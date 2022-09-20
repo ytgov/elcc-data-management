@@ -1,0 +1,141 @@
+body,
+h1,
+h2,
+h3,
+p {
+    color: #323232 !important;
+}
+
+* {
+    font-family: Montserrat, Helvetica, Arial, sans-serif;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+h2 {
+    margin-bottom: 15px;
+}
+
+h3 {
+    margin-bottom: 15px;
+}
+
+a {
+    text-decoration: none;
+}
+
+.v-main .v-btn,
+.v-dialog__content .v-btn {
+    text-transform: none;
+    color: #ffffff;
+    /* border: 1px #000 solid !important; */
+    text-decoration: none;
+    margin: 15px 0;
+    box-shadow: none;
+    font-size: 16px;
+    font-weight: 400;
+    ;
+}
+
+/* .v-main .v-btn.primary {
+    border: 1px #000 solid !important;
+}
+ */
+
+.v-main .v-btn.secondary,
+.v-dialog__content .v-btn.secondary {
+    color: #0097a9;
+    border: 1px #0097a9 solid !important;
+}
+
+
+.v-card {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, .2), 0 0 0 0 rgba(0, 0, 0, .14), 0 0 0 0 rgba(0, 0, 0, .12) !important;
+    border: thin solid rgba(0, 0, 0, .12) !important;
+}
+
+.v-application--is-ltr .v-list-item__action:first-child,
+.v-application--is-ltr .v-list-item__icon:first-child {
+    margin-right: 12px;
+}
+
+.container {
+    padding: 12px 24px;
+}
+
+.v-banner {
+    background-color: #fff2d5 !important;
+    border-bottom: 1px #f3b228 solid !important;
+    border-left: 5px #f3b228 solid !important;
+    box-shadow: none !important;
+    color: #323232 !important;
+}
+
+.v-banner .v-icon {
+    color: #323232 !important;
+}
+
+.v-banner.problem {
+    background-color: #EA848D99 !important;
+    border-bottom: 1px #9b1b27 solid !important;
+    border-left: 5px #9b1b27 solid !important;
+    color: #9b1b27 !important;
+}
+
+.v-banner.problem h3 {
+    color: #9b1b27 !important;
+}
+
+.v-banner.problem .v-icon {
+    color: #9b1b27 !important;
+}
+
+.v-card.default {
+    background-color: #fff2d5;
+}
+
+.v-card.default .v-data-table {
+    border: 1px #e0d5bb solid
+}
+
+.v-card.default .v-card__title {
+    font-size: 1.0rem;
+    line-height: 1.4rem;
+}
+
+ul.v-breadcrumbs {
+    padding-left: 0;
+}
+
+.v-card.info-card .v-card__subtitle {
+    margin: 0;
+    padding-bottom: 0;
+    font-size: .80rem;
+    line-height: .80rem;
+}
+
+.v-card.info-card .v-card__title {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    padding: 0 16px;
+    font-size: 1.0rem;
+    line-height: 1.4rem;
+}
+
+.v-card.default .v-expansion-panels {
+    border: thin solid #9e9e9e !important;
+}
+
+.text-error {
+    color: #9b1b27 !important;
+}
+
+.v-btn.v-size--small {
+    font-size: 14px;
+}
+
+.v-data-table.row-clickable > .v-data-table__wrapper > table > tbody > tr:hover > td{
+  cursor: pointer;
+}
