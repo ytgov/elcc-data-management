@@ -20,9 +20,7 @@
           clearable
         ></v-text-field>
       </template>
-      <template v-slot:right>
-        <create-user-btn ref="create-user-btn" :onSave="saveComplete"></create-user-btn>
-      </template>
+      <template v-slot:right> </template>
 
       <v-card class="default">
         <v-card-text>
@@ -44,7 +42,6 @@
       </v-card>
     </BaseCard>
 
-    <user-editor ref="userEditor" :onSave="saveComplete"></user-editor>
     <notifications ref="notifier"></notifications>
   </v-container>
 </template>
@@ -52,12 +49,9 @@
 <script>
 import _ from "lodash";
 import { mapActions } from "vuex";
-import userEditor from "../components/UserEditor.vue";
-import CreateUserBtn from "../components/createUserBtn.vue";
 
 export default {
   name: "Home",
-  components: { userEditor, CreateUserBtn },
   data: () => ({
     page: { title: "Manage Users" },
     breadcrumbs: [

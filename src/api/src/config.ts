@@ -30,7 +30,10 @@ export const VUE_APP: any = Object.keys(obj)
 console.log(`LOADING ${NODE_ENV} CONFIG FROM ${path}`);
 export const apiBaseUrl = process.env.NODE_ENV == "production" ? "" : "http://localhost:3000";
 export const API_PORT = process.env.API_PORT || "3000";
+
 export const VUE_APP_FRONTEND_URL = process.env.VUE_APP_FRONTEND_URL || "";
+export const AUTH0_DOMAIN = `${process.env.VUE_APP_AUTH_DOMAIN}/` || "";
+export const AUTH0_AUDIENCE = process.env.VUE_APP_AUTH_AUDIENCE;
 
 export const APPLICATION_NAME = process.env.APPLICATION_NAME || "";
 

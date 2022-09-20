@@ -1,59 +1,21 @@
 <template>
     <div class="home">
-        <h1>Signing Authorities Home</h1>
+        <h1>Dashboard</h1>
 
         <v-row>
             <v-col
                 ><v-card class="mt-5" color="#fff2d5">
-                    <v-card-title>Authorities by Employee</v-card-title>
+                    <v-card-title>Centres</v-card-title>
                     <v-card-text>
-                        <v-text-field
-                            dense
-                            outlined
-                            background-color="white"
-                            label="Search employees"
-                            append-icon="mdi-magnify"
-                            @click:append="doSearch"
-                            @keydown="searchKeyUp"
-                            hint="Enter a Name, YNET ID or Employee ID"
-                            v-model="search"
-                            hide-details
-                        ></v-text-field>
-<!-- 
-                        <v-card-actions class="mt-2">
-                            <router-link to="/search"
-                                >Advanced search</router-link
-                            >
-                        </v-card-actions> -->
+                
                     </v-card-text>
                 </v-card></v-col
             >
             <v-col>
-                <v-card class="mt-5 pb-2" color="#fff2d5">
-                    <v-card-title>Authorities by Department</v-card-title>
-                    <v-card-text>
-                        <v-autocomplete
-                            dense
-                            outlined
-                            background-color="white"
-                            :items="departments"
-                            item-text="display_name"
-                            item-value="dept"
-                            hide-details
-                            @change="selectDepartment"
-                            :search-input.sync="searchTerm"
-                            @keyup.enter="shortCutSelectDepartment(searchTerm)"
-                        >
-                        </v-autocomplete>
-
-                        <!-- <router-link to="/departments">View all</router-link> -->
-                    </v-card-text>
-                </v-card>
+                
             </v-col>
         </v-row>
 
-        <!--         <employee-lookup actionName="Authorities" label="" :select="pickPerson"></employee-lookup>
- -->
         <v-navigation-drawer
             v-model="drawer"
             absolute
@@ -87,34 +49,14 @@
             <v-divider></v-divider>
 
             <div style="max-height: 400px; overflow-y: scroll">
-                <v-data-table
-                    hide-default-footer
-                    :headers="[
-                        { text: 'Name', value: 'display_name' },
-                        { text: 'YNET Id', value: 'ynet_id' },
-                        { text: 'Employee Id', value: 'employee_id' },
-                    ]"
-                    :items="searchResults"
-                    :items-per-page="-1"
-                    :loading="loading"
-                    @click:row="selectEmployee"
-                    class="clickable-row"
-                >
-                </v-data-table>
             </div>
         </v-navigation-drawer>
-        <!-- repalce with a recent work component -->
     </div>
 </template>
 
 <script>
-//import createEmployeeModal from "@/components/employee/createEmployeeModal.vue";
-//import EmployeeLookup from "@/modules/employee/components/employeeLookup.vue";
-import { mapActions, mapState } from "vuex";
-
 export default {
     name: "Home",
-    //components: { createEmployeeModal, EmployeeLookup },
     data: () => ({
         search: "",
         drawer: null,
@@ -123,10 +65,9 @@ export default {
         searchTerm: null,
     }),
     computed: {
-        ...mapState("department", ["departments"]),
     },
     methods: {
-        ...mapActions("home", ["employeeSearch"]),
+        
         searchKeyUp(event) {
             if (event.key == "Enter") this.doSearch();
         },
@@ -148,26 +89,6 @@ export default {
                 .finally(() => {
                     this.loading = false;
                 });
-        },
-        selectEmployee(item) {
-            this.$router.push(`/employee/${item._id}`);
-        },
-        shortCutSelectDepartment(searchInput) {
-            if (
-                this.departments.filter(
-                    (department) => department.dept === searchInput
-                ).length === 1
-            ) {
-                this.selectDepartment(searchInput);
-            }
-        },
-        selectDepartment(item) {
-            this.$router.push(`/departments/${item}`);
-        },
-        pickPerson(item) {
-            console.log("PICKED", item);
-
-            this.drawer = true;
         },
     },
 };
