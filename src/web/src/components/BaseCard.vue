@@ -1,7 +1,7 @@
 <template>
-  <v-card class="mb-7 basic">
-    <v-toolbar flat v-if="showHeader">
-      <v-toolbar-title>
+  <v-card class="mb-7"  elevation="3" color="white" >
+    <v-toolbar flat v-if="showHeader" density="comfortable" color="white">
+      <v-toolbar-title v-if="heading">
         {{ heading }}
       </v-toolbar-title>
       <slot name="left" />
@@ -9,7 +9,7 @@
       <slot name="right" />
     </v-toolbar>
     <v-divider v-if="showHeader"></v-divider>
-    <div class="pa-4">
+    <div class="pa-2">
       <slot />
     </div>
   </v-card>
@@ -25,8 +25,8 @@ export default {
       default: "",
     },
     showHeader: {
-      type: Boolean,
-      default: false,
+      type: String,
+      default: "",
     },
   },
   data: () => ({}),
@@ -37,8 +37,9 @@ export default {
 
 <style scoped>
 .v-card.basic {
-  margin-left: -25px !important;
-  margin-right: -25px !important;
-  max-width: none !important;
+/*   margin-left: -15px !important;
+  margin-right: -15px !important; */
+  /* max-width: none !important;
+  border: 1px yg_moss solid !important */
 }
 </style>

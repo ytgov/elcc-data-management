@@ -1,6 +1,6 @@
 <template>
-  <v-container id="login" class="fill-height justify-center" tag="section">
-    <v-row justify="center">
+  <v-container tag="section" class="mt-10">
+    <v-row justify="center" class="mt-10">
       <v-col lg="11" sm="8" xl="7">
         <v-card class="elevation-5" style="overflow: hidden">
           <v-row>
@@ -8,12 +8,8 @@
               <div class="d-none d-sm-block">
                 <img src="@/assets/logo.svg" alt="Logo" class="d-md-block pl-6" />
                 <div class="align-center pa-6">
-                  <h2 class="display-1 font-weight-medium" style="line-height: 40px">
-                    {{ title }}
-                  </h2>
-                  <h6 class="subtitle-1 mt-4 op-5 font-weight-regular">
-                    {{ owner }}
-                  </h6>
+                  <h2 class="text-h5 mb-2" style="line-height: 40px">{{ applicationTitle }}</h2>
+                  <h6 class="text-subtitle-1 mt-0">{{ applicationSubtitle }}</h6>
                 </div>
               </div>
             </v-col>
@@ -21,22 +17,17 @@
               <div class="pa-7 pa-sm-12">
                 <div style="background-color: #f9f4d4" class="pa-5 d-md-none">
                   <img src="@/assets/logo.svg" alt="Logo" class="d-md-inline" />
-                  <h2 class="display-1 font-weight-medium" style="line-height: 40px">
-                    {{ title }}
-                  </h2>
-                  <h6 class="subtitle-1 mt-4 op-5 font-weight-regular">
-                    {{ owner }}
-                  </h6>
+                  <h2 class="display-1 font-weight-medium" style="line-height: 40px">{{ applicationTitle }}</h2>
+                  <h6 class="text-subtitle-1 mt-4 op-5 font-weight-regular">{{ applicationSubtitle }}</h6>
                 </div>
 
-                <h2 class="font-weight-bold mt-4 text--darken-2">Sign in</h2>
-                <h6 class="subtitle-1 mt-3 mb-5">
+                <h2 class="text-h5 mt-4">Sign in</h2>
+                <h6 class="text-subtitle-2 mt-3 mb-5">
                   This application is only available to authorized users. If you have an account, click the button
                   below.
                 </h6>
-                <v-btn v-if="!$auth.isAuthenticated" @click="login" color="primary">
-                  Sign In
-                </v-btn>
+
+                <LoginButton />
               </div>
             </v-col>
           </v-row>
@@ -46,25 +37,18 @@
   </v-container>
 </template>
 
-<script>
-import { applicationName, applicationOwner } from "@/config";
+<script lang="ts">
+import LoginButton from "@/components/LoginButton.vue";
 
 export default {
   name: "SignIn",
-
-  data: () => ({}),
-  computed: {
-    title() {
-      return applicationName;
-    },
-    owner() {
-      return applicationOwner;
-    },
-  },
-  methods: {
-    login() {
-      this.$auth.loginWithRedirect();
-    },
+  components: { LoginButton },
+  data: () => ({
+    applicationTitle: "ELCC Data Management",
+    applicationSubtitle: "Department of Education"
+  }),
+  mounted() {
+    if (this.$auth0.isAuthenticated.value) this.$router.push("/dashboard");
   },
 };
 </script>

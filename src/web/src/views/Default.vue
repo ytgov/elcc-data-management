@@ -1,41 +1,31 @@
 <template>
   <v-overlay>
     <div class="text-center">
-      <v-progress-circular
-        indeterminate
-        size="64"
-        class="mb-5"
-      ></v-progress-circular>
-      <h1 class="title">{{ title }}</h1>
+      <v-progress-circular indeterminate size="64" class="mb-5"></v-progress-circular>
+      <h1 class="title">Loading</h1>
     </div>
   </v-overlay>
 </template>
-
-<script>
-import { applicationName } from "../config";
-import { getInstance } from "@/auth/auth0-plugin";
+<script lang="ts">
+import { useAuth0 } from "@auth0/auth0-vue";
 
 export default {
   name: "Default",
-  data: () => ({
-    title: `Loading ${applicationName}`,
-  }),
-  methods: {},
-  computed: {},
-  watch: {},
-  async mounted() {
-    const authService = getInstance();
+  components: {},
+  mounted() {
+    const auth = useAuth0();
 
     let i = window.setInterval(() => {
-      if (authService.isLoading === false) {
+      if (auth.isLoading) {
         window.clearInterval(i);
 
-        // RA: I think this is forcing the user to always return to the dashboard
-        if (authService.isAuthenticated) {
+        if (auth.isAuthenticated && auth.user.value) {
+          console.log(auth.user.value);
+
           this.$router.push("/dashboard");
         } else this.$router.push("/sign-in");
       }
-    }, 1000);
+    }, 250);
   },
 };
 </script>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>My Profile</h1>
+    <h1>My Profile</h1>adfafsd
     <p>** This information is all read-only</p>
     <v-row>
       <v-col cols="6">
@@ -44,6 +44,8 @@
         <v-btn @click="getRoles()">Get Roles </v-btn>
       </v-col>
     </v-row>
+
+    {{ user }}
   </div>
 </template>
 
@@ -51,7 +53,9 @@
 import { useUserStore } from "@/store/UserStore";
 import { mapActions, mapState } from "pinia";
 export default {
-  setup() {},
+  setup() {
+    console.log("MOUNTED", useUserStore)
+  },
   name: "Profile",
   data() {
     return {};
@@ -64,6 +68,8 @@ export default {
       return ["Editor", "Admin", "Super Admin"].join(", ");
       // return this.currentUser.roles;
     },
+  },
+  mounted() {
   },
   methods: {
     ...mapActions(useUserStore, ["getRoles"]),
