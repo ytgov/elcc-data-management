@@ -13,7 +13,8 @@
     "skipLibCheck": true,
     "noEmit": true,
     "paths": {
-      "@/*": ["./src/*", "./dist/*"]
+      "@/*": ["./src/*", "./dist/*"],
+      "@models": ["../api/src/data/models"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],

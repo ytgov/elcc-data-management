@@ -1,71 +1,57 @@
 <template>
-  <h1 class="text-h5 mb-5">Daily Data Entry</h1>
+  <h1 class="text-h5 mb-5">Child Care Centres</h1>
 
   <BaseCard showHeader="t" heading="" class="pb-3">
     <template v-slot:left>
-      <v-select :items="centres" label="Site" hide-details v-model="site" style="max-width: 220px"></v-select>
+      <v-text-field label="Search" hide-details v-model="search"></v-text-field>
     </template>
     <template v-slot:right>
-      <v-select v-model="date" label="Date" hide-details style="max-width: 220px"></v-select>
+      <v-btn variant="flat" color="primary">Add Centre</v-btn>  
     </template>
 
-    <v-row class="mt-5">
-      <v-col cols="6"></v-col>
-      <v-col cols="3" class="text-body-1 text-center"> Daily Totals </v-col>
-      <v-col cols="3" class="text-body-1 text-center"> Weekly Totals </v-col>
-    </v-row>
-    <v-row v-for="(location, idx) of origins" :key="idx">
-      <v-divider></v-divider>
-      <v-col cols="6">
-        <div class="text-h6 float-left pt-3">{{ location.name }}</div>
-        <div class="float-right">
-          <v-btn variant="flat" color="green" icon="" class="mr-3" @click="plusOne(location)">+1</v-btn>
-          <v-btn variant="flat" color="green" icon="" class="mr-10" @click="plusFive(location)">+5</v-btn>
-          <v-btn variant="flat" color="orange" icon="" class="mr-3" @click="minusOne(location)">-1</v-btn>
-          <v-btn variant="flat" color="orange" icon="" class="mr-0" @click="minusFive(location)">-5</v-btn>
-        </div>
-      </v-col>
+    <router-link to="/child-care-centres">View all</router-link>
 
-      <v-col cols="3" class="text-h6 text-center pt-3">
-        <div class="pt-3">{{ location.dailyTotal }}</div>
+    <v-row class="mt-4">
+      <v-col>
+        <v-card elevation="3" to="/child-care-centres/12345">
+          <v-card-text> 
+           <h4 class="text-h6">Michael's Day Home</h4>  
+           <v-divider class="mb-2 mt-2"></v-divider>
+            <p>Current Enrollment: 24</p>
+            <p></p>
+          </v-card-text>
+        </v-card>
       </v-col>
-      <v-col cols="3" class="text-h6 text-center pt-3">
-        <div class="pt-3">{{ location.weeklyTotal }}</div>
+      <v-col>
+        <v-card elevation="3">
+          <v-card-text> Michael's Day Home </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col>
+        <v-card elevation="3">
+          <v-card-text> Michael's Day Home </v-card-text>
+        </v-card>
       </v-col>
     </v-row>
   </BaseCard>
 </template>
 <script lang="ts">
 import moment from "moment";
+import { CareCentre } from "@models";
 
 export default {
   name: "Dashboard",
   components: {},
   data: () => ({
     total: 0,
-    origins: [
-      { name: "Yukon", dailyTotal: 0, weeklyTotal: 0 },
-      { name: "British Columbia", dailyTotal: 0, weeklyTotal: 0 },
-      { name: "Other Canada", dailyTotal: 0, weeklyTotal: 0 },
-      { name: "American", dailyTotal: 0, weeklyTotal: 0 },
-      { name: "International", dailyTotal: 0, weeklyTotal: 0 },
-      { name: "Unknown", dailyTotal: 0, weeklyTotal: 0 },
-    ],
-    centres: [
-      "Airport",
-      "Beaver Creek",
-      "Carcross",
-      "Dawson City",
-      "Haines Junction",
-      "Old Crow",
-      "Watson Lake",
-      "Whitehorse",
-    ],
+    search: "",
     site: "Whitehorse",
     date: "",
   }),
   mounted() {
     this.date = moment().format("YYYY-MM-DD");
+
+    let t: CareCentre = { name: "Mi", id: 213, location };
   },
   methods: {
     plusOne(location: any) {

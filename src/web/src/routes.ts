@@ -2,6 +2,7 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import homeRoutes from "@/modules/home/router";
 import adminstrationRoutes from "@/modules/administration/router";
 import authenticationRoutes from "@/modules/authentication/router";
+import centreRoutes from "@/modules/centre/router";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -14,6 +15,7 @@ const routes: Array<RouteRecordRaw> = [
       ...authenticationRoutes,
       ...homeRoutes,
       ...adminstrationRoutes,
+      ...centreRoutes,
 
       {
         path: "*",

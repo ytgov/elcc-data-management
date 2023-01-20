@@ -6,15 +6,29 @@ p,
 div {
   color: #323232 !important;
 }
-html{
+html {
   font-size: 15px;
 }
-*,.text-body-1, .text-h6, .text-h5 {
+*,
+.text-body-1,
+.text-h6,
+.text-h5 {
   font-family: Montserrat, Helvetica, Arial, sans-serif !important;
+}
+h1 {
+  display: block;
+  font-size: 2em;
+  font-weight: bold;
+  margin-block-start: 0.67em;
+  margin-block-end: 0.67em;
 }
 
 a {
   text-decoration: none;
+  color: #00818f;
+}
+a:hover {
+  color: #00707c;
 }
 
 .page-wrapper {
@@ -35,6 +49,11 @@ a {
   line-height: 1.4rem;
 }
 
+.v-card-title {
+  font-size: 1.1rem;
+  line-height: 1.4rem;
+}
+
 ul.v-breadcrumbs {
   padding-left: 0;
 }
@@ -49,4 +68,20 @@ ul.v-breadcrumbs {
 
 .v-data-table.row-clickable > .v-data-table__wrapper > table > tbody > tr:hover > td {
   cursor: pointer;
+}
+
+.v-breadcrumbs-item--disabled {
+  color: #323232 !important;
+  opacity: 80% !important;
+}
+
+table.table {
+  width: 100%;
+  text-align: left;
+  margin-top: 10px;
+  font-size: 1.05em;
+}
+table.table td,
+table.table th {
+  border-bottom: 1px black solid;
 }

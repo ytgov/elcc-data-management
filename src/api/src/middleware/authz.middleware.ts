@@ -4,6 +4,7 @@ import axios from "axios";
 import jwksRsa from "jwks-rsa";
 import { AUTH0_DOMAIN, AUTH0_AUDIENCE } from "../config";
 import { UserService } from "../services";
+import { UserStatus } from "../data/models";
 
 export const checkJwt = jwt({
   secret: jwksRsa.expressJwtSecret({
@@ -47,7 +48,7 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
         } else {
           if (!email) email = `${first_name}.${last_name}@yukon-no-email.ca`;
 
-          u = await db.create({ email, sub, status: "Inactive", first_name, last_name });
+          u = await db.create({ email, sub, status: UserStatus.INACTIVE, first_name, last_name });
           console.log("CREATING USER FOR " + email);
           req.user = { ...req.user, ...u };
         }

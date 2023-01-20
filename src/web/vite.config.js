@@ -18,7 +18,8 @@ export default defineConfig({
   define: { "process.env": {} },
   resolve: {
     alias: {
-      '@/': `${path.resolve(__dirname, 'src')}/`
+      "@/": `${path.resolve(__dirname, "src")}/`,
+      "@models": `${path.resolve(__dirname, "../api/src/data/models")}`,
     },
     extensions: [".js", ".json", ".jsx", ".mjs", ".ts", ".tsx", ".vue"],
   },
