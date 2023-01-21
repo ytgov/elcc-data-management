@@ -81,7 +81,3 @@ table.table {
   margin-top: 10px;
   font-size: 1.05em;
 }
-table.table td,
-table.table th {
-  border-bottom: 1px black solid;
-}

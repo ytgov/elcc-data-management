@@ -21,6 +21,7 @@
       <v-card elevation="3">
         <v-text-field v-model="search" label="Search"></v-text-field>
         <v-data-table
+          density="comfortable"
           :headers="[
             { title: 'Name', value: 'name', sortable: true },
             { title: 'Community', value: 'community', sortable: true },
@@ -32,31 +33,57 @@
       </v-card>
     </v-col>
     <v-col>
-      <v-card  color="#7A9A0166" elevation="3">
-        <v-card-title>Child Care Centre Details</v-card-title>
+      <v-card color="#F2A90066" elevation="3">
+        <v-card-title style="background-color: #f2a90068">Child Care Centre Details</v-card-title>
         <v-divider></v-divider>
         <v-card-text>
           <div v-if="!selectedItem.name">Select an item for more information</div>
           <div v-else>
-            <h3>
-              <router-link :to="`/child-care-centres/${selectedItem.id}`">{{ selectedItem.name }}</router-link>
-            </h3>
+            <h2 class="mb-3">
+              {{ selectedItem.name }}
+            </h2>
 
-            <table class="table">
-              <tr>
-                <th>License</th>
-                <td>18-1234</td>
-              </tr>
-              <tr>
-                <th>Hot Meal</th>
-                <td>Yes</td>
-              </tr>
-              <tr>
-                <th>Licensed For</th>
-                <td>3</td>
-              </tr>
-            </table>
-            <v-btn variant="flat" class="mt-5" size="small" color="primary" :to="`/child-care-centres/${selectedItem.id}`">View Details</v-btn>
+            <v-list lines="one" density="comfortable" style="background-color: inherit">
+              <v-list-item title="License" subtitle="19-1234" class="pl-0">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-file-certificate" style="margin-inline-end: 10px"></v-icon>
+                </template>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item title="Hot Meal" subtitle="Yes" class="pl-0">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-silverware" style="margin-inline-end: 10px"></v-icon>
+                </template>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item title="Licensed For" subtitle="19" class="pl-0">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-account-group" style="margin-inline-end: 10px"></v-icon>
+                </template>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item title="Community" subtitle="Tagish" class="pl-0">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-map" style="margin-inline-end: 10px"></v-icon>
+                </template>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item title="Last Submission" subtitle="December 2022" class="pl-0">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-calendar" style="margin-inline-end: 10px"></v-icon>
+                </template>
+              </v-list-item>
+            </v-list>
+
+            <v-btn
+              variant="flat"
+              class="mt-5 float-right"
+              size="small"
+              color="primary"
+              :to="`/child-care-centres/${selectedItem.id}`"
+              >View Details</v-btn
+            >
+            <div style="clear: both"></div>
           </div>
         </v-card-text>
       </v-card>
