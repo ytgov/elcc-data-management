@@ -56,8 +56,8 @@ export default {
     async loadItems() {
       await this.getAllUsers();
     },
-    rowClick(event: Event, { item }) {
-      this.selectUser(item.value);
+    rowClick(event: Event, thing: any) {
+      this.selectUser(thing.item.value);
     },
   },
 };

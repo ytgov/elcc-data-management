@@ -51,7 +51,7 @@ export default {
   mounted() {
     this.date = moment().format("YYYY-MM-DD");
 
-    let t: CareCentre = { name: "Mi", id: 213, location };
+    let t: CareCentre = { name: "Mi", id: 213, location: "Home" };
   },
   methods: {
     plusOne(location: any) {

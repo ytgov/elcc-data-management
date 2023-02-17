@@ -9,7 +9,7 @@ let m = useNotificationStore();
 function waitSomeSeconds(seconds: number) {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve();
+      resolve("T");
     }, seconds * 1000);
   });
 }

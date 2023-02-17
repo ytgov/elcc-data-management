@@ -404,7 +404,7 @@ export default {
           i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands) +
           (decimalCount
             ? decimal +
-              Math.abs(amount - i)
+              Math.abs(parseFloat(amount) - parseFloat(i))
                 .toFixed(decimalCount)
                 .slice(2)
             : "")
