@@ -7,14 +7,11 @@ const register = (app: App<Element>) => {
     let p = path || "";
     let def = definition as any;
 
-
     // Get name of component, based on filename
     // "./components/Fruits.vue" will become "Fruits"
     if (p && def) {
-      const componentName = p
-        .split("/")
-        .pop()
-        .replace(/\.\w+$/, "");
+      const componentName1 = p.split("/").pop();
+      const componentName = (componentName1 || "").replace(/\.\w+$/, "");
 
       app.component(componentName, def.default);
     }

@@ -15,6 +15,9 @@ export default defineConfig({
       autoImport: true,
     }),
   ],
+  build: {
+    outDir: "../app/dist/web",
+  },
   define: { "process.env": {} },
   resolve: {
     alias: {
