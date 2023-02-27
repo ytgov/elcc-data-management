@@ -1,6 +1,8 @@
 export interface Centre {
-  id: number;
   name: string;
   community: string;
   status: string;
+  hot_meal: boolean;
+  licensed_for: number;
+  last_submission: string;
 }

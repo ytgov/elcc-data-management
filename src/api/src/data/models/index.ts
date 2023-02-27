@@ -1,6 +1,7 @@
 export * from "./centre-model";
 export * from "./user-model";
 export * from "./centre-submissions-model";
+export * from "./log";
 
 export interface APIResponse<T> {
   data: T | T[] | undefined;

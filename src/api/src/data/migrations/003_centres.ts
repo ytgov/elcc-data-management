@@ -10,6 +10,7 @@ exports.up = function (knex: knex.Knex, Promise: any) {
     table.boolean("hot_meal").notNullable();
     table.integer("licensed_for", 255).notNullable(); //number of childre
     table.date("last_submission").notNullable();
+    table.specificType("create_date", "datetime2(0)").notNullable().defaultTo(knex.raw("GETDATE()"));
   });
 };
 
