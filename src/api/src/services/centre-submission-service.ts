@@ -7,26 +7,28 @@ const TABLE = "centre_submissions";
 
 export class CentreSubmissionService implements GenericService<CentreSubmission> {
   async getAll(): Promise<CentreSubmission[]> {
-    return db.withSchema(SCHEMA).from(TABLE);
+    return await db.withSchema(SCHEMA).from(TABLE);
   }
 
   async getByCentreId(centreId: number): Promise<CentreSubmission[]> {
-    return db.withSchema(SCHEMA).from(TABLE).where("centre_id", centreId);
+    return await db.withSchema(SCHEMA).from(TABLE).where("centre_id", centreId);
   }
 
   async create(item: CentreSubmission): Promise<any> {
-    return db(TABLE).withSchema(SCHEMA).insert(item);
+    const result = await db(TABLE).withSchema(SCHEMA).insert(item).returning("*");
+    return result[0];
   }
 
   async update(item: CentreSubmission): Promise<any> {
-    return db(TABLE).withSchema(SCHEMA).update(item);
+    const result = await db(TABLE).withSchema(SCHEMA).update(item).returning("*");
+    return result[0];
   }
 
   async delete(id: string): Promise<any> {
-    return db(TABLE).withSchema(SCHEMA).where("id", id).del();
+    return await db(TABLE).withSchema(SCHEMA).where("id", id).del();
   }
 
   async get(id: string): Promise<CentreSubmission> {
-    return db(TABLE).withSchema(SCHEMA).where("id", id).first();
+    return await db(TABLE).withSchema(SCHEMA).where("id", id).first();
   }
 }

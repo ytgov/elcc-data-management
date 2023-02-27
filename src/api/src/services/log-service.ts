@@ -7,7 +7,7 @@ const TABLE = "logs";
 
 export class LogService implements GenericService<Log> {
   async getAll(): Promise<Log[]> {
-    return db.withSchema(SCHEMA).from(TABLE);
+    return await db.withSchema(SCHEMA).from(TABLE);
   }
 
   async create(item: Log): Promise<any> {
@@ -15,18 +15,18 @@ export class LogService implements GenericService<Log> {
       table_name: item.table_name,
       operation: item.operation,
       data: item.data,
-      user: item.user,
+      user_email: item.user_email,
       date: new Date()
     };
 
-    return db(TABLE).withSchema(SCHEMA).insert(log);
+    return await db(TABLE).withSchema(SCHEMA).insert(log);
   }
 
   async getAllByEmail(email: string): Promise<Log[]> {
-    return db.withSchema(SCHEMA).from(TABLE).where("user_email", email);
+    return await db.withSchema(SCHEMA).from(TABLE).where("user_email", email);
   }
 
   async get(id: string): Promise<Log> {
-    return db(TABLE).withSchema(SCHEMA).where("id", id).first();
+    return await db(TABLE).withSchema(SCHEMA).where("id", id).first();
   }
 }

@@ -3,7 +3,6 @@ import { UserStatus } from "../data/models";
 
 export function RequireAdmin(req: Request, res: Response, next: NextFunction) {
   if (!req.user.is_admin) return res.status(403).send("You aren't an admin");
-
   next();
 }
 

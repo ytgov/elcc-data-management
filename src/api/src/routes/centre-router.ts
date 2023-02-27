@@ -19,7 +19,7 @@ centreRouter.post("/", RequireAdmin, async (req: Request, res: Response) => {
   try {
     const centre = await db.create(req.body);
     await logService.create({
-      user: req.user.email,
+      user_email: req.user.email,
       operation: `Create record ${centre.id}`,
       table_name: "Centre",
       data: JSON.stringify(centre)
@@ -43,7 +43,7 @@ centreRouter.put("/:id", RequireAdmin, async (req: Request, res: Response) => {
   try {
     const centre = await db.update(req.body);
     await logService.create({
-      user: req.user.email,
+      user_email: req.user.email,
       operation: `Update record ${centre.id}`,
       table_name: "Centre",
       data: JSON.stringify(centre)

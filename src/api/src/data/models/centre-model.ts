@@ -4,5 +4,5 @@ export interface Centre {
   status: string;
   hot_meal: boolean;
   licensed_for: number;
-  last_submission: string;
+  last_submission: Date;
 }
