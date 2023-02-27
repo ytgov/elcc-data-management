@@ -26,4 +26,14 @@ export class MigrationManager {
     console.log("-------- MIGRATE LATEST ---------");
     return this.db.migrate.latest({ directory: join(__dirname, "migrations") });
   }
+
+  async seedUp() {
+    console.log("-------- SEED UP ---------");
+    return this.db.seed.run({ directory: join(__dirname, "seeds") });
+  }
+
+  async seedDown() {
+    console.log("-------- SEED DOWN ---------");
+    return this.db.seed.run({ directory: join(__dirname, "seeds") });
+  }
 }

@@ -11,13 +11,12 @@ export const checkJwt = jwt({
     cache: true,
     rateLimit: true,
     jwksRequestsPerMinute: 5,
-    jwksUri: `${AUTH0_DOMAIN}.well-known/jwks.json`,
+    jwksUri: `${AUTH0_DOMAIN}.well-known/jwks.json`
   }),
 
-  // Validate the audience and the issuer.
   audience: AUTH0_AUDIENCE,
   issuer: AUTH0_DOMAIN,
-  algorithms: ["RS256"],
+  algorithms: ["RS256"]
 });
 
 export async function loadUser(req: Request, res: Response, next: NextFunction) {
@@ -34,7 +33,7 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
 
   await axios
     .get(`${AUTH0_DOMAIN}userinfo`, { headers: { authorization: token } })
-    .then(async (resp) => {
+    .then(async resp => {
       if (resp.data && resp.data.sub) {
         let email = resp.data.email;
         let first_name = resp.data.given_name;
@@ -58,7 +57,7 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
 
       next();
     })
-    .catch((err) => {
+    .catch(err => {
       console.log("ERROR pulling userinfo", err);
     });
 }
