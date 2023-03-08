@@ -28,12 +28,6 @@
               <v-list-item-title style="font-size: 0.9rem !important">My profile</v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="blip">
-              <template v-slot:prepend>
-                <v-icon>mdi-information-outline</v-icon>
-              </template>
-              <v-list-item-title style="font-size: 0.9rem !important">Show API Message</v-list-item-title>
-            </v-list-item>
             <v-list-item to="/administration" v-if="isAdmin">
               <template v-slot:prepend>
                 <v-icon>mdi-cogs</v-icon>
@@ -41,7 +35,7 @@
               <v-list-item-title style="font-size: 0.9rem !important">Administration</v-list-item-title>
             </v-list-item>
             <v-divider />
-            <v-list-item @click="$auth0.logout({ returnTo })">
+            <v-list-item @click="logoutClick">
               <template v-slot:prepend>
                 <v-icon>mdi-exit-run</v-icon>
               </template>
@@ -93,14 +87,9 @@ export default {
 
     title() {
       return "ELCC Data Management";
-      // return applicationName;
     },
     username() {
       return this.authUser.name;
-    },
-    returnTo: function () {
-      return window.location.origin;
-      // return auth.options.logout_redirect;
     },
   },
 
@@ -110,8 +99,9 @@ export default {
   },
   methods: {
     ...mapActions(useUserStore, ["initialize", "toggleAdmin"]),
-    blip: function () {
-      this.showNotification = true;
+    
+    logoutClick() {
+      this.$auth.logout({ logoutParams: { returnTo: window.location.origin } });
     },
   },
 };
