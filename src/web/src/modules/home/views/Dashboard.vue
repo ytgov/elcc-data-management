@@ -25,7 +25,7 @@
           >
 
           <div>Education is Currently Funding</div>
-          <div style="font-size: 52px; line-height: 52px">154</div>
+          <div style="font-size: 52px; line-height: 52px">{{ centreCount }}</div>
           <div>Child Care Centres</div>
         </v-card-text>
       </v-card>
@@ -37,7 +37,7 @@
             >mdi-map</v-icon
           >
           <div>Located In</div>
-          <div style="font-size: 52px; line-height: 52px">14</div>
+          <div style="font-size: 52px; line-height: 52px">{{ communityCount }}</div>
           <div>Communities</div>
         </v-card-text>
       </v-card>
@@ -71,6 +71,8 @@
 </template>
 
 <script lang="ts">
+import { useCentreStore } from "@/modules/centre/store";
+import { mapGetters, mapState } from "pinia";
 import VueApexCharts from "vue3-apexcharts";
 
 export default {
@@ -94,5 +96,8 @@ export default {
       },
     ],
   }),
+  computed: {
+    ...mapState(useCentreStore, ["centreCount", "communityCount"]),
+  },
 };
 </script>

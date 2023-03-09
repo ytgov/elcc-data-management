@@ -11,8 +11,9 @@
   "dependencies": {
     "@auth0/auth0-vue": "^2.0.0",
     "@mdi/font": "^7.1.96",
-    "apexcharts": "^3.36.3",
+    "apexcharts": "^3.37.1",
     "axios": "^1.3.3",
+    "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "pinia": "^2.0.32",
     "vue": "^3.2.38",
@@ -21,6 +22,7 @@
     "vuetify": "^3.1.6"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.191",
     "@vitejs/plugin-vue": "^4.0.0",
     "typescript": "^4.9.3",
     "vite": "^4.1.4",

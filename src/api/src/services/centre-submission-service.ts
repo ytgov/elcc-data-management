@@ -20,8 +20,7 @@ export class CentreSubmissionService implements GenericService<CentreSubmission>
   }
 
   async update(item: CentreSubmission): Promise<any> {
-    const result = await db(TABLE).withSchema(SCHEMA).update(item).returning("*");
-    return result[0];
+    return await db(TABLE).withSchema(SCHEMA).update(item);
   }
 
   async delete(id: string): Promise<any> {

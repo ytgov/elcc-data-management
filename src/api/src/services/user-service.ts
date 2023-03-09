@@ -1,5 +1,5 @@
 import { db } from "../data";
-import { User, UserRole, User_Create } from "../data/models";
+import { User, UserRole, User_Create, User_Update } from "../data/models";
 import { GenericService } from "./generic-service";
 
 const SCHEMA = "dbo";
@@ -31,5 +31,9 @@ export class UserService implements GenericService<User> {
 
   async create(item: User_Create): Promise<any> {
     return db(USER_TABLE).withSchema(SCHEMA).insert(item);
+  }
+
+  async update(email: string, item: User_Update): Promise<User> {
+    return db(USER_TABLE).withSchema(SCHEMA).where({ email }).update(item).returning("*").first();
   }
 }

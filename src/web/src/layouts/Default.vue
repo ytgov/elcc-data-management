@@ -71,6 +71,7 @@ import { useUserStore } from "@/store/UserStore";
 import { useNotificationStore } from "@/store/NotificationStore";
 
 import { mapState, mapActions, mapWritableState } from "pinia";
+import { useCentreStore } from "@/modules/centre/store";
 export default {
   name: "Default",
 
@@ -95,11 +96,13 @@ export default {
 
   async mounted() {
     await this.initialize();
+    await this.initCentres();
     this.showOverlay = false;
   },
   methods: {
     ...mapActions(useUserStore, ["initialize", "toggleAdmin"]),
-    
+    ...mapActions(useCentreStore, { initCentres: "initialize" }),
+
     logoutClick() {
       this.$auth.logout({ logoutParams: { returnTo: window.location.origin } });
     },

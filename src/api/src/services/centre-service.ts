@@ -15,20 +15,20 @@ export class CentreService implements GenericService<Centre> {
     return result[0];
   }
 
-  async update(item: Centre): Promise<any> {
-    const result = await db(TABLE).withSchema(SCHEMA).update(item).returning("*");
+  async update(id: number, item: Centre): Promise<any> {
+    const result = await db(TABLE).withSchema(SCHEMA).where({ id }).update(item).returning("*");
     return result[0];
   }
 
-  async updateDate(id: string, date: Date): Promise<any> {
-    return await db(TABLE).withSchema(SCHEMA).where("id", id).update({ last_submission: date }).returning("*");
+  async updateDate(id: number, date: Date): Promise<any> {
+    return await db(TABLE).withSchema(SCHEMA).where({ id }).update({ last_submission: date }).returning("*");
   }
 
-  async delete(id: string): Promise<any> {
-    return await db(TABLE).withSchema(SCHEMA).where("id", id).del();
+  async delete(id: number): Promise<any> {
+    return await db(TABLE).withSchema(SCHEMA).where({ id }).del();
   }
 
-  async get(id: string): Promise<Centre> {
-    return await db(TABLE).withSchema(SCHEMA).where("id", id).first();
+  async get(id: number): Promise<Centre> {
+    return await db(TABLE).withSchema(SCHEMA).where({ id }).first();
   }
 }

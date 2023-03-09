@@ -27,7 +27,7 @@ export const useApiStore = defineStore("api", () => {
     m.notify(message);
   }
 
-  async function secureCall(method: string, url: string) {
+  async function secureCall(method: string, url: string, data?: any) {
     let response;
     /* if (!auth.isAuthenticated.value) {
       console.log("Not Authenticated");
@@ -36,7 +36,7 @@ export const useApiStore = defineStore("api", () => {
     } */
     response = await auth.getAccessTokenSilently().then(async (token) => {
       return await SecureAPICall(method, token)
-        .request({ url })
+        .request({ url, data })
         .then((res) => {
           return res.data;
         })
