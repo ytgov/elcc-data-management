@@ -1,11 +1,7 @@
 <template>
-  <v-snackbar
-    v-model="showNotification"
-    location="bottom right"
-    :color="prettyMessage(message).color"
-  >
-    <v-icon class="mr-3">{{ prettyMessage(message).icon }}</v-icon>
-    {{ message.text }}
+  <v-snackbar v-model="showNotification" location="bottom right" :color="prettyMessage(message).color">
+    <v-icon class="mr-3" color="white">{{ prettyMessage(message).icon }}</v-icon>
+    <span style="color: white">{{ message.text }}</span>
   </v-snackbar>
 </template>
 
@@ -19,8 +15,8 @@ export default {
 
     // this subscription will be kept even after the component is unmounted
     notifcation.$subscribe((mutation, state) => {
-      console.log(mutation.type, mutation.events);
-      console.log(state.showNotification);
+      //console.log(mutation.type, mutation.events);
+      //console.log(state.showNotification);
     });
   },
 
@@ -30,7 +26,7 @@ export default {
     ...mapWritableState(useNotificationStore, ["showNotification", "message"]),
   },
   methods: {
-    prettyMessage(message :any) {
+    prettyMessage(message: any) {
       if (message.variant == "success") {
         return {
           color: "green",
@@ -51,37 +47,6 @@ export default {
         };
       }
     },
-    // show(color, icon, message) {
-    //   this.color = color;
-    //   this.icon = icon;
-    //   this.text = message;
-    //   this.visible = true;
-    // },
-    // showSuccess(message) {
-    //   this.color = "green";
-    //   this.icon = "mdi-thumb-up";
-    //   this.text = message;
-    //   this.visible = true;
-    // },
-    // showError(message) {
-    //   this.color = "red";
-    //   this.icon = "mdi-thumb-down";
-    //   this.text = message;
-    //   this.visible = true;
-    // },
-    // showAPIMessages(apiResponse) {
-    //   if (apiResponse.errors) {
-    //     return this.showError(apiResponse.errors[0].text);
-    //   }
-    //   if (apiResponse.messages) {
-    //     let message = apiResponse.messages[0];
-    //     if (message.variant == "success") this.showSuccess(message.text);
-    //     else if (message.variant == "error") this.showError(message.text);
-    //     else this.show(message.variant, "mdi-help-circle", message.text);
-    //     return;
-    //   }
-    //   this.show("primary", "mdi-check", "Complete");
-    // },
   },
 };
 </script>

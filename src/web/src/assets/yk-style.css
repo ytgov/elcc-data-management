@@ -66,10 +66,13 @@ ul.v-breadcrumbs {
   font-size: 14px;
 }
 
-.v-data-table.row-clickable > .v-table__wrapper > table > tbody > tr:hover > td {
+.v-data-table.row-clickable > .v-data-table__wrapper > table > tbody > tr:hover > td {
   cursor: pointer;
 }
 
+.v-toolbar.bg-primary .v-toolbar-title__placeholder {
+  color: white !important;
+}
 .v-breadcrumbs-item--disabled {
   color: #323232 !important;
   opacity: 80% !important;
@@ -80,9 +83,4 @@ table.table {
   text-align: left;
   margin-top: 10px;
   font-size: 1.05em;
-}
-
-.v-data-table-footer,
-.v-data-table-footer .v-field__input {
-  font-size: 0.85rem;
 }

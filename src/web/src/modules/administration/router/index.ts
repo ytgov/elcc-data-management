@@ -12,7 +12,17 @@ const routes = [
       },
       {
         path: "/administration/users",
-        component: () => import("../views/UserList.vue"),
+        component: () => import("@/modules/users/views/UserList.vue"),
+        beforeEnter: authGuard,
+      },
+      {
+        path: "/administration/funding-periods",
+        component: () => import("../views/FundingPeriodList.vue"),
+        beforeEnter: authGuard,
+      },
+      {
+        path: "/administration/submission-lines",
+        component: () => import("@/modules/submission-lines/views/SubmissionLinesList.vue"),
         beforeEnter: authGuard,
       },
     ],

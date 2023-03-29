@@ -14,13 +14,16 @@ export const useApiStore = defineStore("api", () => {
 
   function doApiErrorMessage(err: any) {
     let status_code = 500;
+    let text = err.message;
+
     if (err.response) {
       status_code = err.response.status || 500;
+      if (err.response.data && err.response.data.message) text = err.response.data.message;
     }
 
     let message = {
       status_code: status_code,
-      text: `${err.message}`, // ${err.response.statusText}`,
+      text,
       icon: "mdi-error",
       variant: "error",
     };

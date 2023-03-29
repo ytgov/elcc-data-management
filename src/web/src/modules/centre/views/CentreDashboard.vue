@@ -14,12 +14,25 @@
     </template>
   </v-breadcrumbs>
 
+  <div class="float-right">
+    <v-select
+      label="Fiscal year"
+      v-model="currentFiscalYear"
+      :items="fiscalYears"
+      class="float-right"
+      style="width: 200px"
+      variant="outlined"
+      density="compact"></v-select>
+  </div>
   <h1 class="mb-4">{{ currentCentre.name }}</h1>
 
-  <v-row v-if="currentCentre && currentCentre.id">
+  <v-row v-if="currentCentre && currentCentre.id" style="clear: both">
     <v-col cols="12" md="4">
       <v-card elevation="3" color="#F2A90066" class="mb-5">
-        <v-card-title style="background-color: #f2a90068">Child Care Centre Details</v-card-title>
+        <v-card-title style="background-color: #f2a90068">
+          <v-btn icon="mdi-pencil" size="x-small" color="primary" class="float-right my-0" @click="editClick"></v-btn>
+          Child Care Centre Details
+        </v-card-title>
         <v-divider></v-divider>
         <v-card-text class="pt-0">
           <v-list lines="one" density="comfortable" style="background-color: inherit">
@@ -63,7 +76,7 @@
         </v-card-text>
       </v-card>
     </v-col>
-    <v-col>
+    <v-col cols="12" md="8">
       <v-card class="mb-5 fill-height" elevation="3">
         <v-tabs v-model="tab" grow>
           <v-tab value="option-1"> Summary </v-tab>
@@ -86,55 +99,47 @@
             </v-card>
           </v-window-item>
           <v-window-item value="option-2">
-            {{ worksheets }}
-
             <v-toolbar color="#0097a966" density="compact">
               <v-tabs v-model="month">
-                <v-tab :value="worksheet.month" v-for="worksheet of worksheets"> {{ worksheet.month }} </v-tab>
+                <v-tab :value="worksheet.month" v-for="worksheet of yearWorksheets"> {{ worksheet.month }} </v-tab>
               </v-tabs>
             </v-toolbar>
-            <v-btn color="primary" size="small" @click="addWorksheetClick">Add Worksheet</v-btn>
 
             <v-window v-model="month">
-              <v-window-item :value="worksheet.month" v-for="worksheet of worksheets">
-                <Monthly-Worksheet month="April 2022"></Monthly-Worksheet>
-              </v-window-item>
-              <v-window-item value="May 2022">
-                <Monthly-Worksheet month="May 2022"></Monthly-Worksheet>
+              <div v-if="yearWorksheets.length == 0" class="pa-5">
+                <p>There are currently no worksheets for {{ currentFiscalYear }}.</p>
+                <v-btn color="primary" size="small" class="mt-3" @click="addFiscalClick"
+                  >Add worksheets for {{ currentFiscalYear }}</v-btn
+                >
+              </div>
+              <v-window-item :value="worksheet.month" v-for="worksheet of yearWorksheets">
+                <Monthly-Worksheet :month="worksheet"></Monthly-Worksheet>
               </v-window-item>
             </v-window>
-
-            <!--  <v-carousel show-arrows="top" hide-delimiters :cycle="false">
-              <v-carousel-item style="height: 400px !important"> 
-            <Monthly-Worksheet month="April 2022"></Monthly-Worksheet>-->
-            <!--   </v-carousel-item>
-              <v-carousel-item>
-                <Monthly-Worksheet month="May 2022"></Monthly-Worksheet>
-              </v-carousel-item>
-              <v-carousel-item>
-                <Monthly-Worksheet month="June  2022"></Monthly-Worksheet>
-              </v-carousel-item>
-            </v-carousel> -->
           </v-window-item>
         </v-window>
       </v-card>
     </v-col>
   </v-row>
+
+  <centre-editor></centre-editor>
 </template>
 
 <script lang="ts">
 import { FormatDate, FormatYesNo } from "@/utils";
-import { mapActions, mapState } from "pinia";
+import { mapActions, mapState, mapWritableState } from "pinia";
 import VueApexCharts from "vue3-apexcharts";
 import MonthlyWorksheet from "../components/MonthlyWorksheet.vue";
 import PaymentSummary from "../components/PaymentSummary.vue";
 import EnrollmentChart from "../components/EnrollmentChart.vue";
+import CentreEditor from "../components/CentreEditor.vue";
 import { ChildCareCentre, useCentreStore } from "../store";
+import { useSubmissionLinesStore } from "@/modules/submission-lines/store";
 
 export default {
   setup() {},
   name: "CentreDashboard",
-  components: { VueApexCharts, MonthlyWorksheet, PaymentSummary, EnrollmentChart },
+  components: { VueApexCharts, MonthlyWorksheet, PaymentSummary, EnrollmentChart, CentreEditor },
   mounted() {
     let centreId = this.$route.params.id;
 
@@ -183,6 +188,8 @@ export default {
   },
   computed: {
     ...mapState(useCentreStore, ["selectedCentre", "worksheets"]),
+    ...mapState(useSubmissionLinesStore, ["fiscalYears"]),
+    ...mapWritableState(useSubmissionLinesStore, ["currentFiscalYear"]),
     breadcrumbs() {
       return [
         { to: "/dashboard", title: "Home" },
@@ -190,20 +197,34 @@ export default {
         { title: this.currentCentre.name },
       ];
     },
-    worksheetMonths() {
-      return ["TEST ", "TEST 2"];
+    yearWorksheets() {
+      let t = this.worksheets.filter((w) => w.fiscal_year == this.currentFiscalYear);
+      return t;
     },
   },
   methods: {
-    ...mapActions(useCentreStore, ["selectCentreById", "unselectCentre", "loadWorksheets", "createWorksheet"]),
-    FormatDate(input: Date) {
-      return FormatDate(input);
+    ...mapActions(useCentreStore, [
+      "selectCentreById",
+      "unselectCentre",
+      "loadWorksheets",
+      "createWorksheet",
+      "editCentre",
+      "addCentreFiscal",
+    ]),
+    FormatDate(input: Date | undefined) {
+      return input ? FormatDate(input) : "";
     },
     FormatYesNo(input: boolean) {
       return FormatYesNo(input);
     },
+    editClick() {
+      if (this.selectedCentre) this.editCentre(this.selectedCentre);
+    },
     addWorksheetClick() {
-      this.createWorksheet(this.currentCentre.id);
+      this.createWorksheet(this.currentCentre.id || 0);
+    },
+    addFiscalClick() {
+      this.addCentreFiscal(this.currentFiscalYear);
     },
   },
 };

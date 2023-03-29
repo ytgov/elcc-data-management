@@ -12,7 +12,7 @@ interface AdminState {
   isLoading: Boolean;
 }
 
-export const useAdminStore = defineStore("admin", {
+export const useUserAdminStore = defineStore("userAdmin", {
   state: (): AdminState => ({
     users: [],
     isLoading: false,
@@ -20,7 +20,8 @@ export const useAdminStore = defineStore("admin", {
   }),
   getters: {
     userCount(state) {
-      return state.users.length;
+      if (state && state.users) return state.users.length;
+      return 0;
     },
   },
   actions: {
@@ -48,12 +49,25 @@ export const useAdminStore = defineStore("admin", {
     unselectUser() {
       this.selectedUser = undefined;
     },
-    async save() {
-      //save selectedUser to API
+    async saveUser() {
+      this.isLoading = true;
+      let api = useApiStore();
 
-      m.notify("User saved");
-      this.getAllUsers();
-    }
+      if (this.selectedUser) {
+        await api
+          .secureCall("put", `${USERS_URL}/${this.selectedUser.email}`, this.selectedUser)
+          .then((resp) => {
+            this.users = resp.data;
+            this.unselectUser();
+          })
+          .finally(() => {
+            this.isLoading = false;
+          });
+
+        m.notify({ text: "User saved", variant: "success" });
+        this.getAllUsers();
+      }
+    },
   },
 });
 
@@ -62,4 +76,6 @@ export interface AppUser {
   first_name: string;
   last_name: string;
   display_name: string;
+  is_admin: boolean;
+  status: string;
 }

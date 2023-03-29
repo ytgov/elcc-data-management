@@ -14,6 +14,8 @@
     </template>
   </v-breadcrumbs>
 
+  <v-btn class="float-right" color="primary" @click="addCentreClick">Add Centre</v-btn>
+
   <h1 class="mb-4">Child Care Centres</h1>
 
   <v-row>
@@ -90,16 +92,20 @@
       </v-card>
     </v-col>
   </v-row>
+
+  <centre-editor></centre-editor>
 </template>
 
 <script lang="ts">
 import { FormatDate, FormatYesNo } from "@/utils";
 import { mapActions, mapState } from "pinia";
 import { ChildCareCentre, useCentreStore } from "../store";
+import CentreEditor from "../components/CentreEditor.vue";
 
 export default {
   setup() {},
   name: "CentreList",
+  components: { CentreEditor },
   data() {
     return {
       search: "",
@@ -114,7 +120,7 @@ export default {
     ...mapState(useCentreStore, ["centres"]),
   },
   methods: {
-    ...mapActions(useCentreStore, ["selectCentre"]),
+    ...mapActions(useCentreStore, ["selectCentre", "editCentre"]),
     tableRowClick(event: any, item: any) {
       this.selectedItem = item.item.raw;
     },
@@ -122,8 +128,19 @@ export default {
       this.selectCentre(this.selectedItem);
       this.$router.push(`/child-care-centres/${this.selectedItem.id}`);
     },
-    FormatDate(input: Date) {
-      return FormatDate(input);
+    addCentreClick() {
+      this.editCentre({
+        status: "Active",
+        community: "Whitehorse",
+        create_date: new Date(),
+        hot_meal: true,
+        license: "",
+        licensed_for: 10,
+        name: "",
+      });
+    },
+    FormatDate(input: Date | undefined) {
+      return input ? FormatDate(input) : "";
     },
     FormatYesNo(input: boolean) {
       return FormatYesNo(input);

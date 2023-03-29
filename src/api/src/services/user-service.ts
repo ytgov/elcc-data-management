@@ -34,6 +34,6 @@ export class UserService implements GenericService<User> {
   }
 
   async update(email: string, item: User_Update): Promise<User> {
-    return db(USER_TABLE).withSchema(SCHEMA).where({ email }).update(item).returning("*").first();
+    return db(USER_TABLE).withSchema(SCHEMA).where({ email }).update(item);
   }
 }

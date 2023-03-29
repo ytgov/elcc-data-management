@@ -70,8 +70,10 @@
 import { useUserStore } from "@/store/UserStore";
 import { useNotificationStore } from "@/store/NotificationStore";
 
-import { mapState, mapActions, mapWritableState } from "pinia";
 import { useCentreStore } from "@/modules/centre/store";
+import { useSubmissionLinesStore } from "@/modules/submission-lines/store";
+
+import { mapState, mapActions, mapWritableState } from "pinia";
 export default {
   name: "Default",
 
@@ -97,11 +99,13 @@ export default {
   async mounted() {
     await this.initialize();
     await this.initCentres();
+    await this.initLines();
     this.showOverlay = false;
   },
   methods: {
     ...mapActions(useUserStore, ["initialize", "toggleAdmin"]),
     ...mapActions(useCentreStore, { initCentres: "initialize" }),
+    ...mapActions(useSubmissionLinesStore, { initLines: "initialize" }),
 
     logoutClick() {
       this.$auth.logout({ logoutParams: { returnTo: window.location.origin } });
