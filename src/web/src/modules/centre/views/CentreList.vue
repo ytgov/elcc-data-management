@@ -14,6 +14,8 @@
     </template>
   </v-breadcrumbs>
 
+  <v-btn class="float-right" color="primary" @click="addCentreClick">Add Centre</v-btn>
+
   <h1 class="mb-4">Child Care Centres</h1>
 
   <v-row>
@@ -27,8 +29,9 @@
             { title: 'Community', value: 'community', sortable: true },
             { title: 'Status', value: 'status', sortable: true },
           ]"
-          :items="items"
+          :items="centres"
           :search="search"
+          class="row-clickable"
           @click:row="tableRowClick"></v-data-table>
       </v-card>
     </v-col>
@@ -44,31 +47,31 @@
             </h2>
 
             <v-list lines="one" density="comfortable" style="background-color: inherit">
-              <v-list-item title="License" subtitle="19-1234" class="pl-0">
+              <v-list-item title="License" :subtitle="selectedItem.license" class="pl-0">
                 <template v-slot:prepend>
                   <v-icon icon="mdi-file-certificate" style="margin-inline-end: 10px"></v-icon>
                 </template>
               </v-list-item>
               <v-divider></v-divider>
-              <v-list-item title="Hot Meal" subtitle="Yes" class="pl-0">
+              <v-list-item title="Hot Meal" :subtitle="FormatYesNo(selectedItem.hot_meal)" class="pl-0">
                 <template v-slot:prepend>
                   <v-icon icon="mdi-silverware" style="margin-inline-end: 10px"></v-icon>
                 </template>
               </v-list-item>
               <v-divider></v-divider>
-              <v-list-item title="Licensed For" subtitle="19" class="pl-0">
+              <v-list-item title="Licensed For" :subtitle="selectedItem.licensed_for" class="pl-0">
                 <template v-slot:prepend>
                   <v-icon icon="mdi-account-group" style="margin-inline-end: 10px"></v-icon>
                 </template>
               </v-list-item>
               <v-divider></v-divider>
-              <v-list-item title="Community" subtitle="Tagish" class="pl-0">
+              <v-list-item title="Community" :subtitle="selectedItem.community" class="pl-0">
                 <template v-slot:prepend>
                   <v-icon icon="mdi-map" style="margin-inline-end: 10px"></v-icon>
                 </template>
               </v-list-item>
               <v-divider></v-divider>
-              <v-list-item title="Last Submission" subtitle="December 2022" class="pl-0">
+              <v-list-item title="Last Submission" :subtitle="FormatDate(selectedItem.last_submission)" class="pl-0">
                 <template v-slot:prepend>
                   <v-icon icon="mdi-calendar" style="margin-inline-end: 10px"></v-icon>
                 </template>
@@ -89,12 +92,20 @@
       </v-card>
     </v-col>
   </v-row>
+
+  <centre-editor></centre-editor>
 </template>
 
 <script lang="ts">
+import { FormatDate, FormatYesNo } from "@/utils";
+import { mapActions, mapState } from "pinia";
+import { ChildCareCentre, useCentreStore } from "../store";
+import CentreEditor from "../components/CentreEditor.vue";
+
 export default {
   setup() {},
   name: "CentreList",
+  components: { CentreEditor },
   data() {
     return {
       search: "",
@@ -102,23 +113,37 @@ export default {
         { to: "/dashboard", title: "Home" },
         { to: "/child-care-centres", title: "Child Care Centres" },
       ],
-      items: [
-        { name: "Grow with Joy 2nd", community: "Whitehorse", id: 43, status: "Up to date" },
-        { name: "Grow with Joy 4th", community: "Whitehorse", id: 41, status: "Up to date" },
-        { name: "Happy Hearts Preschool", community: "Whitehorse", id: 42, status: "Up to date" },
-        { name: "Michael's Day Home", community: "Tagish", id: 39, status: "Behind" },
-        { name: "Heart of Riverdale", community: "Whitehorse", id: 39, status: "Up to date" },
-      ],
-      selectedItem: { id: -1, name: undefined },
+      selectedItem: {} as ChildCareCentre,
     };
   },
+  computed: {
+    ...mapState(useCentreStore, ["centres"]),
+  },
   methods: {
+    ...mapActions(useCentreStore, ["selectCentre", "editCentre"]),
     tableRowClick(event: any, item: any) {
-      console.log("CLICK", item.item);
       this.selectedItem = item.item.raw;
     },
     goToCentre() {
+      this.selectCentre(this.selectedItem);
       this.$router.push(`/child-care-centres/${this.selectedItem.id}`);
+    },
+    addCentreClick() {
+      this.editCentre({
+        status: "Active",
+        community: "Whitehorse",
+        create_date: new Date(),
+        hot_meal: true,
+        license: "",
+        licensed_for: 10,
+        name: "",
+      });
+    },
+    FormatDate(input: Date | undefined) {
+      return input ? FormatDate(input) : "";
+    },
+    FormatYesNo(input: boolean) {
+      return FormatYesNo(input);
     },
   },
 };

@@ -1,13 +1,15 @@
 import express, { Request, Response } from "express";
-import { CentreSubmissionService, CentreService, LogService } from "../services";
+import { CentreFundingService, CentreService, LogService } from "../services";
 import { RequireAdmin } from "../middleware";
 
-export const centreSubmissionRouter = express.Router();
-const db = new CentreSubmissionService();
+export const centreFundingRouter = express.Router();
+
+const db = new CentreFundingService();
+
 const centreDB = new CentreService();
 const logService = new LogService();
-
-centreSubmissionRouter.get("/", async (req: Request, res: Response) => {
+/* 
+centreFundingRouter.get("/", async (req: Request, res: Response) => {
   try {
     const centreSubmissions = await db.getAll();
     res.status(200).json(centreSubmissions);
@@ -16,7 +18,7 @@ centreSubmissionRouter.get("/", async (req: Request, res: Response) => {
   }
 });
 
-centreSubmissionRouter.post("/", RequireAdmin, async (req: Request, res: Response) => {
+centreFundingRouter.post("/", RequireAdmin, async (req: Request, res: Response) => {
   try {
     const centreSubmission = await db.create(req.body);
     await centreDB.updateDate(req.body.centre_id, req.body.date);
@@ -34,7 +36,7 @@ centreSubmissionRouter.post("/", RequireAdmin, async (req: Request, res: Respons
   }
 });
 
-centreSubmissionRouter.get("/:id", async (req: Request, res: Response) => {
+centreFundingRouter.get("/:id", async (req: Request, res: Response) => {
   try {
     const centreSubmission = await db.get(req.params.id);
     res.status(200).json(centreSubmission);
@@ -43,7 +45,7 @@ centreSubmissionRouter.get("/:id", async (req: Request, res: Response) => {
   }
 });
 
-centreSubmissionRouter.put("/:id", RequireAdmin, async (req: Request, res: Response) => {
+centreFundingRouter.put("/:id", RequireAdmin, async (req: Request, res: Response) => {
   try {
     const centreSubmission = await db.update(req.body);
 
@@ -60,7 +62,7 @@ centreSubmissionRouter.put("/:id", RequireAdmin, async (req: Request, res: Respo
   }
 });
 
-centreSubmissionRouter.delete("/:id", RequireAdmin, async (req: Request, res: Response) => {
+centreFundingRouter.delete("/:id", RequireAdmin, async (req: Request, res: Response) => {
   try {
     const centreSubmission = await db.delete(req.params.id);
     res.status(200).json(centreSubmission);
@@ -68,3 +70,4 @@ centreSubmissionRouter.delete("/:id", RequireAdmin, async (req: Request, res: Re
     res.status(500).json({ message: err });
   }
 });
+ */

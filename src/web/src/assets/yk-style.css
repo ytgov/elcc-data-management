@@ -70,6 +70,9 @@ ul.v-breadcrumbs {
   cursor: pointer;
 }
 
+.v-toolbar.bg-primary .v-toolbar-title__placeholder {
+  color: white !important;
+}
 .v-breadcrumbs-item--disabled {
   color: #323232 !important;
   opacity: 80% !important;

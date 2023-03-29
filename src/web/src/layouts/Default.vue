@@ -28,12 +28,6 @@
               <v-list-item-title style="font-size: 0.9rem !important">My profile</v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="blip">
-              <template v-slot:prepend>
-                <v-icon>mdi-information-outline</v-icon>
-              </template>
-              <v-list-item-title style="font-size: 0.9rem !important">Show API Message</v-list-item-title>
-            </v-list-item>
             <v-list-item to="/administration" v-if="isAdmin">
               <template v-slot:prepend>
                 <v-icon>mdi-cogs</v-icon>
@@ -41,7 +35,7 @@
               <v-list-item-title style="font-size: 0.9rem !important">Administration</v-list-item-title>
             </v-list-item>
             <v-divider />
-            <v-list-item @click="$auth0.logout({ returnTo })">
+            <v-list-item @click="logoutClick">
               <template v-slot:prepend>
                 <v-icon>mdi-exit-run</v-icon>
               </template>
@@ -76,6 +70,9 @@
 import { useUserStore } from "@/store/UserStore";
 import { useNotificationStore } from "@/store/NotificationStore";
 
+import { useCentreStore } from "@/modules/centre/store";
+import { useSubmissionLinesStore } from "@/modules/submission-lines/store";
+
 import { mapState, mapActions, mapWritableState } from "pinia";
 export default {
   name: "Default",
@@ -93,25 +90,25 @@ export default {
 
     title() {
       return "ELCC Data Management";
-      // return applicationName;
     },
     username() {
       return this.authUser.name;
-    },
-    returnTo: function () {
-      return window.location.origin;
-      // return auth.options.logout_redirect;
     },
   },
 
   async mounted() {
     await this.initialize();
+    await this.initCentres();
+    await this.initLines();
     this.showOverlay = false;
   },
   methods: {
     ...mapActions(useUserStore, ["initialize", "toggleAdmin"]),
-    blip: function () {
-      this.showNotification = true;
+    ...mapActions(useCentreStore, { initCentres: "initialize" }),
+    ...mapActions(useSubmissionLinesStore, { initLines: "initialize" }),
+
+    logoutClick() {
+      this.$auth.logout({ logoutParams: { returnTo: window.location.origin } });
     },
   },
 };
