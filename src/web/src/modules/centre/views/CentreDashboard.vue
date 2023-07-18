@@ -81,22 +81,31 @@
         <v-tabs v-model="tab" grow>
           <v-tab value="option-1"> Summary </v-tab>
           <v-tab value="option-2"> Worksheets </v-tab>
+          <v-tab value="option-3"> Employees </v-tab>
         </v-tabs>
         <v-divider></v-divider>
 
         <v-window v-model="tab" class="fill-height">
           <v-window-item value="option-1">
             <v-toolbar color="#0097a966" density="compact">
-              <v-tabs>
+              <v-tabs v-model="summary">
                 <v-tab value="0"> Reconciliation </v-tab>
+                <v-tab value="1"> Worksheets </v-tab>
               </v-tabs>
             </v-toolbar>
 
-            <v-card flat>
-              <v-card-text>
-                <Payment-Summary></Payment-Summary>
-              </v-card-text>
-            </v-card>
+            <v-window v-model="summary">
+              <v-window-item value="0">
+                <v-card flat>
+                  <v-card-text>
+                    <Payment-Summary></Payment-Summary>
+                  </v-card-text>
+                </v-card>
+              </v-window-item>
+              <v-window-item value="1">
+                <Worksheet-Summary></Worksheet-Summary>
+              </v-window-item>
+            </v-window>
           </v-window-item>
           <v-window-item value="option-2">
             <v-toolbar color="#0097a966" density="compact">
@@ -117,6 +126,9 @@
               </v-window-item>
             </v-window>
           </v-window-item>
+          <v-window-item value="option-3">
+            <h4>Employees</h4>
+          </v-window-item>
         </v-window>
       </v-card>
     </v-col>
@@ -131,6 +143,7 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import VueApexCharts from "vue3-apexcharts";
 import MonthlyWorksheet from "../components/MonthlyWorksheet.vue";
 import PaymentSummary from "../components/PaymentSummary.vue";
+import WorksheetSummary from "../components/WorksheetSummary.vue";
 import EnrollmentChart from "../components/EnrollmentChart.vue";
 import CentreEditor from "../components/CentreEditor.vue";
 import { ChildCareCentre, useCentreStore } from "../store";
@@ -139,7 +152,7 @@ import { useSubmissionLinesStore } from "@/modules/submission-lines/store";
 export default {
   setup() {},
   name: "CentreDashboard",
-  components: { VueApexCharts, MonthlyWorksheet, PaymentSummary, EnrollmentChart, CentreEditor },
+  components: { VueApexCharts, MonthlyWorksheet, PaymentSummary, EnrollmentChart, CentreEditor, WorksheetSummary },
   mounted() {
     let centreId = this.$route.params.id;
 
@@ -163,6 +176,7 @@ export default {
       ],
       tab: 0,
       month: "",
+      summary: 0,
       currentCentre: { name: "" } as ChildCareCentre,
 
       options: {
