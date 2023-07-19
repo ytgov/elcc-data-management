@@ -89,3 +89,5 @@
     ```
 
 8. The front-end is viewable at http://localhost:8080.
+
+9. TODO: figure out what the database setup needs to be.
