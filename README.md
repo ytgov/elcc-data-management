@@ -56,11 +56,18 @@ GO
 
 5. Install `asdf` using instructions at https://asdf-vm.com/guide/getting-started.html.
 
-6. Install the `nodejs` plugin via:
+6. Install the `nodejs` plugin via and the appropriate nodejs version.
 
 ```bash
 asdf plugin add nodejs
-asdf install nodejs 18.17.0 # or whatever is in the .tool-verions file
+asdf install nodejs # installs the version from the .tool-verions file
+```
+
+Check that you have the correct version set up by seeing that these two commands match:
+
+```bash
+asdf current nodejs
+node -v
 ```
 
 7. You can now boot and connect to the back-end via
