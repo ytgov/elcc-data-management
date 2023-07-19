@@ -35,7 +35,26 @@ TODO: figure out what other environment variables go where, and in which files.
 docker compose -f ./docker-compose.dev.yml up
 ```
 
-4. Boot the back-end via
+4. After the database has booted, connect to the `sqlcmd` terminal.
+```bash
+docker compose -f ./docker-compose.dev.yml exec -it db /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P DevPwd99!
+```
+
+You will see `1>`, now create the `ELCC` database via
+```mssql
+CREATE DATABASE ELCC
+GO
+```
+
+To list the databases, and check that ELCC was created you can use:
+```msql
+SELECT NAME FROM SYS.DATABASES
+GO
+```
+
+> NOTE: you need to type `GO`/`go` separately from the mssql commands. It acts like `;` in other databases languages.
+
+5. You can now boot and connect to the back-end via
 
 ```bash
 cd ./src/api
@@ -43,7 +62,10 @@ npm install
 npm run start
 ```
 
-5. Boot the front-end via
+6. Run the seed migrations go to http://localhost:3000/api/migrate/up.
+
+
+7. Boot the front-end via
 
 ```bash
 cd ./src/web
@@ -51,4 +73,4 @@ npm install
 npm run start
 ```
 
-6. To run the seed migrations go to http://localhost:3000/api/migrate/up.
+8. You can go to the front-end at http://localhost:8080.
