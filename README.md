@@ -54,7 +54,16 @@ GO
 
 > NOTE: you need to type `GO`/`go` separately from the mssql commands. It acts like `;` in other databases languages.
 
-5. You can now boot and connect to the back-end via
+5. Install `asdf` using instructions at https://asdf-vm.com/guide/getting-started.html.
+
+6. Install the `nodejs` plugin via:
+
+```bash
+asdf plugin add nodejs
+asdf install nodejs 18.17.0 # or whatever is in the .tool-verions file
+```
+
+7. You can now boot and connect to the back-end via
 
 ```bash
 cd ./src/api
@@ -62,10 +71,10 @@ npm install
 npm run start
 ```
 
-6. Run the seed migrations go to http://localhost:3000/api/migrate/up.
+8. Run the seed migrations go to http://localhost:3000/api/migrate/up.
 
 
-7. Boot the front-end via
+9. Boot the front-end via
 
 ```bash
 cd ./src/web
@@ -73,4 +82,4 @@ npm install
 npm run start
 ```
 
-8. You can go to the front-end at http://localhost:8080.
+8. The front-end is viewable at http://localhost:8080.
