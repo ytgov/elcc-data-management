@@ -77,7 +77,32 @@
     npm run start
     ```
 
-8. Run migrations via navigating to http://localhost:3000/api/migrate/up
+8. Run migrations via navigating to http://localhost:3000/api/migrate/up, and refreshing the page once for each migration.
+
+    Response data will look like
+
+    ```js
+    {
+        "data": [
+            [
+                {
+                    "name": "001_create-users.ts"
+                },
+                // ... other completed migrations
+            ],
+            [
+                {
+                    "file": "005_logs.ts",
+                    "directory": "/home/marlen/code/icefoganalytics/elcc-data-management/src/api/src/data/migrations"
+                },
+                // ... other pending migrations
+
+            ]
+        ]
+    }
+    ```
+
+    Keep refreshing the page until all the pending migrations are completed migrations.
 
     > From `src/api/src/routes/migration-router.ts`
 
