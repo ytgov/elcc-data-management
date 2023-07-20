@@ -36,8 +36,8 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
     .then(async (resp) => {
       if (resp.data && resp.data.sub) {
         let email = resp.data.email;
-        let first_name = resp.data.given_name;
-        let last_name = resp.data.family_name;
+        let first_name = resp.data.given_name || 'UNKNOWN';
+        let last_name = resp.data.family_name || 'UNKNOWN';
         sub = resp.data.sub;
 
         let u = await db.getBySub(sub);
