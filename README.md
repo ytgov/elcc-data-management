@@ -77,8 +77,13 @@
     npm run start
     ```
 
-8. Run the seed migrations go to http://localhost:3000/api/migrate/up.
+8. Run migrations via navigating to http://localhost:3000/api/migrate/up
 
+    > From `src/api/src/routes/migration-router.ts`
+
+9. (currently broken) Run seeds via navigating to http://localhost:3000/api/migrate/seed
+
+    > From `src/api/src/routes/migration-router.ts`
 
 9. Boot the front-end via
 
