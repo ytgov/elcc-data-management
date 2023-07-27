@@ -3,11 +3,7 @@ import Notifications from "@/components/Notifications.vue"
 
 import { useApiStore } from "@/store/ApiStore"
 
-components: {
-  Notifications
-}
-
-const api = useApiStore()
+useApiStore()
 </script>
 
 <template>
