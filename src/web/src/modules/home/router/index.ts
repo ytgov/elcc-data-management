@@ -1,4 +1,4 @@
-import { authGuard } from "@auth0/auth0-vue";
+import { authGuard } from "@auth0/auth0-vue"
 
 const routes = [
   {
@@ -17,6 +17,6 @@ const routes = [
       },
     ],
   },
-];
+]
 
-export default routes;
+export default routes

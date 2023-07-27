@@ -1,7 +1,7 @@
-import type * as knex from "knex";
+import type * as knex from "knex"
 
 exports.seed = async function (knex: knex.Knex, Promise: any) {
-  await knex("centres").delete().whereRaw("1=1");
+  await knex("centres").delete().whereRaw("1=1")
 
   return await knex("centres").insert([
     {
@@ -11,7 +11,7 @@ exports.seed = async function (knex: knex.Knex, Promise: any) {
       status: "Up to date",
       hot_meal: true,
       licensed_for: 19,
-      last_submission: "2019-01-01"
+      last_submission: "2019-01-01",
     },
     {
       name: "Happy Hearts Preschool",
@@ -20,7 +20,7 @@ exports.seed = async function (knex: knex.Knex, Promise: any) {
       status: "Up to date",
       hot_meal: true,
       licensed_for: 25,
-      last_submission: "2019-01-01"
-    }
-  ]);
-};
+      last_submission: "2019-01-01",
+    },
+  ])
+}

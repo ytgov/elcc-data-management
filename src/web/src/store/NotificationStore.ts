@@ -1,4 +1,4 @@
-import { defineStore } from "pinia";
+import { defineStore } from "pinia"
 
 export const useNotificationStore = defineStore("notifications", {
   state: () => ({
@@ -13,8 +13,8 @@ export const useNotificationStore = defineStore("notifications", {
   actions: {
     async initialize() {},
     notify(message: any) {
-      this.message = message;
-      this.showNotification = true;
+      this.message = message
+      this.showNotification = true
     },
   },
-});
+})

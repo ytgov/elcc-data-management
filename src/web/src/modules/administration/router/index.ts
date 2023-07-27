@@ -1,4 +1,4 @@
-import { authGuard } from "@auth0/auth0-vue";
+import { authGuard } from "@auth0/auth0-vue"
 
 const routes = [
   {
@@ -22,11 +22,12 @@ const routes = [
       },
       {
         path: "/administration/submission-lines",
-        component: async () => await import("@/modules/submission-lines/views/SubmissionLinesList.vue"),
+        component: async () =>
+          await import("@/modules/submission-lines/views/SubmissionLinesList.vue"),
         beforeEnter: authGuard,
       },
     ],
   },
-];
+]
 
-export default routes;
+export default routes

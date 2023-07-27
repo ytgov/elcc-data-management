@@ -1,12 +1,19 @@
-export function FormatDollar(input: number | undefined, decimalCount = 2, decimal = ".", thousands = ",") {
+export function FormatDollar(
+  input: number | undefined,
+  decimalCount = 2,
+  decimal = ".",
+  thousands = ","
+) {
   if (input) {
-    decimalCount = Math.abs(decimalCount);
-    decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+    decimalCount = Math.abs(decimalCount)
+    decimalCount = isNaN(decimalCount) ? 2 : decimalCount
 
-    const negativeSign = input < 0 ? "-" : "";
+    const negativeSign = input < 0 ? "-" : ""
 
-    const i = parseInt(((input as any) = Math.abs(Number(input) || 0).toFixed(decimalCount))).toString();
-    const j = i.length > 3 ? i.length % 3 : 0;
+    const i = parseInt(
+      ((input as any) = Math.abs(Number(input) || 0).toFixed(decimalCount))
+    ).toString()
+    const j = i.length > 3 ? i.length % 3 : 0
 
     return (
       negativeSign +
@@ -19,8 +26,8 @@ export function FormatDollar(input: number | undefined, decimalCount = 2, decima
             .toFixed(decimalCount)
             .slice(2)
         : "")
-    );
+    )
   }
 
-  return "$0.00";
+  return "$0.00"
 }

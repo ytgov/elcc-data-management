@@ -1,6 +1,12 @@
 <template>
   <div class="ma-4">
-    <table class="table monospace" style="width: 100%" cellpadding="0" cellspacing="0" border="0px">
+    <table
+      class="table monospace"
+      style="width: 100%"
+      cellpadding="0"
+      cellspacing="0"
+      border="0px"
+    >
       <tr class="monospace blue top">
         <td></td>
         <td class="text-right">Est Total</td>
@@ -42,10 +48,22 @@
         </td>
       </tr>
     </table>
-    <v-text-field value="" density="compact" hide-details readonly style="background-color: #eee"></v-text-field>
+    <v-text-field
+      value=""
+      density="compact"
+      hide-details
+      readonly
+      style="background-color: #eee"
+    ></v-text-field>
 
     <div class="">
-      <table class="table monospace d-none" style="width: 99%" table-border="none" cellpadding="0" cellspacing="0">
+      <table
+        class="table monospace d-none"
+        style="width: 99%"
+        table-border="none"
+        cellpadding="0"
+        cellspacing="0"
+      >
         <tr>
           <td></td>
           <th class="text-center">Advance</th>
@@ -169,10 +187,10 @@
   </div>
 </template>
 <script lang="ts">
-import { useSubmissionLinesStore } from "@/modules/submission-lines/store";
-import { mapState } from "pinia";
-import { clone } from "lodash";
-import { useCentreStore } from "../store";
+import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
+import { mapState } from "pinia"
+import { clone } from "lodash"
+import { useCentreStore } from "../store"
 
 export default {
   name: "WorksheetSummry",
@@ -183,25 +201,25 @@ export default {
     ...mapState(useSubmissionLinesStore, ["currentFiscalYear"]),
 
     yearWorksheets() {
-      let t = this.worksheets.filter((w) => w.fiscal_year == this.currentFiscalYear);
-      return t;
+      let t = this.worksheets.filter((w) => w.fiscal_year == this.currentFiscalYear)
+      return t
     },
     allSheets() {
       return this.yearWorksheets
         .map((y) => y.sections)
         .flatMap((s: any) => s)
-        .flatMap((s) => s.lines);
+        .flatMap((s) => s.lines)
     },
     sectionTotals() {
-      return "";
+      return ""
     },
     summaryLines() {
-      let lines = new Array();
-      let running_est_computed_total = 0;
-      let running_act_computed_total = 0;
+      let lines = new Array()
+      let running_est_computed_total = 0
+      let running_act_computed_total = 0
 
       for (let line of this.yearWorksheets) {
-        let rows = line.sections.flatMap((y: any) => y).flatMap((s: any) => s.lines);
+        let rows = line.sections.flatMap((y: any) => y).flatMap((s: any) => s.lines)
 
         /* let v1 = line.flatMap((y: any) => y.sections)
                 .flatMap((s:any) => s.lines)
@@ -210,19 +228,25 @@ export default {
         //console.log(v1);
         let monthVal = {
           month: line.month,
-          est_computed_total: rows.reduce((a: number, v: any) => a + parseFloat(v.est_computed_total), 0),
-          act_computed_total: rows.reduce((a: number, v: any) => a + parseFloat(v.act_computed_total), 0),
+          est_computed_total: rows.reduce(
+            (a: number, v: any) => a + parseFloat(v.est_computed_total),
+            0
+          ),
+          act_computed_total: rows.reduce(
+            (a: number, v: any) => a + parseFloat(v.act_computed_total),
+            0
+          ),
           diff: 0,
-        };
+        }
 
-        monthVal.diff = monthVal.est_computed_total - monthVal.act_computed_total;
+        monthVal.diff = monthVal.est_computed_total - monthVal.act_computed_total
 
-        lines.push(monthVal);
+        lines.push(monthVal)
 
-        running_est_computed_total += monthVal.est_computed_total;
-        running_act_computed_total += monthVal.act_computed_total;
+        running_est_computed_total += monthVal.est_computed_total
+        running_act_computed_total += monthVal.act_computed_total
 
-        console.log(running_est_computed_total, monthVal.est_computed_total);
+        console.log(running_est_computed_total, monthVal.est_computed_total)
 
         if (line.month == "June") {
           lines.push({
@@ -230,56 +254,56 @@ export default {
             est_computed_total: running_est_computed_total,
             act_computed_total: running_act_computed_total,
             diff: running_est_computed_total - running_act_computed_total,
-          });
-          running_est_computed_total = running_act_computed_total = 0;
+          })
+          running_est_computed_total = running_act_computed_total = 0
         } else if (line.month == "August") {
           lines.push({
             month: "Second Advance (2 mos) ",
             est_computed_total: running_est_computed_total,
             act_computed_total: running_act_computed_total,
             diff: running_est_computed_total - running_act_computed_total,
-          });
-          running_est_computed_total = running_act_computed_total = 0;
+          })
+          running_est_computed_total = running_act_computed_total = 0
         } else if (line.month == "October") {
           lines.push({
             month: "Third Advance (2 mos) ",
             est_computed_total: running_est_computed_total,
             act_computed_total: running_act_computed_total,
             diff: running_est_computed_total - running_act_computed_total,
-          });
-          running_est_computed_total = running_act_computed_total = 0;
+          })
+          running_est_computed_total = running_act_computed_total = 0
         } else if (line.month == "December") {
           lines.push({
             month: "Fourth Advance (2 mos) ",
             est_computed_total: running_est_computed_total,
             act_computed_total: running_act_computed_total,
             diff: running_est_computed_total - running_act_computed_total,
-          });
-          running_est_computed_total = running_act_computed_total = 0;
+          })
+          running_est_computed_total = running_act_computed_total = 0
         } else if (line.month == "February") {
           lines.push({
             month: "Fifth Advance (2 mos) ",
             est_computed_total: running_est_computed_total,
             act_computed_total: running_act_computed_total,
             diff: running_est_computed_total - running_act_computed_total,
-          });
-          running_est_computed_total = running_act_computed_total = 0;
+          })
+          running_est_computed_total = running_act_computed_total = 0
         }
       }
 
-      return lines;
+      return lines
     },
   },
   methods: {
     formatMoney(amount: any, decimalCount = 2, decimal = ".", thousands = ",") {
       try {
-        decimalCount = Math.abs(decimalCount);
-        decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+        decimalCount = Math.abs(decimalCount)
+        decimalCount = isNaN(decimalCount) ? 2 : decimalCount
 
-        const negativeSign = amount < 0 ? "-" : "";
+        const negativeSign = amount < 0 ? "-" : ""
 
-        let i = parseInt((amount = Math.abs(amount || 0).toFixed(decimalCount))).toString();
-        let j = i.length > 3 ? i.length % 3 : 0;
+        let i = parseInt((amount = Math.abs(amount || 0).toFixed(decimalCount))).toString()
+        let j = i.length > 3 ? i.length % 3 : 0
 
         return (
           negativeSign +
@@ -292,22 +316,22 @@ export default {
                 .toFixed(decimalCount)
                 .slice(2)
             : "")
-        );
+        )
       } catch (e) {
-        console.log(e);
+        console.log(e)
       }
     },
     format2Dec(num: any, den: any) {
       if (den === 0 || num === 0) {
-        return 0.0;
+        return 0.0
       }
 
-      console.log(num, den);
+      console.log(num, den)
 
-      return Math.round((num / den) * 100) / 100;
+      return Math.round((num / den) * 100) / 100
     },
   },
-};
+}
 </script>
 <style>
 .monospace td {

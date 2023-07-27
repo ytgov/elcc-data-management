@@ -5,13 +5,13 @@
  */
 
 // Styles
-import "@mdi/font/css/materialdesignicons.css";
-import "vuetify/styles";
-import "@/assets/yk-style.css";
+import "@mdi/font/css/materialdesignicons.css"
+import "vuetify/styles"
+import "@/assets/yk-style.css"
 
 // ComposablesF
-import { createVuetify } from "vuetify";
-import * as labs from "vuetify/labs/components";
+import { createVuetify } from "vuetify"
+import * as labs from "vuetify/labs/components"
 
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
@@ -45,4 +45,4 @@ export default createVuetify({
       },
     },
   },
-});
+})

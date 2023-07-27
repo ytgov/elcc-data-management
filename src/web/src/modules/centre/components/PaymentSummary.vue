@@ -1,7 +1,13 @@
 <template>
   <div class="ma-4">
     <div class="">
-      <table class="table monospace" style="width: 99%" table-border="none" cellpadding="0" cellspacing="0">
+      <table
+        class="table monospace"
+        style="width: 99%"
+        table-border="none"
+        cellpadding="0"
+        cellspacing="0"
+      >
         <tr>
           <td></td>
           <th class="text-center">Advance</th>
@@ -129,7 +135,7 @@ export default {
   props: ["month"],
   name: "MonthlyWorksheet",
   setup() {},
-};
+}
 </script>
 <style scoped>
 h4 {

@@ -1,8 +1,8 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
-import homeRoutes from "@/modules/home/router";
-import adminstrationRoutes from "@/modules/administration/router";
-import authenticationRoutes from "@/modules/authentication/router";
-import centreRoutes from "@/modules/centre/router";
+import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router"
+import homeRoutes from "@/modules/home/router"
+import adminstrationRoutes from "@/modules/administration/router"
+import authenticationRoutes from "@/modules/authentication/router"
+import centreRoutes from "@/modules/centre/router"
 
 const routes: RouteRecordRaw[] = [
   {
@@ -23,9 +23,9 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
-];
+]
 
 export const router = createRouter({
   history: createWebHistory(),
   routes,
-});
+})

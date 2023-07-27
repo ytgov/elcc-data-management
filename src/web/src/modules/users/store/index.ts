@@ -1,15 +1,15 @@
-import { defineStore } from "pinia";
+import { defineStore } from "pinia"
 
-import { useNotificationStore } from "@/store/NotificationStore";
-import { useApiStore } from "@/store/ApiStore";
-import { PROFILE_URL, USERS_URL } from "@/urls";
+import { useNotificationStore } from "@/store/NotificationStore"
+import { useApiStore } from "@/store/ApiStore"
+import { PROFILE_URL, USERS_URL } from "@/urls"
 
-const m = useNotificationStore();
+const m = useNotificationStore()
 
 interface AdminState {
-  users: AppUser[];
-  selectedUser: AppUser | undefined;
-  isLoading: boolean;
+  users: AppUser[]
+  selectedUser: AppUser | undefined
+  isLoading: boolean
 }
 
 export const useUserAdminStore = defineStore("userAdmin", {
@@ -20,62 +20,62 @@ export const useUserAdminStore = defineStore("userAdmin", {
   }),
   getters: {
     userCount(state) {
-      if (state && state.users) return state.users.length;
-      return 0;
+      if (state && state.users) return state.users.length
+      return 0
     },
   },
   actions: {
     async getAllUsers() {
-      this.isLoading = true;
-      const api = useApiStore();
+      this.isLoading = true
+      const api = useApiStore()
       await api
         .secureCall("get", USERS_URL)
         .then((resp) => {
-          this.users = resp.data;
+          this.users = resp.data
         })
         .finally(() => {
-          this.isLoading = false;
-        });
+          this.isLoading = false
+        })
     },
     async getRoles() {
-      console.log("getting roles");
+      console.log("getting roles")
 
-      const api = useApiStore();
-      api.secureCall("get", PROFILE_URL);
+      const api = useApiStore()
+      api.secureCall("get", PROFILE_URL)
     },
     selectUser(user: any) {
-      this.selectedUser = user;
+      this.selectedUser = user
     },
     unselectUser() {
-      this.selectedUser = undefined;
+      this.selectedUser = undefined
     },
     async saveUser() {
-      this.isLoading = true;
-      const api = useApiStore();
+      this.isLoading = true
+      const api = useApiStore()
 
       if (this.selectedUser != null) {
         await api
           .secureCall("put", `${USERS_URL}/${this.selectedUser.email}`, this.selectedUser)
           .then((resp) => {
-            this.users = resp.data;
-            this.unselectUser();
+            this.users = resp.data
+            this.unselectUser()
           })
           .finally(() => {
-            this.isLoading = false;
-          });
+            this.isLoading = false
+          })
 
-        m.notify({ text: "User saved", variant: "success" });
-        this.getAllUsers();
+        m.notify({ text: "User saved", variant: "success" })
+        this.getAllUsers()
       }
     },
   },
-});
+})
 
 export interface AppUser {
-  email: string;
-  first_name: string;
-  last_name: string;
-  display_name: string;
-  is_admin: boolean;
-  status: string;
+  email: string
+  first_name: string
+  last_name: string
+  display_name: string
+  is_admin: boolean
+  status: string
 }

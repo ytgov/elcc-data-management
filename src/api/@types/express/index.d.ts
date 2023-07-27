@@ -1,7 +1,7 @@
 namespace Express {
   export interface Request {
-    user?: any;
+    user?: any
 
-    isAuthenticated(): boolean;
+    isAuthenticated(): boolean
   }
 }

@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import Notifications from "@/components/Notifications.vue";
+import Notifications from "@/components/Notifications.vue"
 
-import { useApiStore } from "@/store/ApiStore";
+import { useApiStore } from "@/store/ApiStore"
 
 components: {
-  Notifications;
+  Notifications
 }
 
-const api = useApiStore();
+const api = useApiStore()
 </script>
 
 <template>

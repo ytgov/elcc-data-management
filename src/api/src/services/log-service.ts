@@ -1,13 +1,13 @@
-import { db } from "../data";
-import { type Log, type LogDB } from "../data/models";
-import { type GenericService } from "./generic-service";
+import { db } from "../data"
+import { type Log, type LogDB } from "../data/models"
+import { type GenericService } from "./generic-service"
 
-const SCHEMA = "dbo";
-const TABLE = "logs";
+const SCHEMA = "dbo"
+const TABLE = "logs"
 
 export class LogService implements GenericService<Log> {
   async getAll(): Promise<Log[]> {
-    return await db.withSchema(SCHEMA).from(TABLE);
+    return await db.withSchema(SCHEMA).from(TABLE)
   }
 
   async create(item: Log): Promise<any> {
@@ -16,17 +16,17 @@ export class LogService implements GenericService<Log> {
       operation: item.operation,
       data: item.data,
       user_email: item.user_email,
-      date: new Date()
-    };
+      date: new Date(),
+    }
 
-    return await db(TABLE).withSchema(SCHEMA).insert(log);
+    return await db(TABLE).withSchema(SCHEMA).insert(log)
   }
 
   async getAllByEmail(email: string): Promise<Log[]> {
-    return await db.withSchema(SCHEMA).from(TABLE).where("user_email", email);
+    return await db.withSchema(SCHEMA).from(TABLE).where("user_email", email)
   }
 
   async get(id: string): Promise<Log> {
-    return await db(TABLE).withSchema(SCHEMA).where("id", id).first();
+    return await db(TABLE).withSchema(SCHEMA).where("id", id).first()
   }
 }
