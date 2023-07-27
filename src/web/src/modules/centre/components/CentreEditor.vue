@@ -81,7 +81,7 @@ export default {
     ...mapState(useCentreStore, ["selectedCentre"]),
     ...mapWritableState(useCentreStore, ["editingCentre"]),
     visible() {
-      return this.editingCentre ? true : false
+      return !!this.editingCentre
     },
     canSave() {
       return this.editingCentre?.name && this.editingCentre?.community

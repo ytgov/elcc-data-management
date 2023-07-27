@@ -105,7 +105,7 @@ export default {
   computed: {
     ...mapState(useFundingPeriodStore, ["selectedPeriod"]),
     visible() {
-      return this.selectedPeriod ? true : false
+      return !!this.selectedPeriod
     },
   },
   methods: {

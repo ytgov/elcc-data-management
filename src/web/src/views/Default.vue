@@ -19,7 +19,7 @@ export default {
   mounted() {
     const auth = useAuth0()
 
-    let i = window.setInterval(() => {
+    const i = window.setInterval(() => {
       if (auth.isLoading) {
         window.clearInterval(i)
 

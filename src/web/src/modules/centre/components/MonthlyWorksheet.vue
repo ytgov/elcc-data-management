@@ -185,8 +185,8 @@ export default {
 
         const negativeSign = amount < 0 ? "-" : ""
 
-        let i = parseInt((amount = Math.abs(amount || 0).toFixed(decimalCount))).toString()
-        let j = i.length > 3 ? i.length % 3 : 0
+        const i = parseInt((amount = Math.abs(amount || 0).toFixed(decimalCount))).toString()
+        const j = i.length > 3 ? i.length % 3 : 0
 
         return (
           negativeSign +

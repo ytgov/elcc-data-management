@@ -89,7 +89,7 @@ export default {
   computed: {
     ...mapState(useSubmissionLinesStore, ["selectedLine"]),
     visible() {
-      return this.selectedLine ? true : false
+      return !!this.selectedLine
     },
   },
   methods: {

@@ -52,7 +52,7 @@
 </template>
 <script lang="ts">
 import moment from "moment"
-//import { CareCentre } from "@models";
+// import { CareCentre } from "@models";
 
 export default {
   name: "Dashboard",
@@ -66,7 +66,7 @@ export default {
   mounted() {
     this.date = moment().format("YYYY-MM-DD")
 
-    //let t: CareCentre = { name: "Mi", id: 213, location: "Home" };
+    // let t: CareCentre = { name: "Mi", id: 213, location: "Home" };
   },
   methods: {
     plusOne(location: any) {

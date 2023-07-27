@@ -201,7 +201,7 @@ export default {
     ...mapState(useSubmissionLinesStore, ["currentFiscalYear"]),
 
     yearWorksheets() {
-      let t = this.worksheets.filter((w) => w.fiscal_year == this.currentFiscalYear)
+      const t = this.worksheets.filter((w) => w.fiscal_year == this.currentFiscalYear)
       return t
     },
     allSheets() {
@@ -214,19 +214,19 @@ export default {
       return ""
     },
     summaryLines() {
-      let lines = new Array()
+      const lines = []
       let running_est_computed_total = 0
       let running_act_computed_total = 0
 
-      for (let line of this.yearWorksheets) {
-        let rows = line.sections.flatMap((y: any) => y).flatMap((s: any) => s.lines)
+      for (const line of this.yearWorksheets) {
+        const rows = line.sections.flatMap((y: any) => y).flatMap((s: any) => s.lines)
 
         /* let v1 = line.flatMap((y: any) => y.sections)
                 .flatMap((s:any) => s.lines)
                 .reduce((a: number, v: any) => a + parseFloat(v.act_child_count), 0) */
 
-        //console.log(v1);
-        let monthVal = {
+        // console.log(v1);
+        const monthVal = {
           month: line.month,
           est_computed_total: rows.reduce(
             (a: number, v: any) => a + parseFloat(v.est_computed_total),
@@ -302,8 +302,8 @@ export default {
 
         const negativeSign = amount < 0 ? "-" : ""
 
-        let i = parseInt((amount = Math.abs(amount || 0).toFixed(decimalCount))).toString()
-        let j = i.length > 3 ? i.length % 3 : 0
+        const i = parseInt((amount = Math.abs(amount || 0).toFixed(decimalCount))).toString()
+        const j = i.length > 3 ? i.length % 3 : 0
 
         return (
           negativeSign +

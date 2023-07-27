@@ -63,7 +63,7 @@ export default {
   computed: {
     ...mapState(useSubmissionLinesStore, ["newFiscalYear", "fiscalYears"]),
     visible() {
-      return this.newFiscalYear ? true : false
+      return !!this.newFiscalYear
     },
     canSave() {
       return this.newFiscalYear?.fiscal_year && this.newFiscalYear.base_lines_on

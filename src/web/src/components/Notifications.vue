@@ -23,8 +23,8 @@ export default {
 
     // this subscription will be kept even after the component is unmounted
     notifcation.$subscribe((mutation, state) => {
-      //console.log(mutation.type, mutation.events);
-      //console.log(state.showNotification);
+      // console.log(mutation.type, mutation.events);
+      // console.log(state.showNotification);
     })
   },
 

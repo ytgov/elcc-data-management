@@ -160,7 +160,7 @@
 <script lang="ts">
 import { FormatDate, FormatYesNo } from "@/utils"
 import { mapActions, mapState } from "pinia"
-import { ChildCareCentre, useCentreStore } from "../store"
+import { type ChildCareCentre, useCentreStore } from "../store"
 import CentreEditor from "../components/CentreEditor.vue"
 
 export default {
@@ -201,7 +201,7 @@ export default {
       })
     },
     FormatDate(input: Date | undefined) {
-      return input ? FormatDate(input) : ""
+      return (input != null) ? FormatDate(input) : ""
     },
     FormatYesNo(input: boolean) {
       return FormatYesNo(input)

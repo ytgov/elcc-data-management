@@ -245,7 +245,7 @@ import PaymentSummary from "../components/PaymentSummary.vue"
 import WorksheetSummary from "../components/WorksheetSummary.vue"
 import EnrollmentChart from "../components/EnrollmentChart.vue"
 import CentreEditor from "../components/CentreEditor.vue"
-import { ChildCareCentre, useCentreStore } from "../store"
+import { type ChildCareCentre, useCentreStore } from "../store"
 import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 
 export default {
@@ -260,7 +260,7 @@ export default {
     WorksheetSummary,
   },
   mounted() {
-    let centreId = this.$route.params.id
+    const centreId = this.$route.params.id
 
     if (this.selectedCentre) this.currentCentre = this.selectedCentre
     else {
@@ -318,7 +318,7 @@ export default {
       ]
     },
     yearWorksheets() {
-      let t = this.worksheets.filter((w) => w.fiscal_year == this.currentFiscalYear)
+      const t = this.worksheets.filter((w) => w.fiscal_year == this.currentFiscalYear)
       return t
     },
   },
@@ -332,7 +332,7 @@ export default {
       "addCentreFiscal",
     ]),
     FormatDate(input: Date | undefined) {
-      return input ? FormatDate(input) : ""
+      return (input != null) ? FormatDate(input) : ""
     },
     FormatYesNo(input: boolean) {
       return FormatYesNo(input)

@@ -96,7 +96,7 @@ export default {
   computed: {
     ...mapState(useUserAdminStore, ["selectedUser"]),
     visible() {
-      return this.selectedUser ? true : false
+      return !!this.selectedUser
     },
   },
   methods: {
