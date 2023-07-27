@@ -7,3 +7,4 @@ semi: false
 singleQuote: false
 singleAttributePerLine: true
 useTabs: false
+printWidth: 100
