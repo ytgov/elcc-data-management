@@ -1,0 +1,22 @@
+env:
+  browser: true
+  es2021: true
+  node: true
+extends:
+  - plugin:vue/vue3-recommended
+  - standard-with-typescript
+  - prettier
+overrides: []
+parser: "vue-eslint-parser"
+parserOptions:
+  ecmaVersion: latest
+  extraFileExtensions:
+    - .vue
+  parser: "@typescript-eslint/parser"
+  project:
+    - src/web/tsconfig.node.json
+    - src/web/tsconfig.json
+  sourceType: module
+plugins:
+  - vue
+rules: {}
