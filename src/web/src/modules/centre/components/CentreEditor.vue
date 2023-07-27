@@ -13,39 +13,39 @@
         <v-spacer></v-spacer>
         <v-btn
           icon
-          @click="close"
           color="white"
+          @click="close"
           ><v-icon>mdi-close</v-icon></v-btn
         >
       </v-toolbar>
       <v-card-text>
         <v-text-field
-          label="Name"
           v-model="editingCentre.name"
+          label="Name"
           variant="outlined"
           density="comfortable"
         ></v-text-field>
         <v-text-field
-          label="License"
           v-model="editingCentre.license"
+          label="License"
           variant="outlined"
           density="comfortable"
         ></v-text-field>
         <v-text-field
-          label="Licensed for"
           v-model="editingCentre.licensed_for"
+          label="Licensed for"
           variant="outlined"
           density="comfortable"
         ></v-text-field>
         <v-text-field
-          label="Community"
           v-model="editingCentre.community"
+          label="Community"
           variant="outlined"
           density="comfortable"
         ></v-text-field>
         <v-checkbox
-          label="Hot meal?"
           v-model="editingCentre.hot_meal"
+          label="Hot meal?"
           variant="outlined"
           density="comfortable"
         ></v-checkbox>
@@ -54,8 +54,8 @@
         <v-btn
           color="primary"
           variant="flat"
-          @click="saveClick"
           :disabled="!canSave"
+          @click="saveClick"
           >Save</v-btn
         >
         <v-spacer></v-spacer>

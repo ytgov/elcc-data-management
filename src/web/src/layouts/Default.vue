@@ -18,7 +18,7 @@
       >{{ title }}</v-app-bar-title
     >
 
-    <template v-slot:append>
+    <template #append>
       <div v-if="isAuthenticated">
         <v-btn
           color="primary"
@@ -52,7 +52,7 @@
         </span>
 
         <v-menu offset-y>
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <v-btn
               icon="mdi-dots-vertical"
               color="primary"
@@ -62,17 +62,17 @@
 
           <v-list density="compact">
             <v-list-item to="/profile">
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon>mdi-account</v-icon>
               </template>
               <v-list-item-title style="font-size: 0.9rem !important">My profile</v-list-item-title>
             </v-list-item>
 
             <v-list-item
-              to="/administration"
               v-if="isAdmin"
+              to="/administration"
             >
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon>mdi-cogs</v-icon>
               </template>
               <v-list-item-title style="font-size: 0.9rem !important"
@@ -81,7 +81,7 @@
             </v-list-item>
             <v-divider />
             <v-list-item @click="logoutClick">
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon>mdi-exit-run</v-icon>
               </template>
               <v-list-item-title style="font-size: 0.9rem !important">Sign out</v-list-item-title>

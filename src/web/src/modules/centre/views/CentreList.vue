@@ -7,13 +7,13 @@
     color="white"
     active-color="#fff"
   >
-    <template v-slot:prepend>
+    <template #prepend>
       <v-icon
         color="white"
         icon="mdi-home"
       ></v-icon>
     </template>
-    <template v-slot:divider>
+    <template #divider>
       <v-icon
         color="white"
         icon="mdi-chevron-right"
@@ -78,7 +78,7 @@
                 :subtitle="selectedItem.license"
                 class="pl-0"
               >
-                <template v-slot:prepend>
+                <template #prepend>
                   <v-icon
                     icon="mdi-file-certificate"
                     style="margin-inline-end: 10px"
@@ -91,7 +91,7 @@
                 :subtitle="FormatYesNo(selectedItem.hot_meal)"
                 class="pl-0"
               >
-                <template v-slot:prepend>
+                <template #prepend>
                   <v-icon
                     icon="mdi-silverware"
                     style="margin-inline-end: 10px"
@@ -104,7 +104,7 @@
                 :subtitle="selectedItem.licensed_for"
                 class="pl-0"
               >
-                <template v-slot:prepend>
+                <template #prepend>
                   <v-icon
                     icon="mdi-account-group"
                     style="margin-inline-end: 10px"
@@ -117,7 +117,7 @@
                 :subtitle="selectedItem.community"
                 class="pl-0"
               >
-                <template v-slot:prepend>
+                <template #prepend>
                   <v-icon
                     icon="mdi-map"
                     style="margin-inline-end: 10px"
@@ -130,7 +130,7 @@
                 :subtitle="FormatDate(selectedItem.last_submission)"
                 class="pl-0"
               >
-                <template v-slot:prepend>
+                <template #prepend>
                   <v-icon
                     icon="mdi-calendar"
                     style="margin-inline-end: 10px"
@@ -164,9 +164,9 @@ import { type ChildCareCentre, useCentreStore } from "../store"
 import CentreEditor from "../components/CentreEditor.vue"
 
 export default {
-  setup() {},
   name: "CentreList",
   components: { CentreEditor },
+  setup() {},
   data() {
     return {
       search: "",

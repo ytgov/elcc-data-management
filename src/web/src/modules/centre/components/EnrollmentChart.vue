@@ -5,8 +5,8 @@
       color="#0097a966"
     ></v-progress-linear>
     <div
-      class="skeleton"
       id="chartSkeleton"
+      class="skeleton"
       :style="{
         'min-height': `${skeletonHeight}px`,
       }"
@@ -28,14 +28,9 @@ import VueApexCharts from "vue3-apexcharts"
 import { useCentreStore } from "../store"
 
 export default {
-  setup() {},
   name: "EnrollmentChart",
   components: { VueApexCharts },
-  async mounted() {
-    this.skeletonHeight = this.$el.offsetWidth / 2
-    await this.loadEnrollmentData(parseInt((this.$route.params.id as string) || "0"))
-  },
-  unmounted() {},
+  setup() {},
   data() {
     return {
       skeletonHeight: 100,
@@ -54,6 +49,11 @@ export default {
       },
     }
   },
+  async mounted() {
+    this.skeletonHeight = this.$el.offsetWidth / 2
+    await this.loadEnrollmentData(parseInt((this.$route.params.id as string) || "0"))
+  },
+  unmounted() {},
   computed: {
     ...mapState(useCentreStore, [
       "selectedCentre",

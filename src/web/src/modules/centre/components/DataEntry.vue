@@ -2,18 +2,18 @@
   <h1 class="text-h5 mb-5">Child Care Centres</h1>
 
   <BaseCard
-    showHeader="t"
+    show-header="t"
     heading=""
     class="pb-3"
   >
-    <template v-slot:left>
+    <template #left>
       <v-text-field
+        v-model="search"
         label="Search"
         hide-details
-        v-model="search"
       ></v-text-field>
     </template>
-    <template v-slot:right>
+    <template #right>
       <v-btn
         variant="flat"
         color="primary"

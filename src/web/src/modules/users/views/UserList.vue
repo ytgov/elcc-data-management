@@ -7,13 +7,13 @@
     color="white"
     active-color="#fff"
   >
-    <template v-slot:prepend>
+    <template #prepend>
       <v-icon
         color="white"
         icon="mdi-home"
       ></v-icon>
     </template>
-    <template v-slot:divider>
+    <template #divider>
       <v-icon
         color="white"
         icon="mdi-chevron-right"
@@ -24,10 +24,10 @@
   <h1>Users</h1>
 
   <base-card
-    showHeader="t"
+    show-header="t"
     heading=""
   >
-    <template v-slot:left>
+    <template #left>
       <v-text-field
         v-model="search"
         label="Search"
@@ -38,7 +38,7 @@
         class="ml-2"
       ></v-text-field>
     </template>
-    <template v-slot:right>
+    <template #right>
       <v-btn
         color="primary"
         size="small"
@@ -53,10 +53,10 @@
       :loading="isLoading"
       @click:row="rowClick"
     >
-      <template v-slot:item.permissions="{ item }">
+      <template #item.permissions="{ item }">
         <v-chip
-          color="yg_moss"
           v-if="item.raw.is_admin"
+          color="yg_moss"
           >Admin</v-chip
         >
         <div v-else>{{ item.raw.scopes.length }}</div>

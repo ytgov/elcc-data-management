@@ -18,6 +18,8 @@ import { useNotificationStore } from "../store/NotificationStore"
 import { mapWritableState } from "pinia"
 
 export default {
+
+  name: "Notifications",
   setup() {
     const notifcation = useNotificationStore()
 
@@ -27,8 +29,6 @@ export default {
       // console.log(state.showNotification);
     })
   },
-
-  name: "Notifications",
   data: () => ({}),
   computed: {
     ...mapWritableState(useNotificationStore, ["showNotification", "message"]),

@@ -5,8 +5,8 @@
     color="white"
   >
     <v-toolbar
-      flat
       v-if="showHeader"
+      flat
       density="comfortable"
       color="white"
     >

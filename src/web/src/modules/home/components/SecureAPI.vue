@@ -4,9 +4,9 @@
       <v-row>
         <v-col cols="12">
           <v-text-field
+            v-model="path"
             clearable
             label="Path"
-            v-model="path"
           ></v-text-field>
         </v-col>
       </v-row>
@@ -49,8 +49,8 @@
           >
             <v-spacer></v-spacer>
             <v-btn
-              @click="result = ''"
               v-if="result != ''"
+              @click="result = ''"
             >
               <v-icon> mdi-close </v-icon>
             </v-btn>
@@ -66,16 +66,23 @@
 <script lang="ts">
 import { useApiStore } from "@/store/ApiStore"
 export default {
+  name: "SecureAPI",
   setup() {
     const api = useApiStore()
     return { api }
   },
-  name: "SecureAPI",
   data() {
     return {
       path: "/some-path",
       result: "",
     }
+  },
+  mounted() {
+    // try {
+    //   this.secureApiCall("put", "/some-path");
+    // } catch (e) {
+    //   console.log(e);
+    // }
   },
   methods: {
     get() {
@@ -99,13 +106,6 @@ export default {
         this.result = res
       })
     },
-  },
-  mounted() {
-    // try {
-    //   this.secureApiCall("put", "/some-path");
-    // } catch (e) {
-    //   console.log(e);
-    // }
   },
 }
 </script>

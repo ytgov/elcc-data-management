@@ -7,13 +7,13 @@
     color="white"
     active-color="#fff"
   >
-    <template v-slot:prepend>
+    <template #prepend>
       <v-icon
         color="white"
         icon="mdi-home"
       ></v-icon>
     </template>
-    <template v-slot:divider>
+    <template #divider>
       <v-icon
         color="white"
         icon="mdi-chevron-right"
@@ -23,8 +23,8 @@
 
   <div class="float-right">
     <v-select
-      label="Fiscal year"
       v-model="currentFiscalYear"
+      label="Fiscal year"
       :items="fiscalYears"
       class="float-right"
       style="width: 200px"
@@ -69,7 +69,7 @@
               :subtitle="currentCentre.license"
               class="pl-0"
             >
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon
                   icon="mdi-file-certificate"
                   style="margin-inline-end: 10px"
@@ -82,7 +82,7 @@
               :subtitle="FormatYesNo(currentCentre.hot_meal)"
               class="pl-0"
             >
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon
                   icon="mdi-silverware"
                   style="margin-inline-end: 10px"
@@ -95,7 +95,7 @@
               :subtitle="currentCentre.licensed_for"
               class="pl-0"
             >
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon
                   icon="mdi-account-group"
                   style="margin-inline-end: 10px"
@@ -108,7 +108,7 @@
               :subtitle="currentCentre.community"
               class="pl-0"
             >
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon
                   icon="mdi-map"
                   style="margin-inline-end: 10px"
@@ -121,7 +121,7 @@
               :subtitle="FormatDate(currentCentre.last_submission)"
               class="pl-0"
             >
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon
                   icon="mdi-calendar"
                   style="margin-inline-end: 10px"
@@ -195,8 +195,8 @@
             >
               <v-tabs v-model="month">
                 <v-tab
-                  :value="worksheet.month"
                   v-for="worksheet of yearWorksheets"
+                  :value="worksheet.month"
                 >
                   {{ worksheet.month }}
                 </v-tab>
@@ -218,8 +218,8 @@
                 >
               </div>
               <v-window-item
-                :value="worksheet.month"
                 v-for="worksheet of yearWorksheets"
+                :value="worksheet.month"
               >
                 <Monthly-Worksheet :month="worksheet"></Monthly-Worksheet>
               </v-window-item>
@@ -249,7 +249,6 @@ import { type ChildCareCentre, useCentreStore } from "../store"
 import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 
 export default {
-  setup() {},
   name: "CentreDashboard",
   components: {
     VueApexCharts,
@@ -259,19 +258,7 @@ export default {
     CentreEditor,
     WorksheetSummary,
   },
-  mounted() {
-    const centreId = this.$route.params.id
-
-    if (this.selectedCentre) this.currentCentre = this.selectedCentre
-    else {
-      this.selectCentreById(parseInt(centreId as string))
-    }
-
-    this.loadWorksheets(parseInt(centreId as string))
-  },
-  unmounted() {
-    this.unselectCentre()
-  },
+  setup() {},
   data() {
     return {
       submissions: [
@@ -305,6 +292,19 @@ export default {
     selectedCentre(newVal) {
       this.currentCentre = newVal
     },
+  },
+  mounted() {
+    const centreId = this.$route.params.id
+
+    if (this.selectedCentre) this.currentCentre = this.selectedCentre
+    else {
+      this.selectCentreById(parseInt(centreId as string))
+    }
+
+    this.loadWorksheets(parseInt(centreId as string))
+  },
+  unmounted() {
+    this.unselectCentre()
   },
   computed: {
     ...mapState(useCentreStore, ["selectedCentre", "worksheets"]),

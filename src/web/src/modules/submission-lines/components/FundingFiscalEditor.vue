@@ -13,22 +13,22 @@
         <v-spacer></v-spacer>
         <v-btn
           icon
-          @click="close"
           color="white"
+          @click="close"
           ><v-icon>mdi-close</v-icon></v-btn
         >
       </v-toolbar>
       <v-card-text>
         <v-text-field
-          label="Fiscal year"
           v-model="newFiscalYear.fiscal_year"
+          label="Fiscal year"
           variant="outlined"
           density="comfortable"
         ></v-text-field>
         <v-select
+          v-model="newFiscalYear.base_lines_on"
           label="Base lines on"
           :items="fiscalYears"
-          v-model="newFiscalYear.base_lines_on"
           variant="outlined"
           density="comfortable"
         ></v-select>
@@ -37,8 +37,8 @@
         <v-btn
           color="primary"
           variant="flat"
-          @click="createNewFiscal"
           :disabled="!canSave"
+          @click="createNewFiscal"
           >Save</v-btn
         >
         <v-spacer></v-spacer>

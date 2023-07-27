@@ -7,13 +7,13 @@
     color="white"
     active-color="#fff"
   >
-    <template v-slot:prepend>
+    <template #prepend>
       <v-icon
         color="white"
         icon="mdi-home"
       ></v-icon>
     </template>
-    <template v-slot:divider>
+    <template #divider>
       <v-icon
         color="white"
         icon="mdi-chevron-right"

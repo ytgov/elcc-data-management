@@ -2,18 +2,18 @@
   <div class="ma-4">
     <v-btn
       color="primary"
-      @click="saveClick"
       class="float-right"
+      @click="saveClick"
       >Save</v-btn
     >
 
     <h2 class="mb-3">{{ month.month }} {{ month.year }}</h2>
     <v-btn
-      @click="duplicateEstimatesClick"
       v-if="month.month == 'April'"
       color="yg_sun"
       class="float-right mb-3"
       size="small"
+      @click="duplicateEstimatesClick"
     >
       <v-icon>mdi-content-copy</v-icon> Replicate Estimates
     </v-btn>
@@ -54,8 +54,8 @@
           <td class="pl-4">Act Total</td>
         </tr>
         <tr
-          class="monospace"
           v-for="line of section.lines"
+          class="monospace"
         >
           <td>{{ line.line_name }}</td>
           <td>
@@ -170,8 +170,8 @@ import { mapActions } from "pinia"
 import { useCentreStore } from "../store"
 
 export default {
-  props: ["month"],
   name: "MonthlyWorksheet",
+  props: ["month"],
   setup() {},
   data: () => ({}),
   computed: {},

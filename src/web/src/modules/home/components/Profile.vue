@@ -40,10 +40,10 @@
       </v-col>
       <v-col cols="6">
         <v-text-field
+          v-model="myRoles"
           dense
           outlined
           label="Roles"
-          v-model="myRoles"
           readonly
           append-icon="mdi-lock"
           hide-details
@@ -65,10 +65,10 @@
 import { useUserStore } from "@/store/UserStore"
 import { mapActions, mapState } from "pinia"
 export default {
+  name: "Profile",
   setup() {
     console.log("MOUNTED", useUserStore)
   },
-  name: "Profile",
   data() {
     return {}
   },

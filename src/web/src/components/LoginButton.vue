@@ -14,6 +14,7 @@ export default {
   data: function () {
     return {}
   },
+  computed: {},
   methods: {
     login() {
       this.$auth0.loginWithRedirect({
@@ -21,7 +22,6 @@ export default {
       })
     },
   },
-  computed: {},
 }
 </script>
 r

@@ -13,48 +13,48 @@
         <v-spacer></v-spacer>
         <v-btn
           icon
-          @click="close"
           color="white"
+          @click="close"
           ><v-icon>mdi-close</v-icon></v-btn
         >
       </v-toolbar>
       <v-card-text>
         <v-text-field
-          label="Section"
           v-model="selectedLine.section_name"
+          label="Section"
           variant="outlined"
           density="comfortable"
         ></v-text-field>
         <v-text-field
-          label="Line"
           v-model="selectedLine.line_name"
+          label="Line"
           variant="outlined"
           density="comfortable"
         ></v-text-field>
         <v-text-field
-          label="From age"
           v-model="selectedLine.from_age"
+          label="From age"
           variant="outlined"
           density="comfortable"
         ></v-text-field>
 
         <v-text-field
-          label="To age"
           v-model="selectedLine.to_age"
+          label="To age"
           variant="outlined"
           density="comfortable"
         ></v-text-field>
 
         <v-text-field
-          label="Monthly amount"
           v-model="selectedLine.monthly_amount"
+          label="Monthly amount"
           variant="outlined"
           density="comfortable"
         ></v-text-field>
 
         <v-text-field
-          label="Fiscal Period"
           v-model="selectedLine.fiscal_year"
+          label="Fiscal Period"
           readonly
           variant="outlined"
           density="comfortable"

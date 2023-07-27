@@ -38,8 +38,8 @@
       </v-col>
       <v-col cols="6">
         <v-text-field
-          label="Roles"
           v-model="user.roles"
+          label="Roles"
           readonly
           variant="outlined"
           density="comfortable"
@@ -56,8 +56,8 @@
 import { useUserStore } from "@/store/UserStore"
 import { mapState } from "pinia"
 export default {
-  setup() {},
   name: "Profile",
+  setup() {},
   data() {
     return {}
   },

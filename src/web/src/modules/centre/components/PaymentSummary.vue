@@ -132,8 +132,8 @@
 </template>
 <script lang="ts">
 export default {
-  props: ["month"],
   name: "MonthlyWorksheet",
+  props: ["month"],
   setup() {},
 }
 </script>

@@ -7,13 +7,13 @@
     color="white"
     active-color="#fff"
   >
-    <template v-slot:prepend>
+    <template #prepend>
       <v-icon
         color="white"
         icon="mdi-home"
       ></v-icon>
     </template>
-    <template v-slot:divider>
+    <template #divider>
       <v-icon
         color="white"
         icon="mdi-chevron-right"
@@ -24,10 +24,10 @@
   <h1>Funding Periods</h1>
 
   <base-card
-    showHeader="t"
+    show-header="t"
     heading=""
   >
-    <template v-slot:left>
+    <template #left>
       <v-text-field
         v-model="search"
         label="Search"
@@ -38,7 +38,7 @@
         class="ml-2"
       ></v-text-field>
     </template>
-    <template v-slot:right>
+    <template #right>
       <v-btn
         color="primary"
         size="small"

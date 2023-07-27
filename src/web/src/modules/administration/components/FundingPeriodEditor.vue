@@ -13,8 +13,8 @@
         <v-spacer></v-spacer>
         <v-btn
           icon
-          @click="close"
           color="white"
+          @click="close"
           ><v-icon>mdi-close</v-icon></v-btn
         >
       </v-toolbar>
@@ -25,41 +25,41 @@
             md="6"
           >
             <v-text-field
-              label="Fiscal year"
               v-model="selectedPeriod.fiscal_year"
+              label="Fiscal year"
               variant="outlined"
               density="comfortable"
             ></v-text-field>
             <v-text-field
-              label="Title"
               v-model="selectedPeriod.title"
+              label="Title"
               variant="outlined"
               density="comfortable"
             ></v-text-field>
             <v-text-field
-              label="From date"
               v-model="selectedPeriod.from_date"
+              label="From date"
               variant="outlined"
               density="comfortable"
             ></v-text-field>
 
             <v-text-field
-              label="To date"
               v-model="selectedPeriod.to_date"
+              label="To date"
               variant="outlined"
               density="comfortable"
             ></v-text-field>
 
             <v-checkbox
-              label="Is fiscal year"
               v-model="selectedPeriod.is_fiscal_year"
+              label="Is fiscal year"
               variant="outlined"
               density="comfortable"
             ></v-checkbox>
 
             <v-checkbox
-              label="Is school month"
               v-model="selectedPeriod.is_school_month"
+              label="Is school month"
               variant="outlined"
               density="comfortable"
             ></v-checkbox>

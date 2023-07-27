@@ -13,8 +13,8 @@
         <v-spacer></v-spacer>
         <v-btn
           icon
-          @click="close"
           color="white"
+          @click="close"
           ><v-icon>mdi-close</v-icon></v-btn
         >
       </v-toolbar>
@@ -25,32 +25,32 @@
             md="6"
           >
             <v-text-field
-              label="Name"
               v-model="selectedUser.display_name"
+              label="Name"
               readonly
               variant="outlined"
               density="comfortable"
               append-inner-icon="mdi-lock"
             ></v-text-field>
             <v-text-field
-              label="Email"
               v-model="selectedUser.email"
+              label="Email"
               readonly
               variant="outlined"
               density="comfortable"
               append-inner-icon="mdi-lock"
             ></v-text-field>
             <v-select
-              label="Status"
               v-model="selectedUser.status"
+              label="Status"
               :items="['Active', 'Inactive']"
               variant="outlined"
               density="comfortable"
             ></v-select>
 
             <v-checkbox
-              label="System Admin"
               v-model="selectedUser.is_admin"
+              label="System Admin"
               variant="outlined"
               density="comfortable"
             ></v-checkbox>
