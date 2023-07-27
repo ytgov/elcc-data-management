@@ -332,7 +332,7 @@ export default {
       "addCentreFiscal",
     ]),
     FormatDate(input: Date | undefined) {
-      return (input != null) ? FormatDate(input) : ""
+      return input != null ? FormatDate(input) : ""
     },
     FormatYesNo(input: boolean) {
       return FormatYesNo(input)

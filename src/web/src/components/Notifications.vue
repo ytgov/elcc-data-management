@@ -18,7 +18,6 @@ import { useNotificationStore } from "../store/NotificationStore"
 import { mapWritableState } from "pinia"
 
 export default {
-
   name: "Notifications",
   setup() {
     const notifcation = useNotificationStore()
