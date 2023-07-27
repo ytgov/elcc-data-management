@@ -1,3 +1,3 @@
 export interface GenericService<T> {
-  getAll(): Promise<T[]>;
+  getAll: () => Promise<T[]>;
 }

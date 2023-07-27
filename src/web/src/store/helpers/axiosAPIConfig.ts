@@ -3,7 +3,7 @@
 import axios from "axios";
 
 export function SecureAPICall(method: string, token: string) {
-  let headers = {
+  const headers = {
     "Content-Type": "application/json",
   };
   if (token) {

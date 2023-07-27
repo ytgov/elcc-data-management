@@ -1,6 +1,6 @@
 import { db } from "../data";
-import { Centre } from "../data/models";
-import { GenericService } from "./generic-service";
+import { type Centre } from "../data/models";
+import { type GenericService } from "./generic-service";
 
 const SCHEMA = "dbo";
 const TABLE = "centres";

@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { type Request, type Response } from "express";
 import { param } from "express-validator";
 import { checkJwt, loadUser } from "../middleware/authz.middleware";
 import { ReturnValidationErrors } from "../middleware";

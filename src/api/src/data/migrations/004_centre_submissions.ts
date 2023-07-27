@@ -1,4 +1,4 @@
-import * as knex from "knex";
+import type * as knex from "knex";
 
 exports.up = async function (knex: knex.Knex, Promise: any) {
   await knex.schema.createTable("funding_period", (t) => {
@@ -28,7 +28,7 @@ exports.up = async function (knex: knex.Knex, Promise: any) {
     t.float("monthly_amount").notNullable();
   });
 
-  return knex.schema.createTable("funding_submission_line_value", (t) => {
+  await knex.schema.createTable("funding_submission_line_value", (t) => {
     t.increments("id").notNullable().primary();
     t.integer("centre_id").notNullable().references("centres.id");
     t.integer("submission_line_id").notNullable().references("funding_submission_line.id");

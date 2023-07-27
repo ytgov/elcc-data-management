@@ -5,11 +5,11 @@ import { AuthHelper } from "@/plugins/auth";
 
 // Plugins
 import { registerPlugins } from "./plugins";
-import { Auth0Plugin } from "@auth0/auth0-vue";
-
-const pinia = createPinia();
+import { type Auth0Plugin } from "@auth0/auth0-vue";
 
 import App from "./App.vue";
+
+const pinia = createPinia();
 const app = createApp(App);
 app
   .use(pinia)

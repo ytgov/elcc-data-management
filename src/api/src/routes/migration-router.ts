@@ -1,10 +1,10 @@
-import express, { Request, Response } from "express";
+import express, { type Request, type Response } from "express";
 import { db } from "../data";
 import { MigrationManager } from "../data/migration-manager";
 import { RequireRole } from "../middleware";
 
 export const migrationRouter = express.Router();
-//migrationRouter.use(RequireRole("System Admin"));
+// migrationRouter.use(RequireRole("System Admin"));
 
 const migrator = new MigrationManager(db);
 

@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { type Request, type Response } from "express";
 import { UserService } from "../services";
 import { checkJwt, loadUser } from "../middleware/authz.middleware";
 import { param } from "express-validator";
@@ -16,9 +16,9 @@ userRouter.get("/me", async (req: Request, res: Response) => {
 });
 
 userRouter.get("/", async (req: Request, res: Response) => {
-  let users = await db.getAll();
+  const users = await db.getAll();
 
-  for (let user of users) {
+  for (const user of users) {
     user.display_name = `${user.first_name} ${user.last_name}`;
   }
 
@@ -30,12 +30,12 @@ userRouter.put(
   [param("email").notEmpty().isString()],
   ReturnValidationErrors,
   async (req: Request, res: Response) => {
-    let { email } = req.params;
-    let { roles, status, is_admin } = req.body;
+    const { email } = req.params;
+    const { roles, status, is_admin } = req.body;
 
-    let existing = await db.getByEmail(email);
+    const existing = await db.getByEmail(email);
 
-    if (existing) {
+    if (existing != null) {
       existing.status = status;
       existing.roles = roles;
       existing.is_admin = is_admin;

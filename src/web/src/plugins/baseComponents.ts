@@ -1,11 +1,11 @@
-import { App } from "vue";
+import { type App } from "vue";
 
 const components = import.meta.glob("@/components/*.vue", { eager: true });
 
 const register = (app: App<Element>) => {
   Object.entries(components).forEach(([path, definition]) => {
-    let p = path || "";
-    let def = definition as any;
+    const p = path || "";
+    const def = definition as any;
 
     // Get name of component, based on filename
     // "./components/Fruits.vue" will become "Fruits"

@@ -4,12 +4,12 @@ import { useNotificationStore } from "@/store/NotificationStore";
 import { useApiStore } from "@/store/ApiStore";
 import { FUNDING_PERIOD_URL } from "@/urls";
 
-let m = useNotificationStore();
+const m = useNotificationStore();
 
 interface AdminState {
-  periods: Array<FundingPeriod>;
+  periods: FundingPeriod[];
   selectedPeriod: FundingPeriod | undefined;
-  isLoading: Boolean;
+  isLoading: boolean;
 }
 
 export const useFundingPeriodStore = defineStore("periodAdmin", {
@@ -27,7 +27,7 @@ export const useFundingPeriodStore = defineStore("periodAdmin", {
   actions: {
     async getAllFundingPeriods() {
       this.isLoading = true;
-      let api = useApiStore();
+      const api = useApiStore();
       await api
         .secureCall("get", FUNDING_PERIOD_URL)
         .then((resp) => {
@@ -45,9 +45,9 @@ export const useFundingPeriodStore = defineStore("periodAdmin", {
     },
     async savePeriod() {
       this.isLoading = true;
-      let api = useApiStore();
+      const api = useApiStore();
 
-      if (this.selectedPeriod) {
+      if (this.selectedPeriod != null) {
         await api
           .secureCall("put", `${FUNDING_PERIOD_URL}/${this.selectedPeriod.id}`, this.selectedPeriod)
           .then((resp) => {

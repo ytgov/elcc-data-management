@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { type Request, type Response } from "express";
 import { param } from "express-validator";
 import { checkJwt, loadUser } from "../middleware/authz.middleware";
 import { ReturnValidationErrors } from "../middleware";
@@ -13,9 +13,9 @@ submissionLineRouter.use(loadUser);
 const db = new SubmissionLineService();
 
 submissionLineRouter.get("/", async (req: Request, res: Response) => {
-  let list = await db.getAll();
+  const list = await db.getAll();
 
-  for (let item of list) {
+  for (const item of list) {
     item.age_range = `${item.from_age} - ${item.to_age}`;
     item.monthly_amount_display = FormatDollar(item.monthly_amount);
   }
@@ -36,15 +36,15 @@ submissionLineRouter.put(
 
 submissionLineRouter.post("/fiscal-year", async (req: Request, res: Response) => {
   const { fiscal_year, base_lines_on, interval } = req.body;
-  let yearExists = await db.getAll({ fiscal_year });
+  const yearExists = await db.getAll({ fiscal_year });
 
   if (yearExists.length > 0) {
     return res.status(400).json({ message: "Year already exists" });
   }
 
-  let basis = await db.getAll({ fiscal_year: base_lines_on });
+  const basis = await db.getAll({ fiscal_year: base_lines_on });
 
-  for (let line of basis) {
+  for (const line of basis) {
     delete line.id;
     line.fiscal_year = fiscal_year;
 

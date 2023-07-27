@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { type NextFunction, type Request, type Response } from "express";
 import { UserStatus } from "../data/models";
 
 export function RequireAdmin(req: Request, res: Response, next: NextFunction) {
@@ -13,7 +13,7 @@ export function RequireActive(req: Request, res: Response, next: NextFunction) {
 }
 
 export function RequireRole(value: any) {
-  //let role = value.role;
+  // let role = value.role;
   return async (req: Request, res: Response, next: NextFunction) => {
     console.log("Checking user:", req.user, "for role", `'${value}'`);
     next();

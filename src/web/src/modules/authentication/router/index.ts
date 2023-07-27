@@ -2,11 +2,11 @@
 const routes = [
   {
     path: "",
-    component: () => import("@/layouts/Blank.vue"),
+    component: async () => await import("@/layouts/Blank.vue"),
     children: [
       {
         path: "/sign-in",
-        component: () => import("../views/SignIn.vue"),
+        component: async () => await import("../views/SignIn.vue"),
       },
     ],
   },

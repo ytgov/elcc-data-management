@@ -5,12 +5,12 @@ import { useNotificationStore } from "@/store/NotificationStore";
 import { useApiStore } from "@/store/ApiStore";
 import { SUBMISSION_LINES_URL } from "@/urls";
 
-let m = useNotificationStore();
+const m = useNotificationStore();
 
 interface AdminState {
-  lines: Array<FundingSubmissionLine>;
+  lines: FundingSubmissionLine[];
   selectedLine: FundingSubmissionLine | undefined;
-  isLoading: Boolean;
+  isLoading: boolean;
   newFiscalYear: NewFiscalYear | undefined;
   currentFiscalYear: string;
 }
@@ -41,7 +41,7 @@ export const useSubmissionLinesStore = defineStore("linesAdmin", {
 
     async getAllSubmissionLines() {
       this.isLoading = true;
-      let api = useApiStore();
+      const api = useApiStore();
       await api
         .secureCall("get", SUBMISSION_LINES_URL)
         .then((resp) => {
@@ -60,13 +60,13 @@ export const useSubmissionLinesStore = defineStore("linesAdmin", {
     },
     async saveLine() {
       this.isLoading = true;
-      let api = useApiStore();
+      const api = useApiStore();
 
-      if (this.selectedLine) {
+      if (this.selectedLine != null) {
         await api
           .secureCall("put", `${SUBMISSION_LINES_URL}/${this.selectedLine.id}`, this.selectedLine)
           .then((resp) => {
-            //this.lines = resp.data;
+            // this.lines = resp.data;
             this.unselectLine();
           })
           .finally(() => {
@@ -88,11 +88,11 @@ export const useSubmissionLinesStore = defineStore("linesAdmin", {
     },
     async createNewFiscal() {
       this.isLoading = true;
-      let api = useApiStore();
+      const api = useApiStore();
       await api
         .secureCall("post", `${SUBMISSION_LINES_URL}/fiscal-year`, this.newFiscalYear)
         .then(async (resp) => {
-          //this.lines = resp.data;
+          // this.lines = resp.data;
 
           this.newFiscalYear = undefined;
           await this.getAllSubmissionLines();

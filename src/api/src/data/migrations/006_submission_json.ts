@@ -1,7 +1,7 @@
-import * as knex from "knex";
+import type * as knex from "knex";
 
 exports.up = async function (knex: knex.Knex, Promise: any) {
-  return knex.schema.createTable("funding_submission_line_json", (t) => {
+  await knex.schema.createTable("funding_submission_line_json", (t) => {
     t.increments("id").primary();
     t.integer("centre_id").notNullable().references("centres.id");
     t.string("fiscal_year", 10).notNullable();

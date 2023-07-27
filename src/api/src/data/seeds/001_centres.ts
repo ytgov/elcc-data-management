@@ -1,9 +1,9 @@
-import * as knex from "knex";
+import type * as knex from "knex";
 
 exports.seed = async function (knex: knex.Knex, Promise: any) {
   await knex("centres").delete().whereRaw("1=1");
 
-  return knex("centres").insert([
+  return await knex("centres").insert([
     {
       name: "Grow with Joy 2nd",
       license: "123",

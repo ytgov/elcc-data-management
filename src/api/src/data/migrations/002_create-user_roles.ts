@@ -1,4 +1,4 @@
-import * as knex from "knex";
+import type * as knex from "knex";
 
 exports.up = function (knex: knex.Knex, Promise: any) {
   return knex.schema.createTable("user_roles", function (table) {

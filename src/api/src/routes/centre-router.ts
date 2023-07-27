@@ -1,9 +1,9 @@
-import express, { Request, Response } from "express";
+import express, { type Request, type Response } from "express";
 import { checkJwt, loadUser } from "../middleware/authz.middleware";
 import moment from "moment";
 import { cloneDeep, sortBy, uniq } from "lodash";
 import { RequireAdmin } from "../middleware";
-import { FundingLineValue } from "../data/models";
+import { type FundingLineValue } from "../data/models";
 import {
   CentreService,
   CentreFundingService,
@@ -61,24 +61,24 @@ centreRouter.get("/:id/enrollment", async (req: Request, res: Response) => {
 
 centreRouter.get("/:id/worksheets", async (req: Request, res: Response) => {
   const { id } = req.params;
-  let worksheets = await submissionValueDb.getAllJson({ centre_id: id });
+  const worksheets = await submissionValueDb.getAllJson({ centre_id: id });
   worksheets.forEach((w) => (w.lines = JSON.parse(w.values)));
-  let groups = new Array<any>();
-  let years = uniq(worksheets.map((m) => m.fiscal_year));
+  const groups = new Array<any>();
+  const years = uniq(worksheets.map((m) => m.fiscal_year));
 
-  for (let fiscal_year of years) {
-    let yearSheets = sortBy(
+  for (const fiscal_year of years) {
+    const yearSheets = sortBy(
       worksheets.filter((w) => w.fiscal_year == fiscal_year),
       (o) => o.date_start
     );
 
-    let months = uniq(yearSheets.map((y) => y.date_name));
+    const months = uniq(yearSheets.map((y) => y.date_name));
 
-    for (let month of months) {
-      let monthSheets = yearSheets.filter((m) => month == m.date_name)[0];
+    for (const month of months) {
+      const monthSheets = yearSheets.filter((m) => month == m.date_name)[0];
 
-      let sections = uniq(monthSheets.lines.map((w) => w.section_name));
-      let monthRow = {
+      const sections = uniq(monthSheets.lines.map((w) => w.section_name));
+      const monthRow = {
         id: monthSheets.id,
         fiscal_year,
         month,
@@ -86,8 +86,8 @@ centreRouter.get("/:id/worksheets", async (req: Request, res: Response) => {
         sections: new Array<any>(),
       };
 
-      for (let section of sections) {
-        let lines = monthSheets.lines.filter((w) => section == w.section_name);
+      for (const section of sections) {
+        const lines = monthSheets.lines.filter((w) => section == w.section_name);
         monthRow.sections.push({ section_name: section, lines });
       }
 
@@ -111,7 +111,7 @@ centreRouter.post("/:id/worksheets", async (req: Request, res: Response) => {
 
   await submissionDb.create(req.body);
 
-  let worksheets = await submissionValueDb.getAll({ centre_id: id });
+  const worksheets = await submissionValueDb.getAll({ centre_id: id });
   res.json({ data: worksheets });
 });
 
@@ -120,10 +120,10 @@ centreRouter.put("/:id/worksheet/:worksheetId", async (req: Request, res: Respon
   const { sections } = req.body;
 
   const centre = await db.get(parseInt(id));
-  let sheet = await submissionValueDb.getJson(parseInt(worksheetId));
+  const sheet = await submissionValueDb.getJson(parseInt(worksheetId));
 
-  if (centre && sheet) {
-    let lines = sections.flatMap((s: any) => s.lines);
+  if (centre && (sheet != null)) {
+    const lines = sections.flatMap((s: any) => s.lines);
     sheet.lines = lines;
 
     await submissionValueDb.updateJson(parseInt(worksheetId), sheet);
@@ -137,15 +137,15 @@ centreRouter.post("/:id/fiscal-year", async (req: Request, res: Response) => {
   const { id } = req.params;
   const { fiscal_year } = req.body;
 
-  let worksheets = await submissionValueDb.getAllJson({ centre_id: parseInt(id), fiscal_year });
+  const worksheets = await submissionValueDb.getAllJson({ centre_id: parseInt(id), fiscal_year });
   if (worksheets.length > 0) return res.status(400).json({ message: "Fiscal year already exists for this centre" });
 
-  let basis = await submissionLineDb.getAll({ fiscal_year });
-  let year = fiscal_year.split("/")[0];
+  const basis = await submissionLineDb.getAll({ fiscal_year });
+  const year = fiscal_year.split("/")[0];
   let date = moment.utc(`${year}-04-01`);
-  let lines = new Array<FundingLineValue>();
+  const lines = new Array<FundingLineValue>();
 
-  for (let line of basis) {
+  for (const line of basis) {
     lines.push({
       submission_line_id: line.id as number,
       section_name: line.section_name,
@@ -159,10 +159,10 @@ centreRouter.post("/:id/fiscal-year", async (req: Request, res: Response) => {
   }
 
   for (let i = 0; i < 12; i++) {
-    let date_start = cloneDeep(date).startOf("month");
-    let date_end = cloneDeep(date_start).endOf("month");
+    const date_start = cloneDeep(date).startOf("month");
+    const date_end = cloneDeep(date_start).endOf("month");
     date_end.set("milliseconds", 0);
-    let date_name = date_start.format("MMMM");
+    const date_name = date_start.format("MMMM");
 
     await submissionValueDb.createJson({
       centre_id: parseInt(id),

@@ -1,5 +1,5 @@
 import * as dotenv from "dotenv";
-import { Knex } from "knex";
+import { type Knex } from "knex";
 
 export const NODE_ENV = process.env.NODE_ENV || "development";
 

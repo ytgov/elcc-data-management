@@ -1,14 +1,14 @@
-import { FundingPeriod } from "../data/models";
+import { type FundingPeriod } from "../data/models";
 
 import { db } from "../data";
 
 export class FundingPeriodService {
-  getAll(query?: any): Promise<FundingPeriod[]> {
-    return db("funding_period").where(query || {});
+  async getAll(query?: any): Promise<FundingPeriod[]> {
+    return await db("funding_period").where(query || {});
   }
 
-  get(id: number): Promise<FundingPeriod | undefined> {
-    return db("funding_period").where({ id }).first();
+  async get(id: number): Promise<FundingPeriod | undefined> {
+    return await db("funding_period").where({ id }).first();
   }
 
   update(id: number, period: FundingPeriod) {

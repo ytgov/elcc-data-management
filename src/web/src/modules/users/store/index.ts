@@ -4,12 +4,12 @@ import { useNotificationStore } from "@/store/NotificationStore";
 import { useApiStore } from "@/store/ApiStore";
 import { PROFILE_URL, USERS_URL } from "@/urls";
 
-let m = useNotificationStore();
+const m = useNotificationStore();
 
 interface AdminState {
-  users: Array<AppUser>;
+  users: AppUser[];
   selectedUser: AppUser | undefined;
-  isLoading: Boolean;
+  isLoading: boolean;
 }
 
 export const useUserAdminStore = defineStore("userAdmin", {
@@ -27,7 +27,7 @@ export const useUserAdminStore = defineStore("userAdmin", {
   actions: {
     async getAllUsers() {
       this.isLoading = true;
-      let api = useApiStore();
+      const api = useApiStore();
       await api
         .secureCall("get", USERS_URL)
         .then((resp) => {
@@ -40,7 +40,7 @@ export const useUserAdminStore = defineStore("userAdmin", {
     async getRoles() {
       console.log("getting roles");
 
-      let api = useApiStore();
+      const api = useApiStore();
       api.secureCall("get", PROFILE_URL);
     },
     selectUser(user: any) {
@@ -51,9 +51,9 @@ export const useUserAdminStore = defineStore("userAdmin", {
     },
     async saveUser() {
       this.isLoading = true;
-      let api = useApiStore();
+      const api = useApiStore();
 
-      if (this.selectedUser) {
+      if (this.selectedUser != null) {
         await api
           .secureCall("put", `${USERS_URL}/${this.selectedUser.email}`, this.selectedUser)
           .then((resp) => {

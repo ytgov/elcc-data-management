@@ -4,7 +4,7 @@ export interface User {
   first_name: string;
   last_name: string;
   status: UserStatus;
-  is_admin: Boolean;
+  is_admin: boolean;
   ynet_id: string;
   directory_id: string;
   create_date: Date;

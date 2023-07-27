@@ -1,6 +1,6 @@
 import { db } from "../data";
-import { Log, LogDB } from "../data/models";
-import { GenericService } from "./generic-service";
+import { type Log, type LogDB } from "../data/models";
+import { type GenericService } from "./generic-service";
 
 const SCHEMA = "dbo";
 const TABLE = "logs";

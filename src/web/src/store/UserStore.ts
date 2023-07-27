@@ -4,10 +4,10 @@ import { useNotificationStore } from "@/store/NotificationStore";
 import { useApiStore } from "@/store/ApiStore";
 import { PROFILE_URL } from "@/urls";
 
-let m = useNotificationStore();
+const m = useNotificationStore();
 
-function waitSomeSeconds(seconds: number) {
-  return new Promise((resolve) => {
+async function waitSomeSeconds(seconds: number) {
+  return await new Promise((resolve) => {
     setTimeout(() => {
       resolve("T");
     }, seconds * 1000);
@@ -31,7 +31,7 @@ export const useUserStore = defineStore("user", {
     },
     isAdmin(state) {
       return true;
-      //return state.user.roles.includes("System Administrator");
+      // return state.user.roles.includes("System Administrator");
     },
   },
   actions: {
@@ -40,10 +40,10 @@ export const useUserStore = defineStore("user", {
 
       await this.loadCurrentUser();
 
-      //await waitSomeSeconds(3);
-      //go and get user details
+      // await waitSomeSeconds(3);
+      // go and get user details
 
-      //await this.getRoles();
+      // await this.getRoles();
 
       console.log("Initialized user store");
     },
@@ -56,7 +56,7 @@ export const useUserStore = defineStore("user", {
         this.user.roles.push("System Administrator");
       }
 
-      let message = {
+      const message = {
         status_code: 200,
         text: "Changed role to " + this.user.roles,
         icon: "mdi-information",
@@ -65,7 +65,7 @@ export const useUserStore = defineStore("user", {
       m.notify(message);
     },
     async loadCurrentUser() {
-      let api = useApiStore();
+      const api = useApiStore();
       await api.secureCall("get", PROFILE_URL).then((resp) => {
         this.user = resp.data;
         this.user.roles = [];
@@ -74,7 +74,7 @@ export const useUserStore = defineStore("user", {
     async getRoles() {
       console.log("getting roles");
 
-      let api = useApiStore();
+      const api = useApiStore();
       api.secureCall("get", PROFILE_URL);
     },
   },

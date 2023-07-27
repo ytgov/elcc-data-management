@@ -1,14 +1,14 @@
-import { FundingSubmissionLine } from "../data/models";
+import { type FundingSubmissionLine } from "../data/models";
 
 import { db } from "../data";
 
 export class SubmissionLineService {
-  getAll(query?: any): Promise<FundingSubmissionLine[]> {
-    return db("funding_submission_line").where(query || {});
+  async getAll(query?: any): Promise<FundingSubmissionLine[]> {
+    return await db("funding_submission_line").where(query || {});
   }
 
-  get(id: number): Promise<FundingSubmissionLine | undefined> {
-    return db("funding_submission_line").where({ id }).first();
+  async get(id: number): Promise<FundingSubmissionLine | undefined> {
+    return await db("funding_submission_line").where({ id }).first();
   }
 
   update(id: number, period: FundingSubmissionLine) {

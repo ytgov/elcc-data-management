@@ -1,10 +1,10 @@
-import { FundingSubmissionLineJson, FundingSubmissionLineValue } from "../data/models";
+import { type FundingSubmissionLineJson, type FundingSubmissionLineValue } from "../data/models";
 
 import { db } from "../data";
 
 export class SubmissionLineValueService {
-  getAll(query?: any): Promise<FundingSubmissionLineValue[]> {
-    return db("funding_submission_line_value")
+  async getAll(query?: any): Promise<FundingSubmissionLineValue[]> {
+    return await db("funding_submission_line_value")
       .innerJoin(
         "funding_submission_line",
         "funding_submission_line.id",
@@ -15,15 +15,16 @@ export class SubmissionLineValueService {
       .where(query || {});
   }
 
-  getAllJson(query?: any): Promise<FundingSubmissionLineJson[]> {
-    return db("funding_submission_line_json").where(query || {});
-  }
-  get(id: number): Promise<FundingSubmissionLineValue | undefined> {
-    return db("funding_submission_line_value").where({ id }).first();
+  async getAllJson(query?: any): Promise<FundingSubmissionLineJson[]> {
+    return await db("funding_submission_line_json").where(query || {});
   }
 
-  getJson(id: number): Promise<FundingSubmissionLineJson | undefined> {
-    return db("funding_submission_line_json").where({ id }).first();
+  async get(id: number): Promise<FundingSubmissionLineValue | undefined> {
+    return await db("funding_submission_line_value").where({ id }).first();
+  }
+
+  async getJson(id: number): Promise<FundingSubmissionLineJson | undefined> {
+    return await db("funding_submission_line_json").where({ id }).first();
   }
 
   update(id: number, period: FundingSubmissionLineValue) {

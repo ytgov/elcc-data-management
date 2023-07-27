@@ -1,16 +1,16 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
 import homeRoutes from "@/modules/home/router";
 import adminstrationRoutes from "@/modules/administration/router";
 import authenticationRoutes from "@/modules/authentication/router";
 import centreRoutes from "@/modules/centre/router";
 
-const routes: Array<RouteRecordRaw> = [
+const routes: RouteRecordRaw[] = [
   {
     path: "/",
     children: [
       {
         path: "",
-        component: () => import("@/views/Default.vue"),
+        component: async () => await import("@/views/Default.vue"),
       },
       ...authenticationRoutes,
       ...homeRoutes,
@@ -19,7 +19,7 @@ const routes: Array<RouteRecordRaw> = [
 
       {
         path: "*",
-        component: () => import("@/views/NotFound.vue"),
+        component: async () => await import("@/views/NotFound.vue"),
       },
     ],
   },

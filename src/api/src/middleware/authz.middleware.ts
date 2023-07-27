@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { type NextFunction, type Request, type Response } from "express";
 import jwt from "express-jwt";
 import axios from "axios";
 import jwksRsa from "jwks-rsa";
@@ -24,11 +24,11 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
 
   let sub = req.user.sub;
   const token = req.headers.authorization || "";
-  let u = await db.getBySub(sub);
+  const u = await db.getBySub(sub);
 
-  if (u) {
+  if (u != null) {
     req.user = { ...req.user, ...u };
-    return next();
+    next(); return;
   }
 
   await axios
@@ -36,20 +36,20 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
     .then(async (resp) => {
       if (resp.data && resp.data.sub) {
         let email = resp.data.email;
-        let first_name = resp.data.given_name || 'UNKNOWN';
-        let last_name = resp.data.family_name || 'UNKNOWN';
+        const first_name = resp.data.given_name || 'UNKNOWN';
+        const last_name = resp.data.family_name || 'UNKNOWN';
         sub = resp.data.sub;
 
         let u = await db.getBySub(sub);
 
-        if (u) {
+        if (u != null) {
           req.user = { ...req.user, ...u };
         } else {
           if (!email) email = `${first_name}.${last_name}@yukon-no-email.ca`;
 
-          let eu = await db.getByEmail(email);
+          const eu = await db.getByEmail(email);
 
-          if (eu) {
+          if (eu != null) {
             eu.sub = sub;
             await db.update(email, eu);
 
