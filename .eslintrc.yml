@@ -5,6 +5,7 @@ env:
 extends:
   - plugin:vue/vue3-essential
   - standard-with-typescript
+  - prettier
 overrides: []
 parserOptions:
   ecmaVersion: latest
