@@ -10,6 +10,10 @@ overrides: []
 parserOptions:
   ecmaVersion: latest
   sourceType: module
+  project:
+    - src/api/tsconfig.json
+    - src/web/tsconfig.node.json
+    - src/web/tsconfig.json
 plugins:
   - vue
 rules: {}
