@@ -124,3 +124,18 @@
 11. The front-end is viewable at http://localhost:8080.
 
 12. TODO: figure out what the database setup needs to be.
+
+### Linting and Pretification
+
+Linting and prettification support easier collaborator by standardizing code.
+They also can make programming faster as you no longer need to worry about formatting, as it happens automatically.
+
+To enable linting and prettification:
+
+1. Install the root level packages via `npm install`
+
+2. Install the recommended extensions for VS Code
+
+3. Reboot VS Code.
+
+4. TODO: test on a second machine and see if more instructions are needed.
