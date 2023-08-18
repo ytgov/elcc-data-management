@@ -1,10 +1,10 @@
-import { FundingSubmissionLineJson, FundingSubmissionLineValue } from "../data/models";
+import { type FundingSubmissionLineJson, type FundingSubmissionLineValue } from "../data/models"
 
-import { db } from "../data";
+import { db } from "../data"
 
 export class SubmissionLineValueService {
-  getAll(query?: any): Promise<FundingSubmissionLineValue[]> {
-    return db("funding_submission_line_value")
+  async getAll(query?: any): Promise<FundingSubmissionLineValue[]> {
+    return await db("funding_submission_line_value")
       .innerJoin(
         "funding_submission_line",
         "funding_submission_line.id",
@@ -12,38 +12,39 @@ export class SubmissionLineValueService {
       )
       .select("funding_submission_line_value.*")
       .select("funding_submission_line.monthly_amount")
-      .where(query || {});
+      .where(query || {})
   }
 
-  getAllJson(query?: any): Promise<FundingSubmissionLineJson[]> {
-    return db("funding_submission_line_json").where(query || {});
-  }
-  get(id: number): Promise<FundingSubmissionLineValue | undefined> {
-    return db("funding_submission_line_value").where({ id }).first();
+  async getAllJson(query?: any): Promise<FundingSubmissionLineJson[]> {
+    return await db("funding_submission_line_json").where(query || {})
   }
 
-  getJson(id: number): Promise<FundingSubmissionLineJson | undefined> {
-    return db("funding_submission_line_json").where({ id }).first();
+  async get(id: number): Promise<FundingSubmissionLineValue | undefined> {
+    return await db("funding_submission_line_value").where({ id }).first()
+  }
+
+  async getJson(id: number): Promise<FundingSubmissionLineJson | undefined> {
+    return await db("funding_submission_line_json").where({ id }).first()
   }
 
   update(id: number, period: FundingSubmissionLineValue) {
-    return db("funding_submission_line_value").where({ id }).update(cleanForUpdate(period));
+    return db("funding_submission_line_value").where({ id }).update(cleanForUpdate(period))
   }
 
   updateJson(id: number, sheet: FundingSubmissionLineJson) {
-    return db("funding_submission_line_json").where({ id }).update(cleanForUpdateJson(sheet));
+    return db("funding_submission_line_json").where({ id }).update(cleanForUpdateJson(sheet))
   }
 
   create(period: FundingSubmissionLineValue) {
-    return db("funding_submission_line_value").insert(cleanForUpdate(period));
+    return db("funding_submission_line_value").insert(cleanForUpdate(period))
   }
 
   createJson(period: FundingSubmissionLineJson) {
-    return db("funding_submission_line_json").insert(cleanForUpdateJson(period));
+    return db("funding_submission_line_json").insert(cleanForUpdateJson(period))
   }
 
   delete(id: number) {
-    return db("funding_submission_line_value").where({ id }).delete();
+    return db("funding_submission_line_value").where({ id }).delete()
   }
 }
 
@@ -60,7 +61,7 @@ function cleanForUpdate(i: any) {
     child_count: i.child_count,
     computed_total: i.computed_total,
     is_actual: i.is_actual,
-  };
+  }
 }
 
 function cleanForUpdateJson(i: FundingSubmissionLineJson) {
@@ -71,5 +72,5 @@ function cleanForUpdateJson(i: FundingSubmissionLineJson) {
     date_start: i.date_start,
     date_end: i.date_end,
     values: JSON.stringify(i.lines),
-  };
+  }
 }

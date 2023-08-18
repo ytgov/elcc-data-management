@@ -5,12 +5,19 @@
     style="margin: -13px -16px 10px -16px"
     class="pl-4 mb-4"
     color="white"
-    active-color="#fff">
-    <template v-slot:prepend>
-      <v-icon color="white" icon="mdi-home"></v-icon>
+    active-color="#fff"
+  >
+    <template #prepend>
+      <v-icon
+        color="white"
+        icon="mdi-home"
+      ></v-icon>
     </template>
-    <template v-slot:divider>
-      <v-icon color="white" icon="mdi-chevron-right"></v-icon>
+    <template #divider>
+      <v-icon
+        color="white"
+        icon="mdi-chevron-right"
+      ></v-icon>
     </template>
   </v-breadcrumbs>
 
@@ -47,8 +54,8 @@
 </template>
 
 <script lang="ts">
-import { useUserAdminStore } from "@/modules/users/store";
-import { mapState } from "pinia";
+import { useUserAdminStore } from "@/modules/users/store"
+import { mapState } from "pinia"
 
 export default {
   data: () => ({}),
@@ -61,8 +68,8 @@ export default {
           title: "Administration",
           to: "/administration",
         },
-      ];
+      ]
     },
   },
-};
+}
 </script>

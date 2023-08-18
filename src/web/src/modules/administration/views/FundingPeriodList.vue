@@ -5,19 +5,29 @@
     style="margin: -13px -16px 10px -16px"
     class="pl-4 mb-4"
     color="white"
-    active-color="#fff">
-    <template v-slot:prepend>
-      <v-icon color="white" icon="mdi-home"></v-icon>
+    active-color="#fff"
+  >
+    <template #prepend>
+      <v-icon
+        color="white"
+        icon="mdi-home"
+      ></v-icon>
     </template>
-    <template v-slot:divider>
-      <v-icon color="white" icon="mdi-chevron-right"></v-icon>
+    <template #divider>
+      <v-icon
+        color="white"
+        icon="mdi-chevron-right"
+      ></v-icon>
     </template>
   </v-breadcrumbs>
 
   <h1>Funding Periods</h1>
 
-  <base-card showHeader="t" heading="">
-    <template v-slot:left>
+  <base-card
+    show-header="t"
+    heading=""
+  >
+    <template #left>
       <v-text-field
         v-model="search"
         label="Search"
@@ -25,10 +35,15 @@
         hide-details
         append-inner-icon="mdi-magnify"
         density="compact"
-        class="ml-2"></v-text-field>
+        class="ml-2"
+      ></v-text-field>
     </template>
-    <template v-slot:right>
-      <v-btn color="primary" size="small">New User</v-btn>
+    <template #right>
+      <v-btn
+        color="primary"
+        size="small"
+        >New User</v-btn
+      >
     </template>
 
     <v-data-table
@@ -37,15 +52,16 @@
       :items="items"
       :loading="isLoading"
       return-object
-      @click:row="rowClick"></v-data-table>
+      @click:row="rowClick"
+    ></v-data-table>
   </base-card>
 
   <funding-period-editor></funding-period-editor>
 </template>
 <script lang="ts">
-import { mapActions, mapState } from "pinia";
-import { useFundingPeriodStore } from "../store/FundingPeriod";
-import FundingPeriodEditor from "../components/FundingPeriodEditor.vue";
+import { mapActions, mapState } from "pinia"
+import { useFundingPeriodStore } from "../store/FundingPeriod"
+import FundingPeriodEditor from "../components/FundingPeriodEditor.vue"
 
 export default {
   components: { FundingPeriodEditor },
@@ -61,10 +77,10 @@ export default {
   computed: {
     ...mapState(useFundingPeriodStore, ["periods", "isLoading"]),
     items() {
-      return this.periods;
+      return this.periods
     },
     totalItems() {
-      return this.periods.length;
+      return this.periods.length
     },
     breadcrumbs() {
       return [
@@ -75,22 +91,22 @@ export default {
         {
           title: "Funding Periods",
         },
-      ];
+      ]
     },
   },
   beforeMount() {
-    this.loadItems();
+    this.loadItems()
   },
   methods: {
     ...mapActions(useFundingPeriodStore, ["getAllFundingPeriods", "selectPeriod"]),
 
     async loadItems() {
-      await this.getAllFundingPeriods();
+      await this.getAllFundingPeriods()
     },
     rowClick(event: Event, thing: any) {
-      this.selectPeriod(thing.item.value);
+      this.selectPeriod(thing.item.value)
       console.log(thing.item.value)
     },
   },
-};
+}
 </script>

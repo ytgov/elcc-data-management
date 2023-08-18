@@ -1,32 +1,36 @@
 <template>
   <div v-if="enrollmentChartLoading">
-    <v-progress-linear indeterminate color="#0097a966"></v-progress-linear>
+    <v-progress-linear
+      indeterminate
+      color="#0097a966"
+    ></v-progress-linear>
     <div
-      class="skeleton"
       id="chartSkeleton"
+      class="skeleton"
       :style="{
         'min-height': `${skeletonHeight}px`,
-      }"></div>
+      }"
+    ></div>
   </div>
   <div v-else>
-    <VueApexCharts height="300" type="pie" :options="options" :series="enrollmentChartData"></VueApexCharts>
+    <VueApexCharts
+      height="300"
+      type="pie"
+      :options="options"
+      :series="enrollmentChartData"
+    ></VueApexCharts>
   </div>
 </template>
 
 <script lang="ts">
-import { mapActions, mapState } from "pinia";
-import VueApexCharts from "vue3-apexcharts";
-import { useCentreStore } from "../store";
+import { mapActions, mapState } from "pinia"
+import VueApexCharts from "vue3-apexcharts"
+import { useCentreStore } from "../store"
 
 export default {
-  setup() {},
   name: "EnrollmentChart",
   components: { VueApexCharts },
-  async mounted() {
-    this.skeletonHeight = this.$el.offsetWidth / 2;
-    await this.loadEnrollmentData(parseInt((this.$route.params.id as string) || "0"));
-  },
-  unmounted() {},
+  setup() {},
   data() {
     return {
       skeletonHeight: 100,
@@ -43,15 +47,24 @@ export default {
           "School Age FT",
         ],
       },
-    };
+    }
   },
+  async mounted() {
+    this.skeletonHeight = this.$el.offsetWidth / 2
+    await this.loadEnrollmentData(parseInt((this.$route.params.id as string) || "0"))
+  },
+  unmounted() {},
   computed: {
-    ...mapState(useCentreStore, ["selectedCentre", "enrollmentChartLoading", "enrollmentChartData"]),
+    ...mapState(useCentreStore, [
+      "selectedCentre",
+      "enrollmentChartLoading",
+      "enrollmentChartData",
+    ]),
   },
   methods: {
     ...mapActions(useCentreStore, ["loadEnrollmentData"]),
   },
-};
+}
 </script>
 
 <style>

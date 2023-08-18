@@ -10,7 +10,8 @@
           hide-details
           variant="outlined"
           density="comfortable"
-          append-inner-icon="mdi-lock"></v-text-field>
+          append-inner-icon="mdi-lock"
+        ></v-text-field>
       </v-col>
       <v-col cols="6">
         <v-text-field
@@ -20,7 +21,8 @@
           hide-details
           variant="outlined"
           density="comfortable"
-          append-inner-icon="mdi-lock"></v-text-field>
+          append-inner-icon="mdi-lock"
+        ></v-text-field>
       </v-col>
 
       <v-col cols="6">
@@ -31,17 +33,19 @@
           hide-details
           variant="outlined"
           density="comfortable"
-          append-inner-icon="mdi-lock"></v-text-field>
+          append-inner-icon="mdi-lock"
+        ></v-text-field>
       </v-col>
       <v-col cols="6">
         <v-text-field
-          label="Roles"
           v-model="user.roles"
+          label="Roles"
           readonly
           variant="outlined"
           density="comfortable"
           append-inner-icon="mdi-lock"
-          hide-details>
+          hide-details
+        >
         </v-text-field>
       </v-col>
     </v-row>
@@ -49,17 +53,17 @@
 </template>
 
 <script lang="ts">
-import { useUserStore } from "@/store/UserStore";
-import { mapState } from "pinia";
+import { useUserStore } from "@/store/UserStore"
+import { mapState } from "pinia"
 export default {
-  setup() {},
   name: "Profile",
+  setup() {},
   data() {
-    return {};
+    return {}
   },
   computed: {
     ...mapState(useUserStore, ["user"]),
   },
   methods: {},
-};
+}
 </script>

@@ -1,6 +1,5 @@
 name: Docker UAT Image Build
 
-
 on:
   push:
     branches: [uat, prod]

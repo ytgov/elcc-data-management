@@ -1,26 +1,26 @@
-import { FundingSubmissionLine } from "../data/models";
+import { type FundingSubmissionLine } from "../data/models"
 
-import { db } from "../data";
+import { db } from "../data"
 
 export class SubmissionLineService {
-  getAll(query?: any): Promise<FundingSubmissionLine[]> {
-    return db("funding_submission_line").where(query || {});
+  async getAll(query?: any): Promise<FundingSubmissionLine[]> {
+    return await db("funding_submission_line").where(query || {})
   }
 
-  get(id: number): Promise<FundingSubmissionLine | undefined> {
-    return db("funding_submission_line").where({ id }).first();
+  async get(id: number): Promise<FundingSubmissionLine | undefined> {
+    return await db("funding_submission_line").where({ id }).first()
   }
 
   update(id: number, period: FundingSubmissionLine) {
-    return db("funding_submission_line").where({ id }).update(cleanForUpdate(period));
+    return db("funding_submission_line").where({ id }).update(cleanForUpdate(period))
   }
 
   create(period: FundingSubmissionLine) {
-    return db("funding_submission_line").insert(cleanForUpdate(period));
+    return db("funding_submission_line").insert(cleanForUpdate(period))
   }
 
   delete(id: number) {
-    return db("funding_submission_line").where({ id }).delete();
+    return db("funding_submission_line").where({ id }).delete()
   }
 }
 
@@ -32,5 +32,5 @@ function cleanForUpdate(i: any) {
     from_age: i.from_age,
     to_age: i.to_age,
     monthly_amount: i.monthly_amount,
-  };
+  }
 }

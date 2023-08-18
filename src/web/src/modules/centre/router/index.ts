@@ -1,22 +1,22 @@
-import { authGuard } from "@auth0/auth0-vue";
+import { authGuard } from "@auth0/auth0-vue"
 
 const routes = [
   {
     path: "/child-care-centres",
-    component: () => import("@/layouts/Default.vue"),
+    component: async () => await import("@/layouts/Default.vue"),
     children: [
       {
         path: "",
-        component: () => import("../views/CentreList.vue"),
+        component: async () => await import("../views/CentreList.vue"),
         beforeEnter: authGuard,
       },
       {
         path: ":id",
-        component: () => import("../views/CentreDashboard.vue"),
+        component: async () => await import("../views/CentreDashboard.vue"),
         beforeEnter: authGuard,
       },
     ],
   },
-];
+]
 
-export default routes;
+export default routes

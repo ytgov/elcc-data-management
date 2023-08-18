@@ -1,13 +1,13 @@
-import express, { Request, Response } from "express";
-import { CentreFundingService, CentreService, LogService } from "../services";
-import { RequireAdmin } from "../middleware";
+import express, { Request, Response } from "express"
+import { CentreFundingService, CentreService, LogService } from "../services"
+import { RequireAdmin } from "../middleware"
 
-export const centreFundingRouter = express.Router();
+export const centreFundingRouter = express.Router()
 
-const db = new CentreFundingService();
+const db = new CentreFundingService()
 
-const centreDB = new CentreService();
-const logService = new LogService();
+const centreDB = new CentreService()
+const logService = new LogService()
 /* 
 centreFundingRouter.get("/", async (req: Request, res: Response) => {
   try {

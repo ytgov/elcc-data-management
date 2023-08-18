@@ -1,17 +1,17 @@
 export interface User {
-  email: string;
-  sub: string;
-  first_name: string;
-  last_name: string;
-  status: UserStatus;
-  is_admin: Boolean;
-  ynet_id: string;
-  directory_id: string;
-  create_date: Date;
+  email: string
+  sub: string
+  first_name: string
+  last_name: string
+  status: UserStatus
+  is_admin: boolean
+  ynet_id: string
+  directory_id: string
+  create_date: Date
 
-  roles?: string[];
-  scopes?: string[];
-  display_name?: string;
+  roles?: string[]
+  scopes?: string[]
+  display_name?: string
 }
 
 export enum UserStatus {
@@ -20,25 +20,25 @@ export enum UserStatus {
 }
 
 export interface User_Create {
-  email: string;
-  sub: string;
-  first_name: string;
-  last_name: string;
-  status: UserStatus;
+  email: string
+  sub: string
+  first_name: string
+  last_name: string
+  status: UserStatus
 }
 
 export interface User_Update {
-  first_name: string;
-  last_name: string;
-  status: UserStatus;
-  ynet_id: string;
-  directory_id: string;
-  roles?: string[];
+  first_name: string
+  last_name: string
+  status: UserStatus
+  ynet_id: string
+  directory_id: string
+  roles?: string[]
 }
 
 export interface UserRole {
-  email: string;
-  role: string;
+  email: string
+  role: string
 }
 
 export class UserHelper {
@@ -53,6 +53,6 @@ export class UserHelper {
       ynet_id: dto.ynet_id,
       directory_id: dto.directory_id,
       create_date: dto.create_date,
-    };
+    }
   }
 }

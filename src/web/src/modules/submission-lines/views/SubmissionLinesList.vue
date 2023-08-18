@@ -5,26 +5,37 @@
     style="margin: -13px -16px 10px -16px"
     class="pl-4 mb-4"
     color="white"
-    active-color="#fff">
-    <template v-slot:prepend>
-      <v-icon color="white" icon="mdi-home"></v-icon>
+    active-color="#fff"
+  >
+    <template #prepend>
+      <v-icon
+        color="white"
+        icon="mdi-home"
+      ></v-icon>
     </template>
-    <template v-slot:divider>
-      <v-icon color="white" icon="mdi-chevron-right"></v-icon>
+    <template #divider>
+      <v-icon
+        color="white"
+        icon="mdi-chevron-right"
+      ></v-icon>
     </template>
   </v-breadcrumbs>
 
   <h1>Submission Format</h1>
 
-  <base-card showHeader="t" heading="">
-    <template v-slot:left>
+  <base-card
+    show-header="t"
+    heading=""
+  >
+    <template #left>
       <v-select
         v-model="fiscalYear"
         :items="fiscalYears"
         label="Fiscal year"
         single-line
         style="width: 100px"
-        hide-details></v-select>
+        hide-details
+      ></v-select>
 
       <v-text-field
         v-model="search"
@@ -32,10 +43,17 @@
         single-line
         hide-details
         append-inner-icon="mdi-magnify"
-        class="ml-2"></v-text-field>
+        class="ml-2"
+      ></v-text-field>
     </template>
-    <template v-slot:right>
-      <v-btn color="primary" variant="flat" size="small" @click="startNewFiscal">New Fiscal Year</v-btn>
+    <template #right>
+      <v-btn
+        color="primary"
+        variant="flat"
+        size="small"
+        @click="startNewFiscal"
+        >New Fiscal Year</v-btn
+      >
     </template>
 
     <v-data-table
@@ -46,7 +64,8 @@
       return-object
       density="compact"
       class="row-clickable"
-      @click:row="rowClick"></v-data-table>
+      @click:row="rowClick"
+    ></v-data-table>
   </base-card>
 
   <submission-line-editor></submission-line-editor>
@@ -54,10 +73,10 @@
   <funding-fiscal-editor></funding-fiscal-editor>
 </template>
 <script lang="ts">
-import { mapActions, mapState } from "pinia";
-import { useSubmissionLinesStore } from "../store";
-import SubmissionLineEditor from "../components/SubmissionLineEditor.vue";
-import FundingFiscalEditor from "../components/FundingFiscalEditor.vue";
+import { mapActions, mapState } from "pinia"
+import { useSubmissionLinesStore } from "../store"
+import SubmissionLineEditor from "../components/SubmissionLineEditor.vue"
+import FundingFiscalEditor from "../components/FundingFiscalEditor.vue"
 
 export default {
   components: { SubmissionLineEditor, FundingFiscalEditor },
@@ -74,10 +93,10 @@ export default {
   computed: {
     ...mapState(useSubmissionLinesStore, ["lines", "isLoading", "fiscalYears"]),
     items() {
-      return this.lines.filter((y) => y.fiscal_year == this.fiscalYear);
+      return this.lines.filter((y) => y.fiscal_year == this.fiscalYear)
     },
     totalItems() {
-      return this.lines.length;
+      return this.lines.length
     },
     breadcrumbs() {
       return [
@@ -88,21 +107,25 @@ export default {
         {
           title: "Submission Format",
         },
-      ];
+      ]
     },
   },
   beforeMount() {
-    this.loadItems();
+    this.loadItems()
   },
   methods: {
-    ...mapActions(useSubmissionLinesStore, ["getAllSubmissionLines", "selectLine", "startNewFiscal"]),
+    ...mapActions(useSubmissionLinesStore, [
+      "getAllSubmissionLines",
+      "selectLine",
+      "startNewFiscal",
+    ]),
 
     async loadItems() {
-      await this.getAllSubmissionLines();
+      await this.getAllSubmissionLines()
     },
     rowClick(event: Event, thing: any) {
-      this.selectLine(thing.item.value);
+      this.selectLine(thing.item.value)
     },
   },
-};
+}
 </script>

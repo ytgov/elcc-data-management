@@ -1,8 +1,8 @@
-import express, { Request, Response } from "express";
-import { checkJwt } from "../middleware/authz.middleware";
+import express, { type Request, type Response } from "express"
+import { checkJwt } from "../middleware/authz.middleware"
 
-export const testRouter = express.Router();
+export const testRouter = express.Router()
 
 testRouter.get("/", async (req: Request, res: Response) => {
-  res.send("Test route");
-});
+  res.send("Test route")
+})

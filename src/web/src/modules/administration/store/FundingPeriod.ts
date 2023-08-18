@@ -1,15 +1,15 @@
-import { defineStore } from "pinia";
+import { defineStore } from "pinia"
 
-import { useNotificationStore } from "@/store/NotificationStore";
-import { useApiStore } from "@/store/ApiStore";
-import { FUNDING_PERIOD_URL } from "@/urls";
+import { useNotificationStore } from "@/store/NotificationStore"
+import { useApiStore } from "@/store/ApiStore"
+import { FUNDING_PERIOD_URL } from "@/urls"
 
-let m = useNotificationStore();
+const m = useNotificationStore()
 
 interface AdminState {
-  periods: Array<FundingPeriod>;
-  selectedPeriod: FundingPeriod | undefined;
-  isLoading: Boolean;
+  periods: FundingPeriod[]
+  selectedPeriod: FundingPeriod | undefined
+  isLoading: boolean
 }
 
 export const useFundingPeriodStore = defineStore("periodAdmin", {
@@ -20,57 +20,57 @@ export const useFundingPeriodStore = defineStore("periodAdmin", {
   }),
   getters: {
     periodCount(state) {
-      if (state && state.periods) return state.periods.length;
-      return 0;
+      if (state && state.periods) return state.periods.length
+      return 0
     },
   },
   actions: {
     async getAllFundingPeriods() {
-      this.isLoading = true;
-      let api = useApiStore();
+      this.isLoading = true
+      const api = useApiStore()
       await api
         .secureCall("get", FUNDING_PERIOD_URL)
         .then((resp) => {
-          this.periods = resp.data;
+          this.periods = resp.data
         })
         .finally(() => {
-          this.isLoading = false;
-        });
+          this.isLoading = false
+        })
     },
     selectPeriod(user: any) {
-      this.selectedPeriod = user;
+      this.selectedPeriod = user
     },
     unselectPeriod() {
-      this.selectedPeriod = undefined;
+      this.selectedPeriod = undefined
     },
     async savePeriod() {
-      this.isLoading = true;
-      let api = useApiStore();
+      this.isLoading = true
+      const api = useApiStore()
 
-      if (this.selectedPeriod) {
+      if (this.selectedPeriod != null) {
         await api
           .secureCall("put", `${FUNDING_PERIOD_URL}/${this.selectedPeriod.id}`, this.selectedPeriod)
           .then((resp) => {
-            this.periods = resp.data;
-            this.unselectPeriod();
+            this.periods = resp.data
+            this.unselectPeriod()
           })
           .finally(() => {
-            this.isLoading = false;
-          });
+            this.isLoading = false
+          })
 
-        m.notify({ text: "Funding Period saved", variant: "success" });
-        this.getAllFundingPeriods();
+        m.notify({ text: "Funding Period saved", variant: "success" })
+        this.getAllFundingPeriods()
       }
     },
   },
-});
+})
 
 export interface FundingPeriod {
-  id: number;
-  fiscal_year: string;
-  from_date: Date;
-  to_date: Date;
-  title: string;
-  is_fiscal_year: boolean;
-  is_school_month: boolean;
+  id: number
+  fiscal_year: string
+  from_date: Date
+  to_date: Date
+  title: string
+  is_fiscal_year: boolean
+  is_school_month: boolean
 }
