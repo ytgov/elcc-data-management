@@ -132,40 +132,40 @@ All commands are just strings joined together so its easy to add new commmands. 
    node -v
    ```
 
-10. Run migrations via navigating to http://localhost:3000/api/migrate/up, and refreshing the page once for each migration.
+9. Run migrations via navigating to http://localhost:3000/api/migrate/up, and refreshing the page once for each migration.
 
-    Response data will look like
+   Response data will look like
 
-    ```js
-    {
-        "data": [
-            [
-                {
-                    "name": "001_create-users.ts"
-                },
-                // ... other completed migrations
-            ],
-            [
-                {
-                    "file": "005_logs.ts",
-                    "directory": "/home/marlen/code/icefoganalytics/elcc-data-management/src/api/src/data/migrations"
-                },
-                // ... other pending migrations
+   ```js
+   {
+       "data": [
+           [
+               {
+                   "name": "001_create-users.ts"
+               },
+               // ... other completed migrations
+           ],
+           [
+               {
+                   "file": "005_logs.ts",
+                   "directory": "/home/marlen/code/icefoganalytics/elcc-data-management/src/api/src/data/migrations"
+               },
+               // ... other pending migrations
 
-            ]
-        ]
-    }
-    ```
+           ]
+       ]
+   }
+   ```
 
-    Keep refreshing the page until all the pending migrations are completed migrations.
+   Keep refreshing the page until all the pending migrations are completed migrations.
+
+   > From `src/api/src/routes/migration-router.ts`
+
+10. (currently broken) Run seeds via navigating to http://localhost:3000/api/migrate/seed
 
     > From `src/api/src/routes/migration-router.ts`
 
-11. (currently broken) Run seeds via navigating to http://localhost:3000/api/migrate/seed
-
-    > From `src/api/src/routes/migration-router.ts`
-
-12. Boot the front-end via
+11. Boot the front-end via
 
     ```bash
     cd ./src/web
@@ -173,9 +173,9 @@ All commands are just strings joined together so its easy to add new commmands. 
     npm run start
     ```
 
-13. The front-end is viewable at http://localhost:8080.
+12. The front-end is viewable at http://localhost:8080.
 
-14. TODO: figure out what the database setup needs to be.
+13. TODO: figure out what the database setup needs to be.
 
 ### Linting and Pretification
 
