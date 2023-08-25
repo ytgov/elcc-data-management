@@ -55,7 +55,7 @@ All commands are just strings joined together so its easy to add new commmands. 
 
    You will now be able to do `dev xxx` instead ov `./bin/dev xxx`.
 
-4. Create a `src/api/.env.development` file with the following content:
+4. Create a `./api/.env.development` file with the following content:
 
    ```bash
    VUE_APP_FRONTEND_URL=http://localhost:8080
@@ -132,7 +132,7 @@ All commands are just strings joined together so its easy to add new commmands. 
            [
                {
                    "file": "005_logs.ts",
-                   "directory": "/home/marlen/code/icefoganalytics/elcc-data-management/src/api/src/data/migrations"
+                   "directory": "<project-directory>/elcc-data-management/api/src/data/migrations"
                },
                // ... other pending migrations
 
@@ -143,16 +143,16 @@ All commands are just strings joined together so its easy to add new commmands. 
 
    Keep refreshing the page until all the pending migrations are completed migrations.
 
-   > From `src/api/src/routes/migration-router.ts`
+   > From `./api/src/routes/migration-router.ts`
 
 8. (currently broken) Run seeds via navigating to http://localhost:3000/api/migrate/seed
 
-   > From `src/api/src/routes/migration-router.ts`
+   > From `./api/src/routes/migration-router.ts`
 
 9. Boot the front-end via
 
    ```bash
-   cd ./src/web
+   cd ./web
    npm install
    npm run start
    ```
@@ -184,9 +184,9 @@ Your text editor or IDE might require you to manually install the dependencies t
    ```
 
 
-3. Go to `src/api` and run `npm install`
+3. Go to `./api` and run `npm install`
 
-4. Go to `src/web` and run `npm run install`
+4. Go to `./web` and run `npm run install`
 
 ### Linting and Pretification
 
