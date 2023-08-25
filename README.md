@@ -116,23 +116,7 @@ All commands are just strings joined together so its easy to add new commmands. 
    docker compose -f docker-compose.development.yaml up --remove-orphans
    ```
 
-7. Install `asdf` using instructions at https://asdf-vm.com/guide/getting-started.html.
-
-8. Install the `nodejs` plugin via and the appropriate nodejs version.
-
-   ```bash
-   asdf plugin add nodejs
-   asdf install nodejs # installs the version from the .tool-verions file
-   ```
-
-   Check that you have the correct version set up by seeing that these two commands match:
-
-   ```bash
-   asdf current nodejs
-   node -v
-   ```
-
-9. Run migrations via navigating to http://localhost:3000/api/migrate/up, and refreshing the page once for each migration.
+7. Run migrations via navigating to http://localhost:3000/api/migrate/up, and refreshing the page once for each migration.
 
    Response data will look like
 
@@ -161,21 +145,48 @@ All commands are just strings joined together so its easy to add new commmands. 
 
    > From `src/api/src/routes/migration-router.ts`
 
-10. (currently broken) Run seeds via navigating to http://localhost:3000/api/migrate/seed
+8. (currently broken) Run seeds via navigating to http://localhost:3000/api/migrate/seed
 
-    > From `src/api/src/routes/migration-router.ts`
+   > From `src/api/src/routes/migration-router.ts`
 
-11. Boot the front-end via
+9. Boot the front-end via
 
-    ```bash
-    cd ./src/web
-    npm install
-    npm run start
-    ```
+   ```bash
+   cd ./src/web
+   npm install
+   npm run start
+   ```
 
-12. The front-end is viewable at http://localhost:8080.
+10. The front-end is viewable at http://localhost:8080.
 
-13. TODO: figure out what the database setup needs to be.
+11. TODO: figure out what the database setup needs to be.
+
+### Editor Setup
+
+Your text editor or IDE might require you to manually install the dependencies to get TypesScript autocompletion working. Hopefully, it "just works :tm:". If not you can install packages locally like so:
+
+1. Install `asdf` using instructions from [README -> Set Up dev Commnd](./README.md#set-up-dev-command)
+
+2. Install the `nodejs` plugin via and the appropriate nodejs version.
+
+   ```bash
+   asdf plugin add nodejs
+
+   # install the version from the .tool-verions file
+   asdf install nodejs
+   ```
+
+   Check that you have the correct version set up by seeing that these two commands match:
+
+   ```bash
+   asdf current nodejs
+   node -v
+   ```
+
+
+3. Go to `src/api` and run `npm install`
+
+4. Go to `src/web` and run `npm run install`
 
 ### Linting and Pretification
 
