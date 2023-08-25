@@ -14,8 +14,8 @@ parserOptions:
     - .vue
   parser: "@typescript-eslint/parser"
   project:
-    - src/web/tsconfig.node.json
-    - src/web/tsconfig.json
+    - web/tsconfig.node.json
+    - web/tsconfig.json
   sourceType: module
 plugins:
   - vue

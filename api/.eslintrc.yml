@@ -11,7 +11,7 @@ parserOptions:
   ecmaVersion: latest
   sourceType: module
   project:
-    - src/api/tsconfig.json
+    - api/tsconfig.json
 plugins:
   - "@typescript-eslint"
 rules: {}
