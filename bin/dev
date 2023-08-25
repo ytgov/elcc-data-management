@@ -1,0 +1,139 @@
+#!/usr/bin/env ruby
+
+class DevHelper
+  # External Interface
+  def self.call(*args)
+    new.call(*args)
+  end
+
+  # Core logic
+  def call(*args, **kwargs)
+    if args.length.positive? && respond_to?(args[0])
+      public_send(args[0], *args.drop(1), **kwargs)
+    else
+      compose(*args, **kwargs)
+    end
+  end
+
+  def compose(*args, **kwargs)
+    command = compose_command(*args, **kwargs)
+    puts "Running: #{command}"
+    exec(command)
+  end
+
+  # Primary command wrappers
+  def build(*args, **kwargs)
+    compose(%w[build], *args, **kwargs)
+  end
+
+  def up(*args, **kwargs)
+    compose(*%w[up --remove-orphans], *args, **kwargs)
+  end
+
+  def down(*args, **kwargs)
+    compose(*%w[down --remove-orphans], *args, **kwargs)
+  end
+
+  def logs(*args, **kwargs)
+    compose(*%w[logs -f], *args, **kwargs)
+  end
+
+  def run(*args, **kwargs)
+    compose(*%w[run --rm], *args, **kwargs)
+  end
+
+  # Custom helpers
+  def sh(*args, **kwargs)
+    run(
+      *%w[api sh],
+      *args,
+      **kwargs
+    )
+  end
+
+  def debug
+    api_container_id = container_id('api')
+    puts 'Waiting for breakpoint to trigger...'
+    puts "'ctrl-c' to exit."
+    command = "docker attach --detach-keys ctrl-c #{api_container_id}"
+    puts "Running: #{command}"
+    exec(command)
+    exit 0
+  end
+
+  def npm(*args, **kwargs)
+    run(*%w[api npm], *args, **kwargs)
+  end
+
+  def console(*args, **kwargs)
+    run(*%w[api npm run console], *args, **kwargs)
+  end
+
+  # -I enable quoted identifiers, e.g. "table"."column"
+  def sqlcmd(*args, **kwargs) # rubocop:disable Metrics/MethodLength
+    run(
+      <<~BASH,
+        db sh -c '
+          /opt/mssql/bin/sqlservr &
+          sleep 30
+          /opt/mssql-tools/bin/sqlcmd \
+            -U "$DB_USER" \
+            -P "$DB_PASS" \
+            -H "$DB_HOST" \
+            -d "$DB_NAME" \
+            -I
+          '
+      BASH
+      *args,
+      **kwargs
+    )
+  end
+
+  def db(*args, **kwargs)
+    compose(*%w[exec db], *args, **kwargs)
+  end
+
+  def bash_completions
+    completions = public_methods(false).reject do |word|
+      %i[call].include?(word)
+    end
+    puts completions
+  end
+
+  private
+
+  def container_id(container_name, *args, **kwargs)
+    command = compose_command(*%w[ps -q], container_name, *args, **kwargs)
+    puts "Running: #{command}"
+    id_of_container = `#{command}`.chomp
+    puts "Container id is: #{id_of_container}"
+    id_of_container
+  end
+
+  def compose_command(*args, **kwargs)
+    environment = kwargs.fetch(:environment, 'development')
+    "cd #{project_root} && docker compose -f docker-compose.#{environment}.yaml #{args.join(' ')}"
+  end
+
+  def project_root
+    @project_root ||= File.absolute_path("#{__dir__}/..")
+  end
+end
+
+# Only execute main function when file is executed
+DevHelper.call(*ARGV) if $PROGRAM_NAME == __FILE__
+
+## Dev completions
+# https://iridakos.com/programming/2018/03/01/bash-programmable-completion-tutorial
+# _dev_completions () {
+#   local dev_command_path="$(which dev)"
+#   local dev_function_names
+#   dev_function_names="$(ruby "$dev_command_path" bash_completions)"
+#   # COMP_WORDS: an array of all the words typed after the name of the program the compspec belongs to
+#   # COMP_CWORD: an index of the COMP_WORDS array pointing to the word the current cursor is at - in other words, the index of the word the cursor was when the tab key was pressed
+#   # COMP_LINE: the current command line
+#   COMPREPLY=($(compgen -W "$dev_function_names" "${COMP_WORDS[$COMP_CWORD]}"))
+# }
+
+# complete -F _dev_completions dev
+# complete -W "allow" direnv
