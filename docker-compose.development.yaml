@@ -1,0 +1,47 @@
+version: "3"
+
+x-default-environment: &default-environment
+  NODE_ENV: development
+  DB_NAME: ELCC
+  DB_HOST: db
+  DB_USER: sa
+  DB_PASS: &default-db-password DevPwd99!
+  DB_PORT: 1433
+
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: development.Dockerfile
+    env_file:
+      - ./api/.env.development
+    environment:
+      <<: *default-environment
+    tty: true
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./api:/usr/src/api
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    user: root
+    environment:
+      TZ: "America/Whitehorse"
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: *default-db-password
+    ports:
+      - "1433:1433"
+    volumes:
+      - db_data:/var/opt/mssql/data
+    healthcheck: # https://github.com/Microsoft/mssql-docker/issues/133
+      test: "/opt/mssql-tools/bin/sqlcmd -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q \"SELECT 1\" -b -o /dev/null"
+      interval: 5s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  db_data:
