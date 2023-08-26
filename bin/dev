@@ -71,11 +71,19 @@ class DevHelper
 
   # -I enable quoted identifiers, e.g. "table"."column"
   def sqlcmd(*args, **kwargs) # rubocop:disable Metrics/MethodLength
-    run(
+    environment_hoist = ENV.slice(*%w[
+      DB_NAME
+      DB_USER
+      DB_HOST
+      DB_PORT
+    ]).map { |key, value|
+      "export #{key}=\"#{value}\""
+    }.join("\n  ")
+
+    compose(
       <<~BASH,
-        db sh -c '
-          /opt/mssql/bin/sqlservr &
-          sleep 30
+        exec db sh -c '
+          #{environment_hoist}
           /opt/mssql-tools/bin/sqlcmd \
             -U "$DB_USER" \
             -P "$DB_PASS" \

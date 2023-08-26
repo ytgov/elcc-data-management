@@ -72,6 +72,7 @@ All commands are just strings joined together so its easy to add new commmands. 
 5. Connect to the default database via to create the app database. _This will be automated in the future._
 
    ```
+   dev up db
    DB_NAME=master dev sqlcmd
 
    # or
