@@ -69,7 +69,17 @@ All commands are just strings joined together so its easy to add new commmands. 
    APPLICATION_NAME=ELCC Data Management
    ```
 
-5. Connect to the default database via to create the app database. _This will be automated in the future._
+5. Boot the api, web, and database services using
+
+   ```bash
+   dev up
+
+   # or
+
+   docker compose -f docker-compose.development.yaml up --remove-orphans
+   ```
+
+6. Connect to the default database and create the app database. _This will be automated in the future._
 
    ```
    dev up db
@@ -107,16 +117,6 @@ All commands are just strings joined together so its easy to add new commmands. 
 
    > NOTE: you need to type `GO`/`go` separately from the mssql commands. It applies the current changes as a transaction, _I think_.
 
-6. Boot the database and api services using
-
-   ```bash
-   dev up
-
-   # or
-
-   docker compose -f docker-compose.development.yaml up --remove-orphans
-   ```
-
 7. Run migrations via navigating to http://localhost:3000/api/migrate/up, and refreshing the page once for each migration.
 
    Response data will look like
@@ -150,17 +150,7 @@ All commands are just strings joined together so its easy to add new commmands. 
 
    > From `./api/src/routes/migration-router.ts`
 
-9. Boot the front-end via
-
-   ```bash
-   cd ./web
-   npm install
-   npm run start
-   ```
-
-10. The front-end is viewable at http://localhost:8080.
-
-11. TODO: figure out what the database setup needs to be.
+9. The front-end is viewable at http://localhost:8080.
 
 ### Editor Setup
 
@@ -184,10 +174,9 @@ Your text editor or IDE might require you to manually install the dependencies t
    node -v
    ```
 
-
 3. Go to `./api` and run `npm install`
 
-4. Go to `./web` and run `npm run install`
+4. Go to `./web` and run `npm install`
 
 ### Linting and Pretification
 
