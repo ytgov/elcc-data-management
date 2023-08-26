@@ -26,6 +26,21 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  web:
+    build:
+      context: ./web
+      dockerfile: development.Dockerfile
+    environment:
+      <<: *default-environment
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./web:/usr/src/web
+    depends_on:
+      db:
+        condition: service_healthy
+
   db:
     image: mcr.microsoft.com/mssql/server:2019-latest
     user: root
