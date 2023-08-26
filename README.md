@@ -55,7 +55,9 @@ All commands are just strings joined together so its easy to add new commmands. 
 
    You will now be able to do `dev xxx` instead ov `./bin/dev xxx`.
 
-4. Create a `./api/.env.development` file with the following content:
+### Boot the Application
+
+1. Create a `./api/.env.development` file with the following content:
 
    ```bash
    VUE_APP_FRONTEND_URL=http://localhost:8080
@@ -69,7 +71,7 @@ All commands are just strings joined together so its easy to add new commmands. 
    APPLICATION_NAME=ELCC Data Management
    ```
 
-5. Boot the api, web, and database services using
+2. Boot the api, web, and database services using
 
    ```bash
    dev up
@@ -79,7 +81,7 @@ All commands are just strings joined together so its easy to add new commmands. 
    docker compose -f docker-compose.development.yaml up --remove-orphans
    ```
 
-6. Connect to the default database and create the app database. _This will be automated in the future._
+3. Connect to the default database and create the app database. _This will be automated in the future._
 
    ```
    dev up db
@@ -117,7 +119,7 @@ All commands are just strings joined together so its easy to add new commmands. 
 
    > NOTE: you need to type `GO`/`go` separately from the mssql commands. It applies the current changes as a transaction, _I think_.
 
-7. Run migrations via navigating to http://localhost:3000/api/migrate/up, and refreshing the page once for each migration.
+4. Run migrations via navigating to http://localhost:3000/api/migrate/up, and refreshing the page once for each migration.
 
    Response data will look like
 
@@ -146,11 +148,11 @@ All commands are just strings joined together so its easy to add new commmands. 
 
    > From `./api/src/routes/migration-router.ts`
 
-8. (currently broken) Run seeds via navigating to http://localhost:3000/api/migrate/seed
+5. (currently broken) Run seeds via navigating to http://localhost:3000/api/migrate/seed
 
    > From `./api/src/routes/migration-router.ts`
 
-9. The front-end is viewable at http://localhost:8080.
+6. The front-end is viewable at http://localhost:8080.
 
 ### Editor Setup
 
