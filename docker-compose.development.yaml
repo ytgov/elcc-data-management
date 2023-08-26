@@ -33,13 +33,13 @@ services:
       dockerfile: development.Dockerfile
     environment:
       <<: *default-environment
+      API_HOST_NAME: api
     ports:
       - "8080:8080"
     volumes:
       - ./web:/usr/src/web
     depends_on:
-      db:
-        condition: service_healthy
+      - api
 
   db:
     image: mcr.microsoft.com/mssql/server:2019-latest
