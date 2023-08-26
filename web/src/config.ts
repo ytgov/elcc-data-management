@@ -7,10 +7,9 @@ export const environment = process.env.NODE_ENV
 
 // export const AUTH_REDIRECT_URI = import.meta.env.VITE_AUTH_REDIRECT_URI;
 
-export const apiBaseUrl = environment == "production" ? "" : "http://localhost:3000"
-
 // @ts-expect-error
-export const applicationUrl = process.env.VUE_APP_FRONTEND_URL || "http://localhost:8080"
+const API_HOST_NAME = process.env.API_HOST_NAME || "localhost"
+export const API_BASE_URL = environment == "production" ? "" : `http://${API_HOST_NAME}:3000`
 
 export const applicationName = "Vue 3 Template"
 export const applicationIcon = "mdi-leaf"
