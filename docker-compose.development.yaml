@@ -42,7 +42,9 @@ services:
       - api
 
   db:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+    build:
+      context: ./db
+      dockerfile: development.Dockerfile
     user: root
     environment:
       <<: *default-environment
@@ -53,16 +55,19 @@ services:
     ports:
       - "1433:1433"
     volumes:
+      - ./db:/usr/src/db
       - db_data:/var/opt/mssql/data
-    healthcheck: # https://github.com/Microsoft/mssql-docker/issues/133
+    healthcheck:
+      # Ensures that server is started and that "ELCC" database is in an "online" state.
+      # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-databases-transact-sql?view=sql-server-2017
       test: |
         sh -c '
           /opt/mssql-tools/bin/sqlcmd \
-            -U sa \
-            -P "$$MSSQL_SA_PASSWORD" \
-            -Q "SELECT 1" \
-            -b \
-            -o /dev/null
+          -h -1 \
+          -t 1 \
+          -U sa \
+          -P "$$MSSQL_SA_PASSWORD" \
+          -Q "SET NOCOUNT ON; Select SUM(state) from sys.databases WHERE name = '$$DB_NAME'"
         '
       interval: 5s
       timeout: 10s

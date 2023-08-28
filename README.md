@@ -81,45 +81,7 @@ All commands are just strings joined together so its easy to add new commmands. 
    docker compose -f docker-compose.development.yaml up --remove-orphans
    ```
 
-3. Connect to the default database and create the app database. _This will be automated in the future._
-
-   ```
-   dev up db
-   DB_NAME=master dev sqlcmd
-
-   # or
-
-   docker compose -f docker-compose.development.yaml run --rm db sh -c '
-     /opt/mssql/bin/sqlservr &
-     sleep 30
-     /opt/mssql-tools/bin/sqlcmd \
-       -U "$DB_USER" \
-       -P "$DB_PASS" \
-       -H "$DB_HOST" \
-       -d "$DB_NAME" \
-       -I
-   '
-   ```
-
-   After the database has booted, you are connected to the `sqlcmd` terminal. You will see `1>`.
-
-   Create the `ELCC` database via
-
-   ```mssql
-   CREATE DATABASE ELCC
-   GO
-   ```
-
-   To list the databases, and check that ELCC was created you can use:
-
-   ```msql
-   SELECT NAME FROM SYS.DATABASES
-   GO
-   ```
-
-   > NOTE: you need to type `GO`/`go` separately from the mssql commands. It applies the current changes as a transaction, _I think_.
-
-4. Run migrations via navigating to http://localhost:3000/api/migrate/up, and refreshing the page once for each migration.
+3. Run migrations via navigating to http://localhost:3000/api/migrate/up, and refreshing the page once for each migration.
 
    Response data will look like
 
@@ -148,11 +110,11 @@ All commands are just strings joined together so its easy to add new commmands. 
 
    > From `./api/src/routes/migration-router.ts`
 
-5. (currently broken) Run seeds via navigating to http://localhost:3000/api/migrate/seed
+4. (currently broken) Run seeds via navigating to http://localhost:3000/api/migrate/seed
 
    > From `./api/src/routes/migration-router.ts`
 
-6. The front-end is viewable at http://localhost:8080.
+5. The front-end is viewable at http://localhost:8080.
 
 ### Editor Setup
 
