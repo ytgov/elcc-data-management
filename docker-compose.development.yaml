@@ -42,7 +42,9 @@ services:
       - api
 
   db:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+    build:
+      context: ./db
+      dockerfile: development.Dockerfile
     user: root
     environment:
       <<: *default-environment
@@ -53,6 +55,7 @@ services:
     ports:
       - "1433:1433"
     volumes:
+      - ./db:/usr/src/db
       - db_data:/var/opt/mssql/data
     healthcheck: # https://github.com/Microsoft/mssql-docker/issues/133
       test: |
