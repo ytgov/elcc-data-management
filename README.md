@@ -71,50 +71,19 @@ All commands are just strings joined together so its easy to add new commmands. 
    APPLICATION_NAME=ELCC Data Management
    ```
 
-2. Boot the api, web, and database services using
+2. Boot the api, web, and database services, and run the migrations and seeds using
 
    ```bash
-   dev up
+   dev up --build
 
    # or
 
-   docker compose -f docker-compose.development.yaml up --remove-orphans
+   docker compose -f docker-compose.development.yaml up --remove-orphans --build
    ```
 
-3. Run migrations via navigating to http://localhost:3000/api/migrate/up, and refreshing the page once for each migration.
+   > You only need the --build option if it is your first time building the app, or if you are modifying the the Docker files.
 
-   Response data will look like
-
-   ```js
-   {
-       "data": [
-           [
-               {
-                   "name": "001_create-users.ts"
-               },
-               // ... other completed migrations
-           ],
-           [
-               {
-                   "file": "005_logs.ts",
-                   "directory": "<project-directory>/elcc-data-management/api/src/data/migrations"
-               },
-               // ... other pending migrations
-
-           ]
-       ]
-   }
-   ```
-
-   Keep refreshing the page until all the pending migrations are completed migrations.
-
-   > From `./api/src/routes/migration-router.ts`
-
-4. (currently broken) Run seeds via navigating to http://localhost:3000/api/migrate/seed
-
-   > From `./api/src/routes/migration-router.ts`
-
-5. The front-end is viewable at http://localhost:8080.
+3. The front-end is viewable at http://localhost:8080.
 
 ### Editor Setup
 
