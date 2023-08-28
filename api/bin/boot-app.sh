@@ -3,11 +3,12 @@
 # Start the script to run the migrations
 cd /usr/src/api
 
-npm exec ts-node ./bin/migrate-latest.ts
+npm exec ts-node ./bin/migrate.ts && \
+  npm exec ts-node ./bin/seed.ts
 
-migration_status=$?
-if [ $migration_status -ne 0 ]; then
-  echo "Failed to run migrations, exit code was $migration_status"
+initialization_status=$?
+if [ $initialization_status -ne 0 ]; then
+  echo "Failed to complete initialization, exit code was $initialization_status"
   exit 1
 fi
 

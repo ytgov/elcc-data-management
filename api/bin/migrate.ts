@@ -14,8 +14,6 @@ async function migrateLatest(db: Knex) {
   try {
     await db.migrate.latest(MIGRATION_CONIG)
     console.log("Migrations completed!")
-  } catch (error) {
-    console.error("Error running migrations:", error)
   } finally {
     await db.destroy()
   }
