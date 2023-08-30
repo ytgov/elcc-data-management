@@ -41,7 +41,7 @@ The `dev` command vastly simplifies development using docker compose. It require
 
 Its more or less simply a wrapper around docker compose will the ability to quickly add custom helpers.
 
-All commands are just strings joined together so its easy to add new commmands. It prints out each command that it runs, so that you can run the command manually to debug it, or just so you learn some docker compose while using it.
+All commands are just strings joined together, so it's easy to add new commmands. `dev` prints out each command that it runs, so that you can run the command manually to debug it, or just so you learn some docker compose while using it.
 
 1. (optional) Install `asdf` as seen in https://asdf-vm.com/guide/getting-started.html.
 
@@ -112,7 +112,7 @@ All commands are just strings joined together so its easy to add new commmands. 
    docker compose -f docker-compose.development.yaml up --remove-orphans --build
    ```
 
-   > You only need the --build option if it is your first time building the app, or if you are modifying the the Docker files.
+   > You only need the --build option if it's your first time building the app, or if you are modifying the the Docker files.
 
 3. The front-end is viewable at http://localhost:8080.
 
