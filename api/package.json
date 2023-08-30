@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "nodemon -L src/index.ts",
-    "console": "ts-node"
+    "ts-node": "ts-node"
   },
   "author": "Michael Johnson",
   "license": "ISC",

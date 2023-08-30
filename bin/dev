@@ -1,6 +1,12 @@
 #!/usr/bin/env ruby
 
 class DevHelper
+  # Support dashes in command names
+  COMMAND_TO_METHOD = {
+    "ts-node" => :ts_node
+  }
+  METHOD_TO_COMMAND = COMMAND_TO_METHOD.invert
+
   # External Interface
   def self.call(*args)
     new.call(*args)
@@ -8,8 +14,10 @@ class DevHelper
 
   # Core logic
   def call(*args, **kwargs)
-    if args.length.positive? && respond_to?(args[0])
-      public_send(args[0], *args.drop(1), **kwargs)
+    command = args[0]
+    method = COMMAND_TO_METHOD.fetch(command, command)
+    if args.length.positive? && respond_to?(method)
+      public_send(method, *args.drop(1), **kwargs)
     else
       compose(*args, **kwargs)
     end
@@ -65,8 +73,8 @@ class DevHelper
     run(*%w[api npm], *args, **kwargs)
   end
 
-  def console(*args, **kwargs)
-    run(*%w[api npm run console], *args, **kwargs)
+  def ts_node(*args, **kwargs)
+    run(*%w[api npm run ts-node], *args, **kwargs)
   end
 
   # -I enable quoted identifiers, e.g. "table"."column"
@@ -102,9 +110,11 @@ class DevHelper
   end
 
   def bash_completions
-    completions = public_methods(false).reject do |word|
+    completions = public_methods(false).reject { |word|
       %i[call].include?(word)
-    end
+    }.map { |word|
+      METHOD_TO_COMMAND.fetch(word, word)
+    }
     puts completions
   end
 
