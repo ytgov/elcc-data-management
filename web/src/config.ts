@@ -1,5 +1,4 @@
-// @ts-expect-error
-export const environment = process.env.NODE_ENV
+export const environment = import.meta.env.MODE
 
 // Generally we use window.location.origin for the redirect_uri but if
 // you may want to use a different URL for the redirect_uri. Make sure you
@@ -7,9 +6,7 @@ export const environment = process.env.NODE_ENV
 
 // export const AUTH_REDIRECT_URI = import.meta.env.VITE_AUTH_REDIRECT_URI;
 
-// @ts-expect-error
-const API_HOST_NAME = process.env.API_HOST_NAME || "localhost"
-export const API_BASE_URL = environment == "production" ? "" : `http://${API_HOST_NAME}:3000`
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ""
 
 export const applicationName = "Vue 3 Template"
 export const applicationIcon = "mdi-leaf"

@@ -1,6 +1,37 @@
-# Early Learning Childcare Centre
+# Early Learning Childcare Centre - Data Management Application
 
-## Data Management Application
+## Production - building locally
+
+1. Create an `api/.env.production` file from the `api/.env.sample` file and fill with the appropriate mathcing the local development config with some minor changes.
+   ```bash
+   VUE_APP_FRONTEND_URL=http://localhost:8080
+   VUE_APP_AUTH_DOMAIN=some-url
+   VUE_APP_AUTH_CLIENTID=some-secret
+   VUE_APP_AUTH_AUDIENCE=testing
+
+   AUTH_REDIRECT=http://localhost:8080/dashboard
+   AUTH0_AUDIENCE=testing
+   AUTH0_DOMAIN=some-url
+
+   APPLICATION_NAME=ELCC Data Management
+   API_PORT=8080
+
+   NODE_ENV=production
+
+   DB_NAME=ELCC
+   DB_HOST=db
+   DB_USER=sa
+   DB_PASS=DevPwd99!
+   DB_PORT=1433
+   ```
+
+   > replace the `VUE_APP_AUTH_DOMAIN`, `VUE_APP_AUTH_CLIENTID`, and `AUTH0_DOMAIN` with appropriate values.
+
+6. Duplicate the `api/.env.production` to `.env` at the top level.
+
+7. Run `docker compose up --build` to build the application and boot it locally.
+
+8. Go to http://localhost:8080/ and sign in to the app.
 
 ## Development
 
@@ -84,6 +115,8 @@ All commands are just strings joined together so its easy to add new commmands. 
    > You only need the --build option if it is your first time building the app, or if you are modifying the the Docker files.
 
 3. The front-end is viewable at http://localhost:8080.
+
+> NOTE: make sure you delete the .env file before runing a development setup again as it is auto-loaded by docker compose.
 
 ### Editor Setup
 
