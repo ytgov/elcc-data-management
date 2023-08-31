@@ -2,7 +2,7 @@ import express, { type Request, type Response } from "express"
 import cors from "cors"
 import path from "path"
 import helmet from "helmet"
-import { API_PORT, VUE_APP_FRONTEND_URL, APPLICATION_NAME } from "./config"
+import { API_PORT, VUE_APP_FRONTEND_URL, APPLICATION_NAME } from "@/config"
 import {
   userRouter,
   centreRouter,
@@ -43,7 +43,7 @@ app.use(
     credentials: true,
   })
 )
-/* 
+/*
 app.get("/api/healthCheck", RequiresData, (req: Request, res: Response) => {
   // app.get("/api/healthCheck",  (req: Request, res: Response) => {
   doHealthCheck(req, res);
