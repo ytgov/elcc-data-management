@@ -1,5 +1,4 @@
-// @ts-expect-error
-export const environment = process.env.NODE_ENV
+export const environment = import.meta.env.MODE
 
 // Generally we use window.location.origin for the redirect_uri but if
 // you may want to use a different URL for the redirect_uri. Make sure you
