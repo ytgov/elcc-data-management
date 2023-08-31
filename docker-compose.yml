@@ -8,4 +8,4 @@ services:
     env_file:
       - .env
     ports:
-      - "${HOST_PORT:-8088}:3000"
+      - "${HOST_PORT:-3000}:3000"

@@ -1,3 +1,35 @@
+# Stage 1 - api build - requires development environment because typescript
+FROM node:18-alpine3.17 as api-build-stage
+
+ENV NODE_ENV=development
+
+WORKDIR /usr/src/api
+
+COPY api/package*.json ./
+COPY api/tsconfig*.json ./
+RUN npm install
+
+COPY api ./
+
+RUN npm run build
+
+# State 3 - web build - requires development environment because typescript
+FROM node:18-alpine3.17 as web-build-stage
+
+ENV NODE_ENV=development
+
+WORKDIR /usr/src/web
+
+COPY web/package*.json ./
+COPY web/tsconfig*.json ./
+COPY web/vite.config.js ./
+RUN npm install
+
+COPY web ./
+
+RUN npm run build
+
+# Stage 3 - production setup
 FROM node:18-alpine3.17
 
 RUN apk add --no-cache tzdata
@@ -7,30 +39,20 @@ RUN echo "America/Whitehorse" > /etc/timezone
 RUN apk del tzdata
 
 ENV NODE_ENV=production
+USER node
 
-RUN mkdir /home/node/web && chown -R node:node /home/node/web
-WORKDIR /home/node/web
-COPY --chown=node:node web/package*.json ./
-RUN npm install && npm cache clean --force --loglevel=error
-COPY --chown=node:node web ./
+WORKDIR /home/node/app
+RUN chown -R node:node /home/node/app
 
-RUN mkdir /home/node/app && chown -R node:node /home/node/app
+# TODO: find out why the db folder this necessary
 RUN mkdir /home/node/app/db && chown -R node:node /home/node/app/db
-WORKDIR /home/node/app
-COPY --chown=node:node api/package*.json ./
 
-USER node
+COPY --from=api-build-stage --chown=node:node /usr/src/api/package*.json ./
 RUN npm install && npm cache clean --force --loglevel=error
-COPY --chown=node:node api ./
 
-RUN npm run build
+COPY --from=api-build-stage --chown=node:node /usr/src/api/dist ./
+COPY --from=web-build-stage --chown=node:node /usr/src/web/dist ./src/web
 
-WORKDIR /home/node/web
-
-RUN npm run build
-
-WORKDIR /home/node/app
 EXPOSE 3000
-USER node
 
-CMD ["node", "./dist/index.js"]
+CMD ["node", "./src/index.js"]

@@ -1,6 +1,16 @@
-# Early Learning Childcare Centre
+# Early Learning Childcare Centre - Data Management Application
 
-## Data Management Application
+## Production - building locally
+
+1. Create an `api/.env.production` file from the `api/.env.sample` file and fill with the appropriate values.
+
+2. Set the `VUE_APP_FRONTEND_URL` to `http://localhost:3000` instead of `http://localhost:8080` in the development environment.
+
+3. Duplicate the `api/.env.production` to `.env` at the top level.
+
+4. Run `docker compose up --build` to build the application and boot it locally.
+
+5. Go to http://localhost:8080/ and sign in to the app.
 
 ## Development
 
