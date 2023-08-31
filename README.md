@@ -117,6 +117,8 @@ All commands are just strings joined together so its easy to add new commmands. 
 
 3. The front-end is viewable at http://localhost:8080.
 
+> NOTE: make sure you delete the .env file before runing a development setup again as it is auto-loaded by docker compose.
+
 ### Editor Setup
 
 Your text editor or IDE might require you to manually install the dependencies to get TypesScript autocompletion working. Hopefully, it "just works :tm:". If not you can install packages locally like so:
