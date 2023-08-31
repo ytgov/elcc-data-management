@@ -8,12 +8,17 @@ import {
 
 import sequelize from "@/db/db-client"
 
+export enum UserStatus {
+  ACTIVE = "Active",
+  INACTIVE = "Inactive",
+}
+
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare email: string
   declare sub: string
   declare firstName: string
   declare lastName: string
-  declare status: string
+  declare status: UserStatus
   declare isAdmin: CreationOptional<boolean>
   declare ynetId: string | null
   declare directoryId: string | null
