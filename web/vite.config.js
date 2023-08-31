@@ -16,7 +16,7 @@ export default defineConfig({
     }),
   ],
   build: {
-    outDir: "../app/dist/web",
+    outDir: "./dist",
   },
   define: { "process.env": {} },
   resolve: {
