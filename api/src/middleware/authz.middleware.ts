@@ -2,9 +2,9 @@ import { type NextFunction, type Request, type Response } from "express"
 import jwt from "express-jwt"
 import axios from "axios"
 import jwksRsa from "jwks-rsa"
-import { AUTH0_DOMAIN, AUTH0_AUDIENCE } from "../config"
-import { UserService } from "../services"
-import { UserStatus } from "../data/models"
+
+import { AUTH0_DOMAIN, AUTH0_AUDIENCE } from "@/config"
+import User, { UserStatus } from "@/models/user"
 
 export const checkJwt = jwt({
   secret: jwksRsa.expressJwtSecret({
@@ -20,14 +20,12 @@ export const checkJwt = jwt({
 })
 
 export async function loadUser(req: Request, res: Response, next: NextFunction) {
-  const db = new UserService()
-
   let sub = req.user.sub
   const token = req.headers.authorization || ""
-  const u = await db.getBySub(sub)
+  const user = await User.findOne({ where: { sub } })
 
-  if (u != null) {
-    req.user = { ...req.user, ...u }
+  if (user != null) {
+    req.user = new User({ ...req.user, ...user })
     next()
     return
   }
@@ -37,27 +35,27 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
     .then(async (resp) => {
       if (resp.data && resp.data.sub) {
         let email = resp.data.email
-        const first_name = resp.data.given_name || "UNKNOWN"
-        const last_name = resp.data.family_name || "UNKNOWN"
+        const firstName = resp.data.given_name || "UNKNOWN"
+        const lastName = resp.data.family_name || "UNKNOWN"
         sub = resp.data.sub
 
-        let u = await db.getBySub(sub)
+        let user = await User.findOne({ where: { sub } })
 
-        if (u != null) {
-          req.user = { ...req.user, ...u }
+        if (user != null) {
+          req.user = new User({ ...req.user, ...user })
         } else {
-          if (!email) email = `${first_name}.${last_name}@yukon-no-email.ca`
+          if (!email) email = `${firstName}.${lastName}@yukon-no-email.ca`
 
-          const eu = await db.getByEmail(email)
+          const existingUser = await User.findByPk(email)
 
-          if (eu != null) {
-            eu.sub = sub
-            await db.update(email, eu)
+          if (existingUser != null) {
+            existingUser.sub = sub
+            await User.update(existingUser, { where: { email } })
 
-            req.user = { ...req.user, ...eu }
+            req.user = new User({ ...req.user, ...existingUser })
           } else {
-            u = await db.create({ email, sub, status: UserStatus.INACTIVE, first_name, last_name })
-            req.user = { ...req.user, ...u }
+            user = await User.create({ email, sub, status: UserStatus.INACTIVE, firstName, lastName })
+            req.user = new User({ ...req.user, ...user })
           }
         }
       } else {
