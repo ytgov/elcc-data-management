@@ -4,7 +4,7 @@ import axios from "axios"
 import jwksRsa from "jwks-rsa"
 
 import { AUTH0_DOMAIN, AUTH0_AUDIENCE } from "@/config"
-import User, { UserStatus } from "@/models/user"
+import { User, UserStatus } from "@/models"
 
 export const checkJwt = jwt({
   secret: jwksRsa.expressJwtSecret({
@@ -22,7 +22,7 @@ export const checkJwt = jwt({
 export async function loadUser(req: Request, res: Response, next: NextFunction) {
   let sub = req.user.sub
   const token = req.headers.authorization || ""
-  const user = await User.findOne({ where: { sub } })
+  const user = await User.findOne({ where: { sub }, include: ['roles'] })
 
   if (user != null) {
     req.user = new User({ ...req.user, ...user })
@@ -39,14 +39,14 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
         const lastName = resp.data.family_name || "UNKNOWN"
         sub = resp.data.sub
 
-        let user = await User.findOne({ where: { sub } })
+        let user = await User.findOne({ where: { sub }, include: ['roles'] })
 
         if (user != null) {
           req.user = new User({ ...req.user, ...user })
         } else {
           if (!email) email = `${firstName}.${lastName}@yukon-no-email.ca`
 
-          const existingUser = await User.findByPk(email)
+          const existingUser = await User.findByPk(email, { include: ['roles'] })
 
           if (existingUser != null) {
             existingUser.sub = sub
