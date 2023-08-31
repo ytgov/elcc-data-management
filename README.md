@@ -5,7 +5,6 @@
 1. Create an `api/.env.production` file from the `api/.env.sample` file and fill with the appropriate mathcing the local development config with some minor changes.
    ```bash
    VUE_APP_FRONTEND_URL=http://localhost:8080
-   API_BASE_URL=http://localhost:8080
    VUE_APP_AUTH_DOMAIN=some-url
    VUE_APP_AUTH_CLIENTID=some-secret
    VUE_APP_AUTH_AUDIENCE=testing

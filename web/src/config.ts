@@ -7,8 +7,7 @@ export const environment = process.env.NODE_ENV
 
 // export const AUTH_REDIRECT_URI = import.meta.env.VITE_AUTH_REDIRECT_URI;
 
-// @ts-expect-error
-export const API_BASE_URL = process.env.API_BASE_URL || ""
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ""
 
 export const applicationName = "Vue 3 Template"
 export const applicationIcon = "mdi-leaf"
