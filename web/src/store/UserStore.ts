@@ -17,12 +17,12 @@ async function waitSomeSeconds(seconds: number) {
 export const useUserStore = defineStore("user", {
   state: () => ({
     user: {
-      display_name: "",
-      first_name: "",
-      last_name: "",
+      displayName: "",
+      firstName: "",
+      lastName: "",
       email: "",
       roles: [""],
-      ynet_id: "",
+      ynetId: "",
     },
   }),
   getters: {

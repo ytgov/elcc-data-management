@@ -24,7 +24,8 @@
     "moment": "^2.29.4",
     "pg": "^8.9.0",
     "tedious": "^16.4.0",
-    "tsc-alias": "^1.8.7"
+    "tsc-alias": "^1.8.7",
+    "sequelize": "^6.32.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",

@@ -1,30 +1,29 @@
 import express, { type Request, type Response } from "express"
-import { checkJwt, loadUser } from "../middleware/authz.middleware"
 import moment from "moment"
-import { cloneDeep, sortBy, uniq } from "lodash"
-import { RequireAdmin } from "../middleware"
-import { type FundingLineValue } from "../data/models"
+import { cloneDeep, isNil, sortBy, uniq } from "lodash"
+
+import { checkJwt, loadUser } from "@/middleware/authz.middleware"
+import { RequireAdmin } from "@/middleware"
+import { Centre } from "@/models"
+import { type FundingLineValue } from "@/data/models"
 import {
-  CentreService,
+  CentreServices,
   CentreFundingService,
-  LogService,
   SubmissionLineValueService,
   SubmissionLineService,
-} from "../services"
+} from "@/services"
 
 export const centreRouter = express.Router()
 centreRouter.use(checkJwt)
 centreRouter.use(loadUser)
 
-const db = new CentreService()
 const submissionDb = new CentreFundingService()
 const submissionLineDb = new SubmissionLineService()
 const submissionValueDb = new SubmissionLineValueService()
-const logService = new LogService()
 
 centreRouter.get("/", async (req: Request, res: Response) => {
   try {
-    const centres = await db.getAll()
+    const centres = await Centre.findAll()
     res.json({ data: centres })
   } catch (err) {
     res.status(500).json({ message: err })
@@ -33,14 +32,8 @@ centreRouter.get("/", async (req: Request, res: Response) => {
 
 centreRouter.post("/", RequireAdmin, async (req: Request, res: Response) => {
   try {
-    const centre = await db.create(req.body)
-    await logService.create({
-      user_email: req.user.email,
-      operation: `Create record ${centre.id}`,
-      table_name: "Centre",
-      data: JSON.stringify(centre),
-    })
-    res.json({ data: centre })
+    const centre = await CentreServices.create(req.body, { currentUser: req.user })
+    return res.json({ data: centre })
   } catch (err) {
     res.status(500).json({ message: err })
   }
@@ -48,13 +41,13 @@ centreRouter.post("/", RequireAdmin, async (req: Request, res: Response) => {
 
 centreRouter.get("/:id", async (req: Request, res: Response) => {
   const { id } = req.params
-  const centre = await db.get(parseInt(id))
+  const centre = await Centre.findByPk(id)
   res.json(centre)
 })
 
 centreRouter.get("/:id/enrollment", async (req: Request, res: Response) => {
   const { id } = req.params
-  const centre = await db.get(parseInt(id))
+  const centre = await Centre.findByPk(id)
   await new Promise((resolve) => setTimeout(resolve, 5000))
   res.json({ data: [2, 8, 14, 5, 2, 4, 2] })
 })
@@ -100,7 +93,7 @@ centreRouter.get("/:id/worksheets", async (req: Request, res: Response) => {
 
 centreRouter.post("/:id/worksheets", async (req: Request, res: Response) => {
   const { id } = req.params
-  const centre = await db.get(parseInt(id))
+  const centre = await Centre.findByPk(id)
 
   req.body.centre_id = id
   req.body.start_date = new Date()
@@ -119,7 +112,7 @@ centreRouter.put("/:id/worksheet/:worksheetId", async (req: Request, res: Respon
   const { id, worksheetId } = req.params
   const { sections } = req.body
 
-  const centre = await db.get(parseInt(id))
+  const centre = await Centre.findByPk(id)
   const sheet = await submissionValueDb.getJson(parseInt(worksheetId))
 
   if (centre && sheet != null) {
@@ -183,17 +176,28 @@ centreRouter.post("/:id/fiscal-year", async (req: Request, res: Response) => {
 
 centreRouter.put("/:id", RequireAdmin, async (req: Request, res: Response) => {
   const { id } = req.params
+  const centre = await Centre.findByPk(id)
+  if (isNil(centre)) {
+    return res.status(404).json({ message: `Could not find Centre with id=${id}` })
+  }
+
   try {
-    const centre = await db.update(parseInt(id), req.body)
-
-    await logService.create({
-      user_email: req.user.email,
-      operation: `Update record ${centre.id}`,
-      table_name: "Centre",
-      data: JSON.stringify(centre),
-    })
-
-    res.json({ data: centre })
+    // TODO: remove this, and force the front-end to send the correct data.
+    // If invalid data is sent to the back-end the API should return a 422 status code.
+    const cleanAttributes = {
+      name: req.body.name,
+      license: req.body.license,
+      community: req.body.community,
+      status: req.body.status,
+      hotMeal: req.body.hot_meal,
+      licensedFor: req.body.licensed_for,
+      lastSubmission: req.body.last_submission,
+    }
+    return CentreServices.update(centre, cleanAttributes, { currentUser: req.user }).then(
+      (updatedCentre) => {
+        return res.json({ data: updatedCentre })
+      }
+    )
   } catch (err) {
     res.status(500).json({ message: err })
   }
@@ -202,8 +206,8 @@ centreRouter.put("/:id", RequireAdmin, async (req: Request, res: Response) => {
 centreRouter.delete("/:id", RequireAdmin, async (req: Request, res: Response) => {
   const { id } = req.params
   try {
-    const centre = await db.delete(parseInt(id))
-    res.json({ data: centre })
+    const deletedCount = await Centre.destroy({ where: { id } })
+    res.json({ data: deletedCount })
   } catch (err) {
     res.status(500).json({ message: err })
   }

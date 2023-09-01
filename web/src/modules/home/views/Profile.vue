@@ -4,7 +4,7 @@
     <v-row>
       <v-col cols="6">
         <v-text-field
-          v-model="user.first_name"
+          v-model="user.firstName"
           label="First name"
           readonly
           hide-details
@@ -15,7 +15,7 @@
       </v-col>
       <v-col cols="6">
         <v-text-field
-          v-model="user.last_name"
+          v-model="user.lastName"
           label="Last name"
           readonly
           hide-details

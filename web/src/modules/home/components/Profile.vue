@@ -6,7 +6,7 @@
     <v-row>
       <v-col cols="6">
         <v-text-field
-          v-model="user.first_name"
+          v-model="user.firstName"
           dense
           outlined
           label="First name"
@@ -17,7 +17,7 @@
       </v-col>
       <v-col cols="6">
         <v-text-field
-          v-model="user.last_name"
+          v-model="user.lastName"
           dense
           outlined
           label="Last name"

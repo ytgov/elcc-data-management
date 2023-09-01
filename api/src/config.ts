@@ -26,13 +26,19 @@ export const AUTH_REDIRECT = process.env.AUTH_REDIRECT || process.env.FRONTEND_U
 
 export const APPLICATION_NAME = process.env.APPLICATION_NAME || ""
 
+export const DB_HOST = process.env.DB_HOST
+export const DB_USER = process.env.DB_USER
+export const DB_PASS = process.env.DB_PASS
+export const DB_NAME = process.env.DB_NAME
+export const DB_PORT = parseInt(process.env.DB_PORT || "1433")
+
 export const DB_CONFIG: Knex.Config<any> = {
   client: "mssql",
   connection: {
-    server: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
-    port: parseInt(process.env.DB_PORT || "1433"),
+    server: DB_HOST,
+    user: DB_USER,
+    password: DB_PASS,
+    database: DB_NAME,
+    port: DB_PORT,
   },
 }

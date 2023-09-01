@@ -55,7 +55,7 @@
     >
       <template #item.permissions="{ item }">
         <v-chip
-          v-if="item.raw.is_admin"
+          v-if="item.raw.isAdmin"
           color="yg_moss"
           >Admin</v-chip
         >
@@ -75,7 +75,7 @@ export default {
   components: { UserEditor },
   data: () => ({
     headers: [
-      { title: "Name", key: "display_name" },
+      { title: "Name", key: "displayName" },
       { title: "Email", key: "email" },
       { title: "Status", key: "status" },
       { title: "Permisions", key: "permissions" },

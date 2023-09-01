@@ -31,11 +31,11 @@ const actions = {
 }
 const mutations = {
   setProfile(state: any, profile: any) {
-    state.firstName = profile.first_name
-    state.lastName = profile.last_name
+    state.firstName = profile.firstName
+    state.lastName = profile.lastName
     state.email = profile.email
     state.id = profile.id
-    state.username = profile.display_name
+    state.username = profile.displayName
     state.teams = profile.teams
   },
 }
