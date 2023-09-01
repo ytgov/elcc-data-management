@@ -52,7 +52,7 @@ FundingPeriod.init(
   },
   {
     sequelize,
-    tableName: "funding_period",
+    tableName: "funding_period", // TODO: remove this once table name is pluralized
     underscored: true,
     timestamps: false,
   }
