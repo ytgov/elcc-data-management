@@ -1,12 +1,13 @@
 import express, { Request, Response } from "express"
-import { CentreFundingService, CentreService, LogService } from "../services"
-import { RequireAdmin } from "../middleware"
+
+import { CentreFundingService, LogService } from "@/services"
+import { RequireAdmin } from "@/middleware"
+import { Centre } from "@/models"
 
 export const centreFundingRouter = express.Router()
 
 const db = new CentreFundingService()
 
-const centreDB = new CentreService()
 const logService = new LogService()
 /* 
 centreFundingRouter.get("/", async (req: Request, res: Response) => {
@@ -20,8 +21,8 @@ centreFundingRouter.get("/", async (req: Request, res: Response) => {
 
 centreFundingRouter.post("/", RequireAdmin, async (req: Request, res: Response) => {
   try {
-    const centreSubmission = await db.create(req.body);
-    await centreDB.updateDate(req.body.centre_id, req.body.date);
+    const centreSubmission = await db.create(req.body)
+    await Centre.update({ lastSubmission: req.body.date }, { where: { id: req.body.centre_id } })
 
     await logService.create({
       user_email: req.user.email,
