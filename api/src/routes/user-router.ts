@@ -1,5 +1,5 @@
 import { isNil } from "lodash"
-import express, { Request, Response } from "express"
+import express, { type Request, type Response } from "express"
 
 import { checkJwt, loadUser } from "@/middleware/authz.middleware"
 import { param } from "express-validator"
