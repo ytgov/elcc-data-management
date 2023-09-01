@@ -50,6 +50,7 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
 
           if (existingUser != null) {
             existingUser.sub = sub
+            // TODO: will need to switch this to UserServices.update if roles are present
             await User.update(existingUser, { where: { email } })
 
             req.user = new User({ ...req.user, ...existingUser })

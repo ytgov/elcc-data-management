@@ -1,28 +1,38 @@
-import express, { type Request, type Response } from "express"
-import { UserService } from "../services"
-import { checkJwt, loadUser } from "../middleware/authz.middleware"
+import { isNil } from "lodash"
+import express, { Request, Response } from "express"
+
+import { checkJwt, loadUser } from "@/middleware/authz.middleware"
 import { param } from "express-validator"
-import { ReturnValidationErrors } from "../middleware"
+import { ReturnValidationErrors } from "@/middleware"
+
+import { User } from "@/models"
+import { UserServices } from "@/services/user-services"
 
 export const userRouter = express.Router()
 
 userRouter.use(checkJwt)
 userRouter.use(loadUser)
 
-const db = new UserService()
-
 userRouter.get("/me", async (req: Request, res: Response) => {
   return res.json({ data: req.user })
 })
 
 userRouter.get("/", async (req: Request, res: Response) => {
-  const users = await db.getAll()
+  const users = await User.findAll()
 
-  for (const user of users) {
-    user.display_name = `${user.first_name} ${user.last_name}`
-  }
+  const serializedUsers = users.map((user) => ({
+    email: user.email,
+    sub: user.sub,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    status: user.status,
+    isAdmin: user.isAdmin,
+    ynetId: user.ynetId,
+    directoryId: user.directoryId,
+    createDate: user.createDate,
+  }))
 
-  return res.json({ data: users })
+  return res.json({ data: serializedUsers })
 })
 
 userRouter.put(
@@ -31,22 +41,17 @@ userRouter.put(
   ReturnValidationErrors,
   async (req: Request, res: Response) => {
     const { email } = req.params
-    const { roles, status, is_admin } = req.body
+    const { roles, status, isAdmin } = req.body
 
-    const existing = await db.getByEmail(email)
+    const user = await User.findByPk(email, { include: ["roles"] })
 
-    if (existing != null) {
-      existing.status = status
-      existing.roles = roles
-      existing.is_admin = is_admin
+    if (isNil(user)) return res.status(404).send()
 
-      await db.update(email, existing)
-
+    return UserServices.update(user, { roles, status, isAdmin }).then((updatedUser) => {
       return res.json({
+        user: updatedUser,
         messages: [{ variant: "success", text: "User saved" }],
       })
-    }
-
-    res.status(404).send()
+    })
   }
 )

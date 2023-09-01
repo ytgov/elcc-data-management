@@ -15,6 +15,14 @@ import sequelize from "@/db/db-client"
 
 import User from "@/models/user"
 
+export enum RoleTypes {
+  EDITOR = "Editor",
+  USER = "User",
+  ADMIN = "Admin",
+  SUPER_ADMIN = "Super Admin",
+  SYSTEM_ADMINISTRATOR = "System Administrator",
+}
+
 class UserRole extends Model<InferAttributes<UserRole>, InferCreationAttributes<UserRole>> {
   declare email: ForeignKey<User["email"]>
   declare role: string
@@ -48,6 +56,9 @@ UserRole.init(
     role: {
       type: DataTypes.STRING(255),
       allowNull: false,
+      validate: {
+        isIn: [Object.values(RoleTypes)],
+      }
     },
   },
   {
