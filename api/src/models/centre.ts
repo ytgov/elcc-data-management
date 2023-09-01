@@ -1,12 +1,29 @@
 import {
+  Association,
   CreationOptional,
   DataTypes,
+  HasManyAddAssociationMixin,
+  HasManyAddAssociationsMixin,
+  HasManyCountAssociationsMixin,
+  HasManyCreateAssociationMixin,
+  HasManyGetAssociationsMixin,
+  HasManyHasAssociationMixin,
+  HasManyHasAssociationsMixin,
+  HasManyRemoveAssociationMixin,
+  HasManyRemoveAssociationsMixin,
+  HasManySetAssociationsMixin,
   InferAttributes,
   InferCreationAttributes,
   Model,
+  NonAttribute,
 } from "sequelize"
 
 import sequelize from "@/db/db-client"
+import CentreFundingPeriod from "@/models/centre-funding-period"
+
+export enum CentreStatus {
+  UP_TO_DATE = "Up to date",
+}
 
 export class Centre extends Model<InferAttributes<Centre>, InferCreationAttributes<Centre>> {
   declare id: number
@@ -15,9 +32,37 @@ export class Centre extends Model<InferAttributes<Centre>, InferCreationAttribut
   declare community: string
   declare status: string
   declare hotMeal: boolean | null
-  declare licensedFor: number | null
+  declare licensedFor: number | null // licensed for xx number of children
   declare lastSubmission: Date | null
   declare createDate: CreationOptional<Date>
+
+  // https://sequelize.org/docs/v6/other-topics/typescript/#usage
+  // https://sequelize.org/docs/v6/core-concepts/assocs/#foohasmanybar
+  // https://sequelize.org/api/v7/types/_sequelize_core.index.hasmanyaddassociationmixin
+  declare getFundingPeriods: HasManyGetAssociationsMixin<CentreFundingPeriod>
+  declare setFundingPeriods: HasManySetAssociationsMixin<CentreFundingPeriod, CentreFundingPeriod["centreId"]>
+  declare hasFundingPeriod: HasManyHasAssociationMixin<CentreFundingPeriod, CentreFundingPeriod["centreId"]>
+  declare hasFundingPeriods: HasManyHasAssociationsMixin<CentreFundingPeriod, CentreFundingPeriod["centreId"]>
+  declare addFundingPeriod: HasManyAddAssociationMixin<CentreFundingPeriod, CentreFundingPeriod["centreId"]>
+  declare addFundingPeriods: HasManyAddAssociationsMixin<CentreFundingPeriod, CentreFundingPeriod["centreId"]>
+  declare removeFundingPeriod: HasManyRemoveAssociationMixin<CentreFundingPeriod, CentreFundingPeriod["centreId"]>
+  declare removeFundingPeriods: HasManyRemoveAssociationsMixin<CentreFundingPeriod, CentreFundingPeriod["centreId"]>
+  declare countFundingPeriods: HasManyCountAssociationsMixin
+  declare createFundingPeriod: HasManyCreateAssociationMixin<CentreFundingPeriod>
+
+  declare fundingPeriods?: NonAttribute<CentreFundingPeriod[]> // where center funding periods assocation gets loaded into
+
+  declare static associations: {
+    fundingPeriods: Association<Centre, CentreFundingPeriod>
+  }
+
+  static establishasAssociations() {
+    this.hasMany(CentreFundingPeriod, {
+      sourceKey: "id",
+      foreignKey: "centreId",
+      as: "fundingPeriods",
+    })
+  }
 }
 
 Centre.init(
@@ -42,6 +87,9 @@ Centre.init(
     status: {
       type: DataTypes.STRING(255),
       allowNull: false,
+      validate: {
+        isIn: [Object.values(CentreStatus)],
+      },
     },
     hotMeal: {
       type: DataTypes.BOOLEAN,
