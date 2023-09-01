@@ -1,18 +1,19 @@
 import express, { type Request, type Response } from "express"
 import { param } from "express-validator"
-import { checkJwt, loadUser } from "../middleware/authz.middleware"
-import { ReturnValidationErrors } from "../middleware"
-import { FundingPeriodService } from "../services"
+import { isNil } from "lodash"
+
+import { checkJwt, loadUser } from "@/middleware/authz.middleware"
+import { ReturnValidationErrors } from "@/middleware"
+import { FundingPeriod } from "@/models"
 
 export const fundingPeriodRouter = express.Router()
 
 fundingPeriodRouter.use(checkJwt)
 fundingPeriodRouter.use(loadUser)
 
-const db = new FundingPeriodService()
-
 fundingPeriodRouter.get("/", async (req: Request, res: Response) => {
-  res.json({ data: await db.getAll() })
+  const fundingPeriods = await FundingPeriod.findAll()
+  res.json({ data: fundingPeriods })
 })
 
 fundingPeriodRouter.put(
@@ -21,16 +22,30 @@ fundingPeriodRouter.put(
   ReturnValidationErrors,
   async (req: Request, res: Response) => {
     const { id } = req.params
-    await db.update(parseInt(id), req.body)
+    const fundingPeriod = await FundingPeriod.findByPk(id)
+    if (isNil(fundingPeriod)) {
+      return res.status(404).json({ message: "Funding period not found" })
+    }
 
-    res.json({ data: req.body })
+    return fundingPeriod
+      .update(req.body)
+      .then((updatedFundingPeriod) => {
+        return res.json({ data: updatedFundingPeriod })
+      })
+      .catch((error) => {
+        res.status(422).json({ message: error.message })
+      })
   }
 )
 
 fundingPeriodRouter.post("/", async (req: Request, res: Response) => {
-  await db.create(req.body)
-
-  res.json({ data: req.body })
+  return FundingPeriod.create(req.body)
+    .then((fundingPeriod) => {
+      res.json({ data: fundingPeriod })
+    })
+    .catch((error) => {
+      res.status(422).json({ message: error.message })
+    })
 })
 
 fundingPeriodRouter.delete("/:id", async (req: Request, res: Response) => {
