@@ -8,7 +8,7 @@ import {
 
 import sequelize from "@/db/db-client"
 
-class Centre extends Model<InferAttributes<Centre>, InferCreationAttributes<Centre>> {
+export class Centre extends Model<InferAttributes<Centre>, InferCreationAttributes<Centre>> {
   declare id: number
   declare name: string
   declare license: string | null

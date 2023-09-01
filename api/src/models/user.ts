@@ -27,7 +27,7 @@ export enum UserStatus {
   INACTIVE = "Inactive",
 }
 
-class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
+export class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare email: string
   declare sub: string
   declare firstName: string

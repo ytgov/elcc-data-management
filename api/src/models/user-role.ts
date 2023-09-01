@@ -23,7 +23,7 @@ export enum RoleTypes {
   SYSTEM_ADMINISTRATOR = "System Administrator",
 }
 
-class UserRole extends Model<InferAttributes<UserRole>, InferCreationAttributes<UserRole>> {
+export class UserRole extends Model<InferAttributes<UserRole>, InferCreationAttributes<UserRole>> {
   declare email: ForeignKey<User["email"]>
   declare role: string
 
@@ -70,6 +70,7 @@ UserRole.init(
 
 // supress creation of primary key id column
 // currently this table does not have a primary key column
+// TODO: add primary key column
 UserRole.removeAttribute("id")
 
 export default UserRole
