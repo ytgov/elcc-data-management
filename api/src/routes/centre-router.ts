@@ -6,18 +6,12 @@ import { checkJwt, loadUser } from "@/middleware/authz.middleware"
 import { RequireAdmin } from "@/middleware"
 import { Centre } from "@/models"
 import { type FundingLineValue } from "@/data/models"
-import {
-  CentreServices,
-  CentreFundingService,
-  SubmissionLineValueService,
-  SubmissionLineService,
-} from "@/services"
+import { CentreServices, SubmissionLineValueService, SubmissionLineService } from "@/services"
 
 export const centreRouter = express.Router()
 centreRouter.use(checkJwt)
 centreRouter.use(loadUser)
 
-const submissionDb = new CentreFundingService()
 const submissionLineDb = new SubmissionLineService()
 const submissionValueDb = new SubmissionLineValueService()
 
@@ -102,7 +96,9 @@ centreRouter.post("/:id/worksheets", async (req: Request, res: Response) => {
   req.body.submitted_by = req.user.email
   req.body.submitted_date = new Date()
 
-  await submissionDb.create(req.body)
+  // await SomeModel.create(req.body)
+  // TODO: model matching spec does not exist, create at some point.
+  throw new Error("Not implemented")
 
   const worksheets = await submissionValueDb.getAll({ centre_id: id })
   res.json({ data: worksheets })

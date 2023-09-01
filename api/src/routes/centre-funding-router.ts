@@ -1,15 +1,13 @@
 import express, { Request, Response } from "express"
 
-import { CentreFundingService, LogService } from "@/services"
+import { LogService } from "@/services"
 import { RequireAdmin } from "@/middleware"
 import { Centre } from "@/models"
 
 export const centreFundingRouter = express.Router()
 
-const db = new CentreFundingService()
-
 const logService = new LogService()
-/* 
+/*
 centreFundingRouter.get("/", async (req: Request, res: Response) => {
   try {
     const centreSubmissions = await db.getAll();
