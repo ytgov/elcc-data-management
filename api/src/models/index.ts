@@ -8,6 +8,7 @@ UserRole.establishasAssociations()
 
 export * from "@/models/centre-funding-period"
 export * from "@/models/centre"
+export * from "@/models/funding-period"
 export * from "@/models/user-role"
 export * from "@/models/user"
 
