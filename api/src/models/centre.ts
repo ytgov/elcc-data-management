@@ -8,6 +8,10 @@ import {
 
 import sequelize from "@/db/db-client"
 
+export enum CentreStatus {
+  UP_TO_DATE = "Up to date",
+}
+
 export class Centre extends Model<InferAttributes<Centre>, InferCreationAttributes<Centre>> {
   declare id: number
   declare name: string
@@ -15,7 +19,7 @@ export class Centre extends Model<InferAttributes<Centre>, InferCreationAttribut
   declare community: string
   declare status: string
   declare hotMeal: boolean | null
-  declare licensedFor: number | null
+  declare licensedFor: number | null // licensed for xx number of children
   declare lastSubmission: Date | null
   declare createDate: CreationOptional<Date>
 }
@@ -42,6 +46,9 @@ Centre.init(
     status: {
       type: DataTypes.STRING(255),
       allowNull: false,
+      validate: {
+        isIn: [Object.values(CentreStatus)],
+      },
     },
     hotMeal: {
       type: DataTypes.BOOLEAN,
