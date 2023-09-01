@@ -204,8 +204,8 @@ centreRouter.put("/:id", RequireAdmin, async (req: Request, res: Response) => {
 centreRouter.delete("/:id", RequireAdmin, async (req: Request, res: Response) => {
   const { id } = req.params
   try {
-    const centre = await db.delete(parseInt(id))
-    res.json({ data: centre })
+    const deletedCount = await Centre.destroy({ where: { id } })
+    res.json({ data: deletedCount })
   } catch (err) {
     res.status(500).json({ message: err })
   }
