@@ -73,9 +73,9 @@ export const useUserAdminStore = defineStore("userAdmin", {
 
 export interface AppUser {
   email: string
-  first_name: string
-  last_name: string
-  display_name: string
-  is_admin: boolean
+  firstName: string
+  lastName: string
+  displayName: string
+  isAdmin: boolean
   status: string
 }

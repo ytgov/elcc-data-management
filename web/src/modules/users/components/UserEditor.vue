@@ -25,7 +25,7 @@
             md="6"
           >
             <v-text-field
-              v-model="selectedUser.display_name"
+              v-model="selectedUser.displayName"
               label="Name"
               readonly
               variant="outlined"
@@ -49,7 +49,7 @@
             ></v-select>
 
             <v-checkbox
-              v-model="selectedUser.is_admin"
+              v-model="selectedUser.isAdmin"
               label="System Admin"
               variant="outlined"
               density="comfortable"
