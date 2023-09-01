@@ -4,7 +4,9 @@ import db from "@/db/db-client"
 
 import { User, UserRole } from "@/models"
 
-export class UserServices {
+import BaseService from "@/services/base-service"
+
+export class UserServices extends BaseService {
   static async update(
     user: User,
     newAttributes: { roles?: string[] } & Partial<User>
@@ -26,3 +28,5 @@ export class UserServices {
     })
   }
 }
+
+export default UserServices
