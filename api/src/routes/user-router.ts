@@ -7,6 +7,7 @@ import { ReturnValidationErrors } from "@/middleware"
 
 import { User } from "@/models"
 import { UserServices } from "@/services/user-services"
+import UserSerializer from "@/serializers/user-serializer"
 
 export const userRouter = express.Router()
 
@@ -20,17 +21,7 @@ userRouter.get("/me", async (req: Request, res: Response) => {
 userRouter.get("/", async (req: Request, res: Response) => {
   const users = await User.findAll()
 
-  const serializedUsers = users.map((user) => ({
-    email: user.email,
-    sub: user.sub,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    status: user.status,
-    isAdmin: user.isAdmin,
-    ynetId: user.ynetId,
-    directoryId: user.directoryId,
-    createDate: user.createDate,
-  }))
+  const serializedUsers = UserSerializer.serialize(users, { view: "default" })
 
   return res.json({ data: serializedUsers })
 })
