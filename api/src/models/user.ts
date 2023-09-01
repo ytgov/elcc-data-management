@@ -71,8 +71,9 @@ User.init(
   {
     email: {
       type: DataTypes.STRING(200),
-      allowNull: false,
       primaryKey: true,
+      autoIncrement: false,
+      allowNull: false,
     },
     sub: {
       type: DataTypes.STRING(200),

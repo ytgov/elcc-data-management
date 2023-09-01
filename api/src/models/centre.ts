@@ -26,7 +26,7 @@ export enum CentreStatus {
 }
 
 export class Centre extends Model<InferAttributes<Centre>, InferCreationAttributes<Centre>> {
-  declare id: number
+  declare id: CreationOptional<number>
   declare name: string
   declare license: string | null
   declare community: string
@@ -71,6 +71,7 @@ Centre.init(
       type: DataTypes.INTEGER,
       primaryKey: true,
       allowNull: false,
+      autoIncrement: true,
     },
     name: {
       type: DataTypes.STRING(200),

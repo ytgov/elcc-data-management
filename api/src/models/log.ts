@@ -1,14 +1,20 @@
-import { DataTypes, InferAttributes, InferCreationAttributes, Model } from "sequelize"
+import {
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from "sequelize"
 
 import sequelize from "@/db/db-client"
 
 export class Log extends Model<InferAttributes<Log>, InferCreationAttributes<Log>> {
-  public declare id: number
+  public declare id: CreationOptional<number>
   public declare tableName: string
   public declare operation: string
   public declare userEmail: string
   public declare data: string
-  public declare date: Date
+  public declare date: CreationOptional<Date>
 }
 
 Log.init(

@@ -1,4 +1,4 @@
-import { DataTypes, InferAttributes, InferCreationAttributes, Model } from "sequelize"
+import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from "sequelize"
 
 import sequelize from "@/db/db-client"
 
@@ -6,7 +6,7 @@ export class FundingPeriod extends Model<
   InferAttributes<FundingPeriod>,
   InferCreationAttributes<FundingPeriod>
 > {
-  declare id: number
+  declare id: CreationOptional<number>
   declare fiscalYear: string
   declare fromDate: Date
   declare toDate: Date
@@ -19,9 +19,9 @@ FundingPeriod.init(
   {
     id: {
       type: DataTypes.INTEGER,
-      autoIncrement: true,
       primaryKey: true,
       allowNull: false,
+      autoIncrement: true,
     },
     fiscalYear: {
       type: DataTypes.STRING(10),
