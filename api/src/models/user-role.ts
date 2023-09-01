@@ -52,6 +52,10 @@ UserRole.init(
     email: {
       type: DataTypes.STRING(200),
       allowNull: false,
+      references: {
+        model: User,
+        key: "email",
+      },
     },
     role: {
       type: DataTypes.STRING(255),
