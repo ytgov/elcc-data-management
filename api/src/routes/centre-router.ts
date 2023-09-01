@@ -1,16 +1,18 @@
 import express, { type Request, type Response } from "express"
-import { checkJwt, loadUser } from "../middleware/authz.middleware"
 import moment from "moment"
 import { cloneDeep, sortBy, uniq } from "lodash"
-import { RequireAdmin } from "../middleware"
-import { type FundingLineValue } from "../data/models"
+
+import { checkJwt, loadUser } from "@/middleware/authz.middleware"
+import { RequireAdmin } from "@/middleware"
+import { Centre } from "@/models"
+import { type FundingLineValue } from "@/data/models"
 import {
   CentreService,
   CentreFundingService,
   LogService,
   SubmissionLineValueService,
   SubmissionLineService,
-} from "../services"
+} from "@/services"
 
 export const centreRouter = express.Router()
 centreRouter.use(checkJwt)
@@ -24,7 +26,7 @@ const logService = new LogService()
 
 centreRouter.get("/", async (req: Request, res: Response) => {
   try {
-    const centres = await db.getAll()
+    const centres = await Centre.findAll()
     res.json({ data: centres })
   } catch (err) {
     res.status(500).json({ message: err })
@@ -33,7 +35,7 @@ centreRouter.get("/", async (req: Request, res: Response) => {
 
 centreRouter.post("/", RequireAdmin, async (req: Request, res: Response) => {
   try {
-    const centre = await db.create(req.body)
+    const centre = await Centre.create(req.body)
     await logService.create({
       user_email: req.user.email,
       operation: `Create record ${centre.id}`,
@@ -48,13 +50,13 @@ centreRouter.post("/", RequireAdmin, async (req: Request, res: Response) => {
 
 centreRouter.get("/:id", async (req: Request, res: Response) => {
   const { id } = req.params
-  const centre = await db.get(parseInt(id))
+  const centre = await Centre.findByPk(id)
   res.json(centre)
 })
 
 centreRouter.get("/:id/enrollment", async (req: Request, res: Response) => {
   const { id } = req.params
-  const centre = await db.get(parseInt(id))
+  const centre = await Centre.findByPk(id)
   await new Promise((resolve) => setTimeout(resolve, 5000))
   res.json({ data: [2, 8, 14, 5, 2, 4, 2] })
 })
@@ -100,7 +102,7 @@ centreRouter.get("/:id/worksheets", async (req: Request, res: Response) => {
 
 centreRouter.post("/:id/worksheets", async (req: Request, res: Response) => {
   const { id } = req.params
-  const centre = await db.get(parseInt(id))
+  const centre = await Centre.findByPk(id)
 
   req.body.centre_id = id
   req.body.start_date = new Date()
@@ -119,7 +121,7 @@ centreRouter.put("/:id/worksheet/:worksheetId", async (req: Request, res: Respon
   const { id, worksheetId } = req.params
   const { sections } = req.body
 
-  const centre = await db.get(parseInt(id))
+  const centre = await Centre.findByPk(id)
   const sheet = await submissionValueDb.getJson(parseInt(worksheetId))
 
   if (centre && sheet != null) {
