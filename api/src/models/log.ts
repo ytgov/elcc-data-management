@@ -8,6 +8,12 @@ import {
 
 import sequelize from "@/db/db-client"
 
+export enum LogOperationTypes {
+  CREATE = "create",
+  UPDATE = "update",
+  DELETE = "delete",
+}
+
 export class Log extends Model<InferAttributes<Log>, InferCreationAttributes<Log>> {
   public declare id: CreationOptional<number>
   public declare tableName: string
