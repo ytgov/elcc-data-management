@@ -7,7 +7,7 @@ import { ReturnValidationErrors } from "@/middleware"
 
 import { User } from "@/models"
 import { UserServices } from "@/services/user-services"
-import UserSerializer from "@/serializers/user-serializer"
+import { UserSerializer } from "@/serializers"
 
 export const userRouter = express.Router()
 
