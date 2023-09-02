@@ -3,7 +3,8 @@ import { param } from "express-validator"
 import { checkJwt, loadUser } from "../middleware/authz.middleware"
 import { ReturnValidationErrors } from "../middleware"
 import { SubmissionLineService } from "../services"
-import { FormatDollar } from "../utils/formatter"
+import { FundingSubmissionLine } from "@/models"
+import { FundingSubmissionLineSerializer } from "@/serializers"
 
 export const submissionLineRouter = express.Router()
 
@@ -13,13 +14,12 @@ submissionLineRouter.use(loadUser)
 const db = new SubmissionLineService()
 
 submissionLineRouter.get("/", async (req: Request, res: Response) => {
-  const list = await db.getAll()
+  const fundingSubmissionLines = await FundingSubmissionLine.findAll()
 
-  for (const item of list) {
-    item.age_range = `${item.from_age} - ${item.to_age}`
-    item.monthly_amount_display = FormatDollar(item.monthly_amount)
-  }
-  res.json({ data: list })
+  const serailizedFundingSubmissionLines =
+    FundingSubmissionLineSerializer.serialize(fundingSubmissionLines)
+
+  res.json({ data: serailizedFundingSubmissionLines })
 })
 
 submissionLineRouter.put(
