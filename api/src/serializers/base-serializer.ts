@@ -1,4 +1,4 @@
-import { isArray, isNil, reduce } from "lodash"
+import { isArray, isFunction, isNil, reduce } from "lodash"
 
 type Extractor<Model> = (model: Model) => any | undefined
 type FieldConstructorOptions<Model> = { name?: string; extractor?: Extractor<Model> }
@@ -8,10 +8,29 @@ class Field<Model> {
   name: string | undefined
   extractor: Extractor<Model> | undefined
 
-  constructor(method: string, { name, extractor }: FieldConstructorOptions<Model> = {}) {
-    this.method = method
-    this.name = name
-    this.extractor = extractor
+  constructor(method: string)
+  constructor(method: string, extractor: Extractor<Model>)
+  constructor(method: string, options: FieldConstructorOptions<Model>)
+  constructor(method: string, extractor: Extractor<Model>, options: FieldConstructorOptions<Model>)
+  constructor(
+    method: string,
+    optionsOrExtractor?: Extractor<Model> | FieldConstructorOptions<Model>,
+    options?: FieldConstructorOptions<Model>
+  )
+  constructor(
+    method: string,
+    optionsOrExtractor?: Extractor<Model> | FieldConstructorOptions<Model>,
+    options?: FieldConstructorOptions<Model>
+  ) {
+    if (isFunction(optionsOrExtractor)) {
+      this.method = method
+      this.extractor = optionsOrExtractor
+      this.name = options?.name
+    } else {
+      this.method = method
+      this.extractor = options?.extractor
+      this.name = options?.name
+    }
   }
 }
 
@@ -25,17 +44,21 @@ class View<Model extends Record<string, any>> {
   }
 
   serialize(model: Model) {
-    return reduce(this.fields, (result: Record<string, any>, field: Field<Model>) => {
-      const { method, name, extractor } = field
-      if (name !== undefined && extractor !== undefined) {
-        result[name] = extractor(model)
-      } else if (!isNil(extractor)) {
-        result[method] = extractor(model)
-      } else {
-        result[method] = (model)[method]
-      }
-      return result
-    }, {})
+    return reduce(
+      this.fields,
+      (result: Record<string, any>, field: Field<Model>) => {
+        const { method, name, extractor } = field
+        if (name !== undefined && extractor !== undefined) {
+          result[name] = extractor(model)
+        } else if (!isNil(extractor)) {
+          result[method] = extractor(model)
+        } else {
+          result[method] = model[method]
+        }
+        return result
+      },
+      {}
+    )
   }
 
   addfields(...methods: string[]): Field<Model>[] {
@@ -44,8 +67,11 @@ class View<Model extends Record<string, any>> {
     })
   }
 
-  addField(method: string, options: FieldConstructorOptions<Model> = {}): Field<Model> {
-    const field = new Field<Model>(method, options)
+  addField(
+    ...args: ConstructorParameters<typeof Field<Model>>
+  ): Field<Model> {
+    const method = args[0]
+    const field = new Field<Model>(...args)
     this.fields[method] = field
     return field
   }
@@ -61,7 +87,7 @@ export default class BaseSerializer<Model extends Record<string, any>> {
 
   constructor(model: Model)
   constructor(models: Model[])
-  constructor(modelOrModels: Model | Model[]) // apparently you need to duplicate this to support friendly child constructors
+  constructor(modelOrModels: Model | Model[])
   constructor(modelOrModels: Model | Model[]) {
     if (isArray(modelOrModels)) {
       this.models = modelOrModels
@@ -85,7 +111,9 @@ export default class BaseSerializer<Model extends Record<string, any>> {
     return instance.serialize(options)
   }
 
-  public serialize({ view }: SerializationOptions = {}): Record<string, any>[] | Record<string, any> {
+  public serialize({ view }: SerializationOptions = {}):
+    | Record<string, any>[]
+    | Record<string, any> {
     return this.callView(view)
   }
 

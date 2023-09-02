@@ -22,15 +22,15 @@ export default class UserSerializer extends BaseSerializer<User> {
       "createDate"
     )
 
-    defaultView.addField("displayName", {
-      extractor: (user: User): string => `${user.firstName} ${user.lastName}`,
-    })
+    defaultView.addField(
+      "displayName",
+      (user: User): string => `${user.firstName} ${user.lastName}`
+    )
     return defaultView
   }
 
   // #registerTableView() {}
 }
-
 
 // Until I get a test suite spun up, these are the tests :cry:
 // import { User } from "@/models"
