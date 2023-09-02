@@ -1,8 +1,7 @@
-export * from "./centre-services"
-export * from "./centre-funding-service"
-export * from "./log-service"
-export * from "./submission-line-service"
-export * from "./submission-line-value-service"
-export * from "./user-services"
+export * from "@/services/centre-services"
+export * from "@/services/log-services"
+export * from "@/services/submission-line-service"
+export * from "@/services/submission-line-value-service"
+export * from "@/services/user-services"
 
-export default undefined
+export default undefined // avoid confusing result of returning last default export

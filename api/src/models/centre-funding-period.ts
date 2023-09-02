@@ -3,6 +3,7 @@ import {
   BelongsToCreateAssociationMixin,
   BelongsToGetAssociationMixin,
   BelongsToSetAssociationMixin,
+  CreationOptional,
   DataTypes,
   ForeignKey,
   InferAttributes,
@@ -18,7 +19,7 @@ export class CentreFundingPeriod extends Model<
   InferAttributes<CentreFundingPeriod>,
   InferCreationAttributes<CentreFundingPeriod>
 > {
-  declare id: number
+  declare id: CreationOptional<number>
   declare centreId: ForeignKey<Centre["id"]>
   declare fiscalPeriodId: number
   declare notes: string
@@ -47,8 +48,8 @@ CentreFundingPeriod.init(
   {
     id: {
       type: DataTypes.INTEGER,
-      autoIncrement: true,
       primaryKey: true,
+      autoIncrement: true,
     },
     centreId: {
       type: DataTypes.INTEGER,

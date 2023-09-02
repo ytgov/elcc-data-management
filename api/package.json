@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc && tsc-alias",
     "start": "nodemon -L -r tsconfig-paths/register src/index.ts",
-    "ts-node": "ts-node -r tsconfig-paths/register"
+    "ts-node": "ts-node -r tsconfig-paths/register --logError"
   },
   "author": "Michael Johnson",
   "license": "ISC",

@@ -1,15 +1,12 @@
 import express, { Request, Response } from "express"
 
-import { CentreFundingService, LogService } from "@/services"
+import LogServices from "@/services/log-services"
 import { RequireAdmin } from "@/middleware"
-import { Centre } from "@/models"
+import { Centre, LogOperationTypes } from "@/models"
 
 export const centreFundingRouter = express.Router()
 
-const db = new CentreFundingService()
-
-const logService = new LogService()
-/* 
+/*
 centreFundingRouter.get("/", async (req: Request, res: Response) => {
   try {
     const centreSubmissions = await db.getAll();
@@ -24,11 +21,10 @@ centreFundingRouter.post("/", RequireAdmin, async (req: Request, res: Response) 
     const centreSubmission = await db.create(req.body)
     await Centre.update({ lastSubmission: req.body.date }, { where: { id: req.body.centre_id } })
 
-    await logService.create({
-      user_email: req.user.email,
-      operation: `Create record ${centreSubmission.id}`,
-      table_name: "CentreSubmission",
-      data: JSON.stringify(centreSubmission)
+    await LogService.create({
+      model: centerSubmission
+      operation: LogOperationTypes.CREATE,
+      currentUser: req.user,
     });
 
     res.status(200).json(centreSubmission);
@@ -50,11 +46,10 @@ centreFundingRouter.put("/:id", RequireAdmin, async (req: Request, res: Response
   try {
     const centreSubmission = await db.update(req.body);
 
-    await logService.create({
-      user_email: req.user.email,
-      operation: `Update record ${centreSubmission.id}`,
-      table_name: "CentreSubmission",
-      data: JSON.stringify(centreSubmission)
+    await LogService.create({
+      model: centerSubmission
+      operation: LogOperationTypes.UPDATE,
+      currentUser: req.user,
     });
 
     res.status(200).json(centreSubmission);
