@@ -4,15 +4,14 @@ import { cloneDeep, isNil, sortBy, uniq } from "lodash"
 
 import { checkJwt, loadUser } from "@/middleware/authz.middleware"
 import { RequireAdmin } from "@/middleware"
-import { Centre } from "@/models"
+import { Centre, FundingSubmissionLine } from "@/models"
 import { type FundingLineValue } from "@/data/models"
-import { CentreServices, SubmissionLineValueService, SubmissionLineService } from "@/services"
+import { CentreServices, SubmissionLineValueService } from "@/services"
 
 export const centreRouter = express.Router()
 centreRouter.use(checkJwt)
 centreRouter.use(loadUser)
 
-const submissionLineDb = new SubmissionLineService()
 const submissionValueDb = new SubmissionLineValueService()
 
 centreRouter.get("/", async (req: Request, res: Response) => {
@@ -125,12 +124,13 @@ centreRouter.put("/:id/worksheet/:worksheetId", async (req: Request, res: Respon
 centreRouter.post("/:id/fiscal-year", async (req: Request, res: Response) => {
   const { id } = req.params
   const { fiscal_year } = req.body
+  const fiscalYear = fiscal_year // TODO: delete when front-end is using standard casing
 
   const worksheets = await submissionValueDb.getAllJson({ centre_id: parseInt(id), fiscal_year })
   if (worksheets.length > 0)
     return res.status(400).json({ message: "Fiscal year already exists for this centre" })
 
-  const basis = await submissionLineDb.getAll({ fiscal_year })
+  const basis = await FundingSubmissionLine.findAll({ where: { fiscalYear } })
   const year = fiscal_year.split("/")[0]
   let date = moment.utc(`${year}-04-01`)
   const lines = new Array<FundingLineValue>()
@@ -138,9 +138,9 @@ centreRouter.post("/:id/fiscal-year", async (req: Request, res: Response) => {
   for (const line of basis) {
     lines.push({
       submission_line_id: line.id as number,
-      section_name: line.section_name,
-      line_name: line.line_name,
-      monthly_amount: line.monthly_amount,
+      section_name: line.sectionName,
+      line_name: line.lineName,
+      monthly_amount: line.monthlyAmount,
       est_child_count: 0,
       act_child_count: 0,
       est_computed_total: 0,
