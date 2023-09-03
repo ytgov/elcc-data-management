@@ -125,7 +125,7 @@ export default class BaseSerializer<Model extends Record<string, any>> {
       return view.serialize(this.model)
     } else {
       return this.models.map((model) => {
-        return view.serialize(this.model)
+        return view.serialize(model)
       })
     }
   }
