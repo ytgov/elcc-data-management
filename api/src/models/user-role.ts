@@ -62,7 +62,7 @@ UserRole.init(
       allowNull: false,
       validate: {
         isIn: [Object.values(RoleTypes)],
-      }
+      },
     },
   },
   {
