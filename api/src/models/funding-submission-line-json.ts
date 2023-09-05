@@ -46,6 +46,10 @@ export class FundingSubmissionLineJson extends Model<
       foreignKey: "id",
     })
   }
+
+  get lines(): NonAttribute<any[]> {
+    return JSON.parse(this.values)
+  }
 }
 
 FundingSubmissionLineJson.init(

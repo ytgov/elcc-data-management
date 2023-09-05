@@ -1,12 +1,14 @@
 import express, { type Request, type Response } from "express"
 import moment from "moment"
-import { cloneDeep, isNil, sortBy, uniq } from "lodash"
+import { cloneDeep, isNil } from "lodash"
 
 import { checkJwt, loadUser } from "@/middleware/authz.middleware"
 import { RequireAdmin } from "@/middleware"
-import { Centre, FundingSubmissionLine } from "@/models"
+import { Centre, FundingSubmissionLine, FundingSubmissionLineJson } from "@/models"
 import { type FundingLineValue } from "@/data/models"
 import { CentreServices, SubmissionLineValueService } from "@/services"
+
+import { FundingSubmissionLineJsonSerializer } from "@/serializers"
 
 export const centreRouter = express.Router()
 centreRouter.use(checkJwt)
@@ -47,41 +49,9 @@ centreRouter.get("/:id/enrollment", async (req: Request, res: Response) => {
 
 centreRouter.get("/:id/worksheets", async (req: Request, res: Response) => {
   const { id } = req.params
-  const worksheets = await submissionValueDb.getAllJson({ centre_id: id })
-  worksheets.forEach((w) => (w.lines = JSON.parse(w.values)))
-  const groups = new Array<any>()
-  const years = uniq(worksheets.map((m) => m.fiscal_year))
-
-  for (const fiscal_year of years) {
-    const yearSheets = sortBy(
-      worksheets.filter((w) => w.fiscal_year == fiscal_year),
-      (o) => o.date_start
-    )
-
-    const months = uniq(yearSheets.map((y) => y.date_name))
-
-    for (const month of months) {
-      const monthSheets = yearSheets.filter((m) => month == m.date_name)[0]
-
-      const sections = uniq(monthSheets.lines.map((w) => w.section_name))
-      const monthRow = {
-        id: monthSheets.id,
-        fiscal_year,
-        month,
-        year: moment.utc(monthSheets.date_start).format("YYYY"),
-        sections: new Array<any>(),
-      }
-
-      for (const section of sections) {
-        const lines = monthSheets.lines.filter((w) => section == w.section_name)
-        monthRow.sections.push({ section_name: section, lines })
-      }
-
-      groups.push(monthRow)
-    }
-  }
-
-  res.json({ data: groups })
+  const worksheets = await FundingSubmissionLineJson.findAll({ where: { centreId: id } })
+  const serializedGroups = FundingSubmissionLineJsonSerializer.serializeWorksheetsView(worksheets)
+  return res.json({ data: serializedGroups })
 })
 
 centreRouter.post("/:id/worksheets", async (req: Request, res: Response) => {
