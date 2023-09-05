@@ -1,17 +1,17 @@
 import express, { type Request, type Response } from "express"
 import { param } from "express-validator"
-import { checkJwt, loadUser } from "../middleware/authz.middleware"
-import { ReturnValidationErrors } from "../middleware"
-import { SubmissionLineService } from "../services"
+import { isNil } from "lodash"
+
+import { checkJwt, loadUser } from "@/middleware/authz.middleware"
+import { ReturnValidationErrors } from "@/middleware"
 import { FundingSubmissionLine } from "@/models"
 import { FundingSubmissionLineSerializer } from "@/serializers"
+import { FundingSubmissionLineServices } from "@/services"
 
 export const submissionLineRouter = express.Router()
 
 submissionLineRouter.use(checkJwt)
 submissionLineRouter.use(loadUser)
-
-const db = new SubmissionLineService()
 
 submissionLineRouter.get("/", async (req: Request, res: Response) => {
   const fundingSubmissionLines = await FundingSubmissionLine.findAll()
@@ -34,7 +34,7 @@ submissionLineRouter.put(
     }
 
     const newAttributes = req.body
-     // TODO: make the front-end do this, or return a 422 if invalid data is sent.
+    // TODO: make the front-end do this, or return a 422 if invalid data is sent.
     const cleanedAttributes = {
       fiscalYear: newAttributes.fiscal_year,
       sectionName: newAttributes.section_name,
@@ -56,29 +56,32 @@ submissionLineRouter.put(
 )
 
 submissionLineRouter.post("/fiscal-year", async (req: Request, res: Response) => {
-  const { fiscal_year, base_lines_on, interval } = req.body
-  const yearExists = await db.getAll({ fiscal_year })
+  const { fiscal_year: fiscalYear, base_lines_on: baseLinesOn } = req.body
 
-  if (yearExists.length > 0) {
-    return res.status(400).json({ message: "Year already exists" })
+  const lineForFiscalYear = await FundingSubmissionLine.findOne({ where: { fiscalYear } })
+
+  if (!isNil(lineForFiscalYear)) {
+    return res.status(422).json({ message: "Year already exists" })
   }
 
-  const basis = await db.getAll({ fiscal_year: base_lines_on })
-
-  for (const line of basis) {
-    delete line.id
-    line.fiscal_year = fiscal_year
-
-    await db.create(line)
-  }
-
-  res.json({ data: req.body })
+  return FundingSubmissionLineServices.bulkCreateFrom({ fiscalYear }, baseLinesOn)
+    .then((fundingSubmissionLines) => {
+      res.json({ data: fundingSubmissionLines })
+    })
+    .catch((error) => {
+      return res.status(422).json({ message: error.message })
+    })
 })
 
 submissionLineRouter.post("/", async (req: Request, res: Response) => {
-  await db.create(req.body)
-
-  res.json({ data: req.body })
+  const newAttributes = req.body
+  return FundingSubmissionLine.create(newAttributes)
+    .then((fundingSubmissionLine) => {
+      res.json({ data: fundingSubmissionLine })
+    })
+    .catch((error) => {
+      return res.status(422).json({ message: error.message })
+    })
 })
 
 submissionLineRouter.delete("/:id", async (req: Request, res: Response) => {
