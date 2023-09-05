@@ -21,6 +21,7 @@ export class FundingSubmissionLineJsonServices implements BaseService {
     const lines = new Array<FundingLineValue>()
 
     for (const line of basis) {
+      // TODO: Write a migration for existing data, and swap this to camel case.
       lines.push({
         submission_line_id: line.id as number,
         section_name: line.sectionName,
