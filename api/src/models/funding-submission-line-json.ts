@@ -43,7 +43,7 @@ export class FundingSubmissionLineJson extends Model<
 
   static establishasAssociations() {
     this.belongsTo(Centre, {
-      foreignKey: "id",
+      foreignKey: "centreId",
     })
   }
 

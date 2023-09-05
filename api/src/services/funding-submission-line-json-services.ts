@@ -2,7 +2,7 @@ import { cloneDeep } from "lodash"
 import moment from "moment"
 
 import { FundingSubmissionLine, FundingSubmissionLineJson } from "@/models"
-import { FundingLineValue } from "@/data/models"
+import { FundingLineValue } from "@/models"
 
 import BaseService from "@/services/base-service"
 
