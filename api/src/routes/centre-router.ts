@@ -82,17 +82,26 @@ centreRouter.put("/:id/worksheet/:worksheetId", async (req: Request, res: Respon
   const { sections } = req.body
 
   const centre = await Centre.findByPk(id)
-  const sheet = await submissionValueDb.getJson(parseInt(worksheetId))
-
-  if (centre && sheet != null) {
-    const lines = sections.flatMap((s: any) => s.lines)
-    sheet.lines = lines
-
-    await submissionValueDb.updateJson(parseInt(worksheetId), sheet)
-    return res.json({ data: sheet })
+  if (isNil(centre)) {
+    return res.status(404).json({ message: "Centre not found" })
   }
 
-  res.status(404).send()
+  const sheet = await FundingSubmissionLineJson.findByPk(worksheetId)
+  if (isNil(sheet)) {
+    throw new Error("Worksheet not found")
+  }
+
+  // TODO: make the front-end handle this conversion
+  const lines = sections.flatMap((s: any) => s.lines)
+  const values = JSON.stringify(lines)
+  return sheet
+    .update({ values })
+    .then((updatedSheet) => {
+      return res.json({ data: updatedSheet })
+    })
+    .catch((error) => {
+      return res.status(422).json({ message: error.message })
+    })
 })
 
 centreRouter.post("/:id/fiscal-year", async (req: Request, res: Response) => {
