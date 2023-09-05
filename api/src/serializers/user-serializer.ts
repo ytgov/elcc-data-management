@@ -10,7 +10,7 @@ export class UserSerializer extends BaseSerializer<User> {
 
   protected registerDefaultView() {
     const defaultView = this.addView("default")
-    defaultView.addfields(
+    defaultView.addFields(
       "email",
       "sub",
       "firstName",

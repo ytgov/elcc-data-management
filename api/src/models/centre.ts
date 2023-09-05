@@ -20,6 +20,7 @@ import {
 
 import sequelize from "@/db/db-client"
 import CentreFundingPeriod from "@/models/centre-funding-period"
+import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
 
 export enum CentreStatus {
   UP_TO_DATE = "Up to date",
@@ -40,20 +41,74 @@ export class Centre extends Model<InferAttributes<Centre>, InferCreationAttribut
   // https://sequelize.org/docs/v6/core-concepts/assocs/#foohasmanybar
   // https://sequelize.org/api/v7/types/_sequelize_core.index.hasmanyaddassociationmixin
   declare getFundingPeriods: HasManyGetAssociationsMixin<CentreFundingPeriod>
-  declare setFundingPeriods: HasManySetAssociationsMixin<CentreFundingPeriod, CentreFundingPeriod["centreId"]>
-  declare hasFundingPeriod: HasManyHasAssociationMixin<CentreFundingPeriod, CentreFundingPeriod["centreId"]>
-  declare hasFundingPeriods: HasManyHasAssociationsMixin<CentreFundingPeriod, CentreFundingPeriod["centreId"]>
-  declare addFundingPeriod: HasManyAddAssociationMixin<CentreFundingPeriod, CentreFundingPeriod["centreId"]>
-  declare addFundingPeriods: HasManyAddAssociationsMixin<CentreFundingPeriod, CentreFundingPeriod["centreId"]>
-  declare removeFundingPeriod: HasManyRemoveAssociationMixin<CentreFundingPeriod, CentreFundingPeriod["centreId"]>
-  declare removeFundingPeriods: HasManyRemoveAssociationsMixin<CentreFundingPeriod, CentreFundingPeriod["centreId"]>
+  declare setFundingPeriods: HasManySetAssociationsMixin<
+    CentreFundingPeriod,
+    CentreFundingPeriod["centreId"]
+  >
+  declare hasFundingPeriod: HasManyHasAssociationMixin<
+    CentreFundingPeriod,
+    CentreFundingPeriod["centreId"]
+  >
+  declare hasFundingPeriods: HasManyHasAssociationsMixin<
+    CentreFundingPeriod,
+    CentreFundingPeriod["centreId"]
+  >
+  declare addFundingPeriod: HasManyAddAssociationMixin<
+    CentreFundingPeriod,
+    CentreFundingPeriod["centreId"]
+  >
+  declare addFundingPeriods: HasManyAddAssociationsMixin<
+    CentreFundingPeriod,
+    CentreFundingPeriod["centreId"]
+  >
+  declare removeFundingPeriod: HasManyRemoveAssociationMixin<
+    CentreFundingPeriod,
+    CentreFundingPeriod["centreId"]
+  >
+  declare removeFundingPeriods: HasManyRemoveAssociationsMixin<
+    CentreFundingPeriod,
+    CentreFundingPeriod["centreId"]
+  >
   declare countFundingPeriods: HasManyCountAssociationsMixin
   declare createFundingPeriod: HasManyCreateAssociationMixin<CentreFundingPeriod>
 
-  declare fundingPeriods?: NonAttribute<CentreFundingPeriod[]> // where center funding periods assocation gets loaded into
+  declare getFundingSubmissionLineJsons: HasManyGetAssociationsMixin<FundingSubmissionLineJson>
+  declare setFundingSubmissionLineJsons: HasManySetAssociationsMixin<
+    FundingSubmissionLineJson,
+    FundingSubmissionLineJson["centreId"]
+  >
+  declare hasFundingSubmissionLineJson: HasManyHasAssociationMixin<
+    FundingSubmissionLineJson,
+    FundingSubmissionLineJson["centreId"]
+  >
+  declare hasFundingSubmissionLineJsons: HasManyHasAssociationsMixin<
+    FundingSubmissionLineJson,
+    FundingSubmissionLineJson["centreId"]
+  >
+  declare addFundingSubmissionLineJson: HasManyAddAssociationMixin<
+    FundingSubmissionLineJson,
+    FundingSubmissionLineJson["centreId"]
+  >
+  declare addFundingSubmissionLineJsons: HasManyAddAssociationsMixin<
+    FundingSubmissionLineJson,
+    FundingSubmissionLineJson["centreId"]
+  >
+  declare removeFundingSubmissionLineJson: HasManyRemoveAssociationMixin<
+    FundingSubmissionLineJson,
+    FundingSubmissionLineJson["centreId"]
+  >
+  declare removeFundingSubmissionLineJsons: HasManyRemoveAssociationsMixin<
+    FundingSubmissionLineJson,
+    FundingSubmissionLineJson["centreId"]
+  >
+  declare countFundingSubmissionLineJsons: HasManyCountAssociationsMixin
+  declare createFundingSubmissionLineJson: HasManyCreateAssociationMixin<FundingSubmissionLineJson>
 
+  declare fundingPeriods?: NonAttribute<CentreFundingPeriod[]> // where center funding periods assocation gets loaded
+  declare fundingSubmissionLineJsons?: NonAttribute<FundingSubmissionLineJson[]> // where funding submission line json assocation gets loaded
   declare static associations: {
     fundingPeriods: Association<Centre, CentreFundingPeriod>
+    fundingSubmissionLineJsons: Association<Centre, FundingSubmissionLineJson>
   }
 
   static establishasAssociations() {
@@ -61,6 +116,11 @@ export class Centre extends Model<InferAttributes<Centre>, InferCreationAttribut
       sourceKey: "id",
       foreignKey: "centreId",
       as: "fundingPeriods",
+    })
+    this.hasMany(FundingSubmissionLineJson, {
+      sourceKey: "id",
+      foreignKey: "centreId",
+      as: "fundingSubmissionLineJsons",
     })
   }
 }

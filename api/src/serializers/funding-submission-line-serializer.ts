@@ -11,7 +11,7 @@ export class FundingSubmissionLineSerializer extends BaseSerializer<FundingSubmi
 
   protected registerDefaultView() {
     const view = this.addView("default")
-    view.addfields(
+    view.addFields(
       "id",
       "fiscalYear",
       "sectionName",

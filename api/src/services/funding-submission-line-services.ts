@@ -1,10 +1,9 @@
 import { InferCreationAttributes, Op } from "sequelize"
+import { merge, omit } from "lodash"
 
-import db from "@/db/db-client"
 import { FundingSubmissionLine } from "@/models"
 
 import BaseService from "@/services/base-service"
-import { merge, omit } from "lodash"
 
 export class FundingSubmissionLineServices implements BaseService {
   static async bulkCreateFrom(

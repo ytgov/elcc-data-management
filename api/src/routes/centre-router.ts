@@ -1,12 +1,16 @@
 import express, { type Request, type Response } from "express"
-import moment from "moment"
-import { cloneDeep, isNil, sortBy, uniq } from "lodash"
+import { isNil } from "lodash"
 
 import { checkJwt, loadUser } from "@/middleware/authz.middleware"
 import { RequireAdmin } from "@/middleware"
-import { Centre, FundingSubmissionLine } from "@/models"
-import { type FundingLineValue } from "@/data/models"
-import { CentreServices, SubmissionLineValueService } from "@/services"
+import { Centre, FundingSubmissionLineJson } from "@/models"
+import {
+  CentreServices,
+  SubmissionLineValueService,
+  FundingSubmissionLineJsonServices,
+} from "@/services"
+
+import { FundingSubmissionLineJsonSerializer } from "@/serializers"
 
 export const centreRouter = express.Router()
 centreRouter.use(checkJwt)
@@ -47,46 +51,18 @@ centreRouter.get("/:id/enrollment", async (req: Request, res: Response) => {
 
 centreRouter.get("/:id/worksheets", async (req: Request, res: Response) => {
   const { id } = req.params
-  const worksheets = await submissionValueDb.getAllJson({ centre_id: id })
-  worksheets.forEach((w) => (w.lines = JSON.parse(w.values)))
-  const groups = new Array<any>()
-  const years = uniq(worksheets.map((m) => m.fiscal_year))
-
-  for (const fiscal_year of years) {
-    const yearSheets = sortBy(
-      worksheets.filter((w) => w.fiscal_year == fiscal_year),
-      (o) => o.date_start
-    )
-
-    const months = uniq(yearSheets.map((y) => y.date_name))
-
-    for (const month of months) {
-      const monthSheets = yearSheets.filter((m) => month == m.date_name)[0]
-
-      const sections = uniq(monthSheets.lines.map((w) => w.section_name))
-      const monthRow = {
-        id: monthSheets.id,
-        fiscal_year,
-        month,
-        year: moment.utc(monthSheets.date_start).format("YYYY"),
-        sections: new Array<any>(),
-      }
-
-      for (const section of sections) {
-        const lines = monthSheets.lines.filter((w) => section == w.section_name)
-        monthRow.sections.push({ section_name: section, lines })
-      }
-
-      groups.push(monthRow)
-    }
-  }
-
-  res.json({ data: groups })
+  const worksheets = await FundingSubmissionLineJson.findAll({ where: { centreId: id } })
+  const serializedGroups = FundingSubmissionLineJsonSerializer.serializeWorksheetsView(worksheets)
+  return res.json({ data: serializedGroups })
 })
 
 centreRouter.post("/:id/worksheets", async (req: Request, res: Response) => {
   const { id } = req.params
   const centre = await Centre.findByPk(id)
+
+  if (isNil(centre)) {
+    return res.status(404).json({ message: "Centre not found" })
+  }
 
   req.body.centre_id = id
   req.body.start_date = new Date()
@@ -108,66 +84,39 @@ centreRouter.put("/:id/worksheet/:worksheetId", async (req: Request, res: Respon
   const { sections } = req.body
 
   const centre = await Centre.findByPk(id)
-  const sheet = await submissionValueDb.getJson(parseInt(worksheetId))
-
-  if (centre && sheet != null) {
-    const lines = sections.flatMap((s: any) => s.lines)
-    sheet.lines = lines
-
-    await submissionValueDb.updateJson(parseInt(worksheetId), sheet)
-    return res.json({ data: sheet })
+  if (isNil(centre)) {
+    return res.status(404).json({ message: "Centre not found" })
   }
 
-  res.status(404).send()
+  const sheet = await FundingSubmissionLineJson.findByPk(worksheetId)
+  if (isNil(sheet)) {
+    throw new Error("Worksheet not found")
+  }
+
+  // TODO: make the front-end handle this conversion
+  const lines = sections.flatMap((s: any) => s.lines)
+  const values = JSON.stringify(lines)
+  return sheet
+    .update({ values })
+    .then((updatedSheet) => {
+      return res.json({ data: updatedSheet })
+    })
+    .catch((error) => {
+      return res.status(422).json({ message: error.message })
+    })
 })
 
 centreRouter.post("/:id/fiscal-year", async (req: Request, res: Response) => {
-  const { id } = req.params
-  const { fiscal_year } = req.body
-  const fiscalYear = fiscal_year // TODO: delete when front-end is using standard casing
+  const centerId = parseInt(req.params.id)
+  const { fiscal_year: fiscalYear } = req.body
 
-  const worksheets = await submissionValueDb.getAllJson({ centre_id: parseInt(id), fiscal_year })
-  if (worksheets.length > 0)
-    return res.status(400).json({ message: "Fiscal year already exists for this centre" })
-
-  const basis = await FundingSubmissionLine.findAll({ where: { fiscalYear } })
-  const year = fiscal_year.split("/")[0]
-  let date = moment.utc(`${year}-04-01`)
-  const lines = new Array<FundingLineValue>()
-
-  for (const line of basis) {
-    lines.push({
-      submission_line_id: line.id as number,
-      section_name: line.sectionName,
-      line_name: line.lineName,
-      monthly_amount: line.monthlyAmount,
-      est_child_count: 0,
-      act_child_count: 0,
-      est_computed_total: 0,
-      act_computed_total: 0,
+  return FundingSubmissionLineJsonServices.bulkCreate(centerId, fiscalYear)
+    .then((fundingSubmissionLineJsons) => {
+      return res.json({ data: fundingSubmissionLineJsons })
     })
-  }
-
-  for (let i = 0; i < 12; i++) {
-    const date_start = cloneDeep(date).startOf("month")
-    const date_end = cloneDeep(date_start).endOf("month")
-    date_end.set("milliseconds", 0)
-    const date_name = date_start.format("MMMM")
-
-    await submissionValueDb.createJson({
-      centre_id: parseInt(id),
-      fiscal_year,
-      date_name,
-      date_start: date_start.toDate(),
-      date_end: date_end.toDate(),
-      lines,
-      values: "",
+    .catch((error) => {
+      return res.status(422).json({ message: error.message })
     })
-
-    date = date.add(1, "month")
-  }
-
-  res.json({ data: "" })
 })
 
 centreRouter.put("/:id", RequireAdmin, async (req: Request, res: Response) => {
