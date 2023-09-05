@@ -16,6 +16,7 @@ UserRole.establishasAssociations()
 
 export * from "@/models/centre-funding-period"
 export * from "@/models/centre"
+export * from "@/models/funding-line-value"
 export * from "@/models/funding-period"
 export * from "@/models/funding-submission-line-json"
 export * from "@/models/funding-submission-line-value"
