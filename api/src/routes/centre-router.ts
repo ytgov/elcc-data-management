@@ -1,12 +1,14 @@
 import express, { type Request, type Response } from "express"
-import moment from "moment"
-import { cloneDeep, isNil } from "lodash"
+import { isNil } from "lodash"
 
 import { checkJwt, loadUser } from "@/middleware/authz.middleware"
 import { RequireAdmin } from "@/middleware"
-import { Centre, FundingSubmissionLine, FundingSubmissionLineJson } from "@/models"
-import { type FundingLineValue } from "@/data/models"
-import { CentreServices, SubmissionLineValueService } from "@/services"
+import { Centre, FundingSubmissionLineJson } from "@/models"
+import {
+  CentreServices,
+  SubmissionLineValueService,
+  FundingSubmissionLineJsonServices,
+} from "@/services"
 
 import { FundingSubmissionLineJsonSerializer } from "@/serializers"
 
@@ -105,52 +107,16 @@ centreRouter.put("/:id/worksheet/:worksheetId", async (req: Request, res: Respon
 })
 
 centreRouter.post("/:id/fiscal-year", async (req: Request, res: Response) => {
-  const { id } = req.params
-  const { fiscal_year } = req.body
-  const fiscalYear = fiscal_year // TODO: delete when front-end is using standard casing
+  const centerId = parseInt(req.params.id)
+  const { fiscal_year: fiscalYear } = req.body
 
-  const worksheets = await submissionValueDb.getAllJson({ centre_id: parseInt(id), fiscal_year })
-  if (worksheets.length > 0)
-    return res.status(400).json({ message: "Fiscal year already exists for this centre" })
-
-  const basis = await FundingSubmissionLine.findAll({ where: { fiscalYear } })
-  const year = fiscal_year.split("/")[0]
-  let date = moment.utc(`${year}-04-01`)
-  const lines = new Array<FundingLineValue>()
-
-  for (const line of basis) {
-    lines.push({
-      submission_line_id: line.id as number,
-      section_name: line.sectionName,
-      line_name: line.lineName,
-      monthly_amount: line.monthlyAmount,
-      est_child_count: 0,
-      act_child_count: 0,
-      est_computed_total: 0,
-      act_computed_total: 0,
+  return FundingSubmissionLineJsonServices.bulkCreate(centerId, fiscalYear)
+    .then((fundingSubmissionLineJsons) => {
+      return res.json({ data: fundingSubmissionLineJsons })
     })
-  }
-
-  for (let i = 0; i < 12; i++) {
-    const date_start = cloneDeep(date).startOf("month")
-    const date_end = cloneDeep(date_start).endOf("month")
-    date_end.set("milliseconds", 0)
-    const date_name = date_start.format("MMMM")
-
-    await submissionValueDb.createJson({
-      centre_id: parseInt(id),
-      fiscal_year,
-      date_name,
-      date_start: date_start.toDate(),
-      date_end: date_end.toDate(),
-      lines,
-      values: "",
+    .catch((error) => {
+      return res.status(422).json({ message: error.message })
     })
-
-    date = date.add(1, "month")
-  }
-
-  res.json({ data: "" })
 })
 
 centreRouter.put("/:id", RequireAdmin, async (req: Request, res: Response) => {
