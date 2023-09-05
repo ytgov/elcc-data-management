@@ -107,6 +107,7 @@ FundingSubmissionLine.init(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    // TODO: migrate column to integer cents, see https://github.com/icefoganalytics/elcc-data-management/issues/33
     monthlyAmount: {
       type: DataTypes.FLOAT,
       allowNull: false,
