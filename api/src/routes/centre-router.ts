@@ -3,20 +3,14 @@ import { isNil } from "lodash"
 
 import { checkJwt, loadUser } from "@/middleware/authz.middleware"
 import { RequireAdmin } from "@/middleware"
-import { Centre, FundingSubmissionLineJson } from "@/models"
-import {
-  CentreServices,
-  SubmissionLineValueService,
-  FundingSubmissionLineJsonServices,
-} from "@/services"
+import { Centre, FundingSubmissionLineJson, FundingSubmissionLineValue } from "@/models"
+import { CentreServices, FundingSubmissionLineJsonServices } from "@/services"
 
 import { FundingSubmissionLineJsonSerializer } from "@/serializers"
 
 export const centreRouter = express.Router()
 centreRouter.use(checkJwt)
 centreRouter.use(loadUser)
-
-const submissionValueDb = new SubmissionLineValueService()
 
 centreRouter.get("/", async (req: Request, res: Response) => {
   try {
@@ -75,7 +69,10 @@ centreRouter.post("/:id/worksheets", async (req: Request, res: Response) => {
   // TODO: model matching spec does not exist, create at some point.
   throw new Error("Not implemented")
 
-  const worksheets = await submissionValueDb.getAll({ centre_id: id })
+  const worksheets = await FundingSubmissionLineValue.findAll({
+    where: { centreId: id },
+    include: "values",
+  })
   res.json({ data: worksheets })
 })
 
