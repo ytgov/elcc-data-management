@@ -58,6 +58,10 @@ centreRouter.post("/:id/worksheets", async (req: Request, res: Response) => {
   const { id } = req.params
   const centre = await Centre.findByPk(id)
 
+  if (isNil(centre)) {
+    return res.status(404).json({ message: "Centre not found" })
+  }
+
   req.body.centre_id = id
   req.body.start_date = new Date()
   req.body.end_date = new Date()
