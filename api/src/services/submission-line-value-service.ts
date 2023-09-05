@@ -1,4 +1,4 @@
-import { type FundingSubmissionLineJson, type FundingSubmissionLineValue } from "../data/models"
+import { type FundingSubmissionLineValue } from "../data/models"
 
 import { db } from "../data"
 
@@ -15,33 +15,18 @@ export class SubmissionLineValueService {
       .where(query || {})
   }
 
-  async getAllJson(query?: any): Promise<FundingSubmissionLineJson[]> {
-    return await db("funding_submission_line_json").where(query || {})
-  }
-
   async get(id: number): Promise<FundingSubmissionLineValue | undefined> {
     return await db("funding_submission_line_value").where({ id }).first()
-  }
-
-  async getJson(id: number): Promise<FundingSubmissionLineJson | undefined> {
-    return await db("funding_submission_line_json").where({ id }).first()
   }
 
   update(id: number, period: FundingSubmissionLineValue) {
     return db("funding_submission_line_value").where({ id }).update(cleanForUpdate(period))
   }
 
-  updateJson(id: number, sheet: FundingSubmissionLineJson) {
-    return db("funding_submission_line_json").where({ id }).update(cleanForUpdateJson(sheet))
-  }
-
   create(period: FundingSubmissionLineValue) {
     return db("funding_submission_line_value").insert(cleanForUpdate(period))
   }
 
-  createJson(period: FundingSubmissionLineJson) {
-    return db("funding_submission_line_json").insert(cleanForUpdateJson(period))
-  }
 
   delete(id: number) {
     return db("funding_submission_line_value").where({ id }).delete()
@@ -61,16 +46,5 @@ function cleanForUpdate(i: any) {
     child_count: i.child_count,
     computed_total: i.computed_total,
     is_actual: i.is_actual,
-  }
-}
-
-function cleanForUpdateJson(i: FundingSubmissionLineJson) {
-  return {
-    centre_id: i.centre_id,
-    fiscal_year: i.fiscal_year,
-    date_name: i.date_name,
-    date_start: i.date_start,
-    date_end: i.date_end,
-    values: JSON.stringify(i.lines),
   }
 }
