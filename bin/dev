@@ -77,6 +77,10 @@ class DevHelper
     run(*%w[api npm run ts-node], *args, **kwargs)
   end
 
+  def migrate(*args, **kwargs)
+    run(*%w[api npm run migrate], *args, **kwargs)
+  end
+
   # -I enable quoted identifiers, e.g. "table"."column"
   def sqlcmd(*args, **kwargs) # rubocop:disable Metrics/MethodLength
     environment_hoist = ENV.slice(*%w[
