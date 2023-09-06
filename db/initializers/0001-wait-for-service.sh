@@ -35,4 +35,5 @@ while [[ $retry_count -lt $RETRIES ]]; do
 done
 
 # If the maximum retries were reached without success, exit with status 1
+echo "Failed to connect to MSSQL server"
 exit 1
