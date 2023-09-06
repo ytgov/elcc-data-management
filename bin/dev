@@ -7,6 +7,9 @@ class DevHelper
   }
   METHOD_TO_COMMAND = COMMAND_TO_METHOD.invert
 
+  REPLACE_PROCESS = 'replace_process'
+  WAIT_FOR_PROCESS = 'wait_for_process'
+
   # External Interface
   def self.call(*args)
     new.call(*args)
@@ -26,7 +29,13 @@ class DevHelper
   def compose(*args, **kwargs)
     command = compose_command(*args, **kwargs)
     puts "Running: #{command}"
-    exec(command)
+
+    case kwargs[:execution_mode]
+    when WAIT_FOR_PROCESS
+      system(command)
+    else
+      exec(command)
+    end
   end
 
   # Primary command wrappers
@@ -78,7 +87,8 @@ class DevHelper
   end
 
   def migrate(*args, **kwargs)
-    run(*%w[api npm run migrate], *args, **kwargs)
+    run(*%w[api npm run migrate], *args, execution_mode: WAIT_FOR_PROCESS, **kwargs)
+    ownit 'api/src/db/migrations'
   end
 
   # -I enable quoted identifiers, e.g. "table"."column"
@@ -111,6 +121,20 @@ class DevHelper
 
   def db(*args, **kwargs)
     compose(*%w[exec db], *args, **kwargs)
+  end
+
+  def ownit(*args, **kwargs)
+    file_or_directory = args[0]
+    raise ScriptError, "Must provide a file or directory path." if file_or_directory.nil?
+
+    if RUBY_PLATFORM =~ /linux/
+      puts "Take ownership of the file or directory? #{file_or_directory}"
+      user_id = `id -u`.strip
+      group_id = `id -g`.strip
+      exec("sudo chown -R #{user_id}:#{group_id} #{file_or_directory}")
+    else
+      raise ScriptError, "Not implement for platform #{RUBY_PLATFORM}"
+    end
   end
 
   def bash_completions

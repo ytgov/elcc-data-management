@@ -177,7 +177,7 @@ NOTE: while database table names use snake_case, sequelize models use camelCase 
    npm run migrate create --name create-users-table.ts
    ```
 
-   > If you are using Linux, all files created in docker will be created as root. You can take over created files via `sudo chown -R $UID:$(id -g) api/src/db/migrations`.
+   > If you are using Linux, all files created in docker will be created as `root` so you won't be able to edit them. Luckily, this is handle by the `dev migrate` command, when using Linux, after you provide your `sudo` password.
 
 2. To run the all new migrations do:
 
@@ -198,15 +198,6 @@ NOTE: while database table names use snake_case, sequelize models use camelCase 
 
 ### Extras
 
-I have the following set as a bash alias:
+If you want to take over a directory or file in Linux you can use `dev ownit <path-to-directory-or-file>`.
 
-```bash
- ownit ()
- {
-     local file_or_directory="${1:-.}";
-     echo "Take ownership of the file or directory? ${file_or_directory}";
-     sudo chown -R $UID:$(id -g) "$file_or_directory"
- }
-```
-
-Usage: `ownit .` to take over the current directory, use with caution.
+If you are on Windows or Mac, and you want that to work, you should implement it in the `bin/dev` file. You might never actually need to take ownership of anything, so this might not be relevant to you.
