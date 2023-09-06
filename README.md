@@ -164,6 +164,8 @@ To enable linting and prettification:
 
 This project is using [umzum](https://github.com/sequelize/umzug) instead of [sequelize-cli](https://github.com/sequelize/cli) because `sequelize-cli` doesn't have TypeScript support.
 
+NOTE: while database table names use snake_case, sequelize models use camelCase to match the JS standard. This means that migrations need to either provide a "field" name for each column that is snake_case, or use snake_case for the column names.
+
 1. To create a new migration from the template [sample-migration](./api/src/db/template/sample-migration.ts) do:
 
    ```bash

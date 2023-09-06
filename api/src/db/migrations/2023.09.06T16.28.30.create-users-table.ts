@@ -9,51 +9,42 @@ export const up: Migration = async ({ context: queryInterface }) => {
       primaryKey: true,
       autoIncrement: false,
       allowNull: false,
-      field: "email",
     },
     sub: {
       type: DataTypes.STRING(200),
       allowNull: false,
-      field: "sub",
     },
-    firstName: {
+    first_name: {
       type: DataTypes.STRING(100),
       allowNull: false,
-      field: "first_name",
     },
-    lastName: {
+    last_name: {
       type: DataTypes.STRING(100),
       allowNull: false,
-      field: "last_name",
     },
     status: {
       type: DataTypes.STRING(50),
       allowNull: false,
-      field: "status",
     },
-    isAdmin: {
+    is_admin: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
-      field: "is_admin",
     },
-    ynetId: {
+    ynet_id: {
       type: DataTypes.STRING(50),
       allowNull: true,
-      field: "ynet_id",
     },
-    directoryId: {
+    directory_id: {
       type: DataTypes.STRING(50),
       allowNull: true,
-      field: "directory_id",
     },
     // Might need to changes this an use literals?
     // type: datetime2(0), default: GETDATE()
-    createDate: {
+    create_date: {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
-      field: "create_date",
     },
   })
 }
