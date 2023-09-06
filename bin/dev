@@ -87,8 +87,16 @@ class DevHelper
   end
 
   def migrate(*args, **kwargs)
-    run(*%w[api npm run migrate], *args, execution_mode: WAIT_FOR_PROCESS, **kwargs)
-    ownit 'api/src/db/migrations'
+    if RUBY_PLATFORM =~ /linux/
+      run(*%w[api npm run migrate], *args, execution_mode: WAIT_FOR_PROCESS, **kwargs)
+
+      file_or_directory = 'api/src/db/migrations'
+      exit(0) unless take_over_needed?(file_or_directory)
+
+      ownit file_or_directory
+    else
+      run(*%w[api npm run migrate], *args, **kwargs)
+    end
   end
 
   # -I enable quoted identifiers, e.g. "table"."column"
@@ -129,11 +137,9 @@ class DevHelper
 
     if RUBY_PLATFORM =~ /linux/
       puts "Take ownership of the file or directory? #{file_or_directory}"
-      user_id = `id -u`.strip
-      group_id = `id -g`.strip
       exec("sudo chown -R #{user_id}:#{group_id} #{file_or_directory}")
     else
-      raise ScriptError, "Not implement for platform #{RUBY_PLATFORM}"
+      raise NotImplementedError, "Not implement for platform #{RUBY_PLATFORM}"
     end
   end
 
@@ -163,6 +169,22 @@ class DevHelper
 
   def project_root
     @project_root ||= File.absolute_path("#{__dir__}/..")
+  end
+
+  def take_over_needed?(file_or_directory)
+    files_owned_by_others = system("find #{file_or_directory} -not -user #{user_id} -print -quit | grep -q .")
+  end
+
+  def user_id
+    raise NotImplementedError, "Not implement for platform #{RUBY_PLATFORM}" unless RUBY_PLATFORM =~ /linux/
+
+    `id -u`.strip
+  end
+
+  def group_id
+    raise NotImplementedError, "Not implement for platform #{RUBY_PLATFORM}" unless RUBY_PLATFORM =~ /linux/
+
+    `id -g`.strip
   end
 end
 
