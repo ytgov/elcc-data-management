@@ -185,9 +185,16 @@ NOTE: while database table names use snake_case, sequelize models use camelCase 
    dev migrate up
    ```
 
-3. To rollback all migrations do:
+3. To rollback the last executed migration:
+
    ```bash
    dev migration down
+   ```
+
+4. To rollback all migrations:
+
+   ```bash
+   dev migrate down -- --to 0
    ```
 
 ### References
