@@ -32,6 +32,6 @@ export const up: SeedMigration = async ({ context: { Centre } }) => {
 }
 
 export const down: SeedMigration = async () => {
-  // this method needs to exist, but does not need to be implemented
-  // as seeds should be idempotent.
+  // this method needs to exist, but does not need to be implemented.
+  // Seeds should be idempotent.
 }
