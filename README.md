@@ -3,6 +3,7 @@
 ## Production - building locally
 
 1. Create an `api/.env.production` file from the `api/.env.sample` file and fill with the appropriate mathcing the local development config with some minor changes.
+
    ```bash
    VUE_APP_FRONTEND_URL=http://localhost:8080
    VUE_APP_AUTH_DOMAIN=some-url
@@ -27,11 +28,11 @@
 
    > replace the `VUE_APP_AUTH_DOMAIN`, `VUE_APP_AUTH_CLIENTID`, and `AUTH0_DOMAIN` with appropriate values.
 
-6. Duplicate the `api/.env.production` to `.env` at the top level.
+2. Duplicate the `api/.env.production` to `.env` at the top level.
 
-7. Run `docker compose up --build` to build the application and boot it locally.
+3. Run `docker compose up --build` to build the application and boot it locally.
 
-8. Go to http://localhost:8080/ and sign in to the app.
+4. Go to http://localhost:8080/ and sign in to the app.
 
 ## Development
 
@@ -158,3 +159,52 @@ To enable linting and prettification:
 3. Reboot VS Code.
 
 4. TODO: test on a second machine and see if more instructions are needed.
+
+## Migrations - Database Management
+
+This project is using [umzum](https://github.com/sequelize/umzug) instead of [sequelize-cli](https://github.com/sequelize/cli) because `sequelize-cli` doesn't have TypeScript support.
+
+NOTE: while database table names use snake_case, sequelize models use camelCase to match the JS standard. This means that migrations need to either provide a "field" name for each column that is snake_case, or use snake_case for the column names.
+
+1. To create a new migration from the template [sample-migration](./api/src/db/template/sample-migration.ts) do:
+
+   ```bash
+   dev migrate create -- --name create-users-table.ts
+
+   # Or
+
+   dev sh
+   npm run migrate create --name create-users-table.ts
+   ```
+
+   > If you are using Linux, all files created in docker will be created as `root` so you won't be able to edit them. Luckily, this is handle by the `dev migrate` command, when using Linux, after you provide your `sudo` password.
+
+2. To run the all new migrations do:
+
+   ```bash
+   dev migrate up
+   ```
+
+3. To rollback the last executed migration:
+
+   ```bash
+   dev migration down
+   ```
+
+4. To rollback all migrations:
+
+   ```bash
+   dev migrate down -- --to 0
+   ```
+
+### References
+
+- [umzug](https://github.com/sequelize/umzug)
+- [query-interface](https://sequelize.org/docs/v6/other-topics/query-interface/) migration examples.
+- [query interface api](https://sequelize.org/api/v6/class/src/dialects/abstract/query-interface.js~queryinterface) for full details.
+
+### Extras
+
+If you want to take over a directory or file in Linux you can use `dev ownit <path-to-directory-or-file>`.
+
+If you are on Windows or Mac, and you want that to work, you should implement it in the `bin/dev` file. You might never actually need to take ownership of anything, so this might not be relevant to you.

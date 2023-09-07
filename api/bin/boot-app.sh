@@ -3,7 +3,7 @@
 # Start the script to run the migrations
 cd /usr/src/api
 
-npm exec ts-node ./bin/migrate.ts && \
+npm run migrate up && \
   npm exec ts-node ./bin/seed.ts
 
 initialization_status=$?

@@ -7,6 +7,9 @@ class DevHelper
   }
   METHOD_TO_COMMAND = COMMAND_TO_METHOD.invert
 
+  REPLACE_PROCESS = 'replace_process'
+  WAIT_FOR_PROCESS = 'wait_for_process'
+
   # External Interface
   def self.call(*args)
     new.call(*args)
@@ -26,7 +29,13 @@ class DevHelper
   def compose(*args, **kwargs)
     command = compose_command(*args, **kwargs)
     puts "Running: #{command}"
-    exec(command)
+
+    case kwargs[:execution_mode]
+    when WAIT_FOR_PROCESS
+      system(command)
+    else
+      exec(command)
+    end
   end
 
   # Primary command wrappers
@@ -77,6 +86,19 @@ class DevHelper
     run(*%w[api npm run ts-node], *args, **kwargs)
   end
 
+  def migrate(*args, **kwargs)
+    if RUBY_PLATFORM =~ /linux/
+      run(*%w[api npm run migrate], *args, execution_mode: WAIT_FOR_PROCESS, **kwargs)
+
+      file_or_directory = 'api/src/db/migrations'
+      exit(0) unless take_over_needed?(file_or_directory)
+
+      ownit file_or_directory
+    else
+      run(*%w[api npm run migrate], *args, **kwargs)
+    end
+  end
+
   # -I enable quoted identifiers, e.g. "table"."column"
   def sqlcmd(*args, **kwargs) # rubocop:disable Metrics/MethodLength
     environment_hoist = ENV.slice(*%w[
@@ -109,6 +131,18 @@ class DevHelper
     compose(*%w[exec db], *args, **kwargs)
   end
 
+  def ownit(*args, **kwargs)
+    file_or_directory = args[0]
+    raise ScriptError, "Must provide a file or directory path." if file_or_directory.nil?
+
+    if RUBY_PLATFORM =~ /linux/
+      puts "Take ownership of the file or directory? #{file_or_directory}"
+      exec("sudo chown -R #{user_id}:#{group_id} #{file_or_directory}")
+    else
+      raise NotImplementedError, "Not implement for platform #{RUBY_PLATFORM}"
+    end
+  end
+
   def bash_completions
     completions = public_methods(false).reject { |word|
       %i[call].include?(word)
@@ -135,6 +169,22 @@ class DevHelper
 
   def project_root
     @project_root ||= File.absolute_path("#{__dir__}/..")
+  end
+
+  def take_over_needed?(file_or_directory)
+    files_owned_by_others = system("find #{file_or_directory} -not -user #{user_id} -print -quit | grep -q .")
+  end
+
+  def user_id
+    raise NotImplementedError, "Not implement for platform #{RUBY_PLATFORM}" unless RUBY_PLATFORM =~ /linux/
+
+    `id -u`.strip
+  end
+
+  def group_id
+    raise NotImplementedError, "Not implement for platform #{RUBY_PLATFORM}" unless RUBY_PLATFORM =~ /linux/
+
+    `id -g`.strip
   end
 end
 

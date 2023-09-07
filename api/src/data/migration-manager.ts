@@ -1,4 +1,4 @@
-import knex, { type Knex } from "knex"
+import { type Knex } from "knex"
 import { join } from "path"
 
 export class MigrationManager {
@@ -6,25 +6,6 @@ export class MigrationManager {
 
   constructor(db: Knex) {
     this.db = db
-  }
-
-  async listMigrations() {
-    return await this.db.migrate.list({ directory: join(__dirname, "migrations") })
-  }
-
-  async migrateUp() {
-    console.log("-------- MIGRATE UP ---------")
-    return await this.db.migrate.up({ directory: join(__dirname, "migrations") })
-  }
-
-  async migrateDown() {
-    console.log("-------- MIGRATE DOWN ---------")
-    return await this.db.migrate.down({ directory: join(__dirname, "migrations") })
-  }
-
-  async migrateLatest() {
-    console.log("-------- MIGRATE LATEST ---------")
-    return await this.db.migrate.latest({ directory: join(__dirname, "migrations") })
   }
 
   async seedUp() {
