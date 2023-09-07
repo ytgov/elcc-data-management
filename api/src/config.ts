@@ -1,5 +1,4 @@
 import * as dotenv from "dotenv"
-import { type Knex } from "knex"
 
 export const NODE_ENV = process.env.NODE_ENV || "development"
 
@@ -31,14 +30,3 @@ export const DB_USER = process.env.DB_USER
 export const DB_PASS = process.env.DB_PASS
 export const DB_NAME = process.env.DB_NAME
 export const DB_PORT = parseInt(process.env.DB_PORT || "1433")
-
-export const DB_CONFIG: Knex.Config<any> = {
-  client: "mssql",
-  connection: {
-    server: DB_HOST,
-    user: DB_USER,
-    password: DB_PASS,
-    database: DB_NAME,
-    port: DB_PORT,
-  },
-}
