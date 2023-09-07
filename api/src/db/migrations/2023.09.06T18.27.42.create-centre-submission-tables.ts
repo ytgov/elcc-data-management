@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize"
 
 import type { Migration } from "@/db/umzug"
+import { MssqlDataTypes } from "@/db/mssql-data-types"
 
 export const up: Migration = async ({ context: queryInterface }) => {
   await queryInterface.createTable("funding_period", {
@@ -15,11 +16,11 @@ export const up: Migration = async ({ context: queryInterface }) => {
       allowNull: false,
     },
     from_date: {
-      type: DataTypes.DATE,
+      type: MssqlDataTypes.DATETIME2(0),
       allowNull: false,
     },
     to_date: {
-      type: DataTypes.DATE,
+      type: MssqlDataTypes.DATETIME2(0),
       allowNull: false,
     },
     title: {
@@ -139,11 +140,11 @@ export const up: Migration = async ({ context: queryInterface }) => {
       allowNull: false,
     },
     date_start: {
-      type: DataTypes.DATE,
+      type: MssqlDataTypes.DATETIME2(0),
       allowNull: false,
     },
     date_end: {
-      type: DataTypes.DATE,
+      type: MssqlDataTypes.DATETIME2(0),
       allowNull: false,
     },
     child_count: {

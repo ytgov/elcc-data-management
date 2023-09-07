@@ -40,10 +40,8 @@ export const up: Migration = async ({ context: queryInterface }) => {
       type: DataTypes.STRING(50),
       allowNull: true,
     },
-    // Might need to changes this an use literals?
-    // type: datetime2(0), default: GETDATE()
     create_date: {
-      type: DataTypes.DATE,
+      type: MssqlDataTypes.DATETIME2(0),
       allowNull: false,
       defaultValue: MssqlDataTypes.NOW,
     },
