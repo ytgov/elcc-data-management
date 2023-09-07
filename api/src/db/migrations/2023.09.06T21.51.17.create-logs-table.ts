@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize"
 
 import type { Migration } from "@/db/umzug"
+import { MssqlDataTypes } from "@/db/mssql-data-types"
 
 export const up: Migration = async ({ context: queryInterface }) => {
   await queryInterface.createTable("logs", {
@@ -29,7 +30,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
     date: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: DataTypes.NOW,
+      defaultValue: MssqlDataTypes.NOW,
     },
   })
 }
