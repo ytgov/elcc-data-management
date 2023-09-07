@@ -1,3 +1,3 @@
 import { migrator } from "@/db/umzug"
 
-migrator.runAsCLI()
+migrator.runAsCLI().then(() => process.exit(0))
