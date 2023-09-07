@@ -16,7 +16,7 @@ function DATETIME2(length?: number): string {
   }
 }
 
-export const MssqlDataTypes = {
+export const MssqlSimpleTypes = {
   NOW: Sequelize.literal("GETDATE()"),
   DATETIME2,
 }
