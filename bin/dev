@@ -99,6 +99,19 @@ class DevHelper
     end
   end
 
+  def seed(*args, **kwargs)
+    if RUBY_PLATFORM =~ /linux/
+      run(*%w[api npm run seed], *args, execution_mode: WAIT_FOR_PROCESS, **kwargs)
+
+      file_or_directory = 'api/src/db/seeds'
+      exit(0) unless take_over_needed?(file_or_directory)
+
+      ownit file_or_directory
+    else
+      run(*%w[api npm run seed], *args, **kwargs)
+    end
+  end
+
   # -I enable quoted identifiers, e.g. "table"."column"
   def sqlcmd(*args, **kwargs) # rubocop:disable Metrics/MethodLength
     environment_hoist = ENV.slice(*%w[

@@ -7,7 +7,8 @@
     "build": "tsc && tsc-alias",
     "start": "ts-node-dev -r tsconfig-paths/register src/index.ts",
     "ts-node": "ts-node -r tsconfig-paths/register --logError",
-    "migrate": "ts-node -r tsconfig-paths/register ./bin/migrate.ts"
+    "migrate": "ts-node -r tsconfig-paths/register ./bin/migrate.ts",
+    "seed": "ts-node -r tsconfig-paths/register ./bin/seed.ts"
   },
   "author": "Michael Johnson",
   "license": "ISC",
@@ -20,7 +21,6 @@
     "express-validator": "^6.14.2",
     "helmet": "^6.0.0",
     "jwks-rsa": "^3.0.0",
-    "knex": "^2.4.2",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "pg": "^8.9.0",

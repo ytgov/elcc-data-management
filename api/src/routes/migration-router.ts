@@ -1,13 +1,9 @@
 import express, { type Request, type Response } from "express"
-import { db } from "@/data"
-import { MigrationManager } from "@/data/migration-manager"
 
-import { migrator } from "@/db/umzug"
+import { migrator, seeder } from "@/db/umzug"
 
 export const migrationRouter = express.Router()
 // migrationRouter.use(RequireRole("System Admin"));
-
-const legacyMigrator = new MigrationManager(db)
 
 async function listMigrations() {
   return Promise.all([migrator.executed(), migrator.pending()]).then(([executed, pending]) => {
@@ -33,6 +29,5 @@ migrationRouter.get("/down", async (req: Request, res: Response) => {
 })
 
 migrationRouter.get("/seed", async (req: Request, res: Response) => {
-  await legacyMigrator.seedUp()
-  return res.json({ data: "Seeding" })
+  return res.json({ data: await seeder.up() })
 })
