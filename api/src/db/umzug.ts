@@ -15,10 +15,11 @@ export const migrator = new Umzug({
   logger: console,
   create: {
     folder: path.join(__dirname, "migrations"),
-    template: (filepath) => [
-      // read template from filesystem
-      [filepath, fs.readFileSync(path.join(__dirname, "template/sample-migration.ts")).toString()],
-    ],
+    template: (filepath) => {
+      const templatePath = path.join(__dirname, "template/sample-migration.ts")
+      const template = fs.readFileSync(templatePath).toString()
+      return [[filepath, template]]
+    },
   },
 })
 
