@@ -4,7 +4,7 @@
 cd /usr/src/api
 
 npm run migrate up && \
-  npm exec ts-node ./bin/seed.ts
+  npm run seed up
 
 initialization_status=$?
 if [ $initialization_status -ne 0 ]; then

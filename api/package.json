@@ -7,7 +7,8 @@
     "build": "tsc && tsc-alias",
     "start": "ts-node-dev -r tsconfig-paths/register src/index.ts",
     "ts-node": "ts-node -r tsconfig-paths/register --logError",
-    "migrate": "ts-node -r tsconfig-paths/register ./bin/migrate.ts"
+    "migrate": "ts-node -r tsconfig-paths/register ./bin/migrate.ts",
+    "seed": "ts-node -r tsconfig-paths/register ./bin/seed.ts"
   },
   "author": "Michael Johnson",
   "license": "ISC",

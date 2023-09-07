@@ -188,7 +188,7 @@ NOTE: while database table names use snake_case, sequelize models use camelCase 
 3. To rollback the last executed migration:
 
    ```bash
-   dev migration down
+   dev migrate down
    ```
 
 4. To rollback all migrations:
@@ -196,6 +196,23 @@ NOTE: while database table names use snake_case, sequelize models use camelCase 
    ```bash
    dev migrate down -- --to 0
    ```
+
+### Seeding
+
+Seeding is effectively the same as migrating, you just replace the `dev migrate` command with `dev seed`.
+
+e.g.
+
+- `dev seed create -- --name fill-users-table.ts`
+
+Seeds are separated by environment.
+i.e. api/src/db/seeds/development vs. api/src/db/seeds/production
+
+This allows for the convenient loading of required defaults in production, with more complex seeds in development, for easy QA.
+
+Seed code should be idempotent, so that it can be executed at any point in every environment.
+
+Seeds currently don't keep track of whether they have run or not. An alternative to this would be to store seeds in a `SequelizeData` table. via `new SequelizeStorage({ sequelize, tablename: "SequelizeData" })` in the umzug seeder config.
 
 ### References
 
