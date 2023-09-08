@@ -41,6 +41,23 @@ services:
     depends_on:
       - api
 
+  test_api:
+    build:
+      context: ./api
+      dockerfile: development.Dockerfile
+    env_file:
+      - ./api/.env.development
+    environment:
+      <<: *default-environment
+      NODE_ENV: test
+      DB_NAME: elcc_test
+    tty: true
+    volumes:
+      - ./api:/usr/src/api
+    depends_on:
+      db:
+        condition: service_healthy
+
   db:
     build:
       context: ./db

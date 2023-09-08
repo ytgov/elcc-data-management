@@ -14,7 +14,10 @@
       "@/*": ["./src/*", "./dist/src/*"]
     },
     // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
-    "typeRoots": ["./@types"] /* List of folders to include type definitions from. */,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./@types"
+    ] /* List of folders to include type definitions from. */,
     "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
     /* Advanced Options */
     "skipLibCheck": true /* Skip type checking of declaration files. */,
