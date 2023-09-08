@@ -10,7 +10,7 @@ export class CentreServices implements BaseService {
   static async create(
     attributes: InferCreationAttributes<Centre>,
     { currentUser }: { currentUser: User }
-  ) {
+  ): Promise<Centre> {
     return db.transaction(async (transaction) => {
       const centre = await Centre.create(attributes, { transaction })
 
@@ -20,6 +20,8 @@ export class CentreServices implements BaseService {
         operation: LogOperationTypes.CREATE,
         transaction,
       })
+
+      return centre
     })
   }
 
