@@ -2,7 +2,9 @@ import { type NextFunction, type Request, type Response } from "express"
 import { UserStatus } from "@/models"
 
 export function RequireAdmin(req: Request, res: Response, next: NextFunction) {
-  if (!req.user.isAdmin) return res.status(403).send("You aren't an admin")
+  if (!req.user.isAdmin) {
+    return res.status(403).send("You aren't an admin")
+  }
   next()
 }
 

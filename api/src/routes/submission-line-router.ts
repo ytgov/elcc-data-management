@@ -2,7 +2,7 @@ import express, { type Request, type Response } from "express"
 import { param } from "express-validator"
 import { isNil } from "lodash"
 
-import { checkJwt, loadUser } from "@/middleware/authz.middleware"
+import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 import { ReturnValidationErrors } from "@/middleware"
 import { FundingSubmissionLine } from "@/models"
 import { FundingSubmissionLineSerializer } from "@/serializers"
@@ -11,7 +11,7 @@ import { FundingSubmissionLineServices } from "@/services"
 export const submissionLineRouter = express.Router()
 
 submissionLineRouter.use(checkJwt)
-submissionLineRouter.use(loadUser)
+submissionLineRouter.use(autheticateAndLoadUser)
 
 submissionLineRouter.get("/", async (req: Request, res: Response) => {
   const fundingSubmissionLines = await FundingSubmissionLine.findAll()

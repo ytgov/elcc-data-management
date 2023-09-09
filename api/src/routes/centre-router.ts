@@ -1,16 +1,16 @@
 import express, { type Request, type Response } from "express"
 import { isNil } from "lodash"
 
-import { checkJwt, loadUser } from "@/middleware/authz.middleware"
+import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 import { RequireAdmin } from "@/middleware"
-import { Centre, FundingSubmissionLineJson, FundingSubmissionLineValue } from "@/models"
+import { Centre, FundingSubmissionLineJson, FundingSubmissionLineValue, User } from "@/models"
 import { CentreServices, FundingSubmissionLineJsonServices } from "@/services"
 
 import { FundingSubmissionLineJsonSerializer } from "@/serializers"
 
 export const centreRouter = express.Router()
 centreRouter.use(checkJwt)
-centreRouter.use(loadUser)
+centreRouter.use(autheticateAndLoadUser)
 
 centreRouter.get("/", async (req: Request, res: Response) => {
   try {
@@ -22,11 +22,16 @@ centreRouter.get("/", async (req: Request, res: Response) => {
 })
 
 centreRouter.post("/", RequireAdmin, async (req: Request, res: Response) => {
+  // TODO: figure out how to push this logic into the authentication layer
+  if (!(req.user instanceof User)) {
+    return res.status(401).json({ message: "Unauthorized" })
+  }
+
   try {
     const centre = await CentreServices.create(req.body, { currentUser: req.user })
     return res.json({ data: centre })
   } catch (err) {
-    res.status(500).json({ message: err })
+    return res.status(500).json({ message: err })
   }
 })
 
@@ -51,6 +56,11 @@ centreRouter.get("/:id/worksheets", async (req: Request, res: Response) => {
 })
 
 centreRouter.post("/:id/worksheets", async (req: Request, res: Response) => {
+  // TODO: figure out how to push this logic into the authentication layer
+  if (!(req.user instanceof User)) {
+    return res.status(401).json({ message: "Unauthorized" })
+  }
+
   const { id } = req.params
   const centre = await Centre.findByPk(id)
 
@@ -117,6 +127,11 @@ centreRouter.post("/:id/fiscal-year", async (req: Request, res: Response) => {
 })
 
 centreRouter.put("/:id", RequireAdmin, async (req: Request, res: Response) => {
+  // TODO: figure out how to push this logic into the authentication layer
+  if (!(req.user instanceof User)) {
+    return res.status(401).json({ message: "Unauthorized" })
+  }
+
   const { id } = req.params
   const centre = await Centre.findByPk(id)
   if (isNil(centre)) {
