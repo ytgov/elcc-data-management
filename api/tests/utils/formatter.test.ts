@@ -1,7 +1,7 @@
-import { FormatDollar } from "@/utils/formatter"
+import { formatDollar } from "@/utils/formatter"
 
 describe("api/src/utils/formatter.ts", () => {
-  describe("FormatDollar", () => {
+  describe("formatDollar", () => {
     test.each([
       { input: 100, expected: "$100.00" },
       { input: 0.0, expected: "$0.00" },
@@ -14,16 +14,16 @@ describe("api/src/utils/formatter.ts", () => {
       { input: 0, expected: "$0.00" },
       { input: -0, expected: "$0.00" },
       { input: undefined, expected: "$0.00" },
-    ])("FormatDollar($input)", ({ input, expected }) => {
-      expect(FormatDollar(input)).toBe(expected)
+    ])("formatDollar($input)", ({ input, expected }) => {
+      expect(formatDollar(input)).toBe(expected)
     })
 
-    test("FormatDollar(Infinity)", () => {
-      expect(() => FormatDollar(Infinity)).toThrow("Infinity and -Infinity are not supported.")
+    test("formatDollar(Infinity)", () => {
+      expect(() => formatDollar(Infinity)).toThrow("Infinity and -Infinity are not supported.")
     })
 
-    test("FormatDollar(-Infinity)", () => {
-      expect(() => FormatDollar(-Infinity)).toThrow("Infinity and -Infinity are not supported.")
+    test("formatDollar(-Infinity)", () => {
+      expect(() => formatDollar(-Infinity)).toThrow("Infinity and -Infinity are not supported.")
     })
   })
 })

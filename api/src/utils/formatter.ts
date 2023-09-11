@@ -1,4 +1,4 @@
-export function FormatDollar(
+export function formatDollar(
   input: number | undefined,
   locales: string | string[] | undefined = "en-US",
   options: Intl.NumberFormatOptions = {}
