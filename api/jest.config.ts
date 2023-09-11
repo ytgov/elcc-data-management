@@ -4,7 +4,7 @@ export const jestConfig: JestConfigWithTsJest = {
   preset: "ts-jest",
   testEnvironment: "node",
   moduleNameMapper: {
-    "^@/(.*)$": ["<rootDir>/$1"],
+    "^@/(.*)$": ["<rootDir>/src/$1"],
   },
 }
 
