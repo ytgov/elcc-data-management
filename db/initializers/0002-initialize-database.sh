@@ -3,4 +3,10 @@
   BEGIN
     CREATE DATABASE ELCC;
   END
+  GO
+  IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'elcc_test')
+  BEGIN
+    CREATE DATABASE elcc_test;
+  END
+  GO
 "
