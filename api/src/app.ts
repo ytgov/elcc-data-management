@@ -2,7 +2,7 @@ import express, { type Request, type Response } from "express"
 import cors from "cors"
 import path from "path"
 import helmet from "helmet"
-import { API_PORT, VUE_APP_FRONTEND_URL, APPLICATION_NAME } from "@/config"
+import { VUE_APP_FRONTEND_URL } from "@/config"
 import {
   userRouter,
   centreRouter,
@@ -13,7 +13,7 @@ import {
 import { migrationRouter } from "./routes/migration-router"
 import { checkJwt, autheticateAndLoadUser } from "./middleware/authz.middleware"
 
-const app = express()
+export const app = express()
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 app.use(
@@ -64,8 +64,4 @@ app.use((req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "web") + "/index.html")
 })
 
-const PORT: number = parseInt(API_PORT)
-
-app.listen(PORT, async () => {
-  console.log(`${APPLICATION_NAME} API listenting on port ${PORT}`)
-})
+export default app

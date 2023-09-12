@@ -55,4 +55,4 @@ COPY --from=web-build-stage --chown=node:node /usr/src/web/dist ./src/web
 
 EXPOSE 8080
 
-CMD ["node", "./src/index.js"]
+CMD ["node", "./src/server.js"]
