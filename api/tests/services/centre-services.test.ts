@@ -1,7 +1,7 @@
-import { Centre, Log } from "@/models"
+import { Centre } from "@/models"
 import { CentreServices } from "@/services"
 
-import { centreFactory, userFactory } from "@/factories"
+import { userFactory } from "@/factories"
 
 describe("api/src/services/centre-services.ts", () => {
   describe("CentreServices", () => {
@@ -11,7 +11,6 @@ describe("api/src/services/centre-services.ts", () => {
         // const { dataValues: attributes } = centreFactory.build()
 
         const attributes = {
-          id: 1,
           name: "Reba",
           license: "ECLC-438361",
           community: "Destruction Bay",
@@ -19,10 +18,7 @@ describe("api/src/services/centre-services.ts", () => {
           hotMeal: false,
           licensedFor: null,
           lastSubmission: new Date("2023-09-11"),
-          createDate: new Date("2023-07-08T00:08:18.953Z"),
         }
-
-        console.log("attributes", JSON.stringify(attributes, null, 2))
 
         expect(await Centre.count()).toBe(0)
 
@@ -38,8 +34,7 @@ describe("api/src/services/centre-services.ts", () => {
               status: "Up to date",
               hotMeal: false,
               licensedFor: null,
-              // lastSubmission: new Date("2023-09-11"),
-              // createDate: new Date("2023-07-08T00:08:18.000Z"),
+              lastSubmission: "2023-09-11", // OR new Date("2023-09-11").toISOString().split("T")[0]
             },
           })
         ).toBe(1)
