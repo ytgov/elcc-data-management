@@ -20,7 +20,7 @@ export const up: SeedMigration = async ({ context: { Centre } }) => {
       name: "Happy Hearts Preschool",
     },
     defaults: {
-      name: "Grow with Joy 2nd",
+      name: "Happy Hearts Preschool",
       license: "456",
       community: "Whitehorse",
       status: "Up to date",
