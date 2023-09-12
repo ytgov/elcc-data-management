@@ -4,7 +4,7 @@ import { faker } from "@faker-js/faker"
 import { User, UserStatus } from "@/models"
 
 export const userFactory = Factory.define<User>(({ sequence, onCreate }) => {
-  onCreate((attribues) => User.create(attribues))
+  onCreate((user) => user.save())
 
   return User.build({
     email: `${faker.internet.email()}-${sequence}`,

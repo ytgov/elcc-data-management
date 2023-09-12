@@ -22,7 +22,7 @@ const yukonCommunities = [
 ]
 
 export const centreFactory = Factory.define<Centre>(({ sequence, onCreate }) => {
-  onCreate((attribues) => Centre.create(attribues))
+  onCreate((centre) => centre.save())
 
   return Centre.build({
     id: sequence,
