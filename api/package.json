@@ -9,7 +9,7 @@
     "ts-node": "ts-node -r tsconfig-paths/register --logError",
     "migrate": "ts-node -r tsconfig-paths/register ./bin/migrate.ts",
     "seed": "ts-node -r tsconfig-paths/register ./bin/seed.ts",
-    "test": "jest --watchAll"
+    "test": "jest --watchAll --runInBand --detectOpenHandles"
   },
   "author": "Michael Johnson",
   "license": "ISC",
