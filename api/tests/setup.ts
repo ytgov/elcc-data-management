@@ -8,7 +8,9 @@ async function truncateAllTables() {
   const models = modelNames.map((modelName) => db.models[modelName])
 
   try {
-    await Promise.all(models.map((model) => model.destroy({ where: {}, force: true })))
+    await Promise.all(
+      models.map((model) => model.destroy({ where: {}, force: true, logging: false }))
+    )
     return true
   } catch (error) {
     console.error(error)
