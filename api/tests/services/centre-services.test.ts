@@ -1,15 +1,19 @@
-import { Centre } from "@/models"
+import { Transaction } from "sequelize"
+
+import { Centre, LogOperationTypes } from "@/models"
 import { CentreServices } from "@/services"
 
+import { LogServices } from "@/services/log-services" // import separately for easier mocking.
+
 import { userFactory } from "@/factories"
+
+jest.mock("@/services/log-services")
 
 describe("api/src/services/centre-services.ts", () => {
   describe("CentreServices", () => {
     describe(".create", () => {
       test("creates a new centre in the database", async () => {
         const currentUser = userFactory.build()
-        // const { dataValues: attributes } = centreFactory.build()
-
         const attributes = {
           name: "Reba",
           license: "ECLC-438361",
@@ -19,8 +23,6 @@ describe("api/src/services/centre-services.ts", () => {
           licensedFor: null,
           lastSubmission: new Date("2023-09-11"),
         }
-
-        expect(await Centre.count()).toBe(0)
 
         const centre = await CentreServices.create(attributes, { currentUser })
 
@@ -38,6 +40,28 @@ describe("api/src/services/centre-services.ts", () => {
             },
           })
         ).toBe(1)
+      })
+
+      test("calls the LogService.create method with the appropriate arguments", async () => {
+        const currentUser = userFactory.build()
+        const attributes = {
+          name: "Reba",
+          license: "ECLC-438361",
+          community: "Destruction Bay",
+          status: "Up to date",
+          hotMeal: false,
+          licensedFor: null,
+          lastSubmission: new Date("2023-09-11"),
+        }
+
+        const centre = await CentreServices.create(attributes, { currentUser })
+
+        expect(LogServices.create).toHaveBeenCalledWith({
+          model: centre,
+          currentUser,
+          operation: LogOperationTypes.CREATE,
+          transaction: expect.any(Transaction),
+        })
       })
     })
   })
