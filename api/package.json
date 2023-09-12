@@ -5,6 +5,7 @@
   "main": "src/server.js",
   "scripts": {
     "build": "tsc && tsc-alias",
+    "clean": "rm -rf ./dist",
     "start": "ts-node-dev -r tsconfig-paths/register src/server.ts",
     "ts-node": "ts-node -r tsconfig-paths/register --logError",
     "migrate": "ts-node -r tsconfig-paths/register ./bin/migrate.ts",
