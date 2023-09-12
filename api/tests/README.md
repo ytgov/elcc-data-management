@@ -1,6 +1,24 @@
 # API service Tests
 
-Notes about test.
+## Implementation
+
+Tests are written in [jest](https://jestjs.io/docs/getting-started) and served via [ts-jest](https://kulshekhar.github.io/ts-jest/docs/)
+
+Test initialization goes like this:
+
+1. `api/jest.config.ts` loads the ts config and finds the appropriate setup functions.
+
+2. Before running the tests, it runs the `globalSetup` function from `api/tests/global-setup.ts`. Things like setting up the database and running migrations and base seeds.
+
+3. Next it loads a specific test file triggers the `setupFilesAfterEnv` files, currently only `api/tests/setup.ts`. These setup files add callbacks that will run before/after _each test file_ runs, so they should be performant. Mostly cleanup functions.
+
+4. It runs the actual tests in the loaded file.
+
+5. (Currently) Runs `afterAll` callback that cleans the database after each test file has completed all its tests. This may need to run as an `afterEach` instead ...
+
+6. Runs the next test file, and repeats from step 3.
+
+## General Notes About Tests
 
 1. Tests should map to a specific file in the api/src folder.
 
