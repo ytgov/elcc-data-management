@@ -46,17 +46,17 @@ export async function autheticateAndLoadUser(req: Request, res: Response, next: 
   return auth0Integration
     .getUserInfo(token)
     .then(async ({ sub, email, firstName, lastName }) => {
-      // Linting is broken, this is necessary
-      // @ts-expect-error I can't figure out how to override express-jwt's req.user type definition
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore I can't figure out how to override express-jwt's req.user type definition
       req.user = await User.findOne({ where: { sub }, include: ["roles"] })
 
       if (isNil(req.user)) {
-        // Linting is broken, this is necessary
-        // @ts-expect-error I can't figure out how to override express-jwt's req.user type definition
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore I can't figure out how to override express-jwt's req.user type definition
         req.user = await User.findByPk(email, { include: ["roles"] })
         if (!isNil(req.user)) {
-          // Linting is broken, this is necessary
-          // @ts-expect-error I can't figure out how to override express-jwt's req.user type definition
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore I can't figure out how to override express-jwt's req.user type definition
           req.user.update({ sub, firstName, lastName })
         }
       }
