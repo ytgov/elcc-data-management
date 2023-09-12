@@ -16,7 +16,7 @@ export const checkJwt = jwt({
   }),
 
   audience: AUTH0_AUDIENCE,
-  issuer: AUTH0_DOMAIN,
+  issuer: AUTH0_DOMAIN + "/",
   algorithms: ["RS256"],
 })
 
