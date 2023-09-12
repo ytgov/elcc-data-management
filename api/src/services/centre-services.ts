@@ -1,4 +1,4 @@
-import { InferCreationAttributes } from "sequelize"
+import { CreationAttributes } from "sequelize"
 
 import db from "@/db/db-client"
 import { Centre, LogOperationTypes, User } from "@/models"
@@ -8,7 +8,7 @@ import LogServices from "@/services/log-services"
 
 export class CentreServices implements BaseService {
   static async create(
-    attributes: InferCreationAttributes<Centre>,
+    attributes: CreationAttributes<Centre>,
     { currentUser }: { currentUser: User }
   ): Promise<Centre> {
     return db.transaction(async (transaction) => {

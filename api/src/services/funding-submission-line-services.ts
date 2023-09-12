@@ -1,4 +1,4 @@
-import { InferCreationAttributes, Op } from "sequelize"
+import { CreationAttributes, Op } from "sequelize"
 import { merge, omit } from "lodash"
 
 import { FundingSubmissionLine } from "@/models"
@@ -7,7 +7,7 @@ import BaseService from "@/services/base-service"
 
 export class FundingSubmissionLineServices implements BaseService {
   static async bulkCreateFrom(
-    attributes: Partial<InferCreationAttributes<FundingSubmissionLine>>,
+    attributes: Partial<CreationAttributes<FundingSubmissionLine>>,
     fiscalYearsToFilterOn: string[]
   ) {
     const linesToCreateFrom = await FundingSubmissionLine.findAll({
