@@ -3,24 +3,31 @@ import { Request, Response, NextFunction } from "express"
 
 import app from "@/app"
 import { userFactory } from "@/factories"
+import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 
-let user: any
 jest.mock("@/middleware/authz.middleware", () => ({
-  checkJwt: (req: Request, res: Response, next: NextFunction) => next(),
-  autheticateAndLoadUser: (req: Request, res: Response, next: NextFunction) => {
-    req.user = user // Mock user data
-    next()
-  },
+  checkJwt: jest.fn(),
+  autheticateAndLoadUser: jest.fn(),
 }))
+
+const mockedCheckJwt = checkJwt as unknown as jest.Mock
+const mockedAutheticateAndLoadUser = autheticateAndLoadUser as unknown as jest.Mock
 
 describe("api/src/routes/user-router.ts", () => {
   beforeEach(() => {
-    user = null
+    mockedCheckJwt.mockImplementation((req: Request, res: Response, next: NextFunction) => next())
   })
 
   describe("GET /api/user/me", () => {
     test("when authenticated returns the current user", async () => {
-      user = userFactory.build()
+      const user = userFactory.build()
+
+      mockedAutheticateAndLoadUser.mockImplementation(
+        (req: Request, res: Response, next: NextFunction) => {
+          req.user = user
+          next()
+        }
+      )
 
       return request(app)
         .get("/api/user/me")
@@ -28,7 +35,20 @@ describe("api/src/routes/user-router.ts", () => {
         .expect(200, { data: JSON.parse(JSON.stringify(user.dataValues)) })
     })
 
-    test("when not checkJwt failes", async () => {})
+    // TODO: re-write the user-router such that the app does not 500 on bad auth
+    test("when not checkJwt failes", async () => {
+      mockedCheckJwt.mockImplementation(() => {
+        throw new Error("Error: getaddrinfo ENOTFOUND xxxxxxxxxxx.eu.auth0.com")
+      })
+
+      return request(app)
+        .get("/api/user/me")
+        .expect("Content-Type", /text/)
+        .expect(500)
+        .then((response) => {
+          expect(response.text).toContain("Error: getaddrinfo ENOTFOUND xxxxxxxxxxx.eu.auth0.com")
+        })
+    })
     test("when autheticateAndLoadUser failes", async () => {})
   })
 })
