@@ -98,7 +98,7 @@ All commands are just strings joined together, so it's easy to add new commmands
    VUE_APP_AUTH_AUDIENCE=testing
 
    AUTH0_AUDIENCE=testing
-   AUTH0_DOMAIN=https://dev-0tc6bn14.eu.auth0.com/
+   AUTH0_DOMAIN=https://dev-0tc6bn14.eu.auth0.com
 
    APPLICATION_NAME=ELCC Data Management
    ```

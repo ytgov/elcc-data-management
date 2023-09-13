@@ -1,33 +1,24 @@
-export function FormatDollar(
+export function formatDollar(
   input: number | undefined,
-  decimalCount = 2,
-  decimal = ".",
-  thousands = ","
+  locales: string | string[] | undefined = "en-US",
+  options: Intl.NumberFormatOptions = {}
 ) {
-  if (input) {
-    decimalCount = Math.abs(decimalCount)
-    decimalCount = isNaN(decimalCount) ? 2 : decimalCount
+  const formatter = new Intl.NumberFormat(locales, {
+    style: "currency",
+    currency: "USD",
+    ...options,
+    // These options are needed to round to whole numbers if that's what you want.
+    //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
+    //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
+  })
 
-    const negativeSign = input < 0 ? "-" : ""
-
-    const i = parseInt(
-      ((input as any) = Math.abs(Number(input) || 0).toFixed(decimalCount))
-    ).toString()
-    const j = i.length > 3 ? i.length % 3 : 0
-
-    return (
-      negativeSign +
-      "$" +
-      (j ? i.substring(0, j) + thousands : "") +
-      i.substring(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands) +
-      (decimalCount
-        ? decimal +
-          Math.abs(input - parseFloat(i))
-            .toFixed(decimalCount)
-            .slice(2)
-        : "")
-    )
+  if (input === Infinity || input === -Infinity) {
+    throw new Error("Infinity and -Infinity are not supported.")
   }
 
-  return "$0.00"
+  if (Object.is(input, -0) || Number.isNaN(input) || input === undefined) {
+    return formatter.format(0)
+  }
+
+  return formatter.format(input)
 }

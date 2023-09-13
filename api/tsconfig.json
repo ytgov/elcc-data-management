@@ -11,10 +11,13 @@
     "moduleResolution": "node" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
     "baseUrl": "." /* Base directory to resolve non-absolute module names. */,
     "paths": {
-      "@/*": ["./src/*", "./dist/src/*"]
+      "@/*": ["./src/*", "./dist/src/*", "./tests/*"]
     },
     // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
-    "typeRoots": ["./@types"] /* List of folders to include type definitions from. */,
+    /* List of folders to include type definitions from. */
+    // Note that when you include any type definition, you must then
+    // include node_modules/@types, as it is no longer included by default.
+    "typeRoots": ["./node_modules/@types", "./@types"],
     "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
     /* Advanced Options */
     "skipLibCheck": true /* Skip type checking of declaration files. */,

@@ -1,7 +1,7 @@
 import { isNil } from "lodash"
 import express, { type Request, type Response } from "express"
 
-import { checkJwt, loadUser } from "@/middleware/authz.middleware"
+import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 import { param } from "express-validator"
 import { ReturnValidationErrors } from "@/middleware"
 
@@ -12,7 +12,7 @@ import { UserSerializer } from "@/serializers"
 export const userRouter = express.Router()
 
 userRouter.use(checkJwt)
-userRouter.use(loadUser)
+userRouter.use(autheticateAndLoadUser)
 
 userRouter.get("/me", async (req: Request, res: Response) => {
   return res.json({ data: req.user })

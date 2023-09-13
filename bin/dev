@@ -86,6 +86,10 @@ class DevHelper
     run(*%w[api npm run ts-node], *args, **kwargs)
   end
 
+  def test_api(*args, **kwargs)
+    run(*%w[test_api npm run test], *args, **kwargs)
+  end
+
   def migrate(*args, **kwargs)
     if RUBY_PLATFORM =~ /linux/
       run(*%w[api npm run migrate], *args, execution_mode: WAIT_FOR_PROCESS, **kwargs)
