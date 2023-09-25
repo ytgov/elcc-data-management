@@ -28,6 +28,7 @@ export enum UserStatus {
 }
 
 export class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
+  declare id: CreationOptional<number>
   declare email: string
   declare sub: string
   declare firstName: string
@@ -69,6 +70,12 @@ export class User extends Model<InferAttributes<User>, InferCreationAttributes<U
 
 User.init(
   {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      allowNull: false,
+      autoIncrement: true,
+    },
     email: {
       type: DataTypes.STRING(200),
       primaryKey: true,
