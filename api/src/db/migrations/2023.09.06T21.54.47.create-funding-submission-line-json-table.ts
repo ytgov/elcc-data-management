@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize"
 
 import type { Migration } from "@/db/umzug"
-import { MssqlSimpleTypes } from "@/db/mssql-simple-types"
+import { MssqlSimpleTypes } from "@/db/utils/mssql-simple-types"
 
 export const up: Migration = async ({ context: queryInterface }) => {
   await queryInterface.createTable("funding_submission_line_json", {
