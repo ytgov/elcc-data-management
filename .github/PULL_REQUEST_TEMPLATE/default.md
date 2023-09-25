@@ -1,7 +1,7 @@
 ---
 name: Default
 about: Adding a feature or fixing a bug in this project
-title: ""
+title: "ELCC XXX: ..."
 labels: ""
 assignees: ""
 ---
