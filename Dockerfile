@@ -13,7 +13,7 @@ COPY api ./
 
 RUN npm run build
 
-# State 3 - web build - requires development environment because typescript
+# State 2 - web build - requires development environment because typescript
 FROM node:18-alpine3.17 as web-build-stage
 
 ENV NODE_ENV=development
@@ -44,7 +44,7 @@ USER node
 WORKDIR /home/node/app
 RUN chown -R node:node /home/node/app
 
-# TODO: find out why the db folder this necessary
+# TODO: find out why the db folder is necessary
 RUN mkdir /home/node/app/db && chown -R node:node /home/node/app/db
 
 COPY --from=api-build-stage --chown=node:node /usr/src/api/package*.json ./
