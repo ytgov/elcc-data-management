@@ -1,11 +1,3 @@
----
-name: Default
-about: Adding a feature or fixing a bug in this project
-title: "ELCC XXX: ..."
-labels: ""
-assignees: ""
----
-
 Depends on:
 
 - (delete this section if pull request has no dependencies)
