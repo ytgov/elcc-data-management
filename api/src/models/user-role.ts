@@ -1,14 +1,15 @@
 import {
-  Model,
-  DataTypes,
-  InferAttributes,
-  InferCreationAttributes,
-  NonAttribute,
   Association,
-  ForeignKey,
+  BelongsToCreateAssociationMixin,
   BelongsToGetAssociationMixin,
   BelongsToSetAssociationMixin,
-  BelongsToCreateAssociationMixin,
+  CreationOptional,
+  DataTypes,
+  ForeignKey,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+  NonAttribute,
 } from "sequelize"
 
 import sequelize from "@/db/db-client"
@@ -24,6 +25,7 @@ export enum RoleTypes {
 }
 
 export class UserRole extends Model<InferAttributes<UserRole>, InferCreationAttributes<UserRole>> {
+  declare id: CreationOptional<number>
   declare email: ForeignKey<User["email"]>
   declare role: string
 
@@ -49,6 +51,12 @@ export class UserRole extends Model<InferAttributes<UserRole>, InferCreationAttr
 
 UserRole.init(
   {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      allowNull: false,
+      autoIncrement: true,
+    },
     email: {
       type: DataTypes.STRING(200),
       allowNull: false,
@@ -71,10 +79,5 @@ UserRole.init(
     timestamps: false,
   }
 )
-
-// supress creation of primary key id column
-// currently this table does not have a primary key column
-// TODO: add primary key column
-UserRole.removeAttribute("id")
 
 export default UserRole
