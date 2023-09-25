@@ -34,7 +34,7 @@ userRouter.put(
     const { email } = req.params
     const { roles, status, isAdmin } = req.body
 
-    const user = await User.findByPk(email, { include: ["roles"] })
+    const user = await User.findOne({ where: { email }, include: ["roles"] })
 
     if (isNil(user)) return res.status(404).send()
 
