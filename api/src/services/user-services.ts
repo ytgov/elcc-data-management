@@ -17,9 +17,9 @@ export class UserServices extends BaseService {
       await user.update(newAttributesWithoutRoles, { transaction })
       if (isNil(roles)) return user
 
-      await UserRole.destroy({ where: { email: user.email }, transaction })
+      await UserRole.destroy({ where: { userId: user.id }, transaction })
       const userRolesAttributes = roles.map((role) => ({
-        email: user.email,
+        userId: user.id,
         role,
       }))
       await UserRole.bulkCreate(userRolesAttributes, { transaction })
