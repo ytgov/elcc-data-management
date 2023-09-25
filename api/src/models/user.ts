@@ -43,13 +43,13 @@ export class User extends Model<InferAttributes<User>, InferCreationAttributes<U
   // https://sequelize.org/docs/v6/core-concepts/assocs/#foohasmanybar
   // https://sequelize.org/api/v7/types/_sequelize_core.index.hasmanyaddassociationmixin
   declare getRoles: HasManyGetAssociationsMixin<UserRole>
-  declare setRoles: HasManySetAssociationsMixin<UserRole, UserRole["email"]>
-  declare hasRole: HasManyHasAssociationMixin<UserRole, UserRole["email"]>
-  declare hasRoles: HasManyHasAssociationsMixin<UserRole, UserRole["email"]>
-  declare addRole: HasManyAddAssociationMixin<UserRole, UserRole["email"]>
-  declare addRoles: HasManyAddAssociationsMixin<UserRole, UserRole["email"]>
-  declare removeRole: HasManyRemoveAssociationMixin<UserRole, UserRole["email"]>
-  declare removeRoles: HasManyRemoveAssociationsMixin<UserRole, UserRole["email"]>
+  declare setRoles: HasManySetAssociationsMixin<UserRole, UserRole["userId"]>
+  declare hasRole: HasManyHasAssociationMixin<UserRole, UserRole["userId"]>
+  declare hasRoles: HasManyHasAssociationsMixin<UserRole, UserRole["userId"]>
+  declare addRole: HasManyAddAssociationMixin<UserRole, UserRole["userId"]>
+  declare addRoles: HasManyAddAssociationsMixin<UserRole, UserRole["userId"]>
+  declare removeRole: HasManyRemoveAssociationMixin<UserRole, UserRole["userId"]>
+  declare removeRoles: HasManyRemoveAssociationsMixin<UserRole, UserRole["userId"]>
   declare countRoles: HasManyCountAssociationsMixin
   declare createRole: HasManyCreateAssociationMixin<UserRole>
 
@@ -61,8 +61,8 @@ export class User extends Model<InferAttributes<User>, InferCreationAttributes<U
 
   static establishasAssociations() {
     this.hasMany(UserRole, {
-      sourceKey: "email",
-      foreignKey: "email",
+      sourceKey: "id",
+      foreignKey: "userId",
       as: "roles",
     })
   }

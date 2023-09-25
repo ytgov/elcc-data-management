@@ -26,14 +26,14 @@ export enum RoleTypes {
 
 export class UserRole extends Model<InferAttributes<UserRole>, InferCreationAttributes<UserRole>> {
   declare id: CreationOptional<number>
-  declare email: ForeignKey<User["email"]>
+  declare userId: ForeignKey<User["id"]>
   declare role: string
 
   // https://sequelize.org/docs/v6/other-topics/typescript/#usage
   // https://sequelize.org/docs/v6/core-concepts/assocs/#special-methodsmixins-added-to-instances
   // https://sequelize.org/api/v7/types/_sequelize_core.index.belongstocreateassociationmixin
   declare getUser: BelongsToGetAssociationMixin<User>
-  declare setUser: BelongsToSetAssociationMixin<User, User["email"]>
+  declare setUser: BelongsToSetAssociationMixin<User, User["id"]>
   declare createUser: BelongsToCreateAssociationMixin<User>
 
   declare user?: NonAttribute<User>
@@ -44,7 +44,7 @@ export class UserRole extends Model<InferAttributes<UserRole>, InferCreationAttr
 
   static establishasAssociations() {
     this.belongsTo(User, {
-      foreignKey: "email",
+      foreignKey: "id",
     })
   }
 }
@@ -57,12 +57,12 @@ UserRole.init(
       allowNull: false,
       autoIncrement: true,
     },
-    email: {
-      type: DataTypes.STRING(200),
+    userId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: User,
-        key: "email",
+        key: "id",
       },
     },
     role: {
