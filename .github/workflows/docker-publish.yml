@@ -3,8 +3,6 @@ name: Build and Push
 on:
   push:
     branches: [main, uat]
-    # Publish semver tags as releases.
-    tags: ["v*.*.*", "v*.*.*.*"]
 
 env:
   REGISTRY: ghcr.io
