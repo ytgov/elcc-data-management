@@ -57,7 +57,7 @@ CentreFundingPeriod.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: Centre,
+        model: "centres",
         key: "id",
       },
     },

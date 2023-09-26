@@ -76,7 +76,7 @@ FundingSubmissionLineValue.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: Centre,
+        model: "centres",
         key: "id",
       },
     },
@@ -84,7 +84,7 @@ FundingSubmissionLineValue.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: FundingSubmissionLine,
+        model: "funding_submission_line", // TODO: pluralize this once table name is pluralized
         key: "id",
       },
     },
