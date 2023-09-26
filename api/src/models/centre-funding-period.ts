@@ -59,6 +59,9 @@ CentreFundingPeriod.init(
         key: "id",
       },
     },
+    // TODO: rename this column if it doesn't reference a database id;
+    // probably to something like fiscalPeriodIdentifier
+    // It's generally best to restrict the *Id pattern for database ids and foreign keys
     fiscalPeriodId: {
       type: DataTypes.INTEGER,
       allowNull: false,
