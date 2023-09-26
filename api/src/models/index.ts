@@ -8,13 +8,13 @@ import FundingSubmissionLineValue from "@/models/funding-submission-line-value"
 import User from "@/models/user"
 import UserRole from "@/models/user-role"
 
-Centre.establishasAssociations()
-CentreFundingPeriod.establishasAssociations()
-FundingSubmissionLine.establishasAssociations()
-FundingSubmissionLineJson.establishasAssociations()
+Centre.establishAssociations()
+CentreFundingPeriod.establishAssociations()
+FundingSubmissionLine.establishAssociations()
+FundingSubmissionLineJson.establishAssociations()
 FundingSubmissionLineValue.establishAssociations()
-User.establishasAssociations()
-UserRole.establishasAssociations()
+User.establishAssociations()
+UserRole.establishAssociations()
 
 export * from "@/models/centre-funding-period"
 export * from "@/models/centre"

@@ -39,7 +39,7 @@ export class CentreFundingPeriod extends Model<
     centre: Association<CentreFundingPeriod, Centre>
   }
 
-  static establishasAssociations() {
+  static establishAssociations() {
     this.belongsTo(Centre, {
       foreignKey: "centreId",
     })

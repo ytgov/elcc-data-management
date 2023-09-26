@@ -70,7 +70,7 @@ export class FundingSubmissionLine extends Model<
     values: Association<FundingSubmissionLine, FundingSubmissionLineValue>
   }
 
-  static establishasAssociations() {
+  static establishAssociations() {
     this.hasMany(FundingSubmissionLineValue, {
       sourceKey: "id",
       foreignKey: "submissionLineId",

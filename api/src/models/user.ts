@@ -59,7 +59,7 @@ export class User extends Model<InferAttributes<User>, InferCreationAttributes<U
     roles: Association<User, UserRole>
   }
 
-  static establishasAssociations() {
+  static establishAssociations() {
     this.hasMany(UserRole, {
       sourceKey: "id",
       foreignKey: "userId",

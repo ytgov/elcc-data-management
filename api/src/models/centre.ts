@@ -146,7 +146,7 @@ export class Centre extends Model<InferAttributes<Centre>, InferCreationAttribut
     fundingSubmissionLineValues: Association<Centre, FundingSubmissionLineValue>
   }
 
-  static establishasAssociations() {
+  static establishAssociations() {
     this.hasMany(CentreFundingPeriod, {
       sourceKey: "id",
       foreignKey: "centreId",
