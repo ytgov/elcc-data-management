@@ -43,9 +43,7 @@ export class UserRole extends Model<InferAttributes<UserRole>, InferCreationAttr
   }
 
   static establishAssociations() {
-    this.belongsTo(User, {
-      foreignKey: "userId",
-    })
+    this.belongsTo(User)
   }
 }
 
