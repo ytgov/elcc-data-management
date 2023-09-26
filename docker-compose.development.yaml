@@ -1,0 +1,96 @@
+version: "3"
+
+x-default-environment: &default-environment
+  NODE_ENV: development
+  DB_NAME: "${DB_NAME:-ELCC}"
+  DB_HOST: db
+  DB_USER: sa
+  DB_PASS: &default-db-password DevPwd99!
+  DB_PORT: &default-db-port 1433
+
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: development.Dockerfile
+    env_file:
+      - ./api/.env.development
+    environment:
+      <<: *default-environment
+    tty: true # allows attaching debugger, equivalent of docker exec -t
+    # stdin_open: true # equivalent of docker exec -i
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./api:/usr/src/api
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./web
+      dockerfile: development.Dockerfile
+    environment:
+      <<: *default-environment
+      VITE_API_BASE_URL: "http://localhost:3000"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./web:/usr/src/web
+    depends_on:
+      - api
+
+  test_api:
+    build:
+      context: ./api
+      dockerfile: development.Dockerfile
+    command: /bin/true
+    env_file:
+      - ./api/.env.development
+    environment:
+      <<: *default-environment
+      NODE_ENV: test
+      DB_NAME: elcc_test
+    tty: true
+    volumes:
+      - ./api:/usr/src/api
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    build:
+      context: ./db
+      dockerfile: development.Dockerfile
+    user: root
+    environment:
+      <<: *default-environment
+      DB_HOST: "localhost"
+      MSSQL_SA_PASSWORD: *default-db-password
+      TZ: "America/Whitehorse"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - ./db:/usr/src/db
+      - db_data:/var/opt/mssql/data
+    healthcheck:
+      # Ensures that server is started and that "ELCC" database is in an "online" state.
+      # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-databases-transact-sql?view=sql-server-2017
+      test: |
+        sh -c '
+          /opt/mssql-tools/bin/sqlcmd \
+          -h -1 \
+          -t 1 \
+          -U sa \
+          -P "$$MSSQL_SA_PASSWORD" \
+          -Q "SET NOCOUNT ON; Select SUM(state) from sys.databases WHERE name = '$$DB_NAME'"
+        '
+      interval: 5s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  db_data:

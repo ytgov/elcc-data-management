@@ -1,3 +1,35 @@
+# Stage 1 - api build - requires development environment because typescript
+FROM node:18-alpine3.17 as api-build-stage
+
+ENV NODE_ENV=development
+
+WORKDIR /usr/src/api
+
+COPY api/package*.json ./
+COPY api/tsconfig*.json ./
+RUN npm install
+
+COPY api ./
+
+RUN npm run build
+
+# State 2 - web build - requires development environment because typescript
+FROM node:18-alpine3.17 as web-build-stage
+
+ENV NODE_ENV=development
+
+WORKDIR /usr/src/web
+
+COPY web/package*.json ./
+COPY web/tsconfig*.json ./
+COPY web/vite.config.js ./
+RUN npm install
+
+COPY web ./
+
+RUN npm run build
+
+# Stage 3 - production setup
 FROM node:18-alpine3.17
 
 RUN apk add --no-cache tzdata
@@ -6,31 +38,21 @@ RUN cp /usr/share/zoneinfo/America/Whitehorse /etc/localtime
 RUN echo "America/Whitehorse" > /etc/timezone
 RUN apk del tzdata
 
-RUN mkdir /home/node/web && chown -R node:node /home/node/web
-WORKDIR /home/node/web
-COPY --chown=node:node src/web/package*.json ./
-RUN npm install && npm cache clean --force --loglevel=error
-COPY --chown=node:node src/web ./
-
-RUN mkdir /home/node/app && chown -R node:node /home/node/app
-RUN mkdir /home/node/app/db && chown -R node:node /home/node/app/db
-WORKDIR /home/node/app
-COPY --chown=node:node src/api/package*.json ./
-
-ENV NODE_ENV=test
-USER node
-RUN npm install && npm cache clean --force --loglevel=error
-COPY --chown=node:node src/api ./
-
-RUN npm run build
-
-WORKDIR /home/node/web
 ENV NODE_ENV=production
-
-RUN npm run build
-
-WORKDIR /home/node/app
-EXPOSE 3000
 USER node
 
-CMD ["node", "./dist/index.js"]
+WORKDIR /home/node/app
+RUN chown -R node:node /home/node/app
+
+# TODO: find out why the db folder is necessary
+RUN mkdir /home/node/app/db && chown -R node:node /home/node/app/db
+
+COPY --from=api-build-stage --chown=node:node /usr/src/api/package*.json ./
+RUN npm install && npm cache clean --force --loglevel=error
+
+COPY --from=api-build-stage --chown=node:node /usr/src/api/dist ./
+COPY --from=web-build-stage --chown=node:node /usr/src/web/dist ./src/web
+
+EXPOSE 8080
+
+CMD ["node", "./src/server.js"]
