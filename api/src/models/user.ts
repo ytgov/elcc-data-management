@@ -37,7 +37,8 @@ export class User extends Model<InferAttributes<User>, InferCreationAttributes<U
   declare isAdmin: CreationOptional<boolean>
   declare ynetId: string | null
   declare directoryId: string | null
-  declare createDate: CreationOptional<Date>
+  declare createdAt: CreationOptional<Date>
+  declare updatedAt: CreationOptional<Date>
 
   // https://sequelize.org/docs/v6/other-topics/typescript/#usage
   // https://sequelize.org/docs/v6/core-concepts/assocs/#foohasmanybar
@@ -111,7 +112,12 @@ User.init(
       type: DataTypes.STRING(50),
       allowNull: true,
     },
-    createDate: {
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
@@ -120,7 +126,6 @@ User.init(
   {
     sequelize,
     underscored: true,
-    timestamps: false,
   }
 )
 

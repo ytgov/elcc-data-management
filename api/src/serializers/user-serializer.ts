@@ -19,7 +19,8 @@ export class UserSerializer extends BaseSerializer<User> {
       "isAdmin",
       "ynetId",
       "directoryId",
-      "createDate"
+      "createdAt",
+      "updatedAt"
     )
 
     defaultView.addField(
