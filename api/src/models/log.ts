@@ -15,12 +15,13 @@ export enum LogOperationTypes {
 }
 
 export class Log extends Model<InferAttributes<Log>, InferCreationAttributes<Log>> {
-  public declare id: CreationOptional<number>
-  public declare tableName: string
-  public declare operation: string
-  public declare userEmail: string
-  public declare data: string
-  public declare date: CreationOptional<Date>
+  declare id: CreationOptional<number>
+  declare tableName: string
+  declare operation: string
+  declare userEmail: string
+  declare data: string
+  declare createdAt: CreationOptional<Date>
+  declare updatedAt: CreationOptional<Date>
 }
 
 Log.init(
@@ -47,7 +48,12 @@ Log.init(
       type: DataTypes.STRING(2000),
       allowNull: false,
     },
-    date: {
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
@@ -56,7 +62,6 @@ Log.init(
   {
     sequelize,
     underscored: true,
-    timestamps: false,
   }
 )
 
