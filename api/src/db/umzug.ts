@@ -6,10 +6,12 @@ import sequelize from "@/db/db-client"
 import * as models from "@/models"
 
 import { UmzugNullStorage } from "@/db/umzug-null-storage"
+import { sequelizeAutoTransactionResolver } from "@/db/utils/sequelize-auto-transaction-resolver"
 
 export const migrator = new Umzug({
   migrations: {
     glob: ["migrations/*.ts", { cwd: __dirname }],
+    resolve: sequelizeAutoTransactionResolver,
   },
   context: sequelize.getQueryInterface(),
   storage: new SequelizeStorage({

@@ -1,6 +1,10 @@
 import { Sequelize, Options } from "sequelize"
+import { createNamespace } from "cls-hooked"
 
 import { DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT, NODE_ENV } from "@/config"
+
+const namespace = createNamespace("sequelize-transaction-context")
+Sequelize.useCLS(namespace)
 
 if (DB_NAME === undefined) throw new Error("database name is unset.")
 if (DB_USER === undefined) throw new Error("database username is unset.")
