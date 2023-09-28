@@ -36,7 +36,8 @@ export class Centre extends Model<InferAttributes<Centre>, InferCreationAttribut
   declare hotMeal: boolean | null
   declare licensedFor: number | null // licensed for xx number of children
   declare lastSubmission: Date | null
-  declare createDate: CreationOptional<Date>
+  declare createdAt: CreationOptional<Date>
+  declare updatedAt: CreationOptional<Date>
 
   // https://sequelize.org/docs/v6/other-topics/typescript/#usage
   // https://sequelize.org/docs/v6/core-concepts/assocs/#foohasmanybar
@@ -204,7 +205,12 @@ Centre.init(
       type: DataTypes.DATEONLY,
       allowNull: true,
     },
-    createDate: {
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
@@ -213,7 +219,6 @@ Centre.init(
   {
     sequelize,
     underscored: true,
-    timestamps: false,
   }
 )
 
