@@ -27,6 +27,8 @@ export class FundingSubmissionLineJson extends Model<
   declare dateStart: Date
   declare dateEnd: Date
   declare values: string
+  declare createdAt: CreationOptional<Date>
+  declare updatedAt: CreationOptional<Date>
 
   // https://sequelize.org/docs/v6/other-topics/typescript/#usage
   // https://sequelize.org/docs/v6/core-concepts/assocs/#special-methodsmixins-added-to-instances
@@ -88,12 +90,21 @@ FundingSubmissionLineJson.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     sequelize,
     tableName: "funding_submission_line_json", // TODO: remove this once table name is pluralized
     underscored: true,
-    timestamps: false,
   }
 )
 
