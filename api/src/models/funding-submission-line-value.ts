@@ -34,6 +34,8 @@ export class FundingSubmissionLineValue extends Model<
   declare childCount: number
   declare computedTotal: number
   declare isActual: boolean
+  declare createdAt: CreationOptional<Date>
+  declare updatedAt: CreationOptional<Date>
 
   declare getCentre: BelongsToGetAssociationMixin<Centre>
   declare setCentre: BelongsToSetAssociationMixin<Centre, Centre["id"]>
@@ -132,12 +134,21 @@ FundingSubmissionLineValue.init(
       allowNull: false,
       defaultValue: true,
     },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     sequelize,
     tableName: "funding_submission_line_value", // TODO: remove this once table name is pluralized
     underscored: true,
-    timestamps: false,
   }
 )
 
