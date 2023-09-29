@@ -32,7 +32,7 @@
           density="comfortable"
         ></v-text-field>
         <v-text-field
-          v-model="editingCentre.licensed_for"
+          v-model="editingCentre.licensedFor"
           label="Licensed for"
           variant="outlined"
           density="comfortable"
@@ -44,7 +44,7 @@
           density="comfortable"
         ></v-text-field>
         <v-checkbox
-          v-model="editingCentre.hot_meal"
+          v-model="editingCentre.hotMeal"
           label="Hot meal?"
           variant="outlined"
           density="comfortable"

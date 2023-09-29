@@ -67,10 +67,10 @@ export const useFundingPeriodStore = defineStore("periodAdmin", {
 
 export interface FundingPeriod {
   id: number
-  fiscal_year: string
-  from_date: Date
-  to_date: Date
+  fiscalYear: string
+  fromDate: Date
+  toDate: Date
   title: string
-  is_fiscal_year: boolean
-  is_school_month: boolean
+  isFiscalYear: boolean
+  isSchoolMonth: boolean
 }

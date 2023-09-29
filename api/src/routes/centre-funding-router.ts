@@ -19,7 +19,7 @@ centreFundingRouter.get("/", async (req: Request, res: Response) => {
 centreFundingRouter.post("/", RequireAdmin, async (req: Request, res: Response) => {
   try {
     const centreSubmission = await db.create(req.body)
-    await Centre.update({ lastSubmission: req.body.date }, { where: { id: req.body.centre_id } })
+    await Centre.update({ lastSubmission: req.body.date }, { where: { id: req.body.centreId } })
 
     await LogService.create({
       model: centerSubmission

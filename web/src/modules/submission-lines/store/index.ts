@@ -29,7 +29,7 @@ export const useSubmissionLinesStore = defineStore("linesAdmin", {
       return 0
     },
     fiscalYears(state) {
-      if (state && state.lines) return uniq(state.lines.map((l) => l.fiscal_year))
+      if (state && state.lines) return uniq(state.lines.map((l) => l.fiscalYear))
       return []
     },
   },
@@ -46,8 +46,7 @@ export const useSubmissionLinesStore = defineStore("linesAdmin", {
         .secureCall("get", SUBMISSION_LINES_URL)
         .then((resp) => {
           this.lines = resp.data
-          this.currentFiscalYear =
-            last(sortBy(this.lines, [(o) => o.fiscal_year]))?.fiscal_year || ""
+          this.currentFiscalYear = last(sortBy(this.lines, [(o) => o.fiscalYear]))?.fiscalYear || ""
         })
         .finally(() => {
           this.isLoading = false
@@ -80,8 +79,8 @@ export const useSubmissionLinesStore = defineStore("linesAdmin", {
     },
     startNewFiscal() {
       this.newFiscalYear = {
-        base_lines_on: this.fiscalYears[this.fiscalYears.length - 1],
-        fiscal_year: "",
+        baseLinesOn: this.fiscalYears[this.fiscalYears.length - 1],
+        fiscalYear: "",
       }
     },
     unselectNewFiscal() {
@@ -107,15 +106,15 @@ export const useSubmissionLinesStore = defineStore("linesAdmin", {
 
 export interface FundingSubmissionLine {
   id: number
-  fiscal_year: string
-  section_name: string
-  line_name: string
-  from_age: number
-  to_age: number
-  monthly_amount: number
+  fiscalYear: string
+  sectionName: string
+  lineName: string
+  fromAge: number
+  toAge: number
+  monthlyAmount: number
 }
 
 export interface NewFiscalYear {
-  fiscal_year: string
-  base_lines_on: string
+  fiscalYear: string
+  baseLinesOn: string
 }
