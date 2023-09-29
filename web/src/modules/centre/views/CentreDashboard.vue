@@ -138,7 +138,7 @@
         <v-card-title style="background-color: #0097a968">Latest Enrollment</v-card-title>
         <v-divider></v-divider>
         <v-card-text class="pt-3">
-          <Enrollment-Chart></Enrollment-Chart>
+          <EnrollmentChart />
         </v-card-text>
       </v-card>
     </v-col>
@@ -179,12 +179,12 @@
               <v-window-item value="0">
                 <v-card flat>
                   <v-card-text>
-                    <Payment-Summary></Payment-Summary>
+                    <PaymentSummary />
                   </v-card-text>
                 </v-card>
               </v-window-item>
               <v-window-item value="1">
-                <Worksheet-Summary></Worksheet-Summary>
+                <WorksheetSummary />
               </v-window-item>
             </v-window>
           </v-window-item>
@@ -221,7 +221,7 @@
                 v-for="worksheet of yearWorksheets"
                 :value="worksheet.month"
               >
-                <Monthly-Worksheet :month="worksheet"></Monthly-Worksheet>
+                <MonthlyWorksheet :month="worksheet" />
               </v-window-item>
             </v-window>
           </v-window-item>
