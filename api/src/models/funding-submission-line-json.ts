@@ -104,7 +104,6 @@ FundingSubmissionLineJson.init(
   {
     sequelize,
     tableName: "funding_submission_line_json", // TODO: remove this once table name is pluralized
-    underscored: true,
   }
 )
 

@@ -61,7 +61,6 @@ Log.init(
   },
   {
     sequelize,
-    underscored: true,
   }
 )
 

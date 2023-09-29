@@ -218,7 +218,6 @@ Centre.init(
   },
   {
     sequelize,
-    underscored: true,
   }
 )
 

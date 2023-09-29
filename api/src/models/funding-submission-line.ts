@@ -128,7 +128,6 @@ FundingSubmissionLine.init(
   {
     sequelize,
     tableName: "funding_submission_line", // TODO: remove this once table name is pluralized
-    underscored: true,
   }
 )
 

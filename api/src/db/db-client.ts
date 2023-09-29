@@ -23,6 +23,7 @@ export const SEQUELIZE_CONFIG: Options = {
   logging: NODE_ENV === "development" ? console.log : false,
   define: {
     underscored: true,
+    timestamps: true, // This is actually the default, but making it explicit for clarity.
   },
 }
 

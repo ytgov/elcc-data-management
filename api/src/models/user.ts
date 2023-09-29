@@ -125,7 +125,6 @@ User.init(
   },
   {
     sequelize,
-    underscored: true,
   }
 )
 

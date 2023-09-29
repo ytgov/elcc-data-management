@@ -85,7 +85,6 @@ UserRole.init(
   },
   {
     sequelize,
-    underscored: true,
   }
 )
 
