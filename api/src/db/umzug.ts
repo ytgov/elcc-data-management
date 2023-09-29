@@ -16,6 +16,8 @@ export const migrator = new Umzug({
   context: sequelize.getQueryInterface(),
   storage: new SequelizeStorage({
     sequelize,
+    tableName: "SequelizeMeta",
+    timestamps: true,
   }),
   logger: console,
   create: {

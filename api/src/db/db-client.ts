@@ -21,6 +21,9 @@ export const SEQUELIZE_CONFIG: Options = {
   port: DB_PORT,
   schema: "dbo",
   logging: NODE_ENV === "development" ? console.log : false,
+  define: {
+    underscored: true,
+  },
 }
 
 const db = new Sequelize(SEQUELIZE_CONFIG)
