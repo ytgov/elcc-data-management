@@ -85,7 +85,6 @@ CentreFundingPeriod.init(
   },
   {
     sequelize,
-    tableName: "centre_funding_period", // TODO: remove this once table name is pluralized
   }
 )
 

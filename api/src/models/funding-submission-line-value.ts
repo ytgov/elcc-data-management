@@ -86,7 +86,7 @@ FundingSubmissionLineValue.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "funding_submission_line", // TODO: pluralize this once table name is pluralized
+        model: "funding_submission_lines",
         key: "id",
       },
     },
@@ -147,7 +147,6 @@ FundingSubmissionLineValue.init(
   },
   {
     sequelize,
-    tableName: "funding_submission_line_value", // TODO: remove this once table name is pluralized
   }
 )
 
