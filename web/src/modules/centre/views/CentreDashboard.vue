@@ -218,7 +218,8 @@
                 >
               </div>
               <v-window-item
-                v-for="worksheet of yearWorksheets"
+                v-for="worksheet in yearWorksheets"
+                :key="worksheet.month"
                 :value="worksheet.month"
               >
                 <MonthlyWorksheet :month="worksheet" />
