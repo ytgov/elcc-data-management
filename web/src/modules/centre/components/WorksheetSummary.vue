@@ -18,8 +18,8 @@
         <td>
           {{ line.month }}
         </td>
-        <td class="text-right">{{ formatMoney(line.est_computed_total) }}</td>
-        <td class="text-right">{{ formatMoney(line.act_computed_total) }}</td>
+        <td class="text-right">{{ formatMoney(line.estComputedTotal) }}</td>
+        <td class="text-right">{{ formatMoney(line.actComputedTotal) }}</td>
         <td class="text-right">{{ formatMoney(line.diff) }}</td>
       </tr>
 
@@ -31,7 +31,7 @@
               yearWorksheets
                 .flatMap((y: any) => y.sections)
                 .flatMap((s) => s.lines)
-                .reduce((a: number, v: any) => a + parseFloat(v.est_computed_total), 0)
+                .reduce((a: number, v: any) => a + parseFloat(v.estComputedTotal), 0)
             )
           }}
         </td>
@@ -42,7 +42,7 @@
               yearWorksheets
                 .flatMap((y: any) => y.sections)
                 .flatMap((s) => s.lines)
-                .reduce((a: number, v: any) => a + parseFloat(v.act_computed_total), 0)
+                .reduce((a: number, v: any) => a + parseFloat(v.actComputedTotal), 0)
             )
           }}
         </td>
@@ -215,79 +215,79 @@ export default {
     },
     summaryLines() {
       const lines = []
-      let running_est_computed_total = 0
-      let running_act_computed_total = 0
+      let runningEstComputedTotal = 0
+      let runningActComputedTotal = 0
 
       for (const line of this.yearWorksheets) {
         const rows = line.sections.flatMap((y: any) => y).flatMap((s: any) => s.lines)
 
         /* let v1 = line.flatMap((y: any) => y.sections)
                 .flatMap((s:any) => s.lines)
-                .reduce((a: number, v: any) => a + parseFloat(v.act_child_count), 0) */
+                .reduce((a: number, v: any) => a + parseFloat(v.actChildCount), 0) */
 
         // console.log(v1);
         const monthVal = {
           month: line.month,
-          est_computed_total: rows.reduce(
-            (a: number, v: any) => a + parseFloat(v.est_computed_total),
+          estComputedTotal: rows.reduce(
+            (a: number, v: any) => a + parseFloat(v.estComputedTotal),
             0
           ),
-          act_computed_total: rows.reduce(
-            (a: number, v: any) => a + parseFloat(v.act_computed_total),
+          actComputedTotal: rows.reduce(
+            (a: number, v: any) => a + parseFloat(v.actComputedTotal),
             0
           ),
           diff: 0,
         }
 
-        monthVal.diff = monthVal.est_computed_total - monthVal.act_computed_total
+        monthVal.diff = monthVal.estComputedTotal - monthVal.actComputedTotal
 
         lines.push(monthVal)
 
-        running_est_computed_total += monthVal.est_computed_total
-        running_act_computed_total += monthVal.act_computed_total
+        runningEstComputedTotal += monthVal.estComputedTotal
+        runningActComputedTotal += monthVal.actComputedTotal
 
-        console.log(running_est_computed_total, monthVal.est_computed_total)
+        console.log(runningEstComputedTotal, monthVal.estComputedTotal)
 
         if (line.month == "June") {
           lines.push({
             month: "Initial Advance (3 mos)",
-            est_computed_total: running_est_computed_total,
-            act_computed_total: running_act_computed_total,
-            diff: running_est_computed_total - running_act_computed_total,
+            estComputedTotal: runningEstComputedTotal,
+            actComputedTotal: runningActComputedTotal,
+            diff: runningEstComputedTotal - runningActComputedTotal,
           })
-          running_est_computed_total = running_act_computed_total = 0
+          runningEstComputedTotal = runningActComputedTotal = 0
         } else if (line.month == "August") {
           lines.push({
             month: "Second Advance (2 mos) ",
-            est_computed_total: running_est_computed_total,
-            act_computed_total: running_act_computed_total,
-            diff: running_est_computed_total - running_act_computed_total,
+            estComputedTotal: runningEstComputedTotal,
+            actComputedTotal: runningActComputedTotal,
+            diff: runningEstComputedTotal - runningActComputedTotal,
           })
-          running_est_computed_total = running_act_computed_total = 0
+          runningEstComputedTotal = runningActComputedTotal = 0
         } else if (line.month == "October") {
           lines.push({
             month: "Third Advance (2 mos) ",
-            est_computed_total: running_est_computed_total,
-            act_computed_total: running_act_computed_total,
-            diff: running_est_computed_total - running_act_computed_total,
+            estComputedTotal: runningEstComputedTotal,
+            actComputedTotal: runningActComputedTotal,
+            diff: runningEstComputedTotal - runningActComputedTotal,
           })
-          running_est_computed_total = running_act_computed_total = 0
+          runningEstComputedTotal = runningActComputedTotal = 0
         } else if (line.month == "December") {
           lines.push({
             month: "Fourth Advance (2 mos) ",
-            est_computed_total: running_est_computed_total,
-            act_computed_total: running_act_computed_total,
-            diff: running_est_computed_total - running_act_computed_total,
+            estComputedTotal: runningEstComputedTotal,
+            actComputedTotal: runningActComputedTotal,
+            diff: runningEstComputedTotal - runningActComputedTotal,
           })
-          running_est_computed_total = running_act_computed_total = 0
+          runningEstComputedTotal = runningActComputedTotal = 0
         } else if (line.month == "February") {
           lines.push({
             month: "Fifth Advance (2 mos) ",
-            est_computed_total: running_est_computed_total,
-            act_computed_total: running_act_computed_total,
-            diff: running_est_computed_total - running_act_computed_total,
+            estComputedTotal: runningEstComputedTotal,
+            actComputedTotal: runningActComputedTotal,
+            diff: runningEstComputedTotal - runningActComputedTotal,
           })
-          running_est_computed_total = running_act_computed_total = 0
+          runningEstComputedTotal = runningActComputedTotal = 0
         }
       }
 

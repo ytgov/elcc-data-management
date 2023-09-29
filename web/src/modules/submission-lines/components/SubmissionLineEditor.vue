@@ -20,13 +20,13 @@
       </v-toolbar>
       <v-card-text>
         <v-text-field
-          v-model="selectedLine.section_name"
+          v-model="selectedLine.sectionName"
           label="Section"
           variant="outlined"
           density="comfortable"
         ></v-text-field>
         <v-text-field
-          v-model="selectedLine.line_name"
+          v-model="selectedLine.lineName"
           label="Line"
           variant="outlined"
           density="comfortable"
@@ -46,7 +46,7 @@
         ></v-text-field>
 
         <v-text-field
-          v-model="selectedLine.monthly_amount"
+          v-model="selectedLine.monthlyAmount"
           label="Monthly amount"
           variant="outlined"
           density="comfortable"

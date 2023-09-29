@@ -22,7 +22,7 @@
       v-for="section of month.sections"
       style="clear: both"
     >
-      <h4>{{ section.section_name }}</h4>
+      <h4>{{ section.sectionName }}</h4>
 
       <table
         style="width: 100%"
@@ -57,10 +57,10 @@
           v-for="line of section.lines"
           class="monospace"
         >
-          <td>{{ line.line_name }}</td>
+          <td>{{ line.lineName }}</td>
           <td>
             <v-text-field
-              :value="formatMoney(line.monthly_amount)"
+              :value="formatMoney(line.monthlyAmount)"
               density="compact"
               hide-details
               readonly
@@ -69,7 +69,7 @@
           </td>
           <td>
             <v-text-field
-              v-model="line.est_child_count"
+              v-model="line.estChildCount"
               density="compact"
               hide-details
               @change="changeLine(line)"
@@ -77,7 +77,7 @@
           </td>
           <td>
             <v-text-field
-              :value="formatMoney(line.est_computed_total)"
+              :value="formatMoney(line.estComputedTotal)"
               density="compact"
               hide-details
               readonly
@@ -86,7 +86,7 @@
           </td>
           <td>
             <v-text-field
-              v-model="line.act_child_count"
+              v-model="line.actChildCount"
               density="compact"
               hide-details
               @change="changeLine(line)"
@@ -95,7 +95,7 @@
 
           <td>
             <v-text-field
-              :value="formatMoney(line.act_computed_total)"
+              :value="formatMoney(line.actComputedTotal)"
               density="compact"
               hide-details
               readonly
@@ -109,7 +109,7 @@
           <td>
             <v-text-field
               :value="
-                section.lines.reduce((a: number, v: any) => a + parseInt(v.est_child_count || 0), 0)
+                section.lines.reduce((a: number, v: any) => a + parseInt(v.estChildCount || 0), 0)
               "
               density="compact"
               hide-details
@@ -122,7 +122,7 @@
               :value="
                 formatMoney(
                   section.lines.reduce(
-                    (a: number, v: any) => a + parseFloat(v.est_computed_total || 0),
+                    (a: number, v: any) => a + parseFloat(v.estComputedTotal || 0),
                     0
                   )
                 )
@@ -136,7 +136,7 @@
           <td>
             <v-text-field
               :value="
-                section.lines.reduce((a: number, v: any) => a + parseInt(v.act_child_count || 0), 0)
+                section.lines.reduce((a: number, v: any) => a + parseInt(v.actChildCount || 0), 0)
               "
               density="compact"
               hide-details
@@ -149,7 +149,7 @@
               :value="
                 formatMoney(
                   section.lines.reduce(
-                    (a: number, v: any) => a + parseFloat(v.act_computed_total || 0),
+                    (a: number, v: any) => a + parseFloat(v.actComputedTotal || 0),
                     0
                   )
                 )
@@ -205,10 +205,10 @@ export default {
       }
     },
     changeLine(line: any) {
-      line.est_child_count = parseInt(line.est_child_count || 0)
-      line.act_child_count = parseInt(line.act_child_count || 0)
-      line.est_computed_total = line.monthly_amount * line.est_child_count
-      line.act_computed_total = line.monthly_amount * line.act_child_count
+      line.estChildCount = parseInt(line.estChildCount || 0)
+      line.actChildCount = parseInt(line.actChildCount || 0)
+      line.estComputedTotal = line.monthlyAmount * line.estChildCount
+      line.actComputedTotal = line.monthlyAmount * line.actChildCount
     },
     async saveClick() {
       await this.saveWorksheet(this.month)

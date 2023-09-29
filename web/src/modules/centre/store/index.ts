@@ -194,10 +194,10 @@ export const useCentreStore = defineStore("centre", {
         for (const section of month.sections) {
           for (const line of section.lines) {
             const aprilLine = aprilLines.filter(
-              (a: any) => a.submission_line_id == line.submission_line_id
+              (a: any) => a.submissionLineId == line.submissionLineId
             )
-            line.est_child_count = aprilLine[0].est_child_count
-            line.est_computed_total = aprilLine[0].est_computed_total
+            line.estChildCount = aprilLine[0].estChildCount
+            line.estComputedTotal = aprilLine[0].estComputedTotal
           }
         }
         await this.saveWorksheet(month, false)
