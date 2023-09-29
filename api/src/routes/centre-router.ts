@@ -41,10 +41,11 @@ centreRouter.get("/:id", async (req: Request, res: Response) => {
   res.json(centre)
 })
 
+// TODO: implement this endpoint, currently it is returning fake data
 centreRouter.get("/:id/enrollment", async (req: Request, res: Response) => {
-  const { id } = req.params
-  const centre = await Centre.findByPk(id)
-  await new Promise((resolve) => setTimeout(resolve, 5000))
+  // const { id } = req.params
+  // const centre = await Centre.findByPk(id)
+  await new Promise((resolve) => setTimeout(resolve, 1000))
   res.json({ data: [2, 8, 14, 5, 2, 4, 2] })
 })
 
