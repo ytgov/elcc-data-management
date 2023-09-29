@@ -136,10 +136,9 @@ class DevHelper
             -P "$DB_PASS" \
             -H "$DB_HOST" \
             -d "$DB_NAME" \
-            -I
+            -I #{args.join(" ")}
           '
       BASH
-      *args,
       **kwargs
     )
   end
