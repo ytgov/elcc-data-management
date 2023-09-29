@@ -17,7 +17,9 @@ export const migrator = new Umzug({
   storage: new SequelizeStorage({
     sequelize,
     tableName: "SequelizeMeta",
-    timestamps: true,
+    // FUTURE: 2023-10-28 enable this once api/src/db/migrations/2023.09.28T23.58.04.add-timestamp-columns-to-sequelize-meta-table.ts
+    // has run in all environments.
+    // timestamps: true,
   }),
   logger: console,
   create: {
