@@ -32,14 +32,14 @@
           density="comfortable"
         ></v-text-field>
         <v-text-field
-          v-model="selectedLine.from_age"
+          v-model="selectedLine.fromAge"
           label="From age"
           variant="outlined"
           density="comfortable"
         ></v-text-field>
 
         <v-text-field
-          v-model="selectedLine.to_age"
+          v-model="selectedLine.toAge"
           label="To age"
           variant="outlined"
           density="comfortable"
@@ -53,7 +53,7 @@
         ></v-text-field>
 
         <v-text-field
-          v-model="selectedLine.fiscal_year"
+          v-model="selectedLine.fiscalYear"
           label="Fiscal Period"
           readonly
           variant="outlined"

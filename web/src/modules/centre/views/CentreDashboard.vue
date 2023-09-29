@@ -318,7 +318,7 @@ export default {
       ]
     },
     yearWorksheets() {
-      const t = this.worksheets.filter((w) => w.fiscal_year == this.currentFiscalYear)
+      const t = this.worksheets.filter((w) => w.fiscalYear == this.currentFiscalYear)
       return t
     },
   },

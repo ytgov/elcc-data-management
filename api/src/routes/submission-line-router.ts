@@ -33,19 +33,8 @@ submissionLineRouter.put(
       return res.status(404).json({ message: "Funding Submission Line not found" })
     }
 
-    const newAttributes = req.body
-    // TODO: make the front-end do this, or return a 422 if invalid data is sent.
-    const cleanedAttributes = {
-      fiscalYear: newAttributes.fiscal_year,
-      sectionName: newAttributes.section_name,
-      lineName: newAttributes.line_name,
-      fromAge: newAttributes.from_age,
-      toAge: newAttributes.to_age,
-      monthlyAmount: newAttributes.monthly_amount,
-    }
-
     return fundingSubmissionLine
-      .update(cleanedAttributes)
+      .update(req.body)
       .then((updatedFundingSubmissionLine) => {
         return res.status(200).json({ data: updatedFundingSubmissionLine })
       })
@@ -56,7 +45,7 @@ submissionLineRouter.put(
 )
 
 submissionLineRouter.post("/fiscal-year", async (req: Request, res: Response) => {
-  const { fiscal_year: fiscalYear, base_lines_on: baseLinesOn } = req.body
+  const { fiscalYear, baseLinesOn } = req.body
 
   const lineForFiscalYear = await FundingSubmissionLine.findOne({ where: { fiscalYear } })
 

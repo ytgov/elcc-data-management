@@ -150,13 +150,13 @@ export const useCentreStore = defineStore("centre", {
       this.getAllCentres()
     },
 
-    async addCentreFiscal(fiscal_year: string) {
+    async addCentreFiscal(fiscalYear: string) {
       if (this.selectedCentre != null) {
         const id = this.selectedCentre.id || 0
 
         const api = useApiStore()
         await api
-          .secureCall("post", `${CENTRE_URL}/${id}/fiscal-year`, { fiscal_year })
+          .secureCall("post", `${CENTRE_URL}/${id}/fiscal-year`, { fiscalYear })
           .then((resp) => {
             // this.selectedCentre = resp.data;
             this.loadWorksheets(id)
@@ -186,7 +186,7 @@ export const useCentreStore = defineStore("centre", {
       if (this.selectedCentre != null) id = this.selectedCentre.id || 0
 
       const currentFiscalYear = subs.currentFiscalYear
-      const forDup = this.worksheets.filter((w) => w.fiscal_year == currentFiscalYear)
+      const forDup = this.worksheets.filter((w) => w.fiscalYear == currentFiscalYear)
       const aprilSheet = forDup.filter((s) => s.month == "April")[0]
       const aprilLines = aprilSheet.sections.flatMap((s: any) => s.lines)
 

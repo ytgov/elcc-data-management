@@ -20,13 +20,13 @@
       </v-toolbar>
       <v-card-text>
         <v-text-field
-          v-model="newFiscalYear.fiscal_year"
+          v-model="newFiscalYear.fiscalYear"
           label="Fiscal year"
           variant="outlined"
           density="comfortable"
         ></v-text-field>
         <v-select
-          v-model="newFiscalYear.base_lines_on"
+          v-model="newFiscalYear.baseLinesOn"
           label="Base lines on"
           :items="fiscalYears"
           variant="outlined"
@@ -66,7 +66,7 @@ export default {
       return !!this.newFiscalYear
     },
     canSave() {
-      return this.newFiscalYear?.fiscal_year && this.newFiscalYear.base_lines_on
+      return this.newFiscalYear?.fiscalYear && this.newFiscalYear.baseLinesOn
     },
   },
   methods: {

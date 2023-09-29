@@ -25,7 +25,7 @@
             md="6"
           >
             <v-text-field
-              v-model="selectedPeriod.fiscal_year"
+              v-model="selectedPeriod.fiscalYear"
               label="Fiscal year"
               variant="outlined"
               density="comfortable"
@@ -37,28 +37,28 @@
               density="comfortable"
             ></v-text-field>
             <v-text-field
-              v-model="selectedPeriod.from_date"
+              v-model="selectedPeriod.fromDate"
               label="From date"
               variant="outlined"
               density="comfortable"
             ></v-text-field>
 
             <v-text-field
-              v-model="selectedPeriod.to_date"
+              v-model="selectedPeriod.toDate"
               label="To date"
               variant="outlined"
               density="comfortable"
             ></v-text-field>
 
             <v-checkbox
-              v-model="selectedPeriod.is_fiscal_year"
+              v-model="selectedPeriod.isFiscalYear"
               label="Is fiscal year"
               variant="outlined"
               density="comfortable"
             ></v-checkbox>
 
             <v-checkbox
-              v-model="selectedPeriod.is_school_month"
+              v-model="selectedPeriod.isSchoolMonth"
               label="Is school month"
               variant="outlined"
               density="comfortable"

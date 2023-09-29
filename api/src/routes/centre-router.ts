@@ -116,7 +116,7 @@ centreRouter.put("/:id/worksheet/:worksheetId", async (req: Request, res: Respon
 
 centreRouter.post("/:id/fiscal-year", async (req: Request, res: Response) => {
   const centerId = parseInt(req.params.id)
-  const { fiscal_year: fiscalYear } = req.body
+  const { fiscalYear } = req.body
 
   return FundingSubmissionLineJsonServices.bulkCreate(centerId, fiscalYear)
     .then((fundingSubmissionLineJsons) => {
