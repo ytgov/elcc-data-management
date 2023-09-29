@@ -18,6 +18,7 @@
     // Note that when you include any type definition, you must then
     // include node_modules/@types, as it is no longer included by default.
     "typeRoots": ["./node_modules/@types", "./@types"],
+    "resolveJsonModule": true /* Supports importing .json files. */,
     "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
     /* Advanced Options */
     "skipLibCheck": true /* Skip type checking of declaration files. */,
