@@ -23,6 +23,8 @@ export class CentreFundingPeriod extends Model<
   declare centreId: ForeignKey<Centre["id"]>
   declare fiscalPeriodId: number
   declare notes: string
+  declare createdAt: CreationOptional<Date>
+  declare updatedAt: CreationOptional<Date>
 
   // https://sequelize.org/docs/v6/other-topics/typescript/#usage
   // https://sequelize.org/docs/v6/core-concepts/assocs/#special-methodsmixins-added-to-instances
@@ -37,7 +39,7 @@ export class CentreFundingPeriod extends Model<
     centre: Association<CentreFundingPeriod, Centre>
   }
 
-  static establishasAssociations() {
+  static establishAssociations() {
     this.belongsTo(Centre, {
       foreignKey: "centreId",
     })
@@ -55,10 +57,13 @@ CentreFundingPeriod.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: Centre,
+        model: "centres",
         key: "id",
       },
     },
+    // TODO: rename this column if it doesn't reference a database id;
+    // probably to something like fiscalPeriodIdentifier
+    // It's generally best to restrict the *Id pattern for database ids and foreign keys
     fiscalPeriodId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -67,12 +72,20 @@ CentreFundingPeriod.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     sequelize,
     tableName: "centre_funding_period", // TODO: remove this once table name is pluralized
-    underscored: true,
-    timestamps: false,
   }
 )
 

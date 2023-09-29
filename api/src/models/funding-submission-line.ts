@@ -32,6 +32,8 @@ export class FundingSubmissionLine extends Model<
   declare fromAge: number | null
   declare toAge: number | null
   declare monthlyAmount: number
+  declare createdAt: CreationOptional<Date>
+  declare updatedAt: CreationOptional<Date>
 
   declare getValues: HasManyGetAssociationsMixin<FundingSubmissionLineValue>
   declare setValues: HasManySetAssociationsMixin<
@@ -70,7 +72,7 @@ export class FundingSubmissionLine extends Model<
     values: Association<FundingSubmissionLine, FundingSubmissionLineValue>
   }
 
-  static establishasAssociations() {
+  static establishAssociations() {
     this.hasMany(FundingSubmissionLineValue, {
       sourceKey: "id",
       foreignKey: "submissionLineId",
@@ -112,12 +114,20 @@ FundingSubmissionLine.init(
       type: DataTypes.FLOAT,
       allowNull: false,
     },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     sequelize,
     tableName: "funding_submission_line", // TODO: remove this once table name is pluralized
-    underscored: true,
-    timestamps: false,
   }
 )
 

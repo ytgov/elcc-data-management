@@ -29,7 +29,6 @@ export class LogServices extends BaseService {
         operation: `${operation} record with ${primaryKeyName}=${primaryKeyValue}`,
         tableName,
         data: JSON.stringify(model),
-        date: new Date(),
       },
       { transaction }
     )

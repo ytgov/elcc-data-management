@@ -1,4 +1,10 @@
-import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from "sequelize"
+import {
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from "sequelize"
 
 import sequelize from "@/db/db-client"
 
@@ -13,6 +19,8 @@ export class FundingPeriod extends Model<
   declare title: string
   declare isFiscalYear: boolean
   declare isSchoolMonth: boolean
+  declare createdAt: CreationOptional<Date>
+  declare updatedAt: CreationOptional<Date>
 }
 
 FundingPeriod.init(
@@ -49,12 +57,20 @@ FundingPeriod.init(
       allowNull: false,
       defaultValue: true,
     },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     sequelize,
     tableName: "funding_period", // TODO: remove this once table name is pluralized
-    underscored: true,
-    timestamps: false,
   }
 )
 

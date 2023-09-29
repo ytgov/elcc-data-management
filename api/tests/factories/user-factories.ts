@@ -18,7 +18,7 @@ export const userFactory = Factory.define<User>(({ sequence, onCreate }) => {
       `Directory-${faker.number.int({ min: 1, max: 1000 })}`,
       null,
     ]),
-    createDate: faker.date.past(),
+    createdAt: faker.date.past(),
   })
 })
 
