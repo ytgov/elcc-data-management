@@ -88,7 +88,7 @@
               <v-divider></v-divider>
               <v-list-item
                 title="Hot Meal"
-                :subtitle="FormatYesNo(selectedItem.hot_meal)"
+                :subtitle="FormatYesNo(selectedItem.hotMeal)"
                 class="pl-0"
               >
                 <template #prepend>
@@ -101,7 +101,7 @@
               <v-divider></v-divider>
               <v-list-item
                 title="Licensed For"
-                :subtitle="selectedItem.licensed_for"
+                :subtitle="selectedItem.licensedFor"
                 class="pl-0"
               >
                 <template #prepend>
@@ -127,7 +127,7 @@
               <v-divider></v-divider>
               <v-list-item
                 title="Last Submission"
-                :subtitle="FormatDate(selectedItem.last_submission)"
+                :subtitle="FormatDate(selectedItem.lastSubmission)"
                 class="pl-0"
               >
                 <template #prepend>
@@ -193,10 +193,10 @@ export default {
       this.editCentre({
         status: "Active",
         community: "Whitehorse",
-        create_date: new Date(),
-        hot_meal: true,
+        createDate: new Date(),
+        hotMeal: true,
         license: "",
-        licensed_for: 10,
+        licensedFor: 10,
         name: "",
       })
     },

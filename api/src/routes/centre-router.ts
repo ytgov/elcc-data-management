@@ -69,12 +69,12 @@ centreRouter.post("/:id/worksheets", async (req: Request, res: Response) => {
     return res.status(404).json({ message: "Centre not found" })
   }
 
-  req.body.centre_id = id
-  req.body.start_date = new Date()
-  req.body.end_date = new Date()
+  req.body.centreId = id
+  req.body.startDate = new Date()
+  req.body.endDate = new Date()
   req.body.payment = 0
-  req.body.submitted_by = req.user.email
-  req.body.submitted_date = new Date()
+  req.body.submittedBy = req.user.email
+  req.body.submittedDate = new Date()
 
   // await SomeModel.create(req.body)
   // TODO: model matching spec does not exist, create at some point.
@@ -139,26 +139,13 @@ centreRouter.put("/:id", RequireAdmin, async (req: Request, res: Response) => {
     return res.status(404).json({ message: `Could not find Centre with id=${id}` })
   }
 
-  try {
-    // TODO: remove this, and force the front-end to send the correct data.
-    // If invalid data is sent to the back-end the API should return a 422 status code.
-    const cleanAttributes = {
-      name: req.body.name,
-      license: req.body.license,
-      community: req.body.community,
-      status: req.body.status,
-      hotMeal: req.body.hot_meal,
-      licensedFor: req.body.licensed_for,
-      lastSubmission: req.body.last_submission,
-    }
-    return CentreServices.update(centre, cleanAttributes, { currentUser: req.user }).then(
-      (updatedCentre) => {
-        return res.json({ data: updatedCentre })
-      }
-    )
-  } catch (err) {
-    res.status(500).json({ message: err })
-  }
+  return CentreServices.update(centre, req.body, { currentUser: req.user })
+    .then((updatedCentre) => {
+      return res.json({ data: updatedCentre })
+    })
+    .catch((error) => {
+      return res.status(429).json({ messaage: error.toString() })
+    })
 })
 
 centreRouter.delete("/:id", RequireAdmin, async (req: Request, res: Response) => {

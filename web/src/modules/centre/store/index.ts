@@ -214,8 +214,8 @@ export interface ChildCareCentre {
   license: string
   community: string
   status: string
-  hot_meal: boolean
-  licensed_for: number
-  last_submission?: Date
-  create_date: Date
+  hotMeal: boolean
+  licensedFor: number
+  lastSubmission?: Date
+  createDate: Date
 }
