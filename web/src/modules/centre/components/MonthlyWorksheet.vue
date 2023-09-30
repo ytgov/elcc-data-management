@@ -19,7 +19,7 @@
     </v-btn>
 
     <div
-      v-for="section of month.sections"
+      v-for="(section, sectionIndex) in month.sections"
       style="clear: both"
     >
       <h4>{{ section.sectionName }}</h4>
@@ -54,7 +54,7 @@
           <td class="pl-4">Act Total</td>
         </tr>
         <tr
-          v-for="line of section.lines"
+          v-for="(line, lineIndex) in section.lines"
           class="monospace"
         >
           <td>{{ line.lineName }}</td>
@@ -72,7 +72,7 @@
               v-model="line.estChildCount"
               density="compact"
               hide-details
-              @change="changeLine(line)"
+              @change="changeLineAndPropagate(line, lineIndex, sectionIndex)"
             ></v-text-field>
           </td>
           <td>
@@ -89,7 +89,7 @@
               v-model="line.actChildCount"
               density="compact"
               hide-details
-              @change="changeLine(line)"
+              @change="changeLineAndPropagate(line, lineIndex, sectionIndex)"
             ></v-text-field>
           </td>
 
@@ -176,11 +176,31 @@ export default {
   props: ["month"],
   setup() {},
   data: () => ({}),
-  computed: {},
+  computed: {
+    sections() {
+      return this.month.sections
+    },
+  },
+  watch: {},
   methods: {
     ...mapActions(useCentreStore, ["saveWorksheet", "duplicateAprilEstimates"]),
     formatMoney,
-    changeLine(line: any) {
+    changeLineAndPropagate(line: any, lineIndex: number, sectionIndex: number) {
+      line.estChildCount = parseInt(line.estChildCount || 0)
+      line.actChildCount = parseInt(line.actChildCount || 0)
+      line.estComputedTotal = line.monthlyAmount * line.estChildCount
+      line.actComputedTotal = line.monthlyAmount * line.actChildCount
+
+      // Bind section 1 to sections 2 and 3
+      // When you update the values in section 1, it will propagated the values to section 2 and 3
+      if (sectionIndex === 0) {
+        this.sections[1].lines[lineIndex].estChildCount = line.estChildCount
+        this.sections[1].lines[lineIndex].actChildCount = line.actChildCount
+        this.sections[2].lines[lineIndex].estChildCount = line.estChildCount
+        this.sections[2].lines[lineIndex].actChildCount = line.actChildCount
+      }
+    },
+    changeLine(line: any, lineIndex: number, sectionIndex: number) {
       line.estChildCount = parseInt(line.estChildCount || 0)
       line.actChildCount = parseInt(line.actChildCount || 0)
       line.estComputedTotal = line.monthlyAmount * line.estChildCount
