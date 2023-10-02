@@ -88,6 +88,27 @@ class "funding_submission_line_jsons" {
   +updated_at: datetime2
 }
 
+note right of "funding_submission_line_jsons"
+  The "values" column stores an array of sections.
+  The format is
+  <code>
+  [{
+    "submissionLineId": 50,
+    "sectionName": "Child Care Spaces",
+    "lineName": "Infants",
+    "monthlyAmount": 700,
+    "estChildCount": 1,
+    "actChildCount": 2,
+    "estComputedTotal": 700,
+    "actComputedTotal": 1400
+  },
+  ...
+  ]
+  </code>
+
+  This is generated from the "funding_submission_lines" table.
+end note
+
 class "funding_submission_line_values" {
   +id: int
   +centre_id: int
