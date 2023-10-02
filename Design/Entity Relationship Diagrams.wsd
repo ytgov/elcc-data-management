@@ -109,24 +109,6 @@ note right of "funding_submission_line_jsons"
   This is generated from the "funding_submission_lines" table.
 end note
 
-class "funding_submission_line_values" {
-  +id: int
-  +centre_id: int
-  +submission_line_id: int
-  +fiscal_year: nvarchar(10)
-  +section_name: nvarchar(200)
-  +line_name: nvarchar(200)
-  +monthly_amount: float
-  +date_name: nvarchar(100)
-  +date_start: datetime2(0)
-  +date_end: datetime2(0)
-  +child_count: float
-  +computed_total: float
-  +is_actual: bit
-  +created_at: datetime2
-  +updated_at: datetime2
-}
-
 class "user_roles" {
   +role: nvarchar(255)
   +id: int
@@ -137,8 +119,6 @@ class "user_roles" {
 
 "centres" --|> "centre_funding_periods" : centre_id
 "centres" --|> "funding_submission_line_jsons" : centre_id
-"centres" --|> "funding_submission_line_values" : centre_id
-"funding_submission_lines" --|> "funding_submission_line_values" : submission_line_id
 "users" --|> "user_roles" : user_id
 
 @enduml
