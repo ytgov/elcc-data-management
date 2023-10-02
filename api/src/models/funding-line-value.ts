@@ -11,3 +11,5 @@ export interface FundingLineValue {
   estimatedComputedTotal: number
   actualComputedTotal: number
 }
+
+export default FundingLineValue

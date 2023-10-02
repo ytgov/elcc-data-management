@@ -15,6 +15,7 @@ import {
 import sequelize from "@/db/db-client"
 
 import Centre from "@/models/centre"
+import FundingLineValue from "@/models/funding-line-value"
 
 // TODO: consider renaming this to MonthlyWorksheet?
 export class FundingSubmissionLineJson extends Model<
@@ -50,7 +51,7 @@ export class FundingSubmissionLineJson extends Model<
     })
   }
 
-  get lines(): NonAttribute<any[]> {
+  get lines(): NonAttribute<FundingLineValue[]> {
     return JSON.parse(this.values)
   }
 }
