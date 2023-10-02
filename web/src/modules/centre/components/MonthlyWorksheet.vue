@@ -188,17 +188,25 @@ export default {
     changeLineAndPropagate(line: any, lineIndex: number, sectionIndex: number) {
       line.estChildCount = parseInt(line.estChildCount || 0)
       line.actChildCount = parseInt(line.actChildCount || 0)
-      line.estComputedTotal = line.monthlyAmount * line.estChildCount
-      line.actComputedTotal = line.monthlyAmount * line.actChildCount
+      this.refreshLineTotals(line)
 
       // Bind section 1 to sections 2 and 3
       // When you update the values in section 1, it will propagated the values to section 2 and 3
       if (sectionIndex === 0) {
-        this.sections[1].lines[lineIndex].estChildCount = line.estChildCount
-        this.sections[1].lines[lineIndex].actChildCount = line.actChildCount
-        this.sections[2].lines[lineIndex].estChildCount = line.estChildCount
-        this.sections[2].lines[lineIndex].actChildCount = line.actChildCount
+        const section1Line = this.sections[1].lines[lineIndex]
+        section1Line.estChildCount = line.estChildCount
+        section1Line.actChildCount = line.actChildCount
+        this.refreshLineTotals(section1Line)
+
+        const section2Line = this.sections[2].lines[lineIndex]
+        section2Line.estChildCount = line.estChildCount
+        section2Line.actChildCount = line.actChildCount
+        this.refreshLineTotals(section2Line)
       }
+    },
+    refreshLineTotals(line: any) {
+      line.estComputedTotal = line.monthlyAmount * line.estChildCount
+      line.actComputedTotal = line.monthlyAmount * line.actChildCount
     },
     async saveClick() {
       await this.saveWorksheet(this.month)
