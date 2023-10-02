@@ -92,5 +92,15 @@ services:
       retries: 3
       start_period: 5s
 
+  # For easily generating large PlantUML diagrams
+  # Not relevant to production environment.
+  # Accessible at http://localhost:9999
+  plantuml:
+    image: plantuml/plantuml-server:jetty
+    ports:
+      - 9999:8080
+    environment:
+      PLANTUML_LIMIT_SIZE: 8192
+
 volumes:
   db_data:

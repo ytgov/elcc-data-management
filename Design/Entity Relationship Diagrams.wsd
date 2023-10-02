@@ -1,0 +1,144 @@
+@startuml
+
+class "SequelizeMeta" {
+  +name: nvarchar(255)
+  +created_at: datetime2
+  +updated_at: datetime2
+}
+
+class "centres" {
+  +id: int
+  +name: nvarchar(200)
+  +license: nvarchar(255)
+  +community: nvarchar(255)
+  +status: nvarchar(255)
+  +hot_meal: bit
+  +licensed_for: int
+  +last_submission: date
+  +created_at: datetime2
+  +updated_at: datetime2
+}
+
+class "funding_periods" {
+  +id: int
+  +fiscal_year: nvarchar(10)
+  +from_date: datetime2(0)
+  +to_date: datetime2(0)
+  +title: nvarchar(100)
+  +is_fiscal_year: bit
+  +is_school_month: bit
+  +created_at: datetime2
+  +updated_at: datetime2
+}
+
+class "funding_submission_lines" {
+  +id: int
+  +fiscal_year: nvarchar(10)
+  +section_name: nvarchar(200)
+  +line_name: nvarchar(200)
+  +from_age: int
+  +to_age: int
+  +monthly_amount: float
+  +created_at: datetime2
+  +updated_at: datetime2
+}
+
+class "logs" {
+  +id: int
+  +table_name: nvarchar(200)
+  +operation: nvarchar(200)
+  +user_email: nvarchar(200)
+  +data: nvarchar(2000)
+  +created_at: datetime2
+  +updated_at: datetime2
+}
+
+class "users" {
+  +email: nvarchar(200)
+  +sub: nvarchar(200)
+  +first_name: nvarchar(100)
+  +last_name: nvarchar(100)
+  +status: nvarchar(50)
+  +is_admin: bit
+  +ynet_id: nvarchar(50)
+  +directory_id: nvarchar(50)
+  +id: int
+  +created_at: datetime2
+  +updated_at: datetime2
+}
+
+class "centre_funding_periods" {
+  +id: int
+  +centre_id: int
+  +fiscal_period_id: int
+  +notes: nvarchar(MAX)
+  +created_at: datetime2
+  +updated_at: datetime2
+}
+
+class "funding_submission_line_jsons" {
+  +id: int
+  +centre_id: int
+  +fiscal_year: nvarchar(10)
+  +date_name: nvarchar(100)
+  +date_start: datetime2(0)
+  +date_end: datetime2(0)
+  +values: nvarchar(MAX)
+  +created_at: datetime2
+  +updated_at: datetime2
+}
+
+note right of "funding_submission_line_jsons"
+  The "values" column stores an array of sections.
+  The format is
+  <code>
+  [{
+    "submissionLineId": 50,
+    "sectionName": "Child Care Spaces",
+    "lineName": "Infants",
+    "monthlyAmount": 700,
+    "estChildCount": 1,
+    "actChildCount": 2,
+    "estComputedTotal": 700,
+    "actComputedTotal": 1400
+  },
+  ...
+  ]
+  </code>
+
+  This is generated from the "funding_submission_lines" table.
+end note
+
+class "funding_submission_line_values" {
+  +id: int
+  +centre_id: int
+  +submission_line_id: int
+  +fiscal_year: nvarchar(10)
+  +section_name: nvarchar(200)
+  +line_name: nvarchar(200)
+  +monthly_amount: float
+  +date_name: nvarchar(100)
+  +date_start: datetime2(0)
+  +date_end: datetime2(0)
+  +child_count: float
+  +computed_total: float
+  +is_actual: bit
+  +created_at: datetime2
+  +updated_at: datetime2
+}
+
+class "user_roles" {
+  +role: nvarchar(255)
+  +id: int
+  +user_id: int
+  +created_at: datetime2
+  +updated_at: datetime2
+}
+
+"centres" --|> "centre_funding_periods" : centre_id
+"centres" --|> "funding_submission_line_jsons" : centre_id
+"centres" --|> "funding_submission_line_values" : centre_id
+"funding_submission_lines" --|> "funding_submission_line_values" : submission_line_id
+"users" --|> "user_roles" : user_id
+
+@enduml
