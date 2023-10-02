@@ -328,7 +328,6 @@ export default {
       "selectCentreById",
       "unselectCentre",
       "loadWorksheets",
-      "createWorksheet",
       "editCentre",
       "addCentreFiscal",
     ]),
@@ -340,9 +339,6 @@ export default {
     },
     editClick() {
       if (this.selectedCentre) this.editCentre(this.selectedCentre)
-    },
-    addWorksheetClick() {
-      this.createWorksheet(this.currentCentre.id || 0)
     },
     addFiscalClick() {
       this.addCentreFiscal(this.currentFiscalYear)
