@@ -109,7 +109,7 @@
           <td>
             <v-text-field
               :value="
-                section.lines.reduce((a: number, v: any) => a + parseInt(v.estChildCount || 0), 0)
+                section.lines.reduce((a: number, v: any) => a + parseFloat(v.estChildCount || 0), 0)
               "
               density="compact"
               hide-details
@@ -136,7 +136,7 @@
           <td>
             <v-text-field
               :value="
-                section.lines.reduce((a: number, v: any) => a + parseInt(v.actChildCount || 0), 0)
+                section.lines.reduce((a: number, v: any) => a + parseFloat(v.actChildCount || 0), 0)
               "
               density="compact"
               hide-details
@@ -186,8 +186,8 @@ export default {
     ...mapActions(useCentreStore, ["saveWorksheet", "duplicateAprilEstimates"]),
     formatMoney,
     changeLineAndPropagate(line: any, lineIndex: number, sectionIndex: number) {
-      line.estChildCount = parseInt(line.estChildCount || 0)
-      line.actChildCount = parseInt(line.actChildCount || 0)
+      line.estChildCount = parseFloat(line.estChildCount || 0)
+      line.actChildCount = parseFloat(line.actChildCount || 0)
       this.refreshLineTotals(line)
 
       // Bind section 1 to sections 2 and 3
