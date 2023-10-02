@@ -67,7 +67,7 @@ export const useUserStore = defineStore("user", {
     async loadCurrentUser() {
       const api = useApiStore()
       await api.secureCall("get", PROFILE_URL).then((resp) => {
-        this.user = resp.data
+        this.user = resp.data || {}
         this.user.roles = []
       })
     },
