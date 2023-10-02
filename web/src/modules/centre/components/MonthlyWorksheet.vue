@@ -69,7 +69,7 @@
           </td>
           <td>
             <v-text-field
-              v-model="line.estChildCount"
+              v-model="line.estimatedChildOccupancyRate"
               density="compact"
               hide-details
               @change="changeLineAndPropagate(line, lineIndex, sectionIndex)"
@@ -77,7 +77,7 @@
           </td>
           <td>
             <v-text-field
-              :value="formatMoney(line.estComputedTotal)"
+              :value="formatMoney(line.estimatedComputedTotal)"
               density="compact"
               hide-details
               readonly
@@ -86,7 +86,7 @@
           </td>
           <td>
             <v-text-field
-              v-model="line.actChildCount"
+              v-model="line.actualChildOccupancyRate"
               density="compact"
               hide-details
               @change="changeLineAndPropagate(line, lineIndex, sectionIndex)"
@@ -95,7 +95,7 @@
 
           <td>
             <v-text-field
-              :value="formatMoney(line.actComputedTotal)"
+              :value="formatMoney(line.actualComputedTotal)"
               density="compact"
               hide-details
               readonly
@@ -109,7 +109,10 @@
           <td>
             <v-text-field
               :value="
-                section.lines.reduce((a: number, v: any) => a + parseFloat(v.estChildCount || 0), 0)
+                section.lines.reduce(
+                  (a: number, v: any) => a + parseFloat(v.estimatedChildOccupancyRate || 0),
+                  0
+                )
               "
               density="compact"
               hide-details
@@ -122,7 +125,7 @@
               :value="
                 formatMoney(
                   section.lines.reduce(
-                    (a: number, v: any) => a + parseFloat(v.estComputedTotal || 0),
+                    (a: number, v: any) => a + parseFloat(v.estimatedComputedTotal || 0),
                     0
                   )
                 )
@@ -136,7 +139,10 @@
           <td>
             <v-text-field
               :value="
-                section.lines.reduce((a: number, v: any) => a + parseFloat(v.actChildCount || 0), 0)
+                section.lines.reduce(
+                  (a: number, v: any) => a + parseFloat(v.actualChildOccupancyRate || 0),
+                  0
+                )
               "
               density="compact"
               hide-details
@@ -149,7 +155,7 @@
               :value="
                 formatMoney(
                   section.lines.reduce(
-                    (a: number, v: any) => a + parseFloat(v.actComputedTotal || 0),
+                    (a: number, v: any) => a + parseFloat(v.actualComputedTotal || 0),
                     0
                   )
                 )
@@ -186,27 +192,27 @@ export default {
     ...mapActions(useCentreStore, ["saveWorksheet", "duplicateAprilEstimates"]),
     formatMoney,
     changeLineAndPropagate(line: any, lineIndex: number, sectionIndex: number) {
-      line.estChildCount = parseFloat(line.estChildCount || 0)
-      line.actChildCount = parseFloat(line.actChildCount || 0)
+      line.estimatedChildOccupancyRate = parseFloat(line.estimatedChildOccupancyRate || 0)
+      line.actualChildOccupancyRate = parseFloat(line.actualChildOccupancyRate || 0)
       this.refreshLineTotals(line)
 
       // Bind section 1 to sections 2 and 3
       // When you update the values in section 1, it will propagated the values to section 2 and 3
       if (sectionIndex === 0) {
         const section1Line = this.sections[1].lines[lineIndex]
-        section1Line.estChildCount = line.estChildCount
-        section1Line.actChildCount = line.actChildCount
+        section1Line.estimatedChildOccupancyRate = line.estimatedChildOccupancyRate
+        section1Line.actualChildOccupancyRate = line.actualChildOccupancyRate
         this.refreshLineTotals(section1Line)
 
         const section2Line = this.sections[2].lines[lineIndex]
-        section2Line.estChildCount = line.estChildCount
-        section2Line.actChildCount = line.actChildCount
+        section2Line.estimatedChildOccupancyRate = line.estimatedChildOccupancyRate
+        section2Line.actualChildOccupancyRate = line.actualChildOccupancyRate
         this.refreshLineTotals(section2Line)
       }
     },
     refreshLineTotals(line: any) {
-      line.estComputedTotal = line.monthlyAmount * line.estChildCount
-      line.actComputedTotal = line.monthlyAmount * line.actChildCount
+      line.estimatedComputedTotal = line.monthlyAmount * line.estimatedChildOccupancyRate
+      line.actualComputedTotal = line.monthlyAmount * line.actualChildOccupancyRate
     },
     async saveClick() {
       await this.saveWorksheet(this.month)

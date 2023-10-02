@@ -196,8 +196,8 @@ export const useCentreStore = defineStore("centre", {
             const aprilLine = aprilLines.filter(
               (a: any) => a.submissionLineId == line.submissionLineId
             )
-            line.estChildCount = aprilLine[0].estChildCount
-            line.estComputedTotal = aprilLine[0].estComputedTotal
+            line.estimatedChildOccupancyRate = aprilLine[0].estimatedChildOccupancyRate
+            line.estimatedComputedTotal = aprilLine[0].estimatedComputedTotal
           }
         }
         await this.saveWorksheet(month, false)

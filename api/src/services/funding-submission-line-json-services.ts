@@ -27,10 +27,10 @@ export class FundingSubmissionLineJsonServices implements BaseService {
         sectionName: line.sectionName,
         lineName: line.lineName,
         monthlyAmount: line.monthlyAmount,
-        estChildCount: 0,
-        actChildCount: 0,
-        estComputedTotal: 0,
-        actComputedTotal: 0,
+        estimatedChildOccupancyRate: 0,
+        actualChildOccupancyRate: 0,
+        estimatedComputedTotal: 0,
+        actualComputedTotal: 0,
       })
     }
 

@@ -18,8 +18,8 @@
         <td>
           {{ line.month }}
         </td>
-        <td class="text-right">{{ formatMoney(line.estComputedTotal) }}</td>
-        <td class="text-right">{{ formatMoney(line.actComputedTotal) }}</td>
+        <td class="text-right">{{ formatMoney(line.estimatedComputedTotal) }}</td>
+        <td class="text-right">{{ formatMoney(line.actualComputedTotal) }}</td>
         <td class="text-right">{{ formatMoney(line.diff) }}</td>
       </tr>
 
@@ -31,7 +31,7 @@
               yearWorksheets
                 .flatMap((y: any) => y.sections)
                 .flatMap((s) => s.lines)
-                .reduce((a: number, v: any) => a + parseFloat(v.estComputedTotal), 0)
+                .reduce((a: number, v: any) => a + parseFloat(v.estimatedComputedTotal), 0)
             )
           }}
         </td>
@@ -42,7 +42,7 @@
               yearWorksheets
                 .flatMap((y: any) => y.sections)
                 .flatMap((s) => s.lines)
-                .reduce((a: number, v: any) => a + parseFloat(v.actComputedTotal), 0)
+                .reduce((a: number, v: any) => a + parseFloat(v.actualComputedTotal), 0)
             )
           }}
         </td>
@@ -215,79 +215,79 @@ export default {
     },
     summaryLines() {
       const lines = []
-      let runningEstComputedTotal = 0
-      let runningActComputedTotal = 0
+      let runningestimatedComputedTotal = 0
+      let runningactualComputedTotal = 0
 
       for (const line of this.yearWorksheets) {
         const rows = line.sections.flatMap((y: any) => y).flatMap((s: any) => s.lines)
 
         /* let v1 = line.flatMap((y: any) => y.sections)
                 .flatMap((s:any) => s.lines)
-                .reduce((a: number, v: any) => a + parseFloat(v.actChildCount), 0) */
+                .reduce((a: number, v: any) => a + parseFloat(v.actualChildOccupancyRate), 0) */
 
         // console.log(v1);
         const monthVal = {
           month: line.month,
-          estComputedTotal: rows.reduce(
-            (a: number, v: any) => a + parseFloat(v.estComputedTotal),
+          estimatedComputedTotal: rows.reduce(
+            (a: number, v: any) => a + parseFloat(v.estimatedComputedTotal),
             0
           ),
-          actComputedTotal: rows.reduce(
-            (a: number, v: any) => a + parseFloat(v.actComputedTotal),
+          actualComputedTotal: rows.reduce(
+            (a: number, v: any) => a + parseFloat(v.actualComputedTotal),
             0
           ),
           diff: 0,
         }
 
-        monthVal.diff = monthVal.estComputedTotal - monthVal.actComputedTotal
+        monthVal.diff = monthVal.estimatedComputedTotal - monthVal.actualComputedTotal
 
         lines.push(monthVal)
 
-        runningEstComputedTotal += monthVal.estComputedTotal
-        runningActComputedTotal += monthVal.actComputedTotal
+        runningestimatedComputedTotal += monthVal.estimatedComputedTotal
+        runningactualComputedTotal += monthVal.actualComputedTotal
 
-        console.log(runningEstComputedTotal, monthVal.estComputedTotal)
+        console.log(runningestimatedComputedTotal, monthVal.estimatedComputedTotal)
 
         if (line.month == "June") {
           lines.push({
             month: "Initial Advance (3 mos)",
-            estComputedTotal: runningEstComputedTotal,
-            actComputedTotal: runningActComputedTotal,
-            diff: runningEstComputedTotal - runningActComputedTotal,
+            estimatedComputedTotal: runningestimatedComputedTotal,
+            actualComputedTotal: runningactualComputedTotal,
+            diff: runningestimatedComputedTotal - runningactualComputedTotal,
           })
-          runningEstComputedTotal = runningActComputedTotal = 0
+          runningestimatedComputedTotal = runningactualComputedTotal = 0
         } else if (line.month == "August") {
           lines.push({
             month: "Second Advance (2 mos) ",
-            estComputedTotal: runningEstComputedTotal,
-            actComputedTotal: runningActComputedTotal,
-            diff: runningEstComputedTotal - runningActComputedTotal,
+            estimatedComputedTotal: runningestimatedComputedTotal,
+            actualComputedTotal: runningactualComputedTotal,
+            diff: runningestimatedComputedTotal - runningactualComputedTotal,
           })
-          runningEstComputedTotal = runningActComputedTotal = 0
+          runningestimatedComputedTotal = runningactualComputedTotal = 0
         } else if (line.month == "October") {
           lines.push({
             month: "Third Advance (2 mos) ",
-            estComputedTotal: runningEstComputedTotal,
-            actComputedTotal: runningActComputedTotal,
-            diff: runningEstComputedTotal - runningActComputedTotal,
+            estimatedComputedTotal: runningestimatedComputedTotal,
+            actualComputedTotal: runningactualComputedTotal,
+            diff: runningestimatedComputedTotal - runningactualComputedTotal,
           })
-          runningEstComputedTotal = runningActComputedTotal = 0
+          runningestimatedComputedTotal = runningactualComputedTotal = 0
         } else if (line.month == "December") {
           lines.push({
             month: "Fourth Advance (2 mos) ",
-            estComputedTotal: runningEstComputedTotal,
-            actComputedTotal: runningActComputedTotal,
-            diff: runningEstComputedTotal - runningActComputedTotal,
+            estimatedComputedTotal: runningestimatedComputedTotal,
+            actualComputedTotal: runningactualComputedTotal,
+            diff: runningestimatedComputedTotal - runningactualComputedTotal,
           })
-          runningEstComputedTotal = runningActComputedTotal = 0
+          runningestimatedComputedTotal = runningactualComputedTotal = 0
         } else if (line.month == "February") {
           lines.push({
             month: "Fifth Advance (2 mos) ",
-            estComputedTotal: runningEstComputedTotal,
-            actComputedTotal: runningActComputedTotal,
-            diff: runningEstComputedTotal - runningActComputedTotal,
+            estimatedComputedTotal: runningestimatedComputedTotal,
+            actualComputedTotal: runningactualComputedTotal,
+            diff: runningestimatedComputedTotal - runningactualComputedTotal,
           })
-          runningEstComputedTotal = runningActComputedTotal = 0
+          runningestimatedComputedTotal = runningactualComputedTotal = 0
         }
       }
 

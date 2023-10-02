@@ -6,8 +6,8 @@ export interface FundingLineValue {
   sectionName: string
   lineName: string
   monthlyAmount: number
-  estChildCount: number
-  actChildCount: number
-  estComputedTotal: number
-  actComputedTotal: number
+  estimatedChildOccupancyRate: number
+  actualChildOccupancyRate: number
+  estimatedComputedTotal: number
+  actualComputedTotal: number
 }
