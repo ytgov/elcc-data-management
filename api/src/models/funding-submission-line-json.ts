@@ -16,6 +16,7 @@ import sequelize from "@/db/db-client"
 
 import Centre from "@/models/centre"
 
+// TODO: consider renaming this to MonthlyWorksheet?
 export class FundingSubmissionLineJson extends Model<
   InferAttributes<FundingSubmissionLineJson>,
   InferCreationAttributes<FundingSubmissionLineJson>
