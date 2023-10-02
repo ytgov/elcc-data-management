@@ -109,6 +109,3 @@ db/sapassword.env
 
 # DB Data
 db/data
-
-# IDE customization
-.vscode/settings.json
