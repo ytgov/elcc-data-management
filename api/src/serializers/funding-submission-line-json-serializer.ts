@@ -45,7 +45,6 @@ export class FundingSubmissionLineJsonSerializer extends BaseSerializer<FundingS
 
         for (const section of sections) {
           const lines = monthSheets.lines.filter((w) => section == w.sectionName)
-          // TODO: investigate what would be required to permit this to be camel cased.
           monthRow.sections.push({ sectionName: section, lines })
         }
 
