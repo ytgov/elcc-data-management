@@ -69,8 +69,8 @@ class "users" {
 
 class "centre_funding_periods" {
   +id: int
-  +centreId: int
-  +fiscalPeriodId: int
+  +centre_id: int
+  +fiscal_period_id: int
   +notes: nvarchar(MAX)
   +created_at: datetime2
   +updated_at: datetime2
@@ -135,7 +135,7 @@ class "user_roles" {
   +updated_at: datetime2
 }
 
-"centres" --|> "centre_funding_periods" : centreId
+"centres" --|> "centre_funding_periods" : centre_id
 "centres" --|> "funding_submission_line_jsons" : centre_id
 "centres" --|> "funding_submission_line_values" : centre_id
 "funding_submission_lines" --|> "funding_submission_line_values" : submission_line_id
