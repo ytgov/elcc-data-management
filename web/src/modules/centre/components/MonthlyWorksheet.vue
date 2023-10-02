@@ -200,12 +200,6 @@ export default {
         this.sections[2].lines[lineIndex].actChildCount = line.actChildCount
       }
     },
-    changeLine(line: any, lineIndex: number, sectionIndex: number) {
-      line.estChildCount = parseInt(line.estChildCount || 0)
-      line.actChildCount = parseInt(line.actChildCount || 0)
-      line.estComputedTotal = line.monthlyAmount * line.estChildCount
-      line.actComputedTotal = line.monthlyAmount * line.actChildCount
-    },
     async saveClick() {
       await this.saveWorksheet(this.month)
     },
