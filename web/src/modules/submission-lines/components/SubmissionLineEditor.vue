@@ -84,7 +84,7 @@ import { mapActions, mapState } from "pinia"
 import { useSubmissionLinesStore } from "../store"
 
 export default {
-  name: "UserEditor",
+  name: "SubmissionLineEditor",
   data: () => ({}),
   computed: {
     ...mapState(useSubmissionLinesStore, ["selectedLine"]),
