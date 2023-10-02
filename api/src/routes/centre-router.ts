@@ -101,7 +101,7 @@ centreRouter.put("/:id/worksheet/:worksheetId", async (req: Request, res: Respon
     throw new Error("Worksheet not found")
   }
 
-  // TODO: make the front-end handle this conversion
+  // TODO: validate lines format against a JSON schema.
   const lines = sections.flatMap((s: any) => s.lines)
   const values = JSON.stringify(lines)
   return sheet
