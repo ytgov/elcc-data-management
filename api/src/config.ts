@@ -19,7 +19,7 @@ dotenv.config({ path: path })
 export const API_PORT = process.env.API_PORT || "3000"
 
 export const VUE_APP_FRONTEND_URL = process.env.VUE_APP_FRONTEND_URL || ""
-export const AUTH0_DOMAIN = `${process.env.AUTH0_DOMAIN}` || ""
+export const AUTH0_DOMAIN = (process.env.AUTH0_DOMAIN || "").replace(/\/$/, "")
 export const AUTH0_AUDIENCE = process.env.VUE_APP_AUTH_AUDIENCE
 export const AUTH_REDIRECT = process.env.AUTH_REDIRECT || process.env.FRONTEND_URL || ""
 

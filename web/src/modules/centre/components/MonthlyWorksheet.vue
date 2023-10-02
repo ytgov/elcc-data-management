@@ -19,7 +19,7 @@
     </v-btn>
 
     <div
-      v-for="section of month.sections"
+      v-for="(section, sectionIndex) in month.sections"
       style="clear: both"
     >
       <h4>{{ section.sectionName }}</h4>
@@ -54,7 +54,7 @@
           <td class="pl-4">Act Total</td>
         </tr>
         <tr
-          v-for="line of section.lines"
+          v-for="(line, lineIndex) in section.lines"
           class="monospace"
         >
           <td>{{ line.lineName }}</td>
@@ -72,7 +72,7 @@
               v-model="line.estChildCount"
               density="compact"
               hide-details
-              @change="changeLine(line)"
+              @change="changeLineAndPropagate(line, lineIndex, sectionIndex)"
             ></v-text-field>
           </td>
           <td>
@@ -89,7 +89,7 @@
               v-model="line.actChildCount"
               density="compact"
               hide-details
-              @change="changeLine(line)"
+              @change="changeLineAndPropagate(line, lineIndex, sectionIndex)"
             ></v-text-field>
           </td>
 
@@ -167,46 +167,44 @@
 </template>
 <script lang="ts">
 import { mapActions } from "pinia"
+
 import { useCentreStore } from "../store"
+import { formatMoney } from "@/utils"
 
 export default {
   name: "MonthlyWorksheet",
   props: ["month"],
   setup() {},
   data: () => ({}),
-  computed: {},
+  computed: {
+    sections() {
+      return this.month.sections
+    },
+  },
+  watch: {},
   methods: {
     ...mapActions(useCentreStore, ["saveWorksheet", "duplicateAprilEstimates"]),
-
-    formatMoney(amount: any, decimalCount = 2, decimal = ".", thousands = ",") {
-      try {
-        decimalCount = Math.abs(decimalCount)
-        decimalCount = isNaN(decimalCount) ? 2 : decimalCount
-
-        const negativeSign = amount < 0 ? "-" : ""
-
-        const i = parseInt((amount = Math.abs(amount || 0).toFixed(decimalCount))).toString()
-        const j = i.length > 3 ? i.length % 3 : 0
-
-        return (
-          negativeSign +
-          "$" +
-          (j ? i.substr(0, j) + thousands : "") +
-          i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands) +
-          (decimalCount
-            ? decimal +
-              Math.abs(parseFloat(amount) - parseFloat(i))
-                .toFixed(decimalCount)
-                .slice(2)
-            : "")
-        )
-      } catch (e) {
-        console.log(e)
-      }
-    },
-    changeLine(line: any) {
+    formatMoney,
+    changeLineAndPropagate(line: any, lineIndex: number, sectionIndex: number) {
       line.estChildCount = parseInt(line.estChildCount || 0)
       line.actChildCount = parseInt(line.actChildCount || 0)
+      this.refreshLineTotals(line)
+
+      // Bind section 1 to sections 2 and 3
+      // When you update the values in section 1, it will propagated the values to section 2 and 3
+      if (sectionIndex === 0) {
+        const section1Line = this.sections[1].lines[lineIndex]
+        section1Line.estChildCount = line.estChildCount
+        section1Line.actChildCount = line.actChildCount
+        this.refreshLineTotals(section1Line)
+
+        const section2Line = this.sections[2].lines[lineIndex]
+        section2Line.estChildCount = line.estChildCount
+        section2Line.actChildCount = line.actChildCount
+        this.refreshLineTotals(section2Line)
+      }
+    },
+    refreshLineTotals(line: any) {
       line.estComputedTotal = line.monthlyAmount * line.estChildCount
       line.actComputedTotal = line.monthlyAmount * line.actChildCount
     },
