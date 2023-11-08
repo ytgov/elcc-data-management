@@ -20,7 +20,7 @@ interface CentreState {
 
 export const useCentreStore = defineStore("centre", {
   state: (): CentreState => ({
-    centres: new Array<ChildCareCentre>(),
+    centres: [],
     selectedCentre: undefined,
     editingCentre: undefined,
     isLoading: false,
@@ -62,16 +62,15 @@ export const useCentreStore = defineStore("centre", {
       this.selectedCentre = centre
     },
     selectCentreById(id: number) {
-      if (this.isLoading || this.centres.length == 0) {
-        const self = this
-
+      if (this.isLoading && this.centres.length == 0) {
         const handle = window.setInterval(() => {
-          if (self.isLoading || this.centres.length == 0) {
-          } else {
-            window.clearInterval(handle)
-            this.selectedCentre = this.centres.filter((c) => c.id == id)[0]
+          if (this.isLoading && this.centres.length == 0) {
+            return // wait some more
           }
-        }, 100)
+
+          window.clearInterval(handle)
+          this.selectedCentre = this.centres.filter((c) => c.id == id)[0]
+        }, 300)
       } else {
         this.selectedCentre = this.centres.filter((c) => c.id == id)[0]
       }
@@ -196,8 +195,8 @@ export const useCentreStore = defineStore("centre", {
             const aprilLine = aprilLines.filter(
               (a: any) => a.submissionLineId == line.submissionLineId
             )
-            line.estChildCount = aprilLine[0].estChildCount
-            line.estComputedTotal = aprilLine[0].estComputedTotal
+            line.estimatedChildOccupancyRate = aprilLine[0].estimatedChildOccupancyRate
+            line.estimatedComputedTotal = aprilLine[0].estimatedComputedTotal
           }
         }
         await this.saveWorksheet(month, false)

@@ -68,9 +68,9 @@
     ></v-data-table>
   </base-card>
 
-  <submission-line-editor></submission-line-editor>
+  <SubmissionLineEditor />
 
-  <funding-fiscal-editor></funding-fiscal-editor>
+  <FundingFiscalEditor />
 </template>
 <script lang="ts">
 import { mapActions, mapState } from "pinia"
