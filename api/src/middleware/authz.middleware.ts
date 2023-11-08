@@ -38,6 +38,16 @@ export async function autheticateAndLoadUser(req: Request, res: Response, next: 
     return next()
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore I can't figure out how to override express-jwt's req.user type definition
+  const { sub } = req.user
+  if (!isNil(sub)) {
+    req.user = (await User.findOne({ where: { sub }, include: ["roles"] })) || req.user
+    if (isAuthenticatedRequest(req)) {
+      return next()
+    }
+  }
+
   const token = req.headers.authorization
   if (isNil(token)) {
     return res.status(401).json({ error: "No token provided" })
