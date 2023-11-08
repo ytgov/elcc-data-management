@@ -138,7 +138,7 @@
         <v-card-title style="background-color: #0097a968">Latest Enrollment</v-card-title>
         <v-divider></v-divider>
         <v-card-text class="pt-3">
-          <EnrollmentChart />
+          <EnrollmentChart :centre-id="centreId" />
         </v-card-text>
       </v-card>
     </v-col>
@@ -238,6 +238,8 @@
 </template>
 
 <script lang="ts">
+import { isNil } from "lodash"
+
 import { FormatDate, FormatYesNo } from "@/utils"
 import { mapActions, mapState, mapWritableState } from "pinia"
 import VueApexCharts from "vue3-apexcharts"
@@ -259,7 +261,12 @@ export default {
     CentreEditor,
     WorksheetSummary,
   },
-  setup() {},
+  props: {
+    centreId: {
+      type: String,
+      required: true,
+    },
+  },
   data() {
     return {
       submissions: [
@@ -289,20 +296,15 @@ export default {
       series: [2, 8, 14, 5, 2, 4, 2],
     }
   },
-  watch: {
-    selectedCentre(newVal) {
-      this.currentCentre = newVal
-    },
-  },
-  mounted() {
-    const centreId = this.$route.params.id
-
-    if (this.selectedCentre) this.currentCentre = this.selectedCentre
-    else {
-      this.selectCentreById(parseInt(centreId as string))
+  async mounted() {
+    const centre = await this.selectCentreById(parseInt(this.centreId as string))
+    if (isNil(centre)) {
+      throw new Error(`Could not load centre from id=${this.centreId}`)
     }
 
-    this.loadWorksheets(parseInt(centreId as string))
+    this.currentCentre = centre
+
+    await this.loadWorksheets(parseInt(this.centreId as string))
   },
   unmounted() {
     this.unselectCentre()

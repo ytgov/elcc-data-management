@@ -1,5 +1,6 @@
 import { defineStore } from "pinia"
-import { uniq, cloneDeep } from "lodash"
+import { uniq, cloneDeep, isNil } from "lodash"
+
 import { useNotificationStore } from "@/store/NotificationStore"
 import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 import { useApiStore } from "@/store/ApiStore"
@@ -51,7 +52,7 @@ export const useCentreStore = defineStore("centre", {
       await api
         .secureCall("get", CENTRE_URL)
         .then((resp) => {
-          this.centres = resp.data
+          this.centres = resp.data || []
         })
         .finally(() => {
           this.isLoading = false
@@ -61,19 +62,17 @@ export const useCentreStore = defineStore("centre", {
     selectCentre(centre: ChildCareCentre) {
       this.selectedCentre = centre
     },
-    selectCentreById(id: number) {
-      if (this.isLoading && this.centres.length == 0) {
-        const handle = window.setInterval(() => {
-          if (this.isLoading && this.centres.length == 0) {
-            return // wait some more
-          }
-
-          window.clearInterval(handle)
-          this.selectedCentre = this.centres.filter((c) => c.id == id)[0]
-        }, 300)
-      } else {
-        this.selectedCentre = this.centres.filter((c) => c.id == id)[0]
+    async selectCentreById(id: number): Promise<ChildCareCentre | undefined> {
+      const centreFromStore = this.centres.find((centre) => centre.id === id)
+      if (!isNil(centreFromStore)) {
+        this.selectedCentre = centreFromStore
+        return this.selectedCentre
       }
+
+      const api = useApiStore()
+      const centre = await api.secureCall("get", `${CENTRE_URL}/${id}`)
+      this.selectedCentre = centre
+      return this.selectedCentre
     },
     unselectCentre() {
       this.selectedCentre = undefined
