@@ -5,10 +5,10 @@ describe("api/src/models/funding-submission-line-json.ts", () => {
     describe("#lines", () => {
       it("is #values parsed as json", () => {
         const fundingSubmissionLineJson = FundingSubmissionLineJson.build({
-          dateName: "2020-01-01",
+          dateName: "April",
           dateStart: new Date("2020-01-01"),
           dateEnd: new Date("2020-01-01"),
-          fiscalYear: "2020",
+          fiscalYear: "2020/21",
           values: "[1,2,3]",
         })
         expect(fundingSubmissionLineJson.lines).toEqual([1, 2, 3])
@@ -16,10 +16,10 @@ describe("api/src/models/funding-submission-line-json.ts", () => {
 
       test("when #values is not valid json", () => {
         const fundingSubmissionLineJson = FundingSubmissionLineJson.build({
-          dateName: "2020-01-01",
+          dateName: "April",
           dateStart: new Date("2020-01-01"),
           dateEnd: new Date("2020-01-01"),
-          fiscalYear: "2020",
+          fiscalYear: "2020/21",
           values: "[NotValidJson]",
         })
         expect(() => fundingSubmissionLineJson.lines).toThrow(

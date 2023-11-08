@@ -21,7 +21,6 @@ import {
 import sequelize from "@/db/db-client"
 import CentreFundingPeriod from "@/models/centre-funding-period"
 import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
-import FundingSubmissionLineValue from "@/models/funding-submission-line-value"
 
 export enum CentreStatus {
   UP_TO_DATE = "Up to date",
@@ -106,45 +105,11 @@ export class Centre extends Model<InferAttributes<Centre>, InferCreationAttribut
   declare countFundingSubmissionLineJsons: HasManyCountAssociationsMixin
   declare createFundingSubmissionLineJson: HasManyCreateAssociationMixin<FundingSubmissionLineJson>
 
-  declare getFundingSubmissionLineValues: HasManyGetAssociationsMixin<FundingSubmissionLineValue>
-  declare setFundingSubmissionLineValues: HasManySetAssociationsMixin<
-    FundingSubmissionLineValue,
-    FundingSubmissionLineValue["centreId"]
-  >
-  declare hasFundingSubmissionLineValue: HasManyHasAssociationMixin<
-    FundingSubmissionLineValue,
-    FundingSubmissionLineValue["centreId"]
-  >
-  declare hasFundingSubmissionLineValues: HasManyHasAssociationsMixin<
-    FundingSubmissionLineValue,
-    FundingSubmissionLineValue["centreId"]
-  >
-  declare addFundingSubmissionLineValue: HasManyAddAssociationMixin<
-    FundingSubmissionLineValue,
-    FundingSubmissionLineValue["centreId"]
-  >
-  declare addFundingSubmissionLineValues: HasManyAddAssociationsMixin<
-    FundingSubmissionLineValue,
-    FundingSubmissionLineValue["centreId"]
-  >
-  declare removeFundingSubmissionLineValue: HasManyRemoveAssociationMixin<
-    FundingSubmissionLineValue,
-    FundingSubmissionLineValue["centreId"]
-  >
-  declare removeFundingSubmissionLineValues: HasManyRemoveAssociationsMixin<
-    FundingSubmissionLineValue,
-    FundingSubmissionLineValue["centreId"]
-  >
-  declare countFundingSubmissionLineValues: HasManyCountAssociationsMixin
-  declare createFundingSubmissionLineValue: HasManyCreateAssociationMixin<FundingSubmissionLineValue>
-
   declare fundingPeriods?: NonAttribute<CentreFundingPeriod[]>
   declare fundingSubmissionLineJsons?: NonAttribute<FundingSubmissionLineJson[]>
-  declare fundingSubmissionLineValues?: NonAttribute<FundingSubmissionLineValue[]>
   declare static associations: {
     fundingPeriods: Association<Centre, CentreFundingPeriod>
     fundingSubmissionLineJsons: Association<Centre, FundingSubmissionLineJson>
-    fundingSubmissionLineValues: Association<Centre, FundingSubmissionLineValue>
   }
 
   static establishAssociations() {
@@ -157,11 +122,6 @@ export class Centre extends Model<InferAttributes<Centre>, InferCreationAttribut
       sourceKey: "id",
       foreignKey: "centreId",
       as: "fundingSubmissionLineJsons",
-    })
-    this.hasMany(FundingSubmissionLineValue, {
-      sourceKey: "id",
-      foreignKey: "centreId",
-      as: "fundingSubmissionLineValues",
     })
   }
 }

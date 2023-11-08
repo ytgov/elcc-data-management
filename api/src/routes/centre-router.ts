@@ -3,7 +3,7 @@ import { isNil } from "lodash"
 
 import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 import { RequireAdmin } from "@/middleware"
-import { Centre, FundingSubmissionLineJson, FundingSubmissionLineValue, User } from "@/models"
+import { Centre, FundingSubmissionLineJson, User } from "@/models"
 import { CentreServices, FundingSubmissionLineJsonServices } from "@/services"
 
 import { FundingSubmissionLineJsonSerializer } from "@/serializers"
@@ -56,37 +56,6 @@ centreRouter.get("/:id/worksheets", async (req: Request, res: Response) => {
   return res.json({ data: serializedGroups })
 })
 
-centreRouter.post("/:id/worksheets", async (req: Request, res: Response) => {
-  // TODO: figure out how to push this logic into the authentication layer
-  if (!(req.user instanceof User)) {
-    return res.status(401).json({ message: "Unauthorized" })
-  }
-
-  const { id } = req.params
-  const centre = await Centre.findByPk(id)
-
-  if (isNil(centre)) {
-    return res.status(404).json({ message: "Centre not found" })
-  }
-
-  req.body.centreId = id
-  req.body.startDate = new Date()
-  req.body.endDate = new Date()
-  req.body.payment = 0
-  req.body.submittedBy = req.user.email
-  req.body.submittedDate = new Date()
-
-  // await SomeModel.create(req.body)
-  // TODO: model matching spec does not exist, create at some point.
-  throw new Error("Not implemented")
-
-  const worksheets = await FundingSubmissionLineValue.findAll({
-    where: { centreId: id },
-    include: "values",
-  })
-  res.json({ data: worksheets })
-})
-
 centreRouter.put("/:id/worksheet/:worksheetId", async (req: Request, res: Response) => {
   const { id, worksheetId } = req.params
   const { sections } = req.body
@@ -101,7 +70,7 @@ centreRouter.put("/:id/worksheet/:worksheetId", async (req: Request, res: Respon
     throw new Error("Worksheet not found")
   }
 
-  // TODO: make the front-end handle this conversion
+  // TODO: validate lines format against a JSON schema.
   const lines = sections.flatMap((s: any) => s.lines)
   const values = JSON.stringify(lines)
   return sheet

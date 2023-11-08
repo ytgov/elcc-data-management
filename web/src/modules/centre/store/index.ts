@@ -109,16 +109,6 @@ export const useCentreStore = defineStore("centre", {
         })
         .finally(() => {})
     },
-    async createWorksheet(id: number) {
-      const api = useApiStore()
-      await api
-        .secureCall("post", `${CENTRE_URL}/${id}/worksheets`, { month: "TESTING" })
-        .then((resp) => {
-          this.worksheets = resp.data
-        })
-        .finally(() => {})
-    },
-
     async save() {
       const api = useApiStore()
 
