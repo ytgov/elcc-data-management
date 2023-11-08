@@ -88,6 +88,6 @@ export async function autheticateAndLoadUser(req: Request, res: Response, next: 
       return next()
     })
     .catch((error) => {
-      return res.status(401).json({ message: error.message })
+      return res.status(401).json({ message: `Failed to get user info: ${error}` })
     })
 }
