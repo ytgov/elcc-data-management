@@ -154,7 +154,12 @@
           v-model="tab"
           grow
         >
-          <v-tab value="option-1"> Summary </v-tab>
+          <v-tab
+            value="option-1"
+            :to="{ name: 'CentreDashboard-SummaryTab' }"
+          >
+            Summary
+          </v-tab>
           <v-tab value="option-2"> Worksheets </v-tab>
           <v-tab value="option-3"> Employees </v-tab>
         </v-tabs>
@@ -165,28 +170,7 @@
           class="fill-height"
         >
           <v-window-item value="option-1">
-            <v-toolbar
-              color="#0097a966"
-              density="compact"
-            >
-              <v-tabs v-model="summary">
-                <v-tab value="0"> Reconciliation </v-tab>
-                <v-tab value="1"> Worksheets </v-tab>
-              </v-tabs>
-            </v-toolbar>
-
-            <v-window v-model="summary">
-              <v-window-item value="0">
-                <v-card flat>
-                  <v-card-text>
-                    <PaymentSummary />
-                  </v-card-text>
-                </v-card>
-              </v-window-item>
-              <v-window-item value="1">
-                <WorksheetSummary />
-              </v-window-item>
-            </v-window>
+            <router-view></router-view>
           </v-window-item>
           <v-window-item value="option-2">
             <v-toolbar
@@ -244,8 +228,7 @@ import { FormatDate, FormatYesNo } from "@/utils"
 import { mapActions, mapState, mapWritableState } from "pinia"
 import VueApexCharts from "vue3-apexcharts"
 import MonthlyWorksheet from "../components/MonthlyWorksheet.vue"
-import PaymentSummary from "../components/PaymentSummary.vue"
-import WorksheetSummary from "../components/WorksheetSummary.vue"
+
 import EnrollmentChart from "../components/EnrollmentChart.vue"
 import CentreEditor from "../components/CentreEditor.vue"
 import { type ChildCareCentre, useCentreStore } from "../store"
@@ -256,10 +239,8 @@ export default {
   components: {
     VueApexCharts,
     MonthlyWorksheet,
-    PaymentSummary,
     EnrollmentChart,
     CentreEditor,
-    WorksheetSummary,
   },
   props: {
     centreId: {
@@ -277,7 +258,6 @@ export default {
       ],
       tab: 0,
       month: "",
-      summary: 0,
       currentCentre: { name: "" } as ChildCareCentre,
 
       options: {
@@ -295,6 +275,13 @@ export default {
       },
       series: [2, 8, 14, 5, 2, 4, 2],
     }
+  },
+  watch: {
+    tab(newValue) {
+      if (!["option-1"].includes(newValue)) {
+        this.$router.push({ name: "CentreDashboard" })
+      }
+    },
   },
   async mounted() {
     const centre = await this.selectCentreById(parseInt(this.centreId as string))
