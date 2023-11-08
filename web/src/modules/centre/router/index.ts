@@ -11,9 +11,10 @@ const routes = [
         beforeEnter: authGuard,
       },
       {
-        path: ":id",
+        path: ":centreId",
         component: async () => await import("../views/CentreDashboard.vue"),
         beforeEnter: authGuard,
+        props: true,
       },
     ],
   },

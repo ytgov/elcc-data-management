@@ -50,7 +50,12 @@ centreRouter.get("/:id/enrollment", async (req: Request, res: Response) => {
 })
 
 centreRouter.get("/:id/worksheets", async (req: Request, res: Response) => {
-  const { id } = req.params
+  const id = parseInt(req.params.id)
+
+  if (isNil(id) || isNaN(id)) {
+    return res.status(404).json({ message: "Must provide a centre id" })
+  }
+
   const worksheets = await FundingSubmissionLineJson.findAll({ where: { centreId: id } })
   const serializedGroups = FundingSubmissionLineJsonSerializer.serializeWorksheetsView(worksheets)
   return res.json({ data: serializedGroups })
