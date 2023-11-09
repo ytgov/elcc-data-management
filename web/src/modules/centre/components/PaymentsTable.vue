@@ -21,7 +21,15 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive } from "vue"
+import { ref, onMounted } from "vue"
 
-const payments: any[] = reactive([])
+import paymentsApi from "@/api/payments-api"
+
+const payments = ref([])
+
+onMounted(async () => {
+  await paymentsApi.list().then(({ payments: newPayments }) => {
+    payments.value = newPayments
+  })
+})
 </script>
