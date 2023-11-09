@@ -5,7 +5,7 @@
         <th class="text-left">Payment Name</th>
         <th class="text-left">Payment Amount</th>
         <th class="text-left">Payment Date</th>
-        <th class="text-left">Action</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -23,10 +23,12 @@
         </td>
         <td>
           <v-text-field
-            v-model="payment.amountInCents"
+            :model-value="formatDollars(payment.amountInCents)"
             label="Payment Amount"
             density="compact"
+            prepend-inner-icon="mdi-currency-usd"
             hide-details
+            @update:model-value="(newValue: string) => updatePaymentAmount(payment, newValue)"
           ></v-text-field>
         </td>
         <td>
@@ -38,17 +40,19 @@
             hide-details="auto"
           ></v-text-field>
         </td>
-        <td>
+        <td class="text-center">
           <template v-if="isPersistedPayment(payment)">
             <v-btn
-              v-if="payment.edited"
               color="success"
+              size="small"
               @click="updatePayment(payment)"
             >
-              Edit
+              Update
             </v-btn>
             <v-btn
+              class="ml-2"
               color="error"
+              size="small"
               @click="deletePayment(payment)"
             >
               Delete
@@ -91,7 +95,6 @@ import paymentsApi, { Payment } from "@/api/payments-api"
 
 import { dateRule } from "@/utils/validators"
 
-type PersistedPayment = Payment & { edited?: boolean }
 type NonPersistedPayment = Omit<Payment, "id" | "createdAt" | "updatedAt">
 
 const props = defineProps({
@@ -109,10 +112,10 @@ const centreIdNumber = computed(() => parseInt(props.centreId))
 const submissionLinesStore = useSubmissionLinesStore()
 const fiscalYear = computed(() => submissionLinesStore.currentFiscalYear)
 
-const persistedPayments: Ref<PersistedPayment[]> = ref([])
+const persistedPayments: Ref<Payment[]> = ref([])
 const nonPersistedPayments: Ref<NonPersistedPayment[]> = ref([])
 
-const allPayments: Ref<(PersistedPayment | NonPersistedPayment)[]> = computed(() => [
+const allPayments: Ref<(Payment | NonPersistedPayment)[]> = computed(() => [
   ...persistedPayments.value,
   ...nonPersistedPayments.value,
 ])
@@ -131,6 +134,20 @@ onMounted(async () => {
   await submissionLinesStore.initialize() // TODO: push this to a higher plane
   await fetchPayments()
 })
+
+function formatDollars(value: number) {
+  return value / 100
+}
+function updatePaymentAmount(payment: Payment | NonPersistedPayment, newValue: string) {
+  if (newValue === "-") {
+    payment.amountInCents = 0
+  } else if (newValue === "") {
+    payment.amountInCents = 0
+  } else {
+    const newValueNumber = parseFloat(newValue)
+    payment.amountInCents = Math.trunc(newValueNumber * 100)
+  }
+}
 
 function fetchPayments() {
   return paymentsApi
@@ -159,22 +176,19 @@ function savePayment(payment: NonPersistedPayment) {
   })
 }
 
-function updatePayment(payment: PersistedPayment) {
+function updatePayment(payment: Payment) {
   return paymentsApi.update(payment.id, payment).then(({ payment: updatedPayment }) => {
     Object.assign(payment, updatedPayment)
-    payment.edited = false
   })
 }
 
-function deletePayment(payment: PersistedPayment) {
+function deletePayment(payment: Payment) {
   return paymentsApi.delete(payment.id).then(() => {
     persistedPayments.value = persistedPayments.value.filter((p) => p !== payment)
   })
 }
 
-function isPersistedPayment(
-  payment: PersistedPayment | NonPersistedPayment
-): payment is PersistedPayment {
+function isPersistedPayment(payment: Payment | NonPersistedPayment): payment is Payment {
   return !isNil(payment) && typeof payment === "object" && "id" in payment && !isNil(payment.id)
 }
 </script>
