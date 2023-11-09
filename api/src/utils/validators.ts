@@ -4,7 +4,7 @@ export function isValidFiscalYear(value: string) {
 
   if (matches) {
     const startYearString = matches[1]
-    const endYearString = startYearString + matches[2]
+    const endYearString = startYearString.slice(0, 2) + matches[2]
     const startYear = parseInt(startYearString, 10)
     const endYear = parseInt(endYearString, 10)
 
