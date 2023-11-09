@@ -16,6 +16,12 @@
       >
         Worksheets
       </v-tab>
+      <v-tab
+        value="2"
+        :to="{ name: 'CentreDashboard-SummaryTab-PaymentsTab' }"
+      >
+        Payments
+      </v-tab>
     </v-tabs>
   </v-toolbar>
 
@@ -25,5 +31,5 @@
 <script lang="ts" setup>
 import { ref } from "vue"
 
-const value = ref(0)
+const value = ref("0")
 </script>

@@ -36,6 +36,11 @@ const routes = [
                 name: "CentreDashboard-SummaryTab-WorksheetsTab",
                 component: () => import("../components/WorksheetSummary.vue"),
               },
+              {
+                path: "payments",
+                name: "CentreDashboard-SummaryTab-PaymentsTab",
+                component: () => import("../components/PaymentsTable.vue"),
+              },
             ],
           },
         ],
