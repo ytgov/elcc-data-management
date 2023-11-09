@@ -11,13 +11,36 @@ export const up: Migration = async ({ context: queryInterface }) => {
       allowNull: false,
       autoIncrement: true,
     },
-    // TODO: add other fields
-    createdAt: {
+    centre_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "centres",
+        key: "id",
+      },
+    },
+    fiscal_year: {
+      type: DataTypes.STRING(10),
+      allowNull: false,
+    },
+    paid_on: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    amount_in_cents: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    name: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    created_at: {
       type: MssqlSimpleTypes.DATETIME2(0),
       allowNull: false,
       defaultValue: MssqlSimpleTypes.NOW,
     },
-    updatedAt: {
+    updated_at: {
       type: MssqlSimpleTypes.DATETIME2(0),
       allowNull: false,
       defaultValue: MssqlSimpleTypes.NOW,
