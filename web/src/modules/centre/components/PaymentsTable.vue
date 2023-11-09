@@ -61,6 +61,7 @@
           <v-btn
             v-else
             color="success"
+            size="small"
             @click="savePayment(payment)"
             >Save</v-btn
           >
@@ -91,6 +92,7 @@ import { computed, ref, onMounted, type Ref } from "vue"
 import { isEmpty, isNil } from "lodash"
 
 import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
+import { useNotificationStore } from "@/store/NotificationStore"
 import paymentsApi, { Payment } from "@/api/payments-api"
 
 import { dateRule } from "@/utils/validators"
@@ -111,6 +113,7 @@ const props = defineProps({
 const centreIdNumber = computed(() => parseInt(props.centreId))
 const submissionLinesStore = useSubmissionLinesStore()
 const fiscalYear = computed(() => submissionLinesStore.currentFiscalYear)
+const notificationStore = useNotificationStore()
 
 const persistedPayments: Ref<Payment[]> = ref([])
 const nonPersistedPayments: Ref<NonPersistedPayment[]> = ref([])
@@ -170,22 +173,49 @@ function addRow() {
 }
 
 function savePayment(payment: NonPersistedPayment) {
-  return paymentsApi.create(payment).then(({ payment: newPayment }) => {
-    nonPersistedPayments.value = nonPersistedPayments.value.filter((p) => p !== payment)
-    persistedPayments.value.push(newPayment)
-  })
+  return paymentsApi
+    .create(payment)
+    .then(({ payment: newPayment }) => {
+      nonPersistedPayments.value = nonPersistedPayments.value.filter((p) => p !== payment)
+      persistedPayments.value.push(newPayment)
+    })
+    .then(() => {
+      notificationStore.notify({
+        text: "Payment saved",
+        icon: "mdi-success",
+        variant: "success",
+      })
+    })
 }
 
 function updatePayment(payment: Payment) {
-  return paymentsApi.update(payment.id, payment).then(({ payment: updatedPayment }) => {
-    Object.assign(payment, updatedPayment)
-  })
+  return paymentsApi
+    .update(payment.id, payment)
+    .then(({ payment: updatedPayment }) => {
+      Object.assign(payment, updatedPayment)
+    })
+    .then(() => {
+      notificationStore.notify({
+        text: "Payment updated",
+        icon: "mdi-success",
+        variant: "success",
+      })
+    })
 }
 
 function deletePayment(payment: Payment) {
-  return paymentsApi.delete(payment.id).then(() => {
-    persistedPayments.value = persistedPayments.value.filter((p) => p !== payment)
-  })
+  return paymentsApi
+    .delete(payment.id)
+    .then(() => {
+      persistedPayments.value = persistedPayments.value.filter((p) => p !== payment)
+    })
+    .then(() => {
+      notificationStore.notify({
+        text: "Payment deleted",
+        icon: "mdi-success",
+        variant: "success",
+      })
+    })
 }
 
 function isPersistedPayment(payment: Payment | NonPersistedPayment): payment is Payment {
