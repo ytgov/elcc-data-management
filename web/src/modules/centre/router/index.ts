@@ -1,6 +1,7 @@
 import { authGuard } from "@auth0/auth0-vue"
+import { RouteRecordRaw } from "vue-router"
 
-const routes = [
+const routes: RouteRecordRaw[] = [
   {
     path: "/child-care-centres",
     component: () => import("@/layouts/Default.vue"),
@@ -20,6 +21,7 @@ const routes = [
           {
             path: "summary",
             component: () => import("../components/CentreDashboardSummaryTab.vue"),
+            props: true,
             children: [
               {
                 path: "",
@@ -40,6 +42,7 @@ const routes = [
                 path: "payments",
                 name: "CentreDashboard-SummaryTab-PaymentsTab",
                 component: () => import("../components/PaymentsTable.vue"),
+                props: true,
               },
             ],
           },

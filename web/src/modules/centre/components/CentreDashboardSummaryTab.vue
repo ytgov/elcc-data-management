@@ -18,7 +18,13 @@
       </v-tab>
       <v-tab
         value="2"
-        :to="{ name: 'CentreDashboard-SummaryTab-PaymentsTab' }"
+        :to="{
+          name: 'CentreDashboard-SummaryTab-PaymentsTab',
+          params: {
+            centreId,
+            // fiscalYear, // TODO: support fiscal year as param
+          },
+        }"
       >
         Payments
       </v-tab>
@@ -30,6 +36,17 @@
 
 <script lang="ts" setup>
 import { ref } from "vue"
+
+const props = defineProps({
+  centreId: {
+    type: String,
+    required: true,
+  },
+  // fiscalYear: { // TODO: add support for this prop
+  //   type: String,
+  //   required: true,
+  // },
+})
 
 const value = ref("0")
 </script>

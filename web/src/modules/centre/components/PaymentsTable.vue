@@ -32,7 +32,7 @@
         <td>
           <v-text-field
             v-model="payment.paidOn"
-            label="Paid At"
+            label="Paid On"
             density="compact"
             hide-details
           ></v-text-field>
@@ -85,10 +85,27 @@
 import { computed, ref, onMounted, type Ref } from "vue"
 import { isEmpty, isNil } from "lodash"
 
+import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
+
 import paymentsApi, { Payment } from "@/api/payments-api"
 
 type PersistedPayment = Payment & { edited?: boolean }
-type NonPersistedPayment = Pick<Payment, "name" | "amountInCents" | "paidOn">
+type NonPersistedPayment = Omit<Payment, "id" | "createdAt" | "updatedAt">
+
+const props = defineProps({
+  centreId: {
+    type: String,
+    required: true,
+  },
+  // fiscalYear: { // TODO: support fical year as prop
+  //   type: String,
+  //   required: true,
+  // },
+})
+
+const centreIdNumber = computed(() => parseInt(props.centreId))
+const submissionLinesStore = useSubmissionLinesStore()
+const fiscalYear = submissionLinesStore.currentFiscalYear
 
 const persistedPayments: Ref<PersistedPayment[]> = ref([])
 const nonPersistedPayments: Ref<NonPersistedPayment[]> = ref([])
@@ -103,13 +120,17 @@ onMounted(async () => {
 })
 
 function fetchPayments() {
-  return paymentsApi.list().then(({ payments: newPayments }) => {
-    persistedPayments.value = newPayments
-  })
+  return paymentsApi
+    .list({ where: { centreId: centreIdNumber.value, fiscalYear } })
+    .then(({ payments: newPayments }) => {
+      persistedPayments.value = newPayments
+    })
 }
 
 function addRow() {
   nonPersistedPayments.value.push({
+    centreId: centreIdNumber.value,
+    fiscalYear: fiscalYear,
     name: "",
     amountInCents: 0,
     paidOn: "",
@@ -117,14 +138,15 @@ function addRow() {
 }
 
 function savePayment(payment: NonPersistedPayment) {
-  return paymentsApi.create(payment).then((newPayment) => {
+  return paymentsApi.create(payment).then(({ payment: newPayment }) => {
     nonPersistedPayments.value = nonPersistedPayments.value.filter((p) => p !== payment)
     persistedPayments.value.push(newPayment)
   })
 }
 
 function updatePayment(payment: PersistedPayment) {
-  return paymentsApi.update(payment.id, payment).then((updatedPayment) => {
+  return paymentsApi.update(payment.id, payment).then(({ payment: updatedPayment }) => {
+    Object.assign(payment, updatedPayment)
     payment.edited = false
   })
 }
