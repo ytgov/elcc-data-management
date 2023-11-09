@@ -1,5 +1,15 @@
 import http from "@/api/http-client"
 
+export type Payment = {
+  id: number
+  centreId: number
+  name: string
+  amountInCents: number
+  paidOn: string
+  createdAt: Date
+  updatedAt: Date
+}
+
 export const paymentsApi = {
   list({
     where,

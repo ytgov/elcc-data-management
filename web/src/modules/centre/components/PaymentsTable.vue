@@ -5,29 +5,17 @@
         <th class="text-left">Payment Name</th>
         <th class="text-left">Payment Amount</th>
         <th class="text-left">Payment Date</th>
+        <th class="text-left">Action</th>
       </tr>
     </thead>
     <tbody>
       <tr
-        v-for="payment in payments"
-        :key="payment.id"
+        v-for="(payment, index) in allPayments"
+        :key="index"
       >
-        <td>{{ payment.title }}</td>
-        <td>{{ payment.amountInCents }}</td>
-        <td>{{ payment.paidAt }}</td>
-      </tr>
-      <tr v-if="payments.length === 0">
-        <td
-          colspan="3"
-          class="text-center"
-        >
-          No payments found
-        </td>
-      </tr>
-      <tr v-if="!isEmpty(newPayment)">
         <td>
           <v-text-field
-            v-model="newPayment.title"
+            v-model="payment.name"
             label="Payment Name"
             density="compact"
             hide-details
@@ -35,7 +23,7 @@
         </td>
         <td>
           <v-text-field
-            v-model="newPayment.amountInCents"
+            v-model="payment.amountInCents"
             label="Payment Amount"
             density="compact"
             hide-details
@@ -43,11 +31,26 @@
         </td>
         <td>
           <v-text-field
-            v-model="newPayment.paidAt"
+            v-model="payment.paidOn"
             label="Paid At"
             density="compact"
             hide-details
           ></v-text-field>
+        </td>
+        <td>
+          <v-btn
+            color="success"
+            @click="save(payment)"
+            >Save</v-btn
+          >
+        </td>
+      </tr>
+      <tr v-if="isEmpty(allPayments)">
+        <td
+          colspan="3"
+          class="text-center"
+        >
+          No payments found
         </td>
       </tr>
     </tbody>
@@ -63,21 +66,62 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue"
-import { isEmpty } from "lodash"
+import { computed, ref, onMounted, type Ref } from "vue"
+import { isEmpty, isNil } from "lodash"
 
-import paymentsApi from "@/api/payments-api"
+import paymentsApi, { Payment } from "@/api/payments-api"
 
-const payments = ref([])
-const newPayment = ref({})
+type EditablePayment = Payment & { edited: boolean }
+type NonPersistedPayment = Pick<Payment, "name" | "amountInCents" | "paidOn">
+
+const persistedPayments: Ref<EditablePayment[]> = ref([])
+const nonPersistedPayments: Ref<NonPersistedPayment[]> = ref([])
+
+const allPayments = computed(() => [...persistedPayments.value, ...nonPersistedPayments.value])
+const editedPayments = computed(() => persistedPayments.value.filter((p) => p.edited))
 
 onMounted(async () => {
-  await paymentsApi.list().then(({ payments: newPayments }) => {
-    payments.value = newPayments
-  })
+  await fetchPayments()
 })
 
+function fetchPayments() {
+  return paymentsApi.list().then(({ payments: newPayments }) => {
+    persistedPayments.value = newPayments
+  })
+}
+
 function addRow() {
-  newPayment.value.id = -1
+  nonPersistedPayments.value.push({
+    name: "",
+    amountInCents: 0,
+    paidOn: "",
+  })
+}
+
+async function save(payment: EditablePayment | NonPersistedPayment) {
+  if (isNonPersistedPayment(payment)) {
+    return paymentsApi.create(payment).then((newPayment) => {
+      nonPersistedPayments.value = nonPersistedPayments.value.filter((p) => p !== payment)
+      persistedPayments.value.push(newPayment)
+    })
+  } else if (isEditedPayment(payment)) {
+    return paymentsApi.update(payment.id, payment).then((updatedPayment) => {
+      updatedPayment.edited = false
+    })
+  } else {
+    throw new Error("Invalid payment")
+  }
+}
+
+function isNonPersistedPayment(
+  payment: EditablePayment | NonPersistedPayment
+): payment is NonPersistedPayment {
+  return !("id" in payment)
+}
+
+function isEditedPayment(
+  payment: EditablePayment | NonPersistedPayment
+): payment is EditablePayment {
+  return "id" in payment && !isNil(payment.id) && payment.edited === true
 }
 </script>
