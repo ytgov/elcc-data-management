@@ -1,4 +1,4 @@
-import { Router } from "express"
+import { Router, type Request, type Response } from "express"
 
 import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 import { PaymentsController } from "@/controllers"
@@ -10,3 +10,7 @@ apiRouter.use("/api", checkJwt)
 apiRouter.use("/api", autheticateAndLoadUser)
 
 apiRouter.get("/api/payments", PaymentsController.index)
+
+apiRouter.use("/api", (req: Request, res: Response) => {
+  return res.status(404).json({ error: `Api endpoint "${req.originalUrl}" not found` })
+})
