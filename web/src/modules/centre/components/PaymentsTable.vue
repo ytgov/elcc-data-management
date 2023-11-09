@@ -38,9 +38,25 @@
           ></v-text-field>
         </td>
         <td>
+          <template v-if="isPersistedPayment(payment)">
+            <v-btn
+              v-if="payment.edited"
+              color="success"
+              @click="updatePayment(payment)"
+            >
+              Edit
+            </v-btn>
+            <v-btn
+              color="error"
+              @click="deletePayment(payment)"
+            >
+              Delete
+            </v-btn>
+          </template>
           <v-btn
+            v-else
             color="success"
-            @click="save(payment)"
+            @click="savePayment(payment)"
             >Save</v-btn
           >
         </td>
@@ -71,14 +87,16 @@ import { isEmpty, isNil } from "lodash"
 
 import paymentsApi, { Payment } from "@/api/payments-api"
 
-type EditablePayment = Payment & { edited: boolean }
+type PersistedPayment = Payment & { edited?: boolean }
 type NonPersistedPayment = Pick<Payment, "name" | "amountInCents" | "paidOn">
 
-const persistedPayments: Ref<EditablePayment[]> = ref([])
+const persistedPayments: Ref<PersistedPayment[]> = ref([])
 const nonPersistedPayments: Ref<NonPersistedPayment[]> = ref([])
 
-const allPayments = computed(() => [...persistedPayments.value, ...nonPersistedPayments.value])
-const editedPayments = computed(() => persistedPayments.value.filter((p) => p.edited))
+const allPayments: Ref<(PersistedPayment | NonPersistedPayment)[]> = computed(() => [
+  ...persistedPayments.value,
+  ...nonPersistedPayments.value,
+])
 
 onMounted(async () => {
   await fetchPayments()
@@ -98,30 +116,28 @@ function addRow() {
   })
 }
 
-async function save(payment: EditablePayment | NonPersistedPayment) {
-  if (isNonPersistedPayment(payment)) {
-    return paymentsApi.create(payment).then((newPayment) => {
-      nonPersistedPayments.value = nonPersistedPayments.value.filter((p) => p !== payment)
-      persistedPayments.value.push(newPayment)
-    })
-  } else if (isEditedPayment(payment)) {
-    return paymentsApi.update(payment.id, payment).then((updatedPayment) => {
-      updatedPayment.edited = false
-    })
-  } else {
-    throw new Error("Invalid payment")
-  }
+function savePayment(payment: NonPersistedPayment) {
+  return paymentsApi.create(payment).then((newPayment) => {
+    nonPersistedPayments.value = nonPersistedPayments.value.filter((p) => p !== payment)
+    persistedPayments.value.push(newPayment)
+  })
 }
 
-function isNonPersistedPayment(
-  payment: EditablePayment | NonPersistedPayment
-): payment is NonPersistedPayment {
-  return !("id" in payment)
+function updatePayment(payment: PersistedPayment) {
+  return paymentsApi.update(payment.id, payment).then((updatedPayment) => {
+    payment.edited = false
+  })
 }
 
-function isEditedPayment(
-  payment: EditablePayment | NonPersistedPayment
-): payment is EditablePayment {
-  return "id" in payment && !isNil(payment.id) && payment.edited === true
+function deletePayment(payment: PersistedPayment) {
+  return paymentsApi.delete(payment.id).then(() => {
+    persistedPayments.value = persistedPayments.value.filter((p) => p !== payment)
+  })
+}
+
+function isPersistedPayment(
+  payment: PersistedPayment | NonPersistedPayment
+): payment is PersistedPayment {
+  return !isNil(payment) && typeof payment === "object" && "id" in payment && !isNil(payment.id)
 }
 </script>
