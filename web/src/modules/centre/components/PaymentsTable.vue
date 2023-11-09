@@ -22,14 +22,13 @@
           ></v-text-field>
         </td>
         <td>
-          <v-text-field
-            :model-value="formatDollars(payment.amountInCents)"
+          <CurrencyInput
+            :model-value="centsToDollars(payment.amountInCents)"
             label="Payment Amount"
             density="compact"
-            prepend-inner-icon="mdi-currency-usd"
             hide-details
             @update:model-value="(newValue: string) => updatePaymentAmount(payment, newValue)"
-          ></v-text-field>
+          />
         </td>
         <td>
           <v-text-field
@@ -97,6 +96,8 @@ import paymentsApi, { Payment } from "@/api/payments-api"
 
 import { dateRule } from "@/utils/validators"
 
+import CurrencyInput from "@/components/CurrencyInput.vue"
+
 type NonPersistedPayment = Omit<Payment, "id" | "createdAt" | "updatedAt">
 
 const props = defineProps({
@@ -138,17 +139,16 @@ onMounted(async () => {
   await fetchPayments()
 })
 
-function formatDollars(value: number) {
+function centsToDollars(value: number) {
   return value / 100
 }
+
 function updatePaymentAmount(payment: Payment | NonPersistedPayment, newValue: string) {
-  if (newValue === "-") {
-    payment.amountInCents = 0
-  } else if (newValue === "") {
+  if (["-", "", null].includes(newValue)) {
     payment.amountInCents = 0
   } else {
     const newValueNumber = parseFloat(newValue)
-    payment.amountInCents = Math.trunc(newValueNumber * 100)
+    payment.amountInCents = newValueNumber * 100
   }
 }
 
