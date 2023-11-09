@@ -256,7 +256,7 @@ export default {
         { month: "November 2022", payment: "$11,025", enrollment: 42 },
         { month: "December 2022", payment: "$9,447", enrollment: 39 },
       ],
-      tab: 0,
+      tab: "option-1",
       month: "",
       currentCentre: { name: "" } as ChildCareCentre,
 
@@ -279,7 +279,7 @@ export default {
   watch: {
     tab(newValue) {
       if (!["option-1"].includes(newValue)) {
-        this.$router.push({ name: "CentreDashboard" })
+        this.$router.push({ name: "CentreDashboard", params: { centreId: this.centreId } })
       }
     },
   },
@@ -290,6 +290,10 @@ export default {
     }
 
     this.currentCentre = centre
+
+    if (this.tab === "option-1") {
+      this.$router.push({ name: "CentreDashboard-SummaryTab", params: { centreId: this.centreId } })
+    }
 
     await this.loadWorksheets(parseInt(this.centreId as string))
   },
