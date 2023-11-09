@@ -5,12 +5,14 @@ import CentreFundingPeriod from "@/models/centre-funding-period"
 import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
 import User from "@/models/user"
 import UserRole from "@/models/user-role"
+import Payment from "@/models/payment"
 
 Centre.establishAssociations()
 CentreFundingPeriod.establishAssociations()
 FundingSubmissionLineJson.establishAssociations()
 User.establishAssociations()
 UserRole.establishAssociations()
+Payment.establishAssociations()
 
 export * from "@/models/centre-funding-period"
 export * from "@/models/centre"
@@ -19,6 +21,7 @@ export * from "@/models/funding-period"
 export * from "@/models/funding-submission-line-json"
 export * from "@/models/funding-submission-line"
 export * from "@/models/log"
+export * from "@/models/payment"
 export * from "@/models/user-role"
 export * from "@/models/user"
 
