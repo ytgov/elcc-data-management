@@ -291,7 +291,7 @@ export default {
 
     this.currentCentre = centre
 
-    if (this.tab === "option-1") {
+    if (this.tab === "option-1" && !this.$route.path.includes("summary")) {
       this.$router.push({ name: "CentreDashboard-SummaryTab", params: { centreId: this.centreId } })
     }
 
