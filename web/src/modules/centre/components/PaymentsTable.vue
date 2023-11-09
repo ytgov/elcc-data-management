@@ -107,7 +107,7 @@ const props = defineProps({
 
 const centreIdNumber = computed(() => parseInt(props.centreId))
 const submissionLinesStore = useSubmissionLinesStore()
-const fiscalYear = submissionLinesStore.currentFiscalYear
+const fiscalYear = computed(() => submissionLinesStore.currentFiscalYear)
 
 const persistedPayments: Ref<PersistedPayment[]> = ref([])
 const nonPersistedPayments: Ref<NonPersistedPayment[]> = ref([])
@@ -118,12 +118,13 @@ const allPayments: Ref<(PersistedPayment | NonPersistedPayment)[]> = computed(()
 ])
 
 onMounted(async () => {
+  await submissionLinesStore.initialize() // TODO: push this to a higher plane
   await fetchPayments()
 })
 
 function fetchPayments() {
   return paymentsApi
-    .list({ where: { centreId: centreIdNumber.value, fiscalYear } })
+    .list({ where: { centreId: centreIdNumber.value, fiscalYear: fiscalYear.value } })
     .then(({ payments: newPayments }) => {
       persistedPayments.value = newPayments
     })
@@ -132,7 +133,7 @@ function fetchPayments() {
 function addRow() {
   nonPersistedPayments.value.push({
     centreId: centreIdNumber.value,
-    fiscalYear: fiscalYear,
+    fiscalYear: fiscalYear.value,
     name: "",
     amountInCents: 0,
     paidOn: "",
