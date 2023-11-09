@@ -32,9 +32,10 @@
         <td>
           <v-text-field
             v-model="payment.paidOn"
+            :rules="[dateRule]"
             label="Paid On"
             density="compact"
-            hide-details
+            hide-details="auto"
           ></v-text-field>
         </td>
         <td>
@@ -86,8 +87,9 @@ import { computed, ref, onMounted, type Ref } from "vue"
 import { isEmpty, isNil } from "lodash"
 
 import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
-
 import paymentsApi, { Payment } from "@/api/payments-api"
+
+import { dateRule } from "@/utils/validators"
 
 type PersistedPayment = Payment & { edited?: boolean }
 type NonPersistedPayment = Omit<Payment, "id" | "createdAt" | "updatedAt">
