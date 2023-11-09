@@ -117,6 +117,16 @@ const allPayments: Ref<(PersistedPayment | NonPersistedPayment)[]> = computed(()
   ...nonPersistedPayments.value,
 ])
 
+const paymentNames = ref([
+  "First Advance",
+  "Second Advance",
+  "Third Advance",
+  "Fourth Advance",
+  "Fifth Advance",
+  "Sixth Advance",
+  "Reconciliation",
+])
+
 onMounted(async () => {
   await submissionLinesStore.initialize() // TODO: push this to a higher plane
   await fetchPayments()
@@ -131,12 +141,14 @@ function fetchPayments() {
 }
 
 function addRow() {
+  const name = paymentNames.value[allPayments.value.length]
+  const paidOn = fiscalYear.value.split("/")[0] + "-"
   nonPersistedPayments.value.push({
     centreId: centreIdNumber.value,
     fiscalYear: fiscalYear.value,
-    name: "",
+    name: name,
     amountInCents: 0,
-    paidOn: "",
+    paidOn,
   })
 }
 
