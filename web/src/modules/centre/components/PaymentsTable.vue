@@ -184,10 +184,13 @@ function addRow() {
   })
 }
 
-function savePayment(payment: NonPersistedPayment) {
-  return paymentsStore.save(payment).then(() => {
-    nonPersistedPayments.value = nonPersistedPayments.value.filter((p) => p !== payment)
-  })
+async function savePayment(payment: NonPersistedPayment) {
+  await paymentsStore.save(payment)
+  deleteNonPersistedPayment(payment)
+}
+
+function deleteNonPersistedPayment(payment: NonPersistedPayment) {
+  nonPersistedPayments.value = nonPersistedPayments.value.filter((p) => p !== payment)
 }
 
 function updatePayment(payment: Payment) {
