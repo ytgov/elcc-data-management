@@ -114,6 +114,7 @@ import {
 import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 
 import { dateRule } from "@/utils/validators"
+import { centsToDollars, dollarsToCents } from "@/utils/format-money"
 
 import CurrencyInput from "@/components/CurrencyInput.vue"
 
@@ -162,16 +163,12 @@ onMounted(async () => {
   })
 })
 
-function centsToDollars(value: number) {
-  return value / 100
-}
-
 function updatePaymentAmount(payment: Payment | NonPersistedPayment, newValue: string) {
   if (["-", "", null].includes(newValue)) {
     payment.amountInCents = 0
   } else {
     const newValueNumber = parseFloat(newValue)
-    payment.amountInCents = newValueNumber * 100
+    payment.amountInCents = dollarsToCents(newValueNumber)
   }
 }
 

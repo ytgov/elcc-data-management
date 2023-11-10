@@ -1,3 +1,11 @@
+export function centsToDollars(value: number) {
+  return value / 100
+}
+
+export function dollarsToCents(value: number) {
+  return value * 100
+}
+
 export function formatMoney(
   input: number | undefined,
   locales: string | string[] | undefined = "en-US",
