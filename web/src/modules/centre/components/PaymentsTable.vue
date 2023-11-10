@@ -9,71 +9,85 @@
       </tr>
     </thead>
     <tbody>
-      <tr
-        v-for="(payment, index) in allPayments"
-        :key="index"
-      >
-        <td>
-          <v-text-field
-            v-model="payment.name"
-            label="Payment Name"
-            density="compact"
-            hide-details
-          ></v-text-field>
+      <tr v-if="isLoading">
+        <td
+          colspan="4"
+          class="text-center py-12"
+        >
+          <v-progress-circular
+            :size="70"
+            :width="7"
+            indeterminate
+          ></v-progress-circular>
         </td>
-        <td>
-          <CurrencyInput
-            :model-value="centsToDollars(payment.amountInCents)"
-            label="Payment Amount"
-            density="compact"
-            hide-details
-            @update:model-value="(newValue: string) => updatePaymentAmount(payment, newValue)"
-          />
-        </td>
-        <td>
-          <v-text-field
-            v-model="payment.paidOn"
-            :rules="[dateRule]"
-            label="Paid On"
-            density="compact"
-            hide-details="auto"
-          ></v-text-field>
-        </td>
-        <td class="text-center">
-          <template v-if="isPersistedPayment(payment)">
+      </tr>
+      <template v-else>
+        <tr
+          v-for="(payment, index) in allPayments"
+          :key="index"
+        >
+          <td>
+            <v-text-field
+              v-model="payment.name"
+              label="Payment Name"
+              density="compact"
+              hide-details
+            ></v-text-field>
+          </td>
+          <td>
+            <CurrencyInput
+              :model-value="centsToDollars(payment.amountInCents)"
+              label="Payment Amount"
+              density="compact"
+              hide-details
+              @update:model-value="(newValue: string) => updatePaymentAmount(payment, newValue)"
+            />
+          </td>
+          <td>
+            <v-text-field
+              v-model="payment.paidOn"
+              :rules="[dateRule]"
+              label="Paid On"
+              density="compact"
+              hide-details="auto"
+            ></v-text-field>
+          </td>
+          <td class="text-center">
+            <template v-if="isPersistedPayment(payment)">
+              <v-btn
+                color="success"
+                size="small"
+                @click="updatePayment(payment)"
+              >
+                Update
+              </v-btn>
+              <v-btn
+                class="ml-2"
+                color="error"
+                size="small"
+                @click="deletePayment(payment)"
+              >
+                Delete
+              </v-btn>
+            </template>
             <v-btn
+              v-else
               color="success"
               size="small"
-              @click="updatePayment(payment)"
+              @click="savePayment(payment)"
+              >Save</v-btn
             >
-              Update
-            </v-btn>
-            <v-btn
-              class="ml-2"
-              color="error"
-              size="small"
-              @click="deletePayment(payment)"
-            >
-              Delete
-            </v-btn>
-          </template>
-          <v-btn
-            v-else
-            color="success"
-            size="small"
-            @click="savePayment(payment)"
-            >Save</v-btn
+          </td>
+        </tr>
+        <tr v-if="isEmpty(allPayments)">
+          <td
+            colspan="4"
+            class="text-center"
           >
-        </td>
-      </tr>
-      <tr v-if="isEmpty(allPayments)">
-        <td
-          colspan="3"
-          class="text-center"
-        >
-          No payments found
-        </td>
-      </tr>
+            No payments found
+          </td>
+        </tr>
+      </template>
     </tbody>
   </v-table>
 
@@ -115,6 +129,7 @@ const centreIdNumber = computed(() => parseInt(props.centreId))
 const submissionLinesStore = useSubmissionLinesStore()
 const fiscalYear = computed(() => submissionLinesStore.currentFiscalYear)
 const notificationStore = useNotificationStore()
+const isLoading = ref(false)
 
 const persistedPayments: Ref<Payment[]> = ref([])
 const nonPersistedPayments: Ref<NonPersistedPayment[]> = ref([])
@@ -133,6 +148,8 @@ const paymentNames = ref([
   "Sixth Advance",
   "Reconciliation",
 ])
+
+// TODO: add loading state ...
 
 onMounted(async () => {
   await submissionLinesStore.initialize() // TODO: push this to a higher plane
@@ -153,10 +170,14 @@ function updatePaymentAmount(payment: Payment | NonPersistedPayment, newValue: s
 }
 
 function fetchPayments() {
+  isLoading.value = true
   return paymentsApi
     .list({ where: { centreId: centreIdNumber.value, fiscalYear: fiscalYear.value } })
     .then(({ payments: newPayments }) => {
       persistedPayments.value = newPayments
+    })
+    .finally(() => {
+      isLoading.value = false
     })
 }
 
@@ -173,6 +194,7 @@ function addRow() {
 }
 
 function savePayment(payment: NonPersistedPayment) {
+  isLoading.value = true
   return paymentsApi
     .create(payment)
     .then(({ payment: newPayment }) => {
@@ -186,9 +208,13 @@ function savePayment(payment: NonPersistedPayment) {
         variant: "success",
       })
     })
+    .finally(() => {
+      isLoading.value = false
+    })
 }
 
 function updatePayment(payment: Payment) {
+  isLoading.value = true
   return paymentsApi
     .update(payment.id, payment)
     .then(({ payment: updatedPayment }) => {
@@ -201,9 +227,13 @@ function updatePayment(payment: Payment) {
         variant: "success",
       })
     })
+    .finally(() => {
+      isLoading.value = false
+    })
 }
 
 function deletePayment(payment: Payment) {
+  isLoading.value = true
   return paymentsApi
     .delete(payment.id)
     .then(() => {
@@ -215,6 +245,9 @@ function deletePayment(payment: Payment) {
         icon: "mdi-success",
         variant: "success",
       })
+    })
+    .finally(() => {
+      isLoading.value = false
     })
 }
 
