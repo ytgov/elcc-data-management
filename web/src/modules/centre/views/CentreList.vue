@@ -183,7 +183,7 @@ export default {
   methods: {
     ...mapActions(useCentreStore, ["selectCentre", "editCentre"]),
     tableRowClick(event: any, item: any) {
-      this.selectedItem = item.item.raw
+      this.selectedItem = item.item
     },
     goToCentre() {
       this.selectCentre(this.selectedItem)
