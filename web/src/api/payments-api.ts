@@ -1,3 +1,5 @@
+import { isNil } from "lodash"
+
 import http from "@/api/http-client"
 
 export type Payment = {
@@ -11,18 +13,27 @@ export type Payment = {
   updatedAt: Date
 }
 
+export type NonPersistedPayment = Omit<Payment, "id" | "createdAt" | "updatedAt">
+
+export type Params = {
+  where?: {
+    centreId?: number
+    fiscalYear?: string
+  }
+  page?: number
+  perPage?: number
+  otherParams?: any
+}
+
+export function isPersistedPayment(payment: Payment | NonPersistedPayment): payment is Payment {
+  return !isNil(payment) && typeof payment === "object" && "id" in payment && !isNil(payment.id)
+}
+
 export const paymentsApi = {
-  list({
-    where,
-    page,
-    perPage,
-    ...otherParams
-  }: { where?: any; page?: number; perPage?: number; otherParams?: any } = {}): Promise<{
+  list(params: Params = {}): Promise<{
     payments: Payment[]
   }> {
-    return http
-      .get("/api/payments", { params: { where, page, perPage, ...otherParams } })
-      .then(({ data }) => data)
+    return http.get("/api/payments", { params }).then(({ data }) => data)
   },
   create(attributes: Partial<Payment>): Promise<{ payment: Payment }> {
     return http.post("/api/payments", attributes).then(({ data }) => data)

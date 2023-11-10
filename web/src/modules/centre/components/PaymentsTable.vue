@@ -102,17 +102,20 @@
 
 <script lang="ts" setup>
 import { computed, ref, onMounted, type Ref } from "vue"
-import { isEmpty, isNil } from "lodash"
+import { isEmpty } from "lodash"
+import { storeToRefs } from "pinia"
 
+import {
+  usePaymentsStore,
+  isPersistedPayment,
+  type Payment,
+  type NonPersistedPayment,
+} from "@/store/payments"
 import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
-import { useNotificationStore } from "@/store/NotificationStore"
-import paymentsApi, { Payment } from "@/api/payments-api"
 
 import { dateRule } from "@/utils/validators"
 
 import CurrencyInput from "@/components/CurrencyInput.vue"
-
-type NonPersistedPayment = Omit<Payment, "id" | "createdAt" | "updatedAt">
 
 const props = defineProps({
   centreId: {
@@ -128,10 +131,10 @@ const props = defineProps({
 const centreIdNumber = computed(() => parseInt(props.centreId))
 const submissionLinesStore = useSubmissionLinesStore()
 const fiscalYear = computed(() => submissionLinesStore.currentFiscalYear)
-const notificationStore = useNotificationStore()
-const isLoading = ref(false)
+const paymentsStore = usePaymentsStore()
 
-const persistedPayments: Ref<Payment[]> = ref([])
+const { isLoading } = storeToRefs(paymentsStore)
+const persistedPayments = computed(() => paymentsStore.items)
 const nonPersistedPayments: Ref<NonPersistedPayment[]> = ref([])
 
 const allPayments: Ref<(Payment | NonPersistedPayment)[]> = computed(() => [
@@ -149,11 +152,14 @@ const paymentNames = ref([
   "Reconciliation",
 ])
 
-// TODO: add loading state ...
-
 onMounted(async () => {
   await submissionLinesStore.initialize() // TODO: push this to a higher plane
-  await fetchPayments()
+  await paymentsStore.initialize({
+    where: {
+      centreId: centreIdNumber.value,
+      fiscalYear: fiscalYear.value,
+    },
+  })
 })
 
 function centsToDollars(value: number) {
@@ -169,18 +175,6 @@ function updatePaymentAmount(payment: Payment | NonPersistedPayment, newValue: s
   }
 }
 
-function fetchPayments() {
-  isLoading.value = true
-  return paymentsApi
-    .list({ where: { centreId: centreIdNumber.value, fiscalYear: fiscalYear.value } })
-    .then(({ payments: newPayments }) => {
-      persistedPayments.value = newPayments
-    })
-    .finally(() => {
-      isLoading.value = false
-    })
-}
-
 function addRow() {
   const name = paymentNames.value[allPayments.value.length]
   const paidOn = fiscalYear.value.split("/")[0] + "-"
@@ -194,64 +188,16 @@ function addRow() {
 }
 
 function savePayment(payment: NonPersistedPayment) {
-  isLoading.value = true
-  return paymentsApi
-    .create(payment)
-    .then(({ payment: newPayment }) => {
-      nonPersistedPayments.value = nonPersistedPayments.value.filter((p) => p !== payment)
-      persistedPayments.value.push(newPayment)
-    })
-    .then(() => {
-      notificationStore.notify({
-        text: "Payment saved",
-        icon: "mdi-success",
-        variant: "success",
-      })
-    })
-    .finally(() => {
-      isLoading.value = false
-    })
+  return paymentsStore.save(payment).then(() => {
+    nonPersistedPayments.value = nonPersistedPayments.value.filter((p) => p !== payment)
+  })
 }
 
 function updatePayment(payment: Payment) {
-  isLoading.value = true
-  return paymentsApi
-    .update(payment.id, payment)
-    .then(({ payment: updatedPayment }) => {
-      Object.assign(payment, updatedPayment)
-    })
-    .then(() => {
-      notificationStore.notify({
-        text: "Payment updated",
-        icon: "mdi-success",
-        variant: "success",
-      })
-    })
-    .finally(() => {
-      isLoading.value = false
-    })
+  return paymentsStore.update(payment.id, payment)
 }
 
 function deletePayment(payment: Payment) {
-  isLoading.value = true
-  return paymentsApi
-    .delete(payment.id)
-    .then(() => {
-      persistedPayments.value = persistedPayments.value.filter((p) => p !== payment)
-    })
-    .then(() => {
-      notificationStore.notify({
-        text: "Payment deleted",
-        icon: "mdi-success",
-        variant: "success",
-      })
-    })
-    .finally(() => {
-      isLoading.value = false
-    })
-}
-
-function isPersistedPayment(payment: Payment | NonPersistedPayment): payment is Payment {
-  return !isNil(payment) && typeof payment === "object" && "id" in payment && !isNil(payment.id)
+  return paymentsStore.destroy(payment.id)
 }
 </script>
