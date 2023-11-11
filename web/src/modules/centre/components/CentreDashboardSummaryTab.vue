@@ -6,7 +6,13 @@
     <v-tabs v-model="value">
       <v-tab
         value="0"
-        :to="{ name: 'CentreDashboard-SummaryTab-ReconciliationTab' }"
+        :to="{
+          name: 'CentreDashboard-SummaryTab-ReconciliationTab',
+          params: {
+            centreId,
+            // fiscalYear, // TODO: support fiscal year as param
+          },
+        }"
       >
         Reconciliation
       </v-tab>

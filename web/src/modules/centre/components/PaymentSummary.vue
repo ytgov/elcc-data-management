@@ -84,14 +84,27 @@ import { ref, computed, onMounted } from "vue"
 import { sumBy } from "lodash"
 
 import usePaymentsStore from "@/store/payments"
+import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 import { formatMoney, centsToDollars } from "@/utils/format-money"
 import { interleaveArrays } from "@/utils/interleave-arrays"
 
 const PAYMENT_TYPE = "payment"
 const EXPENSE_TYPE = "expense"
 
-defineProps({})
+const props = defineProps({
+  centreId: {
+    type: String,
+    required: true,
+  },
+  // fiscalYear: { // TODO: support fical year as prop
+  //   type: String,
+  //   required: true,
+  // },
+})
 
+const centreIdNumber = computed(() => parseInt(props.centreId))
+const submissionLinesStore = useSubmissionLinesStore()
+const fiscalYear = computed(() => submissionLinesStore.currentFiscalYear)
 const paymentsStore = usePaymentsStore()
 const payments = computed(() => paymentsStore.items)
 
@@ -143,7 +156,13 @@ const paymentsTotal = computed(() => sumBy(payments.value, "amountInCents"))
 const expensesTotal = computed(() => sumBy(expenses.value, "amountInCents"))
 
 onMounted(async () => {
-  await paymentsStore.initialize()
+  await submissionLinesStore.initialize() // TODO: push this to a higher plane
+  await paymentsStore.initialize({
+    where: {
+      centreId: centreIdNumber.value,
+      fiscalYear: fiscalYear.value,
+    },
+  })
 })
 </script>
 

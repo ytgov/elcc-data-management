@@ -32,6 +32,7 @@ const routes: RouteRecordRaw[] = [
                 path: "reconciliation",
                 name: "CentreDashboard-SummaryTab-ReconciliationTab",
                 component: () => import("../components/PaymentSummary.vue"),
+                props: true,
               },
               {
                 path: "worksheets",

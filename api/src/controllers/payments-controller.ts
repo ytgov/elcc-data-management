@@ -11,9 +11,13 @@ export class PaymentsController extends BaseController {
     return Payment.findAll({
       where,
       order: ["paidOn"],
-    }).then((payments) => {
-      return this.response.json({ payments })
     })
+      .then((payments) => {
+        return this.response.json({ payments })
+      })
+      .catch((error) => {
+        return this.response.status(400).json({ message: `Invalid query for payments: ${error}` })
+      })
   }
 
   async create() {
