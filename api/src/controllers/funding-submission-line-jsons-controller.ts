@@ -4,6 +4,7 @@ import { WhereOptions } from "sequelize"
 import BaseController from "./base-controller"
 
 import { FundingSubmissionLineJson } from "@/models"
+import { FundingSubmissionLineJsonSerializer } from "@/serializers"
 
 export class FundingSubmissionLineJsonsController extends BaseController {
   index() {
@@ -13,7 +14,12 @@ export class FundingSubmissionLineJsonsController extends BaseController {
       order: ["dateStart"],
     })
       .then((fundingSubmissionLineJsons) => {
-        return this.response.json({ fundingSubmissionLineJsons })
+        const serializedfundingSubmissionLineJsons = FundingSubmissionLineJsonSerializer.asTable(
+          fundingSubmissionLineJsons
+        )
+        return this.response.json({
+          fundingSubmissionLineJsons: serializedfundingSubmissionLineJsons,
+        })
       })
       .catch((error) => {
         return this.response

@@ -43,7 +43,7 @@
 <script lang="ts" setup>
 import { ref } from "vue"
 
-const props = defineProps({
+defineProps({
   centreId: {
     type: String,
     required: true,

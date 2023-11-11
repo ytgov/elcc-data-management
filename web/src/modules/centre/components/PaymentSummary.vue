@@ -83,6 +83,7 @@
 import { ref, computed, onMounted } from "vue"
 import { sumBy } from "lodash"
 
+import fundingSubmissionLineJsonsApi from "@/api/funding-submission-line-jsons-api"
 import usePaymentsStore from "@/store/payments"
 import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 import { formatMoney, centsToDollars } from "@/utils/format-money"
@@ -163,6 +164,13 @@ onMounted(async () => {
       fiscalYear: fiscalYear.value,
     },
   })
+  const { fundingSubmissionLineJsons } = await fundingSubmissionLineJsonsApi.list({
+    where: {
+      centreId: centreIdNumber.value,
+      fiscalYear: fiscalYear.value,
+    },
+  })
+  console.log("fundingSubmissionLineJsons:", JSON.stringify(fundingSubmissionLineJsons, null, 2))
 })
 </script>
 
