@@ -14,7 +14,7 @@
         v-for="(adjustment, adjustmentIndex) in allAdjustments"
         :key="`adjustment-${adjustmentIndex}`"
       >
-        <tr :class="adjustmentIndex % 2 === 0 ? 'bg-grey-lighten-3' : 'bg-gray-darken-1'">
+        <tr :class="rowClasses(adjustmentIndex)">
           <td class="text-left font-weight-bold">{{ adjustment.name }}</td>
 
           <template v-if="adjustment.type === PAYMENT_TYPE">
@@ -40,7 +40,9 @@
         <td class="text-right">{{ formatMoney(centsToDollars(paymentsTotal)) }}</td>
         <td class="text-right"></td>
         <td class="text-right">{{ formatMoney(centsToDollars(expensesTotal)) }}</td>
-        <td class="text-right"></td>
+        <td class="text-right">
+          {{ formatMoney(centsToDollars(allAdjustmentsRunningTotals[allAdjustments.length - 1])) }}
+        </td>
       </tr>
       <tr>
         <td colspan="5"></td>
@@ -192,10 +194,17 @@ function updateExpenseValues(fundingSubmissionLineJsons: FundingSubmissionLineJs
     expense.amountInCents = dollarsToCents(sumBy(linesForMonth, "actualComputedTotal"))
   })
 }
+
+function rowClasses(index: number): string[] {
+  const classes = []
+  if (index % 2 === 0) {
+    classes.push("bg-grey-lighten-3")
+  } else {
+    classes.push("bg-gray-darken-1")
+  }
+
+  return classes
+}
 </script>
 
-<style scoped>
-.total-row {
-  background-color: #7a9a0199;
-}
-</style>
+<style scoped></style>
