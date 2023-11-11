@@ -1,206 +1,154 @@
 <template>
-  <div class="ma-4">
-    <div class="">
-      <table
-        class="table monospace"
-        style="width: 99%"
-        table-border="none"
-        cellpadding="0"
-        cellspacing="0"
+  <v-table class="ma-4">
+    <thead>
+      <tr>
+        <th class="text-left"></th>
+        <th class="text-right font-weight-bold">Advance</th>
+        <th class="text-right font-weight-bold">Adjustments</th>
+        <th class="text-right font-weight-bold">Expenses</th>
+        <th class="text-right font-weight-bold">Balance</th>
+      </tr>
+    </thead>
+    <tbody>
+      <template
+        v-for="(adjustment, adjustmentIndex) in allAdjustments"
+        :key="`adjustment-${adjustmentIndex}`"
       >
         <tr>
-          <td></td>
-          <th class="text-center">Advance</th>
-          <th class="text-center">Adjustments</th>
-          <th class="text-center">Expenses</th>
-          <th class="text-center">Balance</th>
+          <td class="text-left font-weight-bold">{{ adjustment.name }}</td>
+
+          <template v-if="adjustment.type === PAYMENT_TYPE">
+            <td class="text-right">{{ formatMoney(centsToDollars(adjustment.amountInCents)) }}</td>
+            <td class="text-right"></td>
+            <td class="text-right"></td>
+          </template>
+          <template v-else-if="adjustment.type === EXPENSE_TYPE">
+            <td class="text-right"></td>
+            <td class="text-right"></td>
+            <td class="text-right">
+              {{ formatMoney(centsToDollars(adjustment.amountInCents)) }}
+            </td>
+          </template>
+
+          <td class="text-right">
+            {{ formatMoney(centsToDollars(allAdjustmentsRunningTotals[adjustmentIndex])) }}
+          </td>
         </tr>
-        <tr class="g1">
-          <th>First Advance</th>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>$0.00</td>
-        </tr>
-        <tr class="g1">
-          <th>Apr, May Expenses</th>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>$0.00</td>
-        </tr>
-        <tr class="g2">
-          <th>Second Advance</th>
-          <td>$109,243.00</td>
-          <td></td>
-          <td></td>
-          <td>$109,243.00</td>
-        </tr>
-        <tr class="g2">
-          <th>Jun, Jul Expenses</th>
-          <td></td>
-          <td></td>
-          <td>$51,061.40</td>
-          <td>$58,181.60</td>
-        </tr>
-        <tr class="g1">
-          <th>Third Advance</th>
-          <td>$75,000.00</td>
-          <td></td>
-          <td></td>
-          <td>$133,181.60</td>
-        </tr>
-        <tr class="g1">
-          <th>Aug, Sep Expenses</th>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>$133,181.60</td>
-        </tr>
-        <tr class="g2">
-          <th>Fourth Advance</th>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>$133,181.60</td>
-        </tr>
-        <tr class="g2">
-          <th>Oct, Nov Expenses</th>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>$133,181.60</td>
-        </tr>
-        <tr class="g1">
-          <th>Fifth Advance</th>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>$133,181.60</td>
-        </tr>
-        <tr class="g1">
-          <th>Dec, Jan Expenses</th>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>$133,181.60</td>
-        </tr>
-        <tr class="g2">
-          <th>Sixth Advance</th>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>$133,181.60</td>
-        </tr>
-        <tr class="g2">
-          <th>Feb, Mar Expenses</th>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>$133,181.60</td>
-        </tr>
-        <tr class="g1">
-          <th>Final Advance (Reconciliation)</th>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>$133,181.60</td>
-        </tr>
-        <tr class="total">
-          <th class="text-left">Totals</th>
-          <th>$184,243.00</th>
-          <th></th>
-          <th>$51,061.40</th>
-          <th></th>
-        </tr>
-        <tr>
-          <td>&nbsp;</td>
-        </tr>
-        <tr class="total">
-          <th class="text-left">Agreement Value</th>
-          <th colspan="2">T00023514</th>
-          <th colspan="2">Remaining</th>
-        </tr>
-        <tr class="total">
-          <th>$449,420.00</th>
-          <th colspan="2">$184,243.00</th>
-          <th colspan="2">$265,177.00</th>
-        </tr>
-      </table>
-    </div>
-  </div>
+      </template>
+      <tr class="font-weight-bold bg-green-lighten-4">
+        <td class="text-left">Totals</td>
+        <td class="text-right">{{ formatMoney(centsToDollars(paymentsTotal)) }}</td>
+        <td class="text-right"></td>
+        <td class="text-right">{{ formatMoney(centsToDollars(expensesTotal)) }}</td>
+        <td class="text-right"></td>
+      </tr>
+      <tr>
+        <td colspan="5"></td>
+      </tr>
+      <tr class="font-weight-bold bg-green-lighten-4">
+        <td class="text-left">Agreement Value</td>
+        <td
+          class="text-right"
+          colspan="2"
+        >
+          T00023514
+        </td>
+        <td
+          class="text-right"
+          colspan="2"
+        >
+          Remaining
+        </td>
+      </tr>
+      <tr class="font-weight-bold bg-green-lighten-4">
+        <td class="text-left">TODO: $449,420.00</td>
+        <td
+          class="text-right"
+          colspan="2"
+        >
+          TODO: $184,243.00
+        </td>
+        <td
+          class="text-right"
+          colspan="2"
+        >
+          TODO: $265,177.00
+        </td>
+      </tr>
+    </tbody>
+  </v-table>
 </template>
-<script lang="ts">
-export default {
-  name: "PaymentSummary",
-  props: ["month"],
-  setup() {},
-}
+
+<script setup lang="ts">
+import { ref, computed, onMounted } from "vue"
+import { sumBy } from "lodash"
+
+import usePaymentsStore from "@/store/payments"
+import { formatMoney, centsToDollars } from "@/utils/format-money"
+import { interleaveArrays } from "@/utils/interleave-arrays"
+
+const PAYMENT_TYPE = "payment"
+const EXPENSE_TYPE = "expense"
+
+defineProps({})
+
+const paymentsStore = usePaymentsStore()
+const payments = computed(() => paymentsStore.items)
+
+const expenses = ref([
+  { name: "April Expenses", amountInCents: 0 },
+  { name: "May Expenses", amountInCents: 0 },
+  { name: "June Expenses", amountInCents: 5106140 / 2 },
+  { name: "July Expenses", amountInCents: 5106140 / 2 },
+  { name: "August Expenses", amountInCents: 0 },
+  { name: "September Expenses", amountInCents: 0 },
+  { name: "October Expenses", amountInCents: 0 },
+  { name: "November Expenses", amountInCents: 0 },
+  { name: "December Expenses", amountInCents: 0 },
+  { name: "January Expenses", amountInCents: 0 },
+  { name: "February Expenses", amountInCents: 0 },
+  { name: "March Expenses", amountInCents: 0 },
+])
+
+const typedPayments = computed(() =>
+  payments.value.map((payment) => ({
+    ...payment,
+    type: PAYMENT_TYPE,
+  }))
+)
+const typedExpenses = computed(() =>
+  expenses.value.map((expense) => ({
+    ...expense,
+    type: EXPENSE_TYPE,
+  }))
+)
+
+const allAdjustments = computed(() => {
+  return interleaveArrays(typedPayments.value, typedExpenses.value, { chunkSize: 2 })
+})
+
+const allAdjustmentsRunningTotals = computed(() => {
+  let total = 0
+  return allAdjustments.value.map((adjustment) => {
+    if (adjustment.type === PAYMENT_TYPE) {
+      total += adjustment.amountInCents
+    } else if (adjustment.type === EXPENSE_TYPE) {
+      total -= adjustment.amountInCents
+    }
+    return total
+  })
+})
+
+const paymentsTotal = computed(() => sumBy(payments.value, "amountInCents"))
+const expensesTotal = computed(() => sumBy(expenses.value, "amountInCents"))
+
+onMounted(async () => {
+  await paymentsStore.initialize()
+})
 </script>
+
 <style scoped>
-h4 {
-  margin-bottom: 10px;
-  font-weight: 400;
-  background-color: #55b6c2;
-  margin-left: -8px;
-  padding: 8px;
-  border-radius: 4px;
-  margin-top: 13px;
-}
-th {
-  text-align: left;
-  padding: 4px 6px;
-}
-td {
-  text-align: right;
-  padding: 4px 6px;
-}
-.total th {
-  text-align: right;
-}
-
-.table > td {
-  border: 1px #ccc solid;
-}
-.table > th {
-  border: 1px #ccc solid;
-  font-weight: bold;
-}
-
-.g1 td,
-.g1 th {
-  background-color: #ddd;
-  border-left: 1px #ccc solid;
-  border-right: 1px #ccc solid;
-}
-.table .g2 td,
-.table .g2 th {
-  background-color: #eee;
-  border-left: 1px #ddd solid;
-  border-right: 1px #ddd solid;
-}
-.table .total th {
+.total-row {
   background-color: #7a9a0199;
-  border-left: 1px #ddd solid;
-  border-right: 1px #ddd solid;
-}
-
-.table.monospace .g2 td,
-.table.monospace .g2 th {
-  font-family: "Courier Prime", monospace !important;
-}
-
-.table.monospace .g1 td {
-  font-family: "Courier Prime", monospace !important;
-}
-
-.table.monospace th {
-  font-family: "Courier Prime", monospace !important;
-  font-weight: 700 !important;
-}
-
-.table.monospace td,
-.table.monospace td {
-  font-family: "Courier Prime", monospace !important;
 }
 </style>
