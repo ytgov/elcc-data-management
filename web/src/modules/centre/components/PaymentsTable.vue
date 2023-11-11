@@ -29,7 +29,7 @@
           <td>
             <v-text-field
               v-model="payment.name"
-              label="Payment Name"
+              aria-label="Payment Name"
               density="compact"
               hide-details
             ></v-text-field>
@@ -37,7 +37,7 @@
           <td>
             <CurrencyInput
               :model-value="centsToDollars(payment.amountInCents)"
-              label="Payment Amount"
+              aria-label="Payment Amount"
               density="compact"
               hide-details
               @update:model-value="(newValue: string) => updatePaymentAmount(payment, newValue)"
@@ -47,7 +47,7 @@
             <v-text-field
               v-model="payment.paidOn"
               :rules="[dateRule]"
-              label="Paid On"
+              aria-label="Paid On"
               density="compact"
               hide-details="auto"
             ></v-text-field>
