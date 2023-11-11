@@ -81,12 +81,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
-import { sumBy } from "lodash"
+import { isNil, sumBy } from "lodash"
 
-import fundingSubmissionLineJsonsApi from "@/api/funding-submission-line-jsons-api"
+import fundingSubmissionLineJsonsApi, {
+  type FundingSubmissionLineJson,
+} from "@/api/funding-submission-line-jsons-api"
 import usePaymentsStore from "@/store/payments"
 import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
-import { formatMoney, centsToDollars } from "@/utils/format-money"
+import { formatMoney, centsToDollars, dollarsToCents } from "@/utils/format-money"
 import { interleaveArrays } from "@/utils/interleave-arrays"
 
 const PAYMENT_TYPE = "payment"
@@ -110,18 +112,18 @@ const paymentsStore = usePaymentsStore()
 const payments = computed(() => paymentsStore.items)
 
 const expenses = ref([
-  { name: "April Expenses", amountInCents: 0 },
-  { name: "May Expenses", amountInCents: 0 },
-  { name: "June Expenses", amountInCents: 5106140 / 2 },
-  { name: "July Expenses", amountInCents: 5106140 / 2 },
-  { name: "August Expenses", amountInCents: 0 },
-  { name: "September Expenses", amountInCents: 0 },
-  { name: "October Expenses", amountInCents: 0 },
-  { name: "November Expenses", amountInCents: 0 },
-  { name: "December Expenses", amountInCents: 0 },
-  { name: "January Expenses", amountInCents: 0 },
-  { name: "February Expenses", amountInCents: 0 },
-  { name: "March Expenses", amountInCents: 0 },
+  { dateName: "April", name: "April Expenses", amountInCents: 0 },
+  { dateName: "May", name: "May Expenses", amountInCents: 0 },
+  { dateName: "June", name: "June Expenses", amountInCents: 0 },
+  { dateName: "July", name: "July Expenses", amountInCents: 0 },
+  { dateName: "August", name: "August Expenses", amountInCents: 0 },
+  { dateName: "September", name: "September Expenses", amountInCents: 0 },
+  { dateName: "October", name: "October Expenses", amountInCents: 0 },
+  { dateName: "November", name: "November Expenses", amountInCents: 0 },
+  { dateName: "December", name: "December Expenses", amountInCents: 0 },
+  { dateName: "January", name: "January Expenses", amountInCents: 0 },
+  { dateName: "February", name: "February Expenses", amountInCents: 0 },
+  { dateName: "March", name: "March Expenses", amountInCents: 0 },
 ])
 
 const typedPayments = computed(() =>
@@ -170,8 +172,26 @@ onMounted(async () => {
       fiscalYear: fiscalYear.value,
     },
   })
-  console.log("fundingSubmissionLineJsons:", JSON.stringify(fundingSubmissionLineJsons, null, 2))
+
+  updateExpenseValues(fundingSubmissionLineJsons)
 })
+
+function updateExpenseValues(fundingSubmissionLineJsons: FundingSubmissionLineJson[]) {
+  expenses.value.map((expense) => {
+    const { dateName } = expense
+    const fundingSubmissionLineJsonsForMonth = fundingSubmissionLineJsons.find(
+      (fundingSubmissionLineJson) => fundingSubmissionLineJson.dateName === dateName
+    )
+
+    if (isNil(fundingSubmissionLineJsonsForMonth)) {
+      console.error(`Could not find funding submission line json for month ${dateName}`)
+      return
+    }
+
+    const { lines: linesForMonth } = fundingSubmissionLineJsonsForMonth
+    expense.amountInCents = dollarsToCents(sumBy(linesForMonth, "actualComputedTotal"))
+  })
+}
 </script>
 
 <style scoped>
