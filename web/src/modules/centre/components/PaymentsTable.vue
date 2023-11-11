@@ -2,9 +2,9 @@
   <v-table>
     <thead>
       <tr>
-        <th class="text-left">Payment Name</th>
-        <th class="text-left">Payment Amount</th>
-        <th class="text-left">Payment Date</th>
+        <th class="text-left font-weight-bold">Payment Name</th>
+        <th class="text-left font-weight-bold">Payment Amount</th>
+        <th class="text-left font-weight-bold">Payment Date</th>
         <th></th>
       </tr>
     </thead>
@@ -25,12 +25,15 @@
         <tr
           v-for="(payment, index) in allPayments"
           :key="index"
+          :class="index % 2 === 0 ? 'bg-grey-lighten-3' : 'bg-gray-darken-1'"
         >
           <td>
             <v-text-field
               v-model="payment.name"
               aria-label="Payment Name"
+              color="primary"
               density="compact"
+              variant="underlined"
               hide-details
             ></v-text-field>
           </td>
@@ -38,7 +41,9 @@
             <CurrencyInput
               :model-value="centsToDollars(payment.amountInCents)"
               aria-label="Payment Amount"
+              color="primary"
               density="compact"
+              variant="underlined"
               hide-details
               @update:model-value="(newValue: string) => updatePaymentAmount(payment, newValue)"
             />
@@ -48,8 +53,10 @@
               v-model="payment.paidOn"
               :rules="[dateRule]"
               aria-label="Paid On"
+              color="primary"
               density="compact"
               hide-details="auto"
+              variant="underlined"
             ></v-text-field>
           </td>
           <td class="text-center">
