@@ -14,7 +14,7 @@
         v-for="(adjustment, adjustmentIndex) in allAdjustments"
         :key="`adjustment-${adjustmentIndex}`"
       >
-        <tr>
+        <tr :class="adjustmentIndex % 2 === 0 ? 'bg-grey-lighten-3' : 'bg-gray-darken-1'">
           <td class="text-left font-weight-bold">{{ adjustment.name }}</td>
 
           <template v-if="adjustment.type === PAYMENT_TYPE">
