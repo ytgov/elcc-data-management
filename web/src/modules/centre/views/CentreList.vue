@@ -144,7 +144,7 @@
               class="mt-5 float-right"
               size="small"
               color="primary"
-              :to="`/child-care-centres/${selectedItem.id}`"
+              :to="{ name: 'CentreDashboard-SummaryTab', params: { centreId: selectedItem.id } }"
               >View Details</v-btn
             >
             <div style="clear: both"></div>
@@ -183,7 +183,7 @@ export default {
   methods: {
     ...mapActions(useCentreStore, ["selectCentre", "editCentre"]),
     tableRowClick(event: any, item: any) {
-      this.selectedItem = item.item.raw
+      this.selectedItem = item.item
     },
     goToCentre() {
       this.selectCentre(this.selectedItem)

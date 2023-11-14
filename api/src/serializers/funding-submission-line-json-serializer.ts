@@ -1,10 +1,28 @@
-import { sortBy, uniq } from "lodash"
+import { sortBy, uniq, pick } from "lodash"
 import moment from "moment"
 import { FundingSubmissionLineJson } from "@/models"
 
 import BaseSerializer from "@/serializers/base-serializer"
 
 export class FundingSubmissionLineJsonSerializer extends BaseSerializer<FundingSubmissionLineJson> {
+  static asTable(fundingSubmissionLineJsons: FundingSubmissionLineJson[]) {
+    return fundingSubmissionLineJsons.map((fundingSubmissionLineJson) => {
+      return {
+        ...pick(fundingSubmissionLineJson, [
+          "id",
+          "centreId",
+          "fiscalYear",
+          "dateName",
+          "dateStart",
+          "dateEnd",
+          "createdAt",
+          "updatedAt",
+        ]),
+        lines: fundingSubmissionLineJson.lines,
+      }
+    })
+  }
+
   constructor(modelOrModels: FundingSubmissionLineJson | FundingSubmissionLineJson[]) {
     super(modelOrModels)
   }
