@@ -83,11 +83,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
-import { isNil, sumBy } from "lodash"
+import { sumBy } from "lodash"
 
-import fundingSubmissionLineJsonsApi, {
-  type FundingSubmissionLineJson,
-} from "@/api/funding-submission-line-jsons-api"
+import useFundingSubmissionLineJsonsStore from "@/store/funding-submission-line-jsons"
 import usePaymentsStore from "@/store/payments"
 import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 import { formatMoney, centsToDollars, dollarsToCents } from "@/utils/format-money"
@@ -112,6 +110,7 @@ const submissionLinesStore = useSubmissionLinesStore()
 const fiscalYear = computed(() => submissionLinesStore.currentFiscalYear)
 const paymentsStore = usePaymentsStore()
 const payments = computed(() => paymentsStore.items)
+const fundingSubmissionLineJsonsStore = useFundingSubmissionLineJsonsStore()
 
 const expenses = ref([
   { dateName: "April", name: "April Expenses", amountInCents: 0 },
@@ -168,29 +167,23 @@ onMounted(async () => {
       fiscalYear: fiscalYear.value,
     },
   })
-  const { fundingSubmissionLineJsons } = await fundingSubmissionLineJsonsApi.list({
-    where: {
-      centreId: centreIdNumber.value,
-      fiscalYear: fiscalYear.value,
-    },
-  })
-
-  updateExpenseValues(fundingSubmissionLineJsons)
+  await fundingSubmissionLineJsonsStore
+    .initialize({
+      where: {
+        centreId: centreIdNumber.value,
+        fiscalYear: fiscalYear.value,
+      },
+    })
+    .then(() => {
+      updateExpenseValues()
+    })
 })
 
-function updateExpenseValues(fundingSubmissionLineJsons: FundingSubmissionLineJson[]) {
+function updateExpenseValues() {
   expenses.value.map((expense) => {
     const { dateName } = expense
-    const fundingSubmissionLineJsonsForMonth = fundingSubmissionLineJsons.find(
-      (fundingSubmissionLineJson) => fundingSubmissionLineJson.dateName === dateName
-    )
+    const linesForMonth = fundingSubmissionLineJsonsStore.linesForMonth(dateName)
 
-    if (isNil(fundingSubmissionLineJsonsForMonth)) {
-      console.error(`Could not find funding submission line json for month ${dateName}`)
-      return
-    }
-
-    const { lines: linesForMonth } = fundingSubmissionLineJsonsForMonth
     expense.amountInCents = dollarsToCents(sumBy(linesForMonth, "actualComputedTotal"))
   })
 }
