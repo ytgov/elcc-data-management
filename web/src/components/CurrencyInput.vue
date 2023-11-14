@@ -1,8 +1,14 @@
 <template>
+  <!--
+    Supress default update:model-value emit, then triggers on blur instead
+    This fixes the annoying cursor jump to end bug
+  -->
   <v-text-field
     ref="inputRef"
     :model-value="modelValue"
     type="text"
+    @blur="onBlur"
+    @update:model-value="false"
   />
 </template>
 
@@ -22,5 +28,12 @@ const props = defineProps({
   },
 })
 
-const { inputRef } = useCurrencyInput(props.options as CurrencyInputOptions)
+const emit = defineEmits(["update:modelValue"])
+
+const autoEmit = false
+const { inputRef, numberValue } = useCurrencyInput(props.options as CurrencyInputOptions, autoEmit)
+
+function onBlur() {
+  emit("update:modelValue", numberValue.value)
+}
 </script>
