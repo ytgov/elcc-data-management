@@ -14,7 +14,7 @@ export { isPersistedPayment, type Payment, type NonPersistedPayment, type Params
 
 export const usePaymentsStore = defineStore("payments", () => {
   const items: Ref<Payment[]> = ref([])
-  const totalCount = ref(0)
+  // TODO: Implement total_count here and in the back-end
   const isLoading = ref(false)
   const isErrored = ref(false)
   const isInitialized = ref(false)
@@ -33,7 +33,6 @@ export const usePaymentsStore = defineStore("payments", () => {
       const { payments } = await paymentsApi.list(params)
       isErrored.value = false
       items.value = payments
-      // TODO: serve total count from back-end
       isInitialized.value = true
       return payments
     } catch (error) {
@@ -126,7 +125,6 @@ export const usePaymentsStore = defineStore("payments", () => {
 
   return {
     items,
-    totalCount,
     isLoading,
     isErrored,
     isInitialized,
