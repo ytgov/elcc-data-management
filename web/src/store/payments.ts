@@ -33,6 +33,7 @@ export const usePaymentsStore = defineStore("payments", () => {
       const { payments } = await paymentsApi.list(params)
       isErrored.value = false
       items.value = payments
+      // TODO: serve total count from back-end
       isInitialized.value = true
       return payments
     } catch (error) {
