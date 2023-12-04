@@ -79,7 +79,7 @@
             <v-divider></v-divider>
             <v-list-item
               title="Hot Meal"
-              :subtitle="FormatYesNo(currentCentre.hot_meal)"
+              :subtitle="FormatYesNo(currentCentre.hotMeal)"
               class="pl-0"
             >
               <template #prepend>
@@ -92,7 +92,7 @@
             <v-divider></v-divider>
             <v-list-item
               title="Licensed For"
-              :subtitle="currentCentre.licensed_for"
+              :subtitle="currentCentre.licensedFor"
               class="pl-0"
             >
               <template #prepend>
@@ -118,7 +118,7 @@
             <v-divider></v-divider>
             <v-list-item
               title="Last Submission"
-              :subtitle="FormatDate(currentCentre.last_submission)"
+              :subtitle="FormatDate(currentCentre.lastSubmission)"
               class="pl-0"
             >
               <template #prepend>
@@ -138,7 +138,7 @@
         <v-card-title style="background-color: #0097a968">Latest Enrollment</v-card-title>
         <v-divider></v-divider>
         <v-card-text class="pt-3">
-          <Enrollment-Chart></Enrollment-Chart>
+          <EnrollmentChart :centre-id="centreId" />
         </v-card-text>
       </v-card>
     </v-col>
@@ -154,7 +154,12 @@
           v-model="tab"
           grow
         >
-          <v-tab value="option-1"> Summary </v-tab>
+          <v-tab
+            value="option-1"
+            :to="{ name: 'CentreDashboard-SummaryTab' }"
+          >
+            Summary
+          </v-tab>
           <v-tab value="option-2"> Worksheets </v-tab>
           <v-tab value="option-3"> Employees </v-tab>
         </v-tabs>
@@ -165,28 +170,7 @@
           class="fill-height"
         >
           <v-window-item value="option-1">
-            <v-toolbar
-              color="#0097a966"
-              density="compact"
-            >
-              <v-tabs v-model="summary">
-                <v-tab value="0"> Reconciliation </v-tab>
-                <v-tab value="1"> Worksheets </v-tab>
-              </v-tabs>
-            </v-toolbar>
-
-            <v-window v-model="summary">
-              <v-window-item value="0">
-                <v-card flat>
-                  <v-card-text>
-                    <Payment-Summary></Payment-Summary>
-                  </v-card-text>
-                </v-card>
-              </v-window-item>
-              <v-window-item value="1">
-                <Worksheet-Summary></Worksheet-Summary>
-              </v-window-item>
-            </v-window>
+            <router-view></router-view>
           </v-window-item>
           <v-window-item value="option-2">
             <v-toolbar
@@ -218,10 +202,11 @@
                 >
               </div>
               <v-window-item
-                v-for="worksheet of yearWorksheets"
+                v-for="worksheet in yearWorksheets"
+                :key="worksheet.month"
                 :value="worksheet.month"
               >
-                <Monthly-Worksheet :month="worksheet"></Monthly-Worksheet>
+                <MonthlyWorksheet :month="worksheet" />
               </v-window-item>
             </v-window>
           </v-window-item>
@@ -237,12 +222,13 @@
 </template>
 
 <script lang="ts">
+import { isNil } from "lodash"
+
 import { FormatDate, FormatYesNo } from "@/utils"
 import { mapActions, mapState, mapWritableState } from "pinia"
 import VueApexCharts from "vue3-apexcharts"
 import MonthlyWorksheet from "../components/MonthlyWorksheet.vue"
-import PaymentSummary from "../components/PaymentSummary.vue"
-import WorksheetSummary from "../components/WorksheetSummary.vue"
+
 import EnrollmentChart from "../components/EnrollmentChart.vue"
 import CentreEditor from "../components/CentreEditor.vue"
 import { type ChildCareCentre, useCentreStore } from "../store"
@@ -253,12 +239,15 @@ export default {
   components: {
     VueApexCharts,
     MonthlyWorksheet,
-    PaymentSummary,
     EnrollmentChart,
     CentreEditor,
-    WorksheetSummary,
   },
-  setup() {},
+  props: {
+    centreId: {
+      type: String,
+      required: true,
+    },
+  },
   data() {
     return {
       submissions: [
@@ -267,9 +256,8 @@ export default {
         { month: "November 2022", payment: "$11,025", enrollment: 42 },
         { month: "December 2022", payment: "$9,447", enrollment: 39 },
       ],
-      tab: 0,
+      tab: "option-1",
       month: "",
-      summary: 0,
       currentCentre: { name: "" } as ChildCareCentre,
 
       options: {
@@ -289,19 +277,25 @@ export default {
     }
   },
   watch: {
-    selectedCentre(newVal) {
-      this.currentCentre = newVal
+    tab(newValue) {
+      if (!["option-1"].includes(newValue)) {
+        this.$router.push({ name: "CentreDashboard", params: { centreId: this.centreId } })
+      }
     },
   },
-  mounted() {
-    const centreId = this.$route.params.id
-
-    if (this.selectedCentre) this.currentCentre = this.selectedCentre
-    else {
-      this.selectCentreById(parseInt(centreId as string))
+  async mounted() {
+    const centre = await this.selectCentreById(parseInt(this.centreId as string))
+    if (isNil(centre)) {
+      throw new Error(`Could not load centre from id=${this.centreId}`)
     }
 
-    this.loadWorksheets(parseInt(centreId as string))
+    this.currentCentre = centre
+
+    if (this.tab === "option-1" && !this.$route.path.includes("summary")) {
+      this.$router.push({ name: "CentreDashboard-SummaryTab", params: { centreId: this.centreId } })
+    }
+
+    await this.loadWorksheets(parseInt(this.centreId as string))
   },
   unmounted() {
     this.unselectCentre()
@@ -318,7 +312,7 @@ export default {
       ]
     },
     yearWorksheets() {
-      const t = this.worksheets.filter((w) => w.fiscal_year == this.currentFiscalYear)
+      const t = this.worksheets.filter((w) => w.fiscalYear == this.currentFiscalYear)
       return t
     },
   },
@@ -327,7 +321,6 @@ export default {
       "selectCentreById",
       "unselectCentre",
       "loadWorksheets",
-      "createWorksheet",
       "editCentre",
       "addCentreFiscal",
     ]),
@@ -339,9 +332,6 @@ export default {
     },
     editClick() {
       if (this.selectedCentre) this.editCentre(this.selectedCentre)
-    },
-    addWorksheetClick() {
-      this.createWorksheet(this.currentCentre.id || 0)
     },
     addFiscalClick() {
       this.addCentreFiscal(this.currentFiscalYear)

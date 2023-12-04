@@ -15,24 +15,23 @@ export class FundingSubmissionLineJsonServices implements BaseService {
       throw new Error("Fiscal year already exists for this centre")
     }
 
-    const basis = await FundingSubmissionLine.findAll({ where: { fiscalYear } })
+    const templateLines = await FundingSubmissionLine.findAll({ where: { fiscalYear } })
     const year = fiscalYear.split("/")[0]
     let date = moment.utc(`${year}-04-01`)
-    const lines = new Array<FundingLineValue>()
+    const lines: FundingLineValue[] = []
 
-    for (const line of basis) {
-      // TODO: Write a migration for existing data, and swap this to camel case.
+    templateLines.forEach((templateLine) => {
       lines.push({
-        submission_line_id: line.id as number,
-        section_name: line.sectionName,
-        line_name: line.lineName,
-        monthly_amount: line.monthlyAmount,
-        est_child_count: 0,
-        act_child_count: 0,
-        est_computed_total: 0,
-        act_computed_total: 0,
+        submissionLineId: templateLine.id,
+        sectionName: templateLine.sectionName,
+        lineName: templateLine.lineName,
+        monthlyAmount: templateLine.monthlyAmount,
+        estimatedChildOccupancyRate: 0,
+        actualChildOccupancyRate: 0,
+        estimatedComputedTotal: 0,
+        actualComputedTotal: 0,
       })
-    }
+    })
 
     const bulkAttributes = []
     for (let i = 0; i < 12; i++) {

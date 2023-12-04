@@ -55,11 +55,11 @@
     >
       <template #item.permissions="{ item }">
         <v-chip
-          v-if="item.raw.isAdmin"
+          v-if="item.isAdmin"
           color="yg_moss"
           >Admin</v-chip
         >
-        <div v-else>{{ item.raw.scopes.length }}</div>
+        <div v-else>{{ item.scopes.length }}</div>
       </template>
     </v-data-table>
   </base-card>

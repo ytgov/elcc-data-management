@@ -67,10 +67,10 @@ export default {
   components: { FundingPeriodEditor },
   data: () => ({
     headers: [
-      { title: "Fiscal Year", value: "fiscal_year" },
+      { title: "Fiscal Year", value: "fiscalYear" },
       { title: "Title", value: "title" },
-      { title: "From Date", value: "to_date" },
-      { title: "To Date", value: "from_date" },
+      { title: "From Date", value: "toDate" },
+      { title: "To Date", value: "fromDate" },
     ],
     search: "",
   }),

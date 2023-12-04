@@ -1,10 +1,28 @@
-import { sortBy, uniq } from "lodash"
+import { sortBy, uniq, pick } from "lodash"
 import moment from "moment"
 import { FundingSubmissionLineJson } from "@/models"
 
 import BaseSerializer from "@/serializers/base-serializer"
 
 export class FundingSubmissionLineJsonSerializer extends BaseSerializer<FundingSubmissionLineJson> {
+  static asTable(fundingSubmissionLineJsons: FundingSubmissionLineJson[]) {
+    return fundingSubmissionLineJsons.map((fundingSubmissionLineJson) => {
+      return {
+        ...pick(fundingSubmissionLineJson, [
+          "id",
+          "centreId",
+          "fiscalYear",
+          "dateName",
+          "dateStart",
+          "dateEnd",
+          "createdAt",
+          "updatedAt",
+        ]),
+        lines: fundingSubmissionLineJson.lines,
+      }
+    })
+  }
+
   constructor(modelOrModels: FundingSubmissionLineJson | FundingSubmissionLineJson[]) {
     super(modelOrModels)
   }
@@ -34,7 +52,7 @@ export class FundingSubmissionLineJsonSerializer extends BaseSerializer<FundingS
       for (const month of months) {
         const monthSheets = yearSheets.filter((m) => month == m.dateName)[0]
 
-        const sections = uniq(monthSheets.lines.map((w) => w.section_name))
+        const sections = uniq(monthSheets.lines.map((w) => w.sectionName))
         const monthRow = {
           id: monthSheets.id,
           fiscalYear,
@@ -44,9 +62,8 @@ export class FundingSubmissionLineJsonSerializer extends BaseSerializer<FundingS
         }
 
         for (const section of sections) {
-          const lines = monthSheets.lines.filter((w) => section == w.section_name)
-          // TODO: investigate what would be required to permit this to be camel cased.
-          monthRow.sections.push({ section_name: section, lines })
+          const lines = monthSheets.lines.filter((w) => section == w.sectionName)
+          monthRow.sections.push({ sectionName: section, lines })
         }
 
         groups.push(monthRow)

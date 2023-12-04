@@ -68,9 +68,9 @@
     ></v-data-table>
   </base-card>
 
-  <submission-line-editor></submission-line-editor>
+  <SubmissionLineEditor />
 
-  <funding-fiscal-editor></funding-fiscal-editor>
+  <FundingFiscalEditor />
 </template>
 <script lang="ts">
 import { mapActions, mapState } from "pinia"
@@ -82,10 +82,10 @@ export default {
   components: { SubmissionLineEditor, FundingFiscalEditor },
   data: () => ({
     headers: [
-      { title: "Section", value: "section_name" },
-      { title: "Line", value: "line_name" },
-      { title: "Age Range", value: "age_range" },
-      { title: "Monthly Amount", value: "monthly_amount_display" },
+      { title: "Section", value: "sectionName" },
+      { title: "Line", value: "lineName" },
+      { title: "Age Range", value: "ageRange" },
+      { title: "Monthly Amount", value: "monthlyAmountDisplay" },
     ],
     fiscalYear: "2022/23",
     search: "",
@@ -93,7 +93,7 @@ export default {
   computed: {
     ...mapState(useSubmissionLinesStore, ["lines", "isLoading", "fiscalYears"]),
     items() {
-      return this.lines.filter((y) => y.fiscal_year == this.fiscalYear)
+      return this.lines.filter((y) => y.fiscalYear == this.fiscalYear)
     },
     totalItems() {
       return this.lines.length

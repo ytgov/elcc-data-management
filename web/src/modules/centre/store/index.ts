@@ -1,5 +1,6 @@
 import { defineStore } from "pinia"
-import { uniq, cloneDeep } from "lodash"
+import { uniq, cloneDeep, isNil } from "lodash"
+
 import { useNotificationStore } from "@/store/NotificationStore"
 import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 import { useApiStore } from "@/store/ApiStore"
@@ -20,7 +21,7 @@ interface CentreState {
 
 export const useCentreStore = defineStore("centre", {
   state: (): CentreState => ({
-    centres: new Array<ChildCareCentre>(),
+    centres: [],
     selectedCentre: undefined,
     editingCentre: undefined,
     isLoading: false,
@@ -51,7 +52,7 @@ export const useCentreStore = defineStore("centre", {
       await api
         .secureCall("get", CENTRE_URL)
         .then((resp) => {
-          this.centres = resp.data
+          this.centres = resp.data || []
         })
         .finally(() => {
           this.isLoading = false
@@ -61,20 +62,17 @@ export const useCentreStore = defineStore("centre", {
     selectCentre(centre: ChildCareCentre) {
       this.selectedCentre = centre
     },
-    selectCentreById(id: number) {
-      if (this.isLoading || this.centres.length == 0) {
-        const self = this
-
-        const handle = window.setInterval(() => {
-          if (self.isLoading || this.centres.length == 0) {
-          } else {
-            window.clearInterval(handle)
-            this.selectedCentre = this.centres.filter((c) => c.id == id)[0]
-          }
-        }, 100)
-      } else {
-        this.selectedCentre = this.centres.filter((c) => c.id == id)[0]
+    async selectCentreById(id: number): Promise<ChildCareCentre | undefined> {
+      const centreFromStore = this.centres.find((centre) => centre.id === id)
+      if (!isNil(centreFromStore)) {
+        this.selectedCentre = centreFromStore
+        return this.selectedCentre
       }
+
+      const api = useApiStore()
+      const centre = await api.secureCall("get", `${CENTRE_URL}/${id}`)
+      this.selectedCentre = centre
+      return this.selectedCentre
     },
     unselectCentre() {
       this.selectedCentre = undefined
@@ -110,16 +108,6 @@ export const useCentreStore = defineStore("centre", {
         })
         .finally(() => {})
     },
-    async createWorksheet(id: number) {
-      const api = useApiStore()
-      await api
-        .secureCall("post", `${CENTRE_URL}/${id}/worksheets`, { month: "TESTING" })
-        .then((resp) => {
-          this.worksheets = resp.data
-        })
-        .finally(() => {})
-    },
-
     async save() {
       const api = useApiStore()
 
@@ -150,13 +138,13 @@ export const useCentreStore = defineStore("centre", {
       this.getAllCentres()
     },
 
-    async addCentreFiscal(fiscal_year: string) {
+    async addCentreFiscal(fiscalYear: string) {
       if (this.selectedCentre != null) {
         const id = this.selectedCentre.id || 0
 
         const api = useApiStore()
         await api
-          .secureCall("post", `${CENTRE_URL}/${id}/fiscal-year`, { fiscal_year })
+          .secureCall("post", `${CENTRE_URL}/${id}/fiscal-year`, { fiscalYear })
           .then((resp) => {
             // this.selectedCentre = resp.data;
             this.loadWorksheets(id)
@@ -186,7 +174,7 @@ export const useCentreStore = defineStore("centre", {
       if (this.selectedCentre != null) id = this.selectedCentre.id || 0
 
       const currentFiscalYear = subs.currentFiscalYear
-      const forDup = this.worksheets.filter((w) => w.fiscal_year == currentFiscalYear)
+      const forDup = this.worksheets.filter((w) => w.fiscalYear == currentFiscalYear)
       const aprilSheet = forDup.filter((s) => s.month == "April")[0]
       const aprilLines = aprilSheet.sections.flatMap((s: any) => s.lines)
 
@@ -194,10 +182,10 @@ export const useCentreStore = defineStore("centre", {
         for (const section of month.sections) {
           for (const line of section.lines) {
             const aprilLine = aprilLines.filter(
-              (a: any) => a.submission_line_id == line.submission_line_id
+              (a: any) => a.submissionLineId == line.submissionLineId
             )
-            line.est_child_count = aprilLine[0].est_child_count
-            line.est_computed_total = aprilLine[0].est_computed_total
+            line.estimatedChildOccupancyRate = aprilLine[0].estimatedChildOccupancyRate
+            line.estimatedComputedTotal = aprilLine[0].estimatedComputedTotal
           }
         }
         await this.saveWorksheet(month, false)
@@ -214,8 +202,8 @@ export interface ChildCareCentre {
   license: string
   community: string
   status: string
-  hot_meal: boolean
-  licensed_for: number
-  last_submission?: Date
-  create_date: Date
+  hotMeal: boolean
+  licensedFor: number
+  lastSubmission?: Date
+  createDate: Date
 }

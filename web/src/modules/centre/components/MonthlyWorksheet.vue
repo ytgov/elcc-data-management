@@ -19,10 +19,10 @@
     </v-btn>
 
     <div
-      v-for="section of month.sections"
+      v-for="(section, sectionIndex) in month.sections"
       style="clear: both"
     >
-      <h4>{{ section.section_name }}</h4>
+      <h4>{{ section.sectionName }}</h4>
 
       <table
         style="width: 100%"
@@ -54,13 +54,13 @@
           <td class="pl-4">Act Total</td>
         </tr>
         <tr
-          v-for="line of section.lines"
+          v-for="(line, lineIndex) in section.lines"
           class="monospace"
         >
-          <td>{{ line.line_name }}</td>
+          <td>{{ line.lineName }}</td>
           <td>
             <v-text-field
-              :value="formatMoney(line.monthly_amount)"
+              :value="formatMoney(line.monthlyAmount)"
               density="compact"
               hide-details
               readonly
@@ -69,15 +69,15 @@
           </td>
           <td>
             <v-text-field
-              v-model="line.est_child_count"
+              v-model="line.estimatedChildOccupancyRate"
               density="compact"
               hide-details
-              @change="changeLine(line)"
+              @change="changeLineAndPropagate(line, lineIndex, sectionIndex)"
             ></v-text-field>
           </td>
           <td>
             <v-text-field
-              :value="formatMoney(line.est_computed_total)"
+              :value="formatMoney(line.estimatedComputedTotal)"
               density="compact"
               hide-details
               readonly
@@ -86,16 +86,16 @@
           </td>
           <td>
             <v-text-field
-              v-model="line.act_child_count"
+              v-model="line.actualChildOccupancyRate"
               density="compact"
               hide-details
-              @change="changeLine(line)"
+              @change="changeLineAndPropagate(line, lineIndex, sectionIndex)"
             ></v-text-field>
           </td>
 
           <td>
             <v-text-field
-              :value="formatMoney(line.act_computed_total)"
+              :value="formatMoney(line.actualComputedTotal)"
               density="compact"
               hide-details
               readonly
@@ -109,7 +109,10 @@
           <td>
             <v-text-field
               :value="
-                section.lines.reduce((a: number, v: any) => a + parseInt(v.est_child_count || 0), 0)
+                section.lines.reduce(
+                  (a: number, v: any) => a + parseFloat(v.estimatedChildOccupancyRate || 0),
+                  0
+                )
               "
               density="compact"
               hide-details
@@ -122,7 +125,7 @@
               :value="
                 formatMoney(
                   section.lines.reduce(
-                    (a: number, v: any) => a + parseFloat(v.est_computed_total || 0),
+                    (a: number, v: any) => a + parseFloat(v.estimatedComputedTotal || 0),
                     0
                   )
                 )
@@ -136,7 +139,10 @@
           <td>
             <v-text-field
               :value="
-                section.lines.reduce((a: number, v: any) => a + parseInt(v.act_child_count || 0), 0)
+                section.lines.reduce(
+                  (a: number, v: any) => a + parseFloat(v.actualChildOccupancyRate || 0),
+                  0
+                )
               "
               density="compact"
               hide-details
@@ -149,7 +155,7 @@
               :value="
                 formatMoney(
                   section.lines.reduce(
-                    (a: number, v: any) => a + parseFloat(v.act_computed_total || 0),
+                    (a: number, v: any) => a + parseFloat(v.actualComputedTotal || 0),
                     0
                   )
                 )
@@ -167,48 +173,46 @@
 </template>
 <script lang="ts">
 import { mapActions } from "pinia"
+
 import { useCentreStore } from "../store"
+import { formatMoney } from "@/utils"
 
 export default {
   name: "MonthlyWorksheet",
   props: ["month"],
   setup() {},
   data: () => ({}),
-  computed: {},
+  computed: {
+    sections() {
+      return this.month.sections
+    },
+  },
+  watch: {},
   methods: {
     ...mapActions(useCentreStore, ["saveWorksheet", "duplicateAprilEstimates"]),
+    formatMoney,
+    changeLineAndPropagate(line: any, lineIndex: number, sectionIndex: number) {
+      line.estimatedChildOccupancyRate = parseFloat(line.estimatedChildOccupancyRate || 0)
+      line.actualChildOccupancyRate = parseFloat(line.actualChildOccupancyRate || 0)
+      this.refreshLineTotals(line)
 
-    formatMoney(amount: any, decimalCount = 2, decimal = ".", thousands = ",") {
-      try {
-        decimalCount = Math.abs(decimalCount)
-        decimalCount = isNaN(decimalCount) ? 2 : decimalCount
+      // Bind section 1 to sections 2 and 3
+      // When you update the values in section 1, it will propagated the values to section 2 and 3
+      if (sectionIndex === 0) {
+        const section1Line = this.sections[1].lines[lineIndex]
+        section1Line.estimatedChildOccupancyRate = line.estimatedChildOccupancyRate
+        section1Line.actualChildOccupancyRate = line.actualChildOccupancyRate
+        this.refreshLineTotals(section1Line)
 
-        const negativeSign = amount < 0 ? "-" : ""
-
-        const i = parseInt((amount = Math.abs(amount || 0).toFixed(decimalCount))).toString()
-        const j = i.length > 3 ? i.length % 3 : 0
-
-        return (
-          negativeSign +
-          "$" +
-          (j ? i.substr(0, j) + thousands : "") +
-          i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands) +
-          (decimalCount
-            ? decimal +
-              Math.abs(parseFloat(amount) - parseFloat(i))
-                .toFixed(decimalCount)
-                .slice(2)
-            : "")
-        )
-      } catch (e) {
-        console.log(e)
+        const section2Line = this.sections[2].lines[lineIndex]
+        section2Line.estimatedChildOccupancyRate = line.estimatedChildOccupancyRate
+        section2Line.actualChildOccupancyRate = line.actualChildOccupancyRate
+        this.refreshLineTotals(section2Line)
       }
     },
-    changeLine(line: any) {
-      line.est_child_count = parseInt(line.est_child_count || 0)
-      line.act_child_count = parseInt(line.act_child_count || 0)
-      line.est_computed_total = line.monthly_amount * line.est_child_count
-      line.act_computed_total = line.monthly_amount * line.act_child_count
+    refreshLineTotals(line: any) {
+      line.estimatedComputedTotal = line.monthlyAmount * line.estimatedChildOccupancyRate
+      line.actualComputedTotal = line.monthlyAmount * line.actualChildOccupancyRate
     },
     async saveClick() {
       await this.saveWorksheet(this.month)

@@ -8,7 +8,7 @@ Fixes (link to Jira ticket or github issue)
 
 (detailed context about the issue the pull request is solving)
 
-# Implemenation
+# Implementation
 
 (and specific implementation details that are worthy of note or might need explanation)
 

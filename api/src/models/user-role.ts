@@ -28,6 +28,8 @@ export class UserRole extends Model<InferAttributes<UserRole>, InferCreationAttr
   declare id: CreationOptional<number>
   declare userId: ForeignKey<User["id"]>
   declare role: string
+  declare createdAt: CreationOptional<Date>
+  declare updatedAt: CreationOptional<Date>
 
   // https://sequelize.org/docs/v6/other-topics/typescript/#usage
   // https://sequelize.org/docs/v6/core-concepts/assocs/#special-methodsmixins-added-to-instances
@@ -42,10 +44,8 @@ export class UserRole extends Model<InferAttributes<UserRole>, InferCreationAttr
     user: Association<UserRole, User>
   }
 
-  static establishasAssociations() {
-    this.belongsTo(User, {
-      foreignKey: "id",
-    })
+  static establishAssociations() {
+    this.belongsTo(User)
   }
 }
 
@@ -61,7 +61,7 @@ UserRole.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: User,
+        model: "users",
         key: "id",
       },
     },
@@ -72,11 +72,19 @@ UserRole.init(
         isIn: [Object.values(RoleTypes)],
       },
     },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     sequelize,
-    underscored: true,
-    timestamps: false,
   }
 )
 

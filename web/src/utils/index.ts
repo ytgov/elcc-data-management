@@ -1,5 +1,7 @@
 import moment from "moment"
 
+export { formatMoney } from "./format-money"
+
 export function FormatDate(input: Date): string {
   return moment.utc(input).format("MMMM D, YYYY")
 }

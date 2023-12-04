@@ -1,12 +1,15 @@
-// TODO: Check if this should be added as a database model.
-// TODO: camel case these after running the appropriate migration.
+// This is not a database model.
+// It describes the structure of the data in the funding_submission_line_json#values column.
+// In the future it might make sense to describe this via a JSON schema.
 export interface FundingLineValue {
-  submission_line_id: number
-  section_name: string
-  line_name: string
-  monthly_amount: number
-  est_child_count: number
-  act_child_count: number
-  est_computed_total: number
-  act_computed_total: number
+  submissionLineId: number
+  sectionName: string
+  lineName: string
+  monthlyAmount: number
+  estimatedChildOccupancyRate: number
+  actualChildOccupancyRate: number
+  estimatedComputedTotal: number
+  actualComputedTotal: number
 }
+
+export default FundingLineValue

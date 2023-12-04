@@ -1,25 +1,12 @@
 import {
-  Association,
   CreationOptional,
   DataTypes,
-  HasManyAddAssociationMixin,
-  HasManyAddAssociationsMixin,
-  HasManyCountAssociationsMixin,
-  HasManyCreateAssociationMixin,
-  HasManyGetAssociationsMixin,
-  HasManyHasAssociationMixin,
-  HasManyHasAssociationsMixin,
-  HasManyRemoveAssociationMixin,
-  HasManyRemoveAssociationsMixin,
-  HasManySetAssociationsMixin,
   InferAttributes,
   InferCreationAttributes,
   Model,
-  NonAttribute,
 } from "sequelize"
 
 import sequelize from "@/db/db-client"
-import FundingSubmissionLineValue from "@/models/funding-submission-line-value"
 
 export class FundingSubmissionLine extends Model<
   InferAttributes<FundingSubmissionLine>,
@@ -32,51 +19,8 @@ export class FundingSubmissionLine extends Model<
   declare fromAge: number | null
   declare toAge: number | null
   declare monthlyAmount: number
-
-  declare getValues: HasManyGetAssociationsMixin<FundingSubmissionLineValue>
-  declare setValues: HasManySetAssociationsMixin<
-    FundingSubmissionLineValue,
-    FundingSubmissionLineValue["submissionLineId"]
-  >
-  declare hasValue: HasManyHasAssociationMixin<
-    FundingSubmissionLineValue,
-    FundingSubmissionLineValue["submissionLineId"]
-  >
-  declare hasValues: HasManyHasAssociationsMixin<
-    FundingSubmissionLineValue,
-    FundingSubmissionLineValue["submissionLineId"]
-  >
-  declare addValue: HasManyAddAssociationMixin<
-    FundingSubmissionLineValue,
-    FundingSubmissionLineValue["submissionLineId"]
-  >
-  declare addValues: HasManyAddAssociationsMixin<
-    FundingSubmissionLineValue,
-    FundingSubmissionLineValue["submissionLineId"]
-  >
-  declare removeValue: HasManyRemoveAssociationMixin<
-    FundingSubmissionLineValue,
-    FundingSubmissionLineValue["submissionLineId"]
-  >
-  declare removeValues: HasManyRemoveAssociationsMixin<
-    FundingSubmissionLineValue,
-    FundingSubmissionLineValue["submissionLineId"]
-  >
-  declare countValues: HasManyCountAssociationsMixin
-  declare createValue: HasManyCreateAssociationMixin<FundingSubmissionLineValue>
-
-  declare values?: NonAttribute<FundingSubmissionLineValue[]>
-  declare static associations: {
-    values: Association<FundingSubmissionLine, FundingSubmissionLineValue>
-  }
-
-  static establishasAssociations() {
-    this.hasMany(FundingSubmissionLineValue, {
-      sourceKey: "id",
-      foreignKey: "submissionLineId",
-      as: "values",
-    })
-  }
+  declare createdAt: CreationOptional<Date>
+  declare updatedAt: CreationOptional<Date>
 }
 
 FundingSubmissionLine.init(
@@ -112,12 +56,19 @@ FundingSubmissionLine.init(
       type: DataTypes.FLOAT,
       allowNull: false,
     },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     sequelize,
-    tableName: "funding_submission_line", // TODO: remove this once table name is pluralized
-    underscored: true,
-    timestamps: false,
   }
 )
 

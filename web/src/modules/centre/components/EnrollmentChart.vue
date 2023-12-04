@@ -30,7 +30,12 @@ import { useCentreStore } from "../store"
 export default {
   name: "EnrollmentChart",
   components: { VueApexCharts },
-  setup() {},
+  props: {
+    centreId: {
+      type: String,
+      required: true,
+    },
+  },
   data() {
     return {
       skeletonHeight: 100,
@@ -51,7 +56,7 @@ export default {
   },
   async mounted() {
     this.skeletonHeight = this.$el.offsetWidth / 2
-    await this.loadEnrollmentData(parseInt((this.$route.params.id as string) || "0"))
+    await this.loadEnrollmentData(parseInt((this.centreId as string) || "0"))
   },
   unmounted() {},
   computed: {

@@ -88,7 +88,7 @@
               <v-divider></v-divider>
               <v-list-item
                 title="Hot Meal"
-                :subtitle="FormatYesNo(selectedItem.hot_meal)"
+                :subtitle="FormatYesNo(selectedItem.hotMeal)"
                 class="pl-0"
               >
                 <template #prepend>
@@ -101,7 +101,7 @@
               <v-divider></v-divider>
               <v-list-item
                 title="Licensed For"
-                :subtitle="selectedItem.licensed_for"
+                :subtitle="selectedItem.licensedFor"
                 class="pl-0"
               >
                 <template #prepend>
@@ -127,7 +127,7 @@
               <v-divider></v-divider>
               <v-list-item
                 title="Last Submission"
-                :subtitle="FormatDate(selectedItem.last_submission)"
+                :subtitle="FormatDate(selectedItem.lastSubmission)"
                 class="pl-0"
               >
                 <template #prepend>
@@ -144,7 +144,7 @@
               class="mt-5 float-right"
               size="small"
               color="primary"
-              :to="`/child-care-centres/${selectedItem.id}`"
+              :to="{ name: 'CentreDashboard-SummaryTab', params: { centreId: selectedItem.id } }"
               >View Details</v-btn
             >
             <div style="clear: both"></div>
@@ -183,7 +183,7 @@ export default {
   methods: {
     ...mapActions(useCentreStore, ["selectCentre", "editCentre"]),
     tableRowClick(event: any, item: any) {
-      this.selectedItem = item.item.raw
+      this.selectedItem = item.item
     },
     goToCentre() {
       this.selectCentre(this.selectedItem)
@@ -193,10 +193,10 @@ export default {
       this.editCentre({
         status: "Active",
         community: "Whitehorse",
-        create_date: new Date(),
-        hot_meal: true,
+        createDate: new Date(),
+        hotMeal: true,
         license: "",
-        licensed_for: 10,
+        licensedFor: 10,
         name: "",
       })
     },
