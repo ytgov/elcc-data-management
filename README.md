@@ -32,7 +32,16 @@
 
 3. Run `docker compose up --build` to build the application and boot it locally.
 
-4. Go to http://localhost:8080/ and sign in to the app.
+4. (optional) If you want to run seeds you can do that manually via:
+
+   ```
+   dc exec app sh
+   NODE_ENV=development node
+   const { runSeeds } = require("./dist/initializers/30-run-seeds.js")
+   runSeeds().then(console.log)
+   ```
+
+5. Go to http://localhost:8080/ and sign in to the app.
 
 ## Development
 
