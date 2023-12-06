@@ -25,14 +25,14 @@ migrationRouter.get("/", async (req: Request, res: Response) => {
 migrationRouter.get("/up", async (req: Request, res: Response) => {
   return migrator
     .up()
-    .then(() => res.json({ data: listMigrations() }))
+    .then(async () => res.json({ data: await listMigrations() }))
     .catch(console.error)
 })
 
 migrationRouter.get("/down", async (req: Request, res: Response) => {
   return migrator
     .down()
-    .then(() => res.json({ data: listMigrations() }))
+    .then(async () => res.json({ data: await listMigrations() }))
     .catch(console.error)
 })
 
