@@ -6,28 +6,39 @@ export const migrationRouter = express.Router()
 // migrationRouter.use(RequireRole("System Admin"));
 
 async function listMigrations() {
-  return Promise.all([migrator.executed(), migrator.pending()]).then(([executed, pending]) => {
-    return {
-      executed,
-      pending,
-    }
-  })
+  return Promise.all([migrator.executed(), migrator.pending()])
+    .then(([executed, pending]) => {
+      return {
+        executed,
+        pending,
+      }
+    })
+    .catch(console.error)
 }
 
 migrationRouter.get("/", async (req: Request, res: Response) => {
-  return res.json({ data: await listMigrations() })
+  return listMigrations()
+    .then((data) => res.json({ data }))
+    .catch(console.error)
 })
 
 migrationRouter.get("/up", async (req: Request, res: Response) => {
-  await migrator.up()
-  return res.json({ data: await listMigrations() })
+  return migrator
+    .up()
+    .then(async () => res.json({ data: await listMigrations() }))
+    .catch(console.error)
 })
 
 migrationRouter.get("/down", async (req: Request, res: Response) => {
-  await migrator.down()
-  return res.json({ data: await listMigrations() })
+  return migrator
+    .down()
+    .then(async () => res.json({ data: await listMigrations() }))
+    .catch(console.error)
 })
 
 migrationRouter.get("/seed", async (req: Request, res: Response) => {
-  return res.json({ data: await seeder.up() })
+  return seeder
+    .up()
+    .then((data) => res.json({ data }))
+    .catch(console.error)
 })
