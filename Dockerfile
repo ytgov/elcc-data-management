@@ -13,6 +13,9 @@ COPY api ./
 
 RUN npm run build
 
+# copy non JS files required in production
+COPY ./api/src/db/data/*.json ./dist/src/db/data/
+
 # State 2 - web build - requires development environment because typescript
 FROM node:18-alpine3.17 as web-build-stage
 
