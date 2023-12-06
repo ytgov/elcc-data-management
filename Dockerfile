@@ -50,9 +50,12 @@ RUN mkdir /home/node/app/db && chown -R node:node /home/node/app/db
 COPY --from=api-build-stage --chown=node:node /usr/src/api/package*.json ./
 RUN npm install && npm cache clean --force --loglevel=error
 
-COPY --from=api-build-stage --chown=node:node /usr/src/api/dist ./
-COPY --from=web-build-stage --chown=node:node /usr/src/web/dist ./src/web
+COPY --from=api-build-stage --chown=node:node /usr/src/api/dist/src ./dist
+COPY --from=web-build-stage --chown=node:node /usr/src/web/dist ./dist/web
 
 EXPOSE 8080
 
-CMD ["node", "./src/server.js"]
+COPY --from=api-build-stage --chown=node:node /usr/src/api/bin/boot-app.sh ./bin/
+RUN chmod +x ./bin/boot-app.sh
+
+ENTRYPOINT ["./bin/boot-app.sh"]
