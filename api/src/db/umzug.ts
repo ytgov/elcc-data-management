@@ -10,7 +10,7 @@ import { sequelizeAutoTransactionResolver } from "@/db/utils/sequelize-auto-tran
 
 export const migrator = new Umzug({
   migrations: {
-    glob: ["migrations/*.ts", { cwd: __dirname }],
+    glob: ["migrations/*.{ts,js}", { cwd: __dirname }],
     resolve: sequelizeAutoTransactionResolver,
   },
   context: sequelize.getQueryInterface(),
@@ -35,7 +35,7 @@ export const migrator = new Umzug({
 const environment = process.env.NODE_ENV || "development"
 export const seeder = new Umzug({
   migrations: {
-    glob: [`seeds/${environment}/*.ts`, { cwd: __dirname }],
+    glob: [`seeds/${environment}/*.{ts,js}`, { cwd: __dirname }],
   },
   context: models,
   storage: new UmzugNullStorage(),
