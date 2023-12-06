@@ -47,9 +47,6 @@ USER node
 WORKDIR /home/node/app
 RUN chown -R node:node /home/node/app
 
-# TODO: find out why the db folder is necessary
-RUN mkdir /home/node/app/db && chown -R node:node /home/node/app/db
-
 COPY --from=api-build-stage --chown=node:node /usr/src/api/package*.json ./
 RUN npm install && npm cache clean --force --loglevel=error
 
