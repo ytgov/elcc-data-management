@@ -57,12 +57,13 @@ const routes: RouteRecordRaw[] = [
               {
                 path: "",
                 name: "CentreDashboard-WorksheetsTab",
-                redirect: {
+                redirect: (to) => ({
                   name: "CentreDashboard-WorksheetsTab-MonthlyWorksheetTab",
                   params: {
+                    centreId: to.params.centreId,
                     month: "april",
                   },
-                },
+                }),
               },
               {
                 path: ":month",
