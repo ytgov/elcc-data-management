@@ -171,16 +171,14 @@
         </v-tabs>
         <v-divider></v-divider>
 
+        <div v-if="['option-1', 'option-2'].includes(tab)">
+          <router-view></router-view>
+        </div>
         <v-window
+          v-else
           v-model="tab"
           class="fill-height"
         >
-          <v-window-item value="option-1">
-            <router-view></router-view>
-          </v-window-item>
-          <v-window-item value="option-2">
-            <router-view></router-view>
-          </v-window-item>
           <v-window-item value="option-2.LEGACY">
             <v-toolbar
               color="#0097a966"
