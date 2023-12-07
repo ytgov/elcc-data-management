@@ -16,7 +16,7 @@ const routes: RouteRecordRaw[] = [
         name: "CentreDashboard",
         component: () => import("../views/CentreDashboard.vue"),
         beforeEnter: authGuard,
-        props: true,
+        props: (route) => ({ centreId: route.params.centreId }),
         children: [
           {
             path: "summary",
@@ -43,6 +43,29 @@ const routes: RouteRecordRaw[] = [
                 path: "payments",
                 name: "CentreDashboard-SummaryTab-PaymentsTab",
                 component: () => import("../components/PaymentsTable.vue"),
+                props: true,
+              },
+            ],
+          },
+          {
+            path: "worksheets",
+            component: () => import("../components/CentreDashboardWorksheetsTab.vue"),
+            children: [
+              {
+                path: "",
+                name: "CentreDashboard-WorksheetsTab",
+                redirect: {
+                  name: "CentreDashboard-WorksheetsTab-MonthlyWorksheetTab",
+                  params: {
+                    month: "april",
+                  },
+                },
+              },
+              {
+                path: ":month",
+                name: "CentreDashboard-WorksheetsTab-MonthlyWorksheetTab",
+                component: () =>
+                  import("../components/CentreDashboardWorksheetsTabMonthlyWorksheetTab.vue"),
                 props: true,
               },
             ],

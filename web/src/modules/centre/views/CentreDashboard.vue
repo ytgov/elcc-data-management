@@ -160,7 +160,13 @@
           >
             Summary
           </v-tab>
-          <v-tab value="option-2"> Worksheets </v-tab>
+          <v-tab
+            value="option-2"
+            :to="{ name: 'CentreDashboard-WorksheetsTab' }"
+          >
+            Worksheets
+          </v-tab>
+          <v-tab value="option-2.LEGACY"> Worksheets - LEGACY</v-tab>
           <v-tab value="option-3"> Employees </v-tab>
         </v-tabs>
         <v-divider></v-divider>
@@ -173,6 +179,9 @@
             <router-view></router-view>
           </v-window-item>
           <v-window-item value="option-2">
+            <router-view></router-view>
+          </v-window-item>
+          <v-window-item value="option-2.LEGACY">
             <v-toolbar
               color="#0097a966"
               density="compact"
@@ -278,7 +287,7 @@ export default {
   },
   watch: {
     tab(newValue) {
-      if (!["option-1"].includes(newValue)) {
+      if (!["option-1", "option-2"].includes(newValue)) {
         this.$router.push({ name: "CentreDashboard", params: { centreId: this.centreId } })
       }
     },
