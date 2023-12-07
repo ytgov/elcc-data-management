@@ -160,6 +160,8 @@ watch<[number, string, string], true>(
     }
 
     isLoading.value = true
+    // TODO: swap this to using a direct lookup? It should only every return a single result.
+    // I'd prefer an id based lookup, I don't have the id mapped to the fiscal year and date name.
     const fundingSubmissionLineJsons = await fundingSubmissionLineJsonsStore.fetch({
       where: {
         centreId: newCentreId,
