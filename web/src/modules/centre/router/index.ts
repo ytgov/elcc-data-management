@@ -50,6 +50,9 @@ const routes: RouteRecordRaw[] = [
           {
             path: "worksheets",
             component: () => import("../components/CentreDashboardWorksheetsTab.vue"),
+            props: (route) => ({
+              centreId: route.params.centreId,
+            }),
             children: [
               {
                 path: "",

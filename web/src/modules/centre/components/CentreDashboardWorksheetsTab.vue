@@ -3,13 +3,13 @@
     color="#0097a966"
     density="compact"
   >
-    <v-tabs v-model="value">
+    <v-tabs>
       <v-tab
         v-for="month of months"
-        :value="month.toLowerCase()"
         :to="{
           name: 'CentreDashboard-WorksheetsTab-MonthlyWorksheetTab',
           params: {
+            centreId,
             month: month.toLowerCase(),
           },
         }"
@@ -40,5 +40,10 @@ const months = ref([
   "March",
 ])
 
-const value = ref("april")
+defineProps({
+  centreId: {
+    type: String,
+    required: true,
+  },
+})
 </script>
