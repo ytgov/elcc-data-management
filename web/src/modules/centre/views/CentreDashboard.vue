@@ -300,7 +300,8 @@ export default {
 
     this.currentCentre = centre
 
-    if (this.tab === "option-1" && !this.$route.path.includes("summary")) {
+    // TODO: remove this patch once all tabs are loaded from the url
+    if (this.tab === "option-1" && this.$route.name === "CentreDashboard") {
       this.$router.push({ name: "CentreDashboard-SummaryTab", params: { centreId: this.centreId } })
     }
 
