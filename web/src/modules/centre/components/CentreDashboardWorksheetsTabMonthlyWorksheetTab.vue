@@ -44,13 +44,18 @@ import { watch, computed, ref } from "vue"
 import { groupBy, isEmpty, isEqual, upperFirst } from "lodash"
 import moment from "moment"
 
+import fundingSubmissionLineJsonsApi, {
+  FundingSubmissionLineJson,
+} from "@/api/funding-submission-line-jsons-api"
 import useFundingSubmissionLineJsonsStore, {
   FundingLineValue,
 } from "@/store/funding-submission-line-jsons"
+import { useNotificationStore } from "@/store/NotificationStore"
 import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 
 import SectionTable from "./centre-dashboard-worksheets-tab-monthly-worksheet-tab/SectionTable.vue"
 
+const notificationStore = useNotificationStore()
 const fundingSubmissionLineJsonsStore = useFundingSubmissionLineJsonsStore()
 
 const props = defineProps({
@@ -78,6 +83,15 @@ const isLoading = ref(true)
 const year = ref("")
 const sections = ref<{ sectionName: string; lines: FundingLineValue[] }[]>([])
 const sectionTables = ref<InstanceType<typeof SectionTable>[]>([])
+const fundingSubmissionLineJsonId = ref<number>()
+
+function buildSectionsFrom(fundingSubmissionLineJson: FundingSubmissionLineJson) {
+  const lines = fundingSubmissionLineJson.lines
+  const sectionGroups = groupBy(lines, "sectionName")
+  sections.value = Object.entries(sectionGroups).map(([sectionName, lines]) => {
+    return { sectionName, lines }
+  })
+}
 
 watch<[number, string, string], true>(
   () => [centreIdNumber.value, fiscalYear.value, dateName.value],
@@ -103,12 +117,12 @@ watch<[number, string, string], true>(
       },
     })
     const fundingSubmissionLineJson = fundingSubmissionLineJsons[0]
+
+    fundingSubmissionLineJsonId.value = fundingSubmissionLineJson.id
     year.value = moment.utc(fundingSubmissionLineJson.dateStart).format("YYYY")
-    const lines = fundingSubmissionLineJson.lines
-    const sectionGroups = groupBy(lines, "sectionName")
-    sections.value = Object.entries(sectionGroups).map(([sectionName, lines]) => {
-      return { sectionName, lines }
-    })
+
+    buildSectionsFrom(fundingSubmissionLineJson)
+
     isLoading.value = false
   },
   {
@@ -116,9 +130,32 @@ watch<[number, string, string], true>(
   }
 )
 
-function save() {
-  // ...mapActions(useCentreStore, ["saveWorksheet",]),
-  // await this.saveWorksheet(this.month)
+async function save() {
+  if (fundingSubmissionLineJsonId.value === undefined) {
+    notificationStore.notify({
+      text: "fundingSubmissionLineJsonId is undefined",
+      variant: "error",
+    })
+    return
+  }
+
+  isLoading.value = true
+  try {
+    const lines = sections.value.flatMap((section) => section.lines)
+    const { fundingSubmissionLineJson } = await fundingSubmissionLineJsonsApi.update(
+      fundingSubmissionLineJsonId.value,
+      { lines }
+    )
+    buildSectionsFrom(fundingSubmissionLineJson)
+  } catch (error) {
+    console.error(error)
+    notificationStore.notify({
+      text: `Failed to save worksheet: ${error}`,
+      variant: "error",
+    })
+  } finally {
+    isLoading.value = false
+  }
 }
 
 function duplicateEstimates() {
