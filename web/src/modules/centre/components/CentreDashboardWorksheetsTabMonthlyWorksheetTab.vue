@@ -19,6 +19,7 @@
     </v-btn>
 
     <v-skeleton-loader
+      style="clear: both"
       type="table"
       v-if="isLoading"
     ></v-skeleton-loader>
