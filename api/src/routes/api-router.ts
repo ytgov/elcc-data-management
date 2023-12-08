@@ -16,6 +16,10 @@ apiRouter.delete("/api/payments/:paymentId", PaymentsController.destroy)
 
 apiRouter.get("/api/funding-submission-line-jsons", FundingSubmissionLineJsonsController.index)
 apiRouter.post("/api/funding-submission-line-jsons", FundingSubmissionLineJsonsController.create)
+apiRouter.get(
+  "/api/funding-submission-line-jsons/:fundingSubmissionLineJsonId",
+  FundingSubmissionLineJsonsController.show
+)
 apiRouter.patch(
   "/api/funding-submission-line-jsons/:fundingSubmissionLineJsonId",
   FundingSubmissionLineJsonsController.update

@@ -128,6 +128,8 @@ All commands are just strings joined together, so it's easy to add new commmands
 
 > NOTE: make sure you delete the .env file before runing a development setup again as it is auto-loaded by docker compose.
 
+> NOTE: You can also skip seeding when database is not empty by setting the `SKIP_SEEDING_UNLESS_EMPTY=true` environment variable.
+
 ### Editor Setup
 
 Your text editor or IDE might require you to manually install the dependencies to get TypesScript autocompletion working. Hopefully, it "just works :tm:". If not you can install packages locally like so:

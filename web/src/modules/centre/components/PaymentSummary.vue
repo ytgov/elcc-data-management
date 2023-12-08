@@ -83,7 +83,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
-import { sumBy } from "lodash"
+import { isEmpty, sumBy } from "lodash"
 
 import useFundingSubmissionLineJsonsStore from "@/store/funding-submission-line-jsons"
 import usePaymentsStore from "@/store/payments"
@@ -174,7 +174,9 @@ onMounted(async () => {
         fiscalYear: fiscalYear.value,
       },
     })
-    .then(() => {
+    .then((fundingSubmissionLineJsons) => {
+      if (isEmpty(fundingSubmissionLineJsons)) return
+
       updateExpenseValues()
     })
 })

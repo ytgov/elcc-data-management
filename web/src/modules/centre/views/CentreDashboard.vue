@@ -160,56 +160,24 @@
           >
             Summary
           </v-tab>
-          <v-tab value="option-2"> Worksheets </v-tab>
+          <v-tab
+            value="option-2"
+            :to="{ name: 'CentreDashboard-WorksheetsTab' }"
+          >
+            Worksheets
+          </v-tab>
           <v-tab value="option-3"> Employees </v-tab>
         </v-tabs>
         <v-divider></v-divider>
 
+        <div v-if="['option-1', 'option-2'].includes(tab)">
+          <router-view></router-view>
+        </div>
         <v-window
+          v-else
           v-model="tab"
           class="fill-height"
         >
-          <v-window-item value="option-1">
-            <router-view></router-view>
-          </v-window-item>
-          <v-window-item value="option-2">
-            <v-toolbar
-              color="#0097a966"
-              density="compact"
-            >
-              <v-tabs v-model="month">
-                <v-tab
-                  v-for="worksheet of yearWorksheets"
-                  :value="worksheet.month"
-                >
-                  {{ worksheet.month }}
-                </v-tab>
-              </v-tabs>
-            </v-toolbar>
-
-            <v-window v-model="month">
-              <div
-                v-if="yearWorksheets.length == 0"
-                class="pa-5"
-              >
-                <p>There are currently no worksheets for {{ currentFiscalYear }}.</p>
-                <v-btn
-                  color="primary"
-                  size="small"
-                  class="mt-3"
-                  @click="addFiscalClick"
-                  >Add worksheets for {{ currentFiscalYear }}</v-btn
-                >
-              </div>
-              <v-window-item
-                v-for="worksheet in yearWorksheets"
-                :key="worksheet.month"
-                :value="worksheet.month"
-              >
-                <MonthlyWorksheet :month="worksheet" />
-              </v-window-item>
-            </v-window>
-          </v-window-item>
           <v-window-item value="option-3">
             <h4>Employees</h4>
           </v-window-item>
@@ -227,7 +195,6 @@ import { isNil } from "lodash"
 import { FormatDate, FormatYesNo } from "@/utils"
 import { mapActions, mapState, mapWritableState } from "pinia"
 import VueApexCharts from "vue3-apexcharts"
-import MonthlyWorksheet from "../components/MonthlyWorksheet.vue"
 
 import EnrollmentChart from "../components/EnrollmentChart.vue"
 import CentreEditor from "../components/CentreEditor.vue"
@@ -238,7 +205,6 @@ export default {
   name: "CentreDashboard",
   components: {
     VueApexCharts,
-    MonthlyWorksheet,
     EnrollmentChart,
     CentreEditor,
   },
@@ -278,7 +244,7 @@ export default {
   },
   watch: {
     tab(newValue) {
-      if (!["option-1"].includes(newValue)) {
+      if (!["option-1", "option-2"].includes(newValue)) {
         this.$router.push({ name: "CentreDashboard", params: { centreId: this.centreId } })
       }
     },
@@ -291,7 +257,8 @@ export default {
 
     this.currentCentre = centre
 
-    if (this.tab === "option-1" && !this.$route.path.includes("summary")) {
+    // TODO: remove this patch once all tabs are loaded from the url
+    if (this.tab === "option-1" && this.$route.name === "CentreDashboard") {
       this.$router.push({ name: "CentreDashboard-SummaryTab", params: { centreId: this.centreId } })
     }
 
@@ -322,7 +289,6 @@ export default {
       "unselectCentre",
       "loadWorksheets",
       "editCentre",
-      "addCentreFiscal",
     ]),
     FormatDate(input: Date | undefined) {
       return input != null ? FormatDate(input) : ""
@@ -332,9 +298,6 @@ export default {
     },
     editClick() {
       if (this.selectedCentre) this.editCentre(this.selectedCentre)
-    },
-    addFiscalClick() {
-      this.addCentreFiscal(this.currentFiscalYear)
     },
   },
 }

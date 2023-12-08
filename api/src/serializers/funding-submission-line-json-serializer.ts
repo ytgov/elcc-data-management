@@ -1,4 +1,4 @@
-import { sortBy, uniq, pick } from "lodash"
+import { sortBy, uniq, pick, omit } from "lodash"
 import moment from "moment"
 import { FundingSubmissionLineJson } from "@/models"
 
@@ -21,6 +21,13 @@ export class FundingSubmissionLineJsonSerializer extends BaseSerializer<FundingS
         lines: fundingSubmissionLineJson.lines,
       }
     })
+  }
+
+  static asDetailed(fundingSubmissionLineJson: FundingSubmissionLineJson) {
+    return {
+      ...omit(fundingSubmissionLineJson.dataValues, "values"),
+      lines: fundingSubmissionLineJson.lines,
+    }
   }
 
   constructor(modelOrModels: FundingSubmissionLineJson | FundingSubmissionLineJson[]) {

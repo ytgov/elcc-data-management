@@ -10,6 +10,7 @@ export class FundingSubmissionLineJsonServices implements BaseService {
   static async bulkCreate(centreId: number, fiscalYear: string) {
     const worksheets = await FundingSubmissionLineJson.findAll({
       where: { centreId, fiscalYear },
+      order: ["dateStart"],
     })
     if (worksheets.length > 0) {
       throw new Error("Fiscal year already exists for this centre")
@@ -52,7 +53,13 @@ export class FundingSubmissionLineJsonServices implements BaseService {
       date = date.add(1, "month")
     }
 
-    return FundingSubmissionLineJson.bulkCreate(bulkAttributes)
+    await FundingSubmissionLineJson.bulkCreate(bulkAttributes)
+
+    // Ensure consistent ordering, as bulk create does not guarantee order
+    return FundingSubmissionLineJson.findAll({
+      where: { fiscalYear },
+      order: ["dateStart"],
+    })
   }
 }
 

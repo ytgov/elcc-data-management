@@ -2,12 +2,10 @@ import { defineStore } from "pinia"
 import { uniq, cloneDeep, isNil } from "lodash"
 
 import { useNotificationStore } from "@/store/NotificationStore"
-import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 import { useApiStore } from "@/store/ApiStore"
 import { CENTRE_URL } from "@/urls"
 
 const m = useNotificationStore()
-const subs = useSubmissionLinesStore()
 
 interface CentreState {
   centres: ChildCareCentre[]
@@ -138,22 +136,6 @@ export const useCentreStore = defineStore("centre", {
       this.getAllCentres()
     },
 
-    async addCentreFiscal(fiscalYear: string) {
-      if (this.selectedCentre != null) {
-        const id = this.selectedCentre.id || 0
-
-        const api = useApiStore()
-        await api
-          .secureCall("post", `${CENTRE_URL}/${id}/fiscal-year`, { fiscalYear })
-          .then((resp) => {
-            // this.selectedCentre = resp.data;
-            this.loadWorksheets(id)
-
-            m.notify({ text: "Fiscal year added", variant: "success" })
-          })
-          .finally(() => {})
-      }
-    },
     async saveWorksheet(worksheet: any, reload = true) {
       let id = 0
       if (this.selectedCentre != null) id = this.selectedCentre.id || 0
@@ -168,30 +150,6 @@ export const useCentreStore = defineStore("centre", {
           m.notify({ text: "Worksheet saved", variant: "success" })
         })
         .finally(() => {})
-    },
-    async duplicateAprilEstimates() {
-      let id = 0
-      if (this.selectedCentre != null) id = this.selectedCentre.id || 0
-
-      const currentFiscalYear = subs.currentFiscalYear
-      const forDup = this.worksheets.filter((w) => w.fiscalYear == currentFiscalYear)
-      const aprilSheet = forDup.filter((s) => s.month == "April")[0]
-      const aprilLines = aprilSheet.sections.flatMap((s: any) => s.lines)
-
-      for (const month of forDup) {
-        for (const section of month.sections) {
-          for (const line of section.lines) {
-            const aprilLine = aprilLines.filter(
-              (a: any) => a.submissionLineId == line.submissionLineId
-            )
-            line.estimatedChildOccupancyRate = aprilLine[0].estimatedChildOccupancyRate
-            line.estimatedComputedTotal = aprilLine[0].estimatedComputedTotal
-          }
-        }
-        await this.saveWorksheet(month, false)
-      }
-
-      this.loadWorksheets(id)
     },
   },
 })

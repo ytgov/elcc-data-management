@@ -40,6 +40,11 @@ export const fundingSubmissionLineJsonsApi = {
   }> {
     return http.get("/api/funding-submission-line-jsons", { params }).then(({ data }) => data)
   },
+  get(fundingSubmissionLineJsonId: number) {
+    return http
+      .get(`/api/funding-submission-line-jsons/${fundingSubmissionLineJsonId}`)
+      .then(({ data }) => data)
+  },
   create(
     attributes: Partial<FundingSubmissionLineJson>
   ): Promise<{ fundingSubmissionLineJson: FundingSubmissionLineJson }> {
