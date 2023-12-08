@@ -19,17 +19,17 @@
     >
       <v-tabs>
         <v-tab
-          v-for="fundingSubmissionLineJson in orderedFundingSubmissionLineJsons"
-          :key="fundingSubmissionLineJson.id"
+          v-for="month in months"
+          :key="month"
           :to="{
             name: 'CentreDashboard-WorksheetsTab-MonthlyWorksheetTab',
             params: {
               centreId,
-              month: fundingSubmissionLineJson.dateName.toLowerCase(),
+              month: month.toLowerCase(),
             },
           }"
         >
-          {{ fundingSubmissionLineJson.dateName }}
+          {{ month }}
         </v-tab>
       </v-tabs>
     </v-toolbar>
