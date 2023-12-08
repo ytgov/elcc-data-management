@@ -49,28 +49,35 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: "worksheets",
+            name: "CentreDashboard-WorksheetsTab",
             component: () => import("../components/CentreDashboardWorksheetsTab.vue"),
             props: (route) => ({
-              centreId: route.params.centreId,
+              centreId: parseInt(route.params.centreId as string),
             }),
             children: [
-              {
-                path: "",
-                name: "CentreDashboard-WorksheetsTab",
-                redirect: (to) => ({
-                  name: "CentreDashboard-WorksheetsTab-MonthlyWorksheetTab",
-                  params: {
-                    centreId: to.params.centreId,
-                    month: "april",
-                  },
-                }),
-              },
+              // {
+              //   path: "",
+              //   name: "CentreDashboard-WorksheetsTab",
+              //   redirect: (to) => ({
+              //     name: "CentreDashboard-WorksheetsTab-MonthlyWorksheetTab",
+              //     params: {
+              //       centreId: parseInt(to.params.centreId as string),
+              //       fundingSubmissionLineJsonId: parseInt(
+              //         to.params.fundingSubmissionLineJsonId as string
+              //       ),
+              //       month: "april",
+              //     },
+              //   }),
+              // },
               {
                 path: ":month",
                 name: "CentreDashboard-WorksheetsTab-MonthlyWorksheetTab",
                 component: () =>
                   import("../components/CentreDashboardWorksheetsTabMonthlyWorksheetTab.vue"),
-                props: true,
+                props: (route) => ({
+                  centreId: parseInt(route.params.centreId as string),
+                  month: route.params.month,
+                }),
               },
             ],
           },

@@ -41,89 +41,77 @@
 
 <script lang="ts" setup>
 import { watch, computed, ref } from "vue"
-import { groupBy, isEmpty, isEqual, upperFirst } from "lodash"
+import { groupBy, isEmpty, isEqual } from "lodash"
 import moment from "moment"
 
 import fundingSubmissionLineJsonsApi, {
   FundingSubmissionLineJson,
 } from "@/api/funding-submission-line-jsons-api"
-import useFundingSubmissionLineJsonsStore, {
-  FundingLineValue,
-} from "@/store/funding-submission-line-jsons"
+import { FundingLineValue } from "@/store/funding-submission-line-jsons"
 import { useNotificationStore } from "@/store/NotificationStore"
-import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 
 import SectionTable from "./centre-dashboard-worksheets-tab-monthly-worksheet-tab/SectionTable.vue"
 
 const notificationStore = useNotificationStore()
-const fundingSubmissionLineJsonsStore = useFundingSubmissionLineJsonsStore()
 
 const props = defineProps({
   centreId: {
-    type: String,
+    type: Number,
     required: true,
   },
-  // TODO: add support for this prop
-  // fiscalYear: {
-  //   type: String,
-  //   required: true,
-  // },
+  fundingSubmissionLineJsonId: {
+    type: Number,
+    required: true,
+  },
   month: {
     type: String,
     required: true,
   },
 })
 
-const centreIdNumber = computed(() => parseInt(props.centreId))
-const submissionLinesStore = useSubmissionLinesStore()
-const fiscalYear = computed(() => submissionLinesStore.currentFiscalYear)
-const dateName = computed(() => upperFirst(props.month))
+const fundingSubmissionLineJson = ref<FundingSubmissionLineJson>()
+const dateName = computed(() => fundingSubmissionLineJson.value?.dateName)
 
 const isLoading = ref(true)
-const year = ref("")
-const sections = ref<{ sectionName: string; lines: FundingLineValue[] }[]>([])
-const sectionTables = ref<InstanceType<typeof SectionTable>[]>([])
-const fundingSubmissionLineJsonId = ref<number>()
+const year = computed(() => moment.utc(fundingSubmissionLineJson.value?.dateStart).format("YYYY"))
+const sections = computed<{ sectionName: string; lines: FundingLineValue[] }[]>(() => {
+  if (isEmpty(fundingSubmissionLineJson.value)) {
+    return []
+  }
 
-function buildSectionsFrom(fundingSubmissionLineJson: FundingSubmissionLineJson) {
-  const lines = fundingSubmissionLineJson.lines
+  const lines = fundingSubmissionLineJson.value.lines
   const sectionGroups = groupBy(lines, "sectionName")
-  sections.value = Object.entries(sectionGroups).map(([sectionName, lines]) => {
+  return Object.entries(sectionGroups).map(([sectionName, lines]) => {
     return { sectionName, lines }
   })
+})
+const sectionTables = ref<InstanceType<typeof SectionTable>[]>([])
+
+async function fetchFundingSubmissionLineJson(fundingSubmissionLineJsonId: number) {
+  isLoading.value = true
+  try {
+    fundingSubmissionLineJson.value = await fundingSubmissionLineJsonsApi
+      .get(fundingSubmissionLineJsonId)
+      .then(({ fundingSubmissionLineJson }) => fundingSubmissionLineJson)
+  } catch (error) {
+    console.error(error)
+    notificationStore.notify({
+      text: `Failed to fetch worksheet: ${error}`,
+      variant: "error",
+    })
+  } finally {
+    isLoading.value = false
+  }
 }
 
-watch<[number, string, string], true>(
-  () => [centreIdNumber.value, fiscalYear.value, dateName.value],
+watch<[number, number], true>(
+  () => [props.centreId, props.fundingSubmissionLineJsonId],
   async (newValues, oldValues) => {
     if (isEqual(newValues, oldValues)) {
       return
     }
 
-    const [newCentreId, newFiscalYear, newDateName] = newValues
-    // TODO: remove once fiscal year is a prop
-    if (isEmpty(newFiscalYear)) {
-      return
-    }
-
-    isLoading.value = true
-    // TODO: swap this to using a direct lookup? It should only every return a single result.
-    // I'd prefer an id based lookup, I don't have the id mapped to the fiscal year and date name.
-    const fundingSubmissionLineJsons = await fundingSubmissionLineJsonsStore.fetch({
-      where: {
-        centreId: newCentreId,
-        fiscalYear: newFiscalYear,
-        dateName: newDateName,
-      },
-    })
-    const fundingSubmissionLineJson = fundingSubmissionLineJsons[0]
-
-    fundingSubmissionLineJsonId.value = fundingSubmissionLineJson.id
-    year.value = moment.utc(fundingSubmissionLineJson.dateStart).format("YYYY")
-
-    buildSectionsFrom(fundingSubmissionLineJson)
-
-    isLoading.value = false
+    await fetchFundingSubmissionLineJson(props.fundingSubmissionLineJsonId)
   },
   {
     immediate: true,
@@ -131,22 +119,10 @@ watch<[number, string, string], true>(
 )
 
 async function save() {
-  if (fundingSubmissionLineJsonId.value === undefined) {
-    notificationStore.notify({
-      text: "fundingSubmissionLineJsonId is undefined",
-      variant: "error",
-    })
-    return
-  }
-
   isLoading.value = true
   try {
     const lines = sections.value.flatMap((section) => section.lines)
-    const { fundingSubmissionLineJson } = await fundingSubmissionLineJsonsApi.update(
-      fundingSubmissionLineJsonId.value,
-      { lines }
-    )
-    buildSectionsFrom(fundingSubmissionLineJson)
+    await fundingSubmissionLineJsonsApi.update(props.fundingSubmissionLineJsonId, { lines })
   } catch (error) {
     console.error(error)
     notificationStore.notify({
