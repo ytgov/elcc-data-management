@@ -29,6 +29,7 @@ export class FundingSubmissionLineJson extends Model<
   declare dateStart: Date
   declare dateEnd: Date
   declare values: string
+  declare lines: CreationOptional<FundingLineValue[]>
   declare createdAt: CreationOptional<Date>
   declare updatedAt: CreationOptional<Date>
 
@@ -49,10 +50,6 @@ export class FundingSubmissionLineJson extends Model<
     this.belongsTo(Centre, {
       foreignKey: "centreId",
     })
-  }
-
-  get lines(): NonAttribute<FundingLineValue[]> {
-    return JSON.parse(this.values)
   }
 }
 
@@ -91,6 +88,16 @@ FundingSubmissionLineJson.init(
     values: {
       type: DataTypes.TEXT,
       allowNull: false,
+    },
+    // TODO: investigate moving these to a get/set on the "values" attribute
+    lines: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return JSON.parse(this.getDataValue("values"))
+      },
+      set(value: FundingLineValue[]) {
+        this.setDataValue("values", JSON.stringify(value))
+      },
     },
     createdAt: {
       type: DataTypes.DATE,
