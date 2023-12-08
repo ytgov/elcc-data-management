@@ -47,7 +47,7 @@
 
 <script lang="ts" setup>
 import { isEmpty, isEqual, keyBy, upperFirst } from "lodash"
-import { computed, ref, watch, nextTick } from "vue"
+import { computed, ref, watch, watchEffect } from "vue"
 import { useRouter, useRoute } from "vue-router"
 
 import centresApi from "@/api/centres-api"
@@ -132,24 +132,6 @@ async function fetchFundingSubmissionLineJsons(centreId: number, fiscalYear: str
   }
 }
 
-function redirectToChildTab() {
-  const firstFundingSubmissionLineJson = orderedFundingSubmissionLineJsons.value[0]
-  router.push({
-    name: "CentreDashboard-WorksheetsTab-MonthlyWorksheetTab",
-    params: {
-      centreId: props.centreId,
-      month: firstFundingSubmissionLineJson.dateName.toLowerCase(),
-    },
-  })
-}
-
-function shouldRedirectToChildTab() {
-  return (
-    route.name === "CentreDashboard-WorksheetsTab" &&
-    !isEmpty(orderedFundingSubmissionLineJsons.value)
-  )
-}
-
 watch<[number, string], true>(
   () => [props.centreId, fiscalYear.value],
   async (newValues, oldValues) => {
@@ -164,9 +146,6 @@ watch<[number, string], true>(
     }
 
     await fetchFundingSubmissionLineJsons(newCentreId, newFiscalYear)
-    // if (shouldRedirectToChildTab()) {
-    //   redirectToChildTab()
-    // }
   },
   {
     immediate: true,
@@ -184,10 +163,27 @@ async function initializeWorksheetsForFiscalYear() {
       text: "Fiscal year added",
       variant: "success",
     })
-    // await nextTick() // wait for computed properties to update
-    // redirectToChildTab()
   } finally {
     isLoading.value = false
   }
 }
+
+watchEffect(() => {
+  if (route.name !== "CentreDashboard-WorksheetsTab") {
+    return
+  }
+
+  if (isEmpty(orderedFundingSubmissionLineJsons.value)) {
+    return
+  }
+
+  const firstFundingSubmissionLineJson = orderedFundingSubmissionLineJsons.value[0]
+  router.push({
+    name: "CentreDashboard-WorksheetsTab-MonthlyWorksheetTab",
+    params: {
+      centreId: props.centreId,
+      month: firstFundingSubmissionLineJson.dateName.toLowerCase(),
+    },
+  })
+})
 </script>

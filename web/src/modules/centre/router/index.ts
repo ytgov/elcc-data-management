@@ -55,20 +55,6 @@ const routes: RouteRecordRaw[] = [
               centreId: parseInt(route.params.centreId as string),
             }),
             children: [
-              // {
-              //   path: "",
-              //   name: "CentreDashboard-WorksheetsTab",
-              //   redirect: (to) => ({
-              //     name: "CentreDashboard-WorksheetsTab-MonthlyWorksheetTab",
-              //     params: {
-              //       centreId: parseInt(to.params.centreId as string),
-              //       fundingSubmissionLineJsonId: parseInt(
-              //         to.params.fundingSubmissionLineJsonId as string
-              //       ),
-              //       month: "april",
-              //     },
-              //   }),
-              // },
               {
                 path: ":month",
                 name: "CentreDashboard-WorksheetsTab-MonthlyWorksheetTab",
