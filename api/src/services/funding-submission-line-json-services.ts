@@ -53,7 +53,13 @@ export class FundingSubmissionLineJsonServices implements BaseService {
       date = date.add(1, "month")
     }
 
-    return FundingSubmissionLineJson.bulkCreate(bulkAttributes)
+    await FundingSubmissionLineJson.bulkCreate(bulkAttributes)
+
+    // Ensure consistent ordering, as bulk create does not guarantee order
+    return FundingSubmissionLineJson.findAll({
+      where: { fiscalYear },
+      order: ["dateStart"],
+    })
   }
 }
 
