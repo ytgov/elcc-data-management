@@ -147,7 +147,9 @@ async function save() {
 async function replicateFirstEstimateToAllOthers() {
   isReplicatingEstimates.value = true
   try {
-    const fundingSubmissionLineJsons = await fundingSubmissionLineJsonsStore.initialize({
+    await save()
+
+    const fundingSubmissionLineJsons = await fundingSubmissionLineJsonsStore.fetch({
       where: {
         centreId: props.centreId,
         fiscalYear: fiscalYear.value,
