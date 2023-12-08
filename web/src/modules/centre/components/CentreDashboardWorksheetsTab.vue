@@ -19,17 +19,17 @@
     >
       <v-tabs>
         <v-tab
-          v-for="month in months"
-          :key="month"
+          v-for="{ id, dateName } in fundingSubmissionLineJsons"
+          :key="id"
           :to="{
             name: 'CentreDashboard-WorksheetsTab-MonthlyWorksheetTab',
             params: {
               centreId,
-              month: month.toLowerCase(),
+              month: dateName.toLowerCase(),
             },
           }"
         >
-          {{ month }}
+          {{ dateName }}
         </v-tab>
       </v-tabs>
     </v-toolbar>
@@ -69,22 +69,11 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+  month: {
+    type: String,
+    default: "",
+  },
 })
-
-const months = ref([
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-  "January",
-  "February",
-  "March",
-])
 
 const fiscalYear = computed(() => submissionLinesStore.currentFiscalYear)
 
@@ -92,21 +81,14 @@ const fundingSubmissionLineJsons = ref<FundingSubmissionLineJson[]>()
 const fundingSubmissionLineJsonsByMonth = computed(() =>
   keyBy(fundingSubmissionLineJsons.value, "dateName")
 )
-const orderedFundingSubmissionLineJsons = computed(() => {
-  if (isEmpty(fundingSubmissionLineJsonsByMonth.value)) {
-    return []
-  }
-
-  return months.value.map((month) => fundingSubmissionLineJsonsByMonth.value[month])
-})
 const selectedFundingSubmissionLineJson = computed(() => {
-  if (isEmpty(fundingSubmissionLineJsonsByMonth.value)) {
+  if (fundingSubmissionLineJsons.value === undefined || isEmpty(fundingSubmissionLineJsons.value)) {
     return
   }
 
   const dateName = upperFirst(route.params.month as string)
   if (isEmpty(dateName)) {
-    return orderedFundingSubmissionLineJsons.value[0]
+    return fundingSubmissionLineJsons.value[0]
   }
 
   return fundingSubmissionLineJsonsByMonth.value[dateName]
@@ -173,11 +155,11 @@ watchEffect(() => {
     return
   }
 
-  if (isEmpty(orderedFundingSubmissionLineJsons.value)) {
+  if (fundingSubmissionLineJsons.value === undefined || isEmpty(fundingSubmissionLineJsons.value)) {
     return
   }
 
-  const firstFundingSubmissionLineJson = orderedFundingSubmissionLineJsons.value[0]
+  const firstFundingSubmissionLineJson = fundingSubmissionLineJsons.value[0]
   router.push({
     name: "CentreDashboard-WorksheetsTab-MonthlyWorksheetTab",
     params: {
