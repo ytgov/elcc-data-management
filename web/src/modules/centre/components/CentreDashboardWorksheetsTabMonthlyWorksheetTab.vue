@@ -4,20 +4,27 @@
       color="primary"
       class="float-right"
       @click="save"
+      :loading="isLoading"
       >Save</v-btn
     >
 
-    <h2 class="mb-3">{{ dateName }} {{ calendarYear }}</h2>
-    <v-btn
-      v-if="dateName == FIRST_FISCAL_MONTH_NAME"
-      :loading="isReplicatingEstimates"
-      color="yg_sun"
-      class="float-right mb-3"
-      size="small"
-      @click="replicateFirstEstimateToAllOthers"
-    >
-      <v-icon>mdi-content-copy</v-icon> Replicate Estimates
-    </v-btn>
+    <v-progress-circular
+      v-if="isLoading"
+      indeterminate
+    />
+    <template v-else>
+      <h2 class="mb-3">{{ dateName }} {{ calendarYear }}</h2>
+      <v-btn
+        v-if="dateName == FIRST_FISCAL_MONTH_NAME"
+        :loading="isReplicatingEstimates"
+        color="yg_sun"
+        class="float-right mb-3"
+        size="small"
+        @click="replicateFirstEstimateToAllOthers"
+      >
+        <v-icon>mdi-content-copy</v-icon> Replicate Estimates
+      </v-btn>
+    </template>
 
     <v-skeleton-loader
       style="clear: both"
