@@ -3,6 +3,7 @@
     <v-btn
       color="primary"
       class="float-right"
+      @click="save"
       >Save</v-btn
     >
 
@@ -12,6 +13,7 @@
       color="yg_sun"
       class="float-right mb-3"
       size="small"
+      @click="duplicateEstimates"
     >
       <v-icon>mdi-content-copy</v-icon> Replicate Estimates
     </v-btn>
@@ -27,84 +29,10 @@
     >
       <h4>{{ sectionName }}</h4>
 
-      <table
-        style="width: 100%"
-        cellpadding="0"
-        cellspacing="0"
-        border="0px"
-      >
-        <tr class="text-left">
-          <td style="width: 180px"></td>
-          <td
-            class="pl-4"
-            style="width: 120px"
-          >
-            Per child
-          </td>
-          <td
-            class="pl-4"
-            style="width: 120px"
-          >
-            Est
-          </td>
-          <td class="pl-4">Est Total</td>
-          <td
-            class="pl-4"
-            style="width: 120px"
-          >
-            Act
-          </td>
-          <td class="pl-4">Act Total</td>
-        </tr>
-        <tr
-          v-for="(line, lineIndex) in lines"
-          class="monospace"
-        >
-          <td>{{ line.lineName }}</td>
-          <td>
-            <v-text-field
-              :value="line.monthlyAmount"
-              density="compact"
-              hide-details
-              readonly
-              style="background-color: #eee"
-            ></v-text-field>
-          </td>
-          <td>
-            <v-text-field
-              v-model="line.estimatedChildOccupancyRate"
-              density="compact"
-              hide-details
-            ></v-text-field>
-          </td>
-          <td>
-            <v-text-field
-              :value="line.estimatedComputedTotal"
-              density="compact"
-              hide-details
-              readonly
-              style="background-color: #eee"
-            ></v-text-field>
-          </td>
-          <td>
-            <v-text-field
-              v-model="line.actualChildOccupancyRate"
-              density="compact"
-              hide-details
-            ></v-text-field>
-          </td>
-
-          <td>
-            <v-text-field
-              :value="line.actualComputedTotal"
-              density="compact"
-              hide-details
-              readonly
-              style="background-color: #eee"
-            ></v-text-field>
-          </td>
-        </tr>
-      </table>
+      <SectionTable
+        :lines="lines"
+        @update="propagateUpdatesAsNeeded(sectionIndex, $event)"
+      />
     </div>
   </div>
 </template>
@@ -118,6 +46,8 @@ import useFundingSubmissionLineJsonsStore, {
   FundingLineValue,
 } from "@/store/funding-submission-line-jsons"
 import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
+
+import SectionTable from "./centre-dashboard-worksheets-tab-monthly-worksheet-tab/SectionTable.vue"
 
 const fundingSubmissionLineJsonsStore = useFundingSubmissionLineJsonsStore()
 
@@ -179,4 +109,47 @@ watch<[number, string, string], true>(
     immediate: true,
   }
 )
+
+function save() {
+  // ...mapActions(useCentreStore, ["saveWorksheet",]),
+  // await this.saveWorksheet(this.month)
+}
+
+function duplicateEstimates() {
+  // ...mapActions(useCentreStore, ["duplicateAprilEstimates"]),
+  // await this.duplicateAprilEstimates(this.month)
+}
+
+function propagateUpdatesAsNeeded(
+  sectionIndex: number,
+  { line, lineIndex }: { line: FundingLineValue; lineIndex: number }
+) {
+  console.log("sectionIndex:", JSON.stringify(sectionIndex, null, 2))
+  console.log("line:", JSON.stringify(line, null, 2))
+  console.log("lineIndex:", JSON.stringify(lineIndex, null, 2))
+  // Bind section 1 to sections 2 and 3
+  // When you update the values in section 1, it will propagated the values to section 2 and 3
+  // if (sectionIndex === 0) {
+  //   const section1Line = this.sections[1].lines[lineIndex]
+  //   section1Line.estimatedChildOccupancyRate = line.estimatedChildOccupancyRate
+  //   section1Line.actualChildOccupancyRate = line.actualChildOccupancyRate
+  //   refreshLineTotals(section1Line)
+  //   const section2Line = this.sections[2].lines[lineIndex]
+  //   section2Line.estimatedChildOccupancyRate = line.estimatedChildOccupancyRate
+  //   section2Line.actualChildOccupancyRate = line.actualChildOccupancyRate
+  //   refreshLineTotals(section2Line)
+  // }
+}
 </script>
+
+<style scoped>
+h4 {
+  margin-bottom: 10px;
+  font-weight: 400;
+  background-color: #55b6c2;
+  margin-left: -8px;
+  padding: 8px;
+  border-radius: 4px;
+  margin-top: 13px;
+}
+</style>
