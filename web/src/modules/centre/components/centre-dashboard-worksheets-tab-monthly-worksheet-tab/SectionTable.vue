@@ -145,7 +145,7 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-  update: [{ line: FundingLineValue; lineIndex: number }]
+  lineChanged: [{ line: FundingLineValue; lineIndex: number }]
 }>()
 
 function refreshLineTotals(line: FundingLineValue) {
@@ -158,8 +158,12 @@ function changeLineAndPropagate(line: FundingLineValue, lineIndex: number) {
   line.actualChildOccupancyRate = line.actualChildOccupancyRate || 0
   refreshLineTotals(line)
 
-  emit("update", { line, lineIndex })
+  emit("lineChanged", { line, lineIndex })
 }
+
+defineExpose({
+  refreshLineTotals,
+})
 </script>
 
 <style scoped>

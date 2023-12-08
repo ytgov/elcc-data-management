@@ -24,21 +24,22 @@
     ></v-skeleton-loader>
 
     <div
-      v-for="(lines, sectionName, sectionIndex) in sections"
+      v-for="({ sectionName, lines }, sectionIndex) in sections"
       style="clear: both"
     >
       <h4>{{ sectionName }}</h4>
 
       <SectionTable
+        ref="sectionTables"
         :lines="lines"
-        @update="propagateUpdatesAsNeeded(sectionIndex, $event)"
+        @line-changed="propagateUpdatesAsNeeded(sectionIndex, $event)"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { watch, computed, ref, Ref } from "vue"
+import { watch, computed, ref } from "vue"
 import { groupBy, isEmpty, isEqual, upperFirst } from "lodash"
 import moment from "moment"
 
@@ -74,7 +75,8 @@ const dateName = computed(() => upperFirst(props.month))
 
 const isLoading = ref(true)
 const year = ref("")
-const sections: Ref<{ [key: string]: FundingLineValue[] }> = ref({})
+const sections = ref<{ sectionName: string; lines: FundingLineValue[] }[]>([])
+const sectionTables = ref<InstanceType<typeof SectionTable>[]>([])
 
 watch<[number, string, string], true>(
   () => [centreIdNumber.value, fiscalYear.value, dateName.value],
@@ -102,7 +104,10 @@ watch<[number, string, string], true>(
     const fundingSubmissionLineJson = fundingSubmissionLineJsons[0]
     year.value = moment.utc(fundingSubmissionLineJson.dateStart).format("YYYY")
     const lines = fundingSubmissionLineJson.lines
-    sections.value = groupBy(lines, "sectionName")
+    const sectionGroups = groupBy(lines, "sectionName")
+    sections.value = Object.entries(sectionGroups).map(([sectionName, lines]) => {
+      return { sectionName, lines }
+    })
     isLoading.value = false
   },
   {
@@ -124,21 +129,20 @@ function propagateUpdatesAsNeeded(
   sectionIndex: number,
   { line, lineIndex }: { line: FundingLineValue; lineIndex: number }
 ) {
-  console.log("sectionIndex:", JSON.stringify(sectionIndex, null, 2))
-  console.log("line:", JSON.stringify(line, null, 2))
-  console.log("lineIndex:", JSON.stringify(lineIndex, null, 2))
   // Bind section 1 to sections 2 and 3
   // When you update the values in section 1, it will propagated the values to section 2 and 3
-  // if (sectionIndex === 0) {
-  //   const section1Line = this.sections[1].lines[lineIndex]
-  //   section1Line.estimatedChildOccupancyRate = line.estimatedChildOccupancyRate
-  //   section1Line.actualChildOccupancyRate = line.actualChildOccupancyRate
-  //   refreshLineTotals(section1Line)
-  //   const section2Line = this.sections[2].lines[lineIndex]
-  //   section2Line.estimatedChildOccupancyRate = line.estimatedChildOccupancyRate
-  //   section2Line.actualChildOccupancyRate = line.actualChildOccupancyRate
-  //   refreshLineTotals(section2Line)
-  // }
+  if (sectionIndex === 0) {
+    const section1Line = sections.value[1].lines[lineIndex]
+    section1Line.estimatedChildOccupancyRate = line.estimatedChildOccupancyRate
+    section1Line.actualChildOccupancyRate = line.actualChildOccupancyRate
+
+    sectionTables.value[1].refreshLineTotals(section1Line)
+
+    const section2Line = sections.value[2].lines[lineIndex]
+    section2Line.estimatedChildOccupancyRate = line.estimatedChildOccupancyRate
+    section2Line.actualChildOccupancyRate = line.actualChildOccupancyRate
+    sectionTables.value[2].refreshLineTotals(section2Line)
+  }
 }
 </script>
 
