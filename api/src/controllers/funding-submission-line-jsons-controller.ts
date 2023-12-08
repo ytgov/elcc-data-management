@@ -48,7 +48,11 @@ export class FundingSubmissionLineJsonsController extends BaseController {
     return fundingSubmissionLineJson
       .update(this.request.body)
       .then((fundingSubmissionLineJson) => {
-        return this.response.json({ fundingSubmissionLineJson })
+        const serializedfundingSubmissionLineJson =
+          FundingSubmissionLineJsonSerializer.asDetailed(fundingSubmissionLineJson)
+        return this.response.json({
+          fundingSubmissionLineJson: serializedfundingSubmissionLineJson,
+        })
       })
       .catch((error) => {
         return this.response
