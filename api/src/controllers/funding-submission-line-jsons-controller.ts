@@ -28,6 +28,18 @@ export class FundingSubmissionLineJsonsController extends BaseController {
       })
   }
 
+  async show() {
+    const fundingSubmissionLineJson = await this.loadFundingSubmissionLineJson()
+    if (isNil(fundingSubmissionLineJson))
+      return this.response.status(404).json({ message: "FundingSubmissionLineJson not found." })
+
+    const serializedfundingSubmissionLineJson =
+      FundingSubmissionLineJsonSerializer.asDetailed(fundingSubmissionLineJson)
+    return this.response.json({
+      fundingSubmissionLineJson: serializedfundingSubmissionLineJson,
+    })
+  }
+
   async create() {
     return FundingSubmissionLineJson.create(this.request.body)
       .then((fundingSubmissionLineJson) => {
