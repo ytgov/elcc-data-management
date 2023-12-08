@@ -166,7 +166,6 @@
           >
             Worksheets
           </v-tab>
-          <v-tab value="option-2.LEGACY"> Worksheets - LEGACY</v-tab>
           <v-tab value="option-3"> Employees </v-tab>
         </v-tabs>
         <v-divider></v-divider>
@@ -179,44 +178,6 @@
           v-model="tab"
           class="fill-height"
         >
-          <v-window-item value="option-2.LEGACY">
-            <v-toolbar
-              color="#0097a966"
-              density="compact"
-            >
-              <v-tabs v-model="month">
-                <v-tab
-                  v-for="worksheet of yearWorksheets"
-                  :value="worksheet.month"
-                >
-                  {{ worksheet.month }}
-                </v-tab>
-              </v-tabs>
-            </v-toolbar>
-
-            <v-window v-model="month">
-              <div
-                v-if="yearWorksheets.length == 0"
-                class="pa-5"
-              >
-                <p>There are currently no worksheets for {{ currentFiscalYear }}.</p>
-                <v-btn
-                  color="primary"
-                  size="small"
-                  class="mt-3"
-                  @click="addFiscalClick"
-                  >Add worksheets for {{ currentFiscalYear }}</v-btn
-                >
-              </div>
-              <v-window-item
-                v-for="worksheet in yearWorksheets"
-                :key="worksheet.month"
-                :value="worksheet.month"
-              >
-                <MonthlyWorksheet :month="worksheet" />
-              </v-window-item>
-            </v-window>
-          </v-window-item>
           <v-window-item value="option-3">
             <h4>Employees</h4>
           </v-window-item>
@@ -234,7 +195,6 @@ import { isNil } from "lodash"
 import { FormatDate, FormatYesNo } from "@/utils"
 import { mapActions, mapState, mapWritableState } from "pinia"
 import VueApexCharts from "vue3-apexcharts"
-import MonthlyWorksheet from "../components/MonthlyWorksheet.vue"
 
 import EnrollmentChart from "../components/EnrollmentChart.vue"
 import CentreEditor from "../components/CentreEditor.vue"
@@ -245,7 +205,6 @@ export default {
   name: "CentreDashboard",
   components: {
     VueApexCharts,
-    MonthlyWorksheet,
     EnrollmentChart,
     CentreEditor,
   },
@@ -330,7 +289,6 @@ export default {
       "unselectCentre",
       "loadWorksheets",
       "editCentre",
-      "addCentreFiscal",
     ]),
     FormatDate(input: Date | undefined) {
       return input != null ? FormatDate(input) : ""
@@ -340,9 +298,6 @@ export default {
     },
     editClick() {
       if (this.selectedCentre) this.editCentre(this.selectedCentre)
-    },
-    addFiscalClick() {
-      this.addCentreFiscal(this.currentFiscalYear)
     },
   },
 }
