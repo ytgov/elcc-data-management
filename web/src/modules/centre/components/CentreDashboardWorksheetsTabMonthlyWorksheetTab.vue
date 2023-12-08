@@ -7,13 +7,14 @@
       >Save</v-btn
     >
 
-    <h2 class="mb-3">{{ dateName }} {{ year }}</h2>
+    <h2 class="mb-3">{{ dateName }} {{ calendarYear }}</h2>
     <v-btn
-      v-if="dateName == 'April'"
+      v-if="dateName == FIRST_FISCAL_MONTH_NAME"
+      :loading="isReplicatingEstimates"
       color="yg_sun"
       class="float-right mb-3"
       size="small"
-      @click="duplicateEstimates"
+      @click="replicateFirstEstimateToAllOthers"
     >
       <v-icon>mdi-content-copy</v-icon> Replicate Estimates
     </v-btn>
@@ -41,18 +42,23 @@
 
 <script lang="ts" setup>
 import { watch, computed, ref } from "vue"
-import { groupBy, isEmpty, isEqual } from "lodash"
+import { groupBy, isEmpty, isEqual, isNil } from "lodash"
 import moment from "moment"
 
 import fundingSubmissionLineJsonsApi, {
   FundingSubmissionLineJson,
 } from "@/api/funding-submission-line-jsons-api"
-import { FundingLineValue } from "@/store/funding-submission-line-jsons"
+import useFundingSubmissionLineJsonsStore, {
+  FundingLineValue,
+} from "@/store/funding-submission-line-jsons"
 import { useNotificationStore } from "@/store/NotificationStore"
 
 import SectionTable from "./centre-dashboard-worksheets-tab-monthly-worksheet-tab/SectionTable.vue"
 
+const FIRST_FISCAL_MONTH_NAME = "April"
+
 const notificationStore = useNotificationStore()
+const fundingSubmissionLineJsonsStore = useFundingSubmissionLineJsonsStore()
 
 const props = defineProps({
   centreId: {
@@ -73,7 +79,11 @@ const fundingSubmissionLineJson = ref<FundingSubmissionLineJson>()
 const dateName = computed(() => fundingSubmissionLineJson.value?.dateName)
 
 const isLoading = ref(true)
-const year = computed(() => moment.utc(fundingSubmissionLineJson.value?.dateStart).format("YYYY"))
+const isReplicatingEstimates = ref(false)
+const fiscalYear = computed(() => fundingSubmissionLineJson.value?.fiscalYear)
+const calendarYear = computed(() =>
+  moment.utc(fundingSubmissionLineJson.value?.dateStart).format("YYYY")
+)
 const sections = computed<{ sectionName: string; lines: FundingLineValue[] }[]>(() => {
   if (isEmpty(fundingSubmissionLineJson.value)) {
     return []
@@ -134,9 +144,37 @@ async function save() {
   }
 }
 
-function duplicateEstimates() {
-  // ...mapActions(useCentreStore, ["duplicateAprilEstimates"]),
-  // await this.duplicateAprilEstimates(this.month)
+async function replicateFirstEstimateToAllOthers() {
+  isReplicatingEstimates.value = true
+  try {
+    const fundingSubmissionLineJsons = await fundingSubmissionLineJsonsStore.initialize({
+      where: {
+        centreId: props.centreId,
+        fiscalYear: fiscalYear.value,
+      },
+    })
+    const firstSubmission = fundingSubmissionLineJsons.find(
+      (submission) => submission.dateName === FIRST_FISCAL_MONTH_NAME
+    )
+    if (isNil(firstSubmission)) {
+      throw new Error(`Could not find submission for ${FIRST_FISCAL_MONTH_NAME}`)
+    }
+
+    const nonFirstSubmissions = fundingSubmissionLineJsons.filter(
+      (submission) => submission.dateName !== FIRST_FISCAL_MONTH_NAME
+    )
+
+    for (const submission of nonFirstSubmissions) {
+      await fundingSubmissionLineJsonsApi.update(submission.id, { lines: firstSubmission.lines })
+    }
+  } catch (error) {
+    notificationStore.notify({
+      text: `Failed to load worksheets: ${error}`,
+      variant: "error",
+    })
+  } finally {
+    isReplicatingEstimates.value = false
+  }
 }
 
 function propagateUpdatesAsNeeded(
