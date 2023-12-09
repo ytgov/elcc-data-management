@@ -156,13 +156,19 @@
         >
           <v-tab
             value="option-1"
-            :to="{ name: 'CentreDashboard-SummaryTab' }"
+            :to="{
+              name: 'CentreDashboard-SummaryTab',
+              params: { centreId },
+            }"
           >
             Summary
           </v-tab>
           <v-tab
             value="option-2"
-            :to="{ name: 'CentreDashboard-WorksheetsTab' }"
+            :to="{
+              name: 'CentreDashboard-WorksheetsTab',
+              params: { centreId },
+            }"
           >
             Worksheets
           </v-tab>
