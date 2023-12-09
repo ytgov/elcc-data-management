@@ -186,7 +186,7 @@
     </v-col>
   </v-row>
 
-  <centre-editor></centre-editor>
+  <CentreEditor />
 </template>
 
 <script lang="ts">
