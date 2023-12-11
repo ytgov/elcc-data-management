@@ -13,11 +13,15 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: ":centreId",
-        name: "CentreDashboard",
-        component: () => import("./views/CentreDashboard.vue"),
+        component: () => import("@/modules/centre/pages/CentreDashboardPage.vue"),
         beforeEnter: authGuard,
         props: (route) => ({ centreId: route.params.centreId }),
         children: [
+          {
+            path: "",
+            name: "CentreDashboardPage",
+            redirect: { name: "CentreDashboard-SummaryTab" },
+          },
           {
             path: "summary",
             component: () => import("./components/CentreDashboardSummaryTab.vue"),

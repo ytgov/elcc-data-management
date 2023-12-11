@@ -144,7 +144,7 @@
               class="mt-5 float-right"
               size="small"
               color="primary"
-              :to="{ name: 'CentreDashboard-SummaryTab', params: { centreId: selectedItem.id } }"
+              :to="{ name: 'CentreDashboardPage', params: { centreId: selectedItem.id } }"
               >View Details</v-btn
             >
             <div style="clear: both"></div>
