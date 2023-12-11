@@ -150,12 +150,8 @@
         class="mb-5 fill-height"
         elevation="3"
       >
-        <v-tabs
-          v-model="tab"
-          grow
-        >
+        <v-tabs grow>
           <v-tab
-            value="option-1"
             :to="{
               name: 'CentreDashboard-SummaryTab',
               params: { centreId },
@@ -164,7 +160,6 @@
             Summary
           </v-tab>
           <v-tab
-            value="option-2"
             :to="{
               name: 'CentreDashboard-WorksheetsTab',
               params: { centreId },
@@ -172,22 +167,19 @@
           >
             Worksheets
           </v-tab>
-          <v-tab value="option-3"> Employees </v-tab>
+          <v-tab
+            :to="{
+              name: 'EmployeesPage',
+              params: { centreId },
+            }"
+          >
+            Employees
+          </v-tab>
         </v-tabs>
+
         <v-divider></v-divider>
 
-        <div v-if="['option-1', 'option-2'].includes(tab)">
-          <router-view></router-view>
-        </div>
-        <v-window
-          v-else
-          v-model="tab"
-          class="fill-height"
-        >
-          <v-window-item value="option-3">
-            <h4>Employees</h4>
-          </v-window-item>
-        </v-window>
+        <router-view></router-view>
       </v-card>
     </v-col>
   </v-row>
@@ -228,8 +220,6 @@ export default {
         { month: "November 2022", payment: "$11,025", enrollment: 42 },
         { month: "December 2022", payment: "$9,447", enrollment: 39 },
       ],
-      tab: "option-1",
-      month: "",
       currentCentre: { name: "" } as ChildCareCentre,
 
       options: {
@@ -248,13 +238,6 @@ export default {
       series: [2, 8, 14, 5, 2, 4, 2],
     }
   },
-  watch: {
-    tab(newValue) {
-      if (!["option-1", "option-2"].includes(newValue)) {
-        this.$router.push({ name: "CentreDashboard", params: { centreId: this.centreId } })
-      }
-    },
-  },
   async mounted() {
     const centre = await this.selectCentreById(parseInt(this.centreId as string))
     if (isNil(centre)) {
@@ -262,12 +245,6 @@ export default {
     }
 
     this.currentCentre = centre
-
-    // TODO: remove this patch once all tabs are loaded from the url
-    if (this.tab === "option-1" && this.$route.name === "CentreDashboard") {
-      this.$router.push({ name: "CentreDashboard-SummaryTab", params: { centreId: this.centreId } })
-    }
-
     await this.loadWorksheets(parseInt(this.centreId as string))
   },
   unmounted() {
