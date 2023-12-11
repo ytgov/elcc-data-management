@@ -42,6 +42,9 @@ const routes: RouteRecordRaw[] = [
                 path: "worksheets",
                 name: "CentreDashboard-SummaryTab-WorksheetsTab",
                 component: () => import("./components/WorksheetSummary.vue"),
+                props: (route) => ({
+                  centreId: parseInt(route.params.centreId as string),
+                }),
               },
               {
                 path: "payments",

@@ -187,15 +187,20 @@
   </div>
 </template>
 <script lang="ts">
+import { mapActions, mapState } from "pinia"
+
 import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
-import { mapState } from "pinia"
-import { clone } from "lodash"
 import { useCentreStore } from "../store"
 
 export default {
   name: "WorksheetSummry",
   data: () => ({}),
-
+  props: {
+    centreId: {
+      type: Number,
+      required: true,
+    },
+  },
   computed: {
     ...mapState(useCentreStore, ["worksheets"]),
     ...mapState(useSubmissionLinesStore, ["currentFiscalYear"]),
@@ -294,7 +299,21 @@ export default {
       return lines
     },
   },
+  watch: {
+    centerId: {
+      async handler(newCenterId, oldCenterId) {
+        if (newCenterId === undefined || newCenterId === oldCenterId) return
+
+        await this.loadWorksheets(newCenterId)
+      },
+      immediate: true,
+    },
+  },
+  async mounted() {
+    await this.loadWorksheets(this.centreId)
+  },
   methods: {
+    ...mapActions(useCentreStore, ["loadWorksheets"]),
     formatMoney(amount: any, decimalCount = 2, decimal = ".", thousands = ",") {
       try {
         decimalCount = Math.abs(decimalCount)
