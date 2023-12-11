@@ -12,6 +12,8 @@ const routes: RouteRecordRaw[] = [
         beforeEnter: authGuard,
       },
       {
+        // TODO: replace centerId with a slug using https://github.com/simov/slugify on center name
+        // also add the appropriate slug column to the centre table and model
         path: ":centreId",
         component: () => import("@/modules/centre/pages/CentreDashboardPage.vue"),
         beforeEnter: authGuard,
