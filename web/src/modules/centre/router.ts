@@ -76,8 +76,8 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: "employees",
-            name: "EmployeesPage",
-            component: () => import("./pages/EmployeesPage.vue"),
+            name: "CentreDashboardEmployeesPage",
+            component: () => import("./pages/CentreDashboardEmployeesPage.vue"),
             props: (route) => ({
               centreId: parseInt(route.params.centreId as string),
             }),

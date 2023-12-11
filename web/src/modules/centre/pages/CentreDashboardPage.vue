@@ -169,7 +169,7 @@
           </v-tab>
           <v-tab
             :to="{
-              name: 'EmployeesPage',
+              name: 'CentreDashboardEmployeesPage',
               params: { centreId },
             }"
           >
