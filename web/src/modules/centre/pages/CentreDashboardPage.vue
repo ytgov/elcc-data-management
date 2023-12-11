@@ -153,7 +153,7 @@
         <v-tabs grow>
           <v-tab
             :to="{
-              name: 'CentreDashboard-SummaryTab',
+              name: 'CentreDashboardSummaryPage',
               params: { centreId },
             }"
           >

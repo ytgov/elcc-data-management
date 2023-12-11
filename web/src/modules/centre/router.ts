@@ -20,16 +20,16 @@ const routes: RouteRecordRaw[] = [
           {
             path: "",
             name: "CentreDashboardPage",
-            redirect: { name: "CentreDashboard-SummaryTab" },
+            redirect: { name: "CentreDashboardSummaryPage" },
           },
           {
             path: "summary",
-            component: () => import("./components/CentreDashboardSummaryTab.vue"),
+            component: () => import("@/modules/centre/pages/CentreDashboardSummaryPage.vue"),
             props: true,
             children: [
               {
                 path: "",
-                name: "CentreDashboard-SummaryTab",
+                name: "CentreDashboardSummaryPage",
                 redirect: { name: "CentreDashboard-SummaryTab-ReconciliationTab" },
               },
               {

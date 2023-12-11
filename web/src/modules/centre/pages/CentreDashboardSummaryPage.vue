@@ -3,9 +3,8 @@
     color="#0097a966"
     density="compact"
   >
-    <v-tabs v-model="value">
+    <v-tabs>
       <v-tab
-        value="0"
         :to="{
           name: 'CentreDashboard-SummaryTab-ReconciliationTab',
           params: {
@@ -16,14 +15,8 @@
       >
         Reconciliation
       </v-tab>
+      <v-tab :to="{ name: 'CentreDashboard-SummaryTab-WorksheetsTab' }"> Worksheets </v-tab>
       <v-tab
-        value="1"
-        :to="{ name: 'CentreDashboard-SummaryTab-WorksheetsTab' }"
-      >
-        Worksheets
-      </v-tab>
-      <v-tab
-        value="2"
         :to="{
           name: 'CentreDashboard-SummaryTab-PaymentsTab',
           params: {
@@ -53,6 +46,4 @@ defineProps({
   //   required: true,
   // },
 })
-
-const value = ref("0")
 </script>
