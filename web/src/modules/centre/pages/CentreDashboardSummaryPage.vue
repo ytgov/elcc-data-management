@@ -6,7 +6,7 @@
     <v-tabs>
       <v-tab
         :to="{
-          name: 'CentreDashboard-SummaryTab-ReconciliationTab',
+          name: 'CentreDashboardSummaryReconciliationPage',
           params: {
             centreId,
             // fiscalYear, // TODO: support fiscal year as param
