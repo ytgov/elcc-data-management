@@ -245,13 +245,12 @@ export default {
     }
 
     this.currentCentre = centre
-    await this.loadWorksheets(parseInt(this.centreId as string))
   },
   unmounted() {
     this.unselectCentre()
   },
   computed: {
-    ...mapState(useCentreStore, ["selectedCentre", "worksheets"]),
+    ...mapState(useCentreStore, ["selectedCentre"]),
     ...mapState(useSubmissionLinesStore, ["fiscalYears"]),
     ...mapWritableState(useSubmissionLinesStore, ["currentFiscalYear"]),
     breadcrumbs() {
@@ -261,18 +260,9 @@ export default {
         { title: this.currentCentre.name },
       ]
     },
-    yearWorksheets() {
-      const t = this.worksheets.filter((w) => w.fiscalYear == this.currentFiscalYear)
-      return t
-    },
   },
   methods: {
-    ...mapActions(useCentreStore, [
-      "selectCentreById",
-      "unselectCentre",
-      "loadWorksheets",
-      "editCentre",
-    ]),
+    ...mapActions(useCentreStore, ["selectCentreById", "unselectCentre", "editCentre"]),
     FormatDate(input: Date | undefined) {
       return input != null ? FormatDate(input) : ""
     },
