@@ -161,7 +161,7 @@
           </v-tab>
           <v-tab
             :to="{
-              name: 'CentreDashboard-WorksheetsTab',
+              name: 'CentreDashboardWorksheetsPage',
               params: { centreId, fiscalYearSlug },
             }"
           >

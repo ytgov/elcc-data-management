@@ -60,7 +60,7 @@ import useFundingSubmissionLineJsonsStore, {
 } from "@/store/funding-submission-line-jsons"
 import { useNotificationStore } from "@/store/NotificationStore"
 
-import SectionTable from "./centre-dashboard-worksheets-tab-monthly-worksheet-tab/SectionTable.vue"
+import SectionTable from "@/modules/centre/components/centre-dashboard-worksheets-tab-monthly-worksheet-tab/SectionTable.vue"
 
 const FIRST_FISCAL_MONTH_NAME = "April"
 
@@ -70,6 +70,10 @@ const fundingSubmissionLineJsonsStore = useFundingSubmissionLineJsonsStore()
 const props = defineProps({
   centreId: {
     type: Number,
+    required: true,
+  },
+  fiscalYearSlug: {
+    type: String,
     required: true,
   },
   fundingSubmissionLineJsonId: {

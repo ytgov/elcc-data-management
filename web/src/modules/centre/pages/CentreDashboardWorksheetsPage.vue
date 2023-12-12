@@ -22,9 +22,10 @@
           v-for="{ id, dateName } in fundingSubmissionLineJsons"
           :key="id"
           :to="{
-            name: 'CentreDashboard-WorksheetsTab-MonthlyWorksheetTab',
+            name: 'CentreDashboardWorksheetsMonthlyWorksheetPage',
             params: {
               centreId,
+              fiscalYearSlug,
               month: dateName.toLowerCase(),
             },
           }"
@@ -37,6 +38,10 @@
       v-if="!isEmpty(selectedFundingSubmissionLineJson)"
       v-slot="{ Component }"
     >
+      <!--
+        TODO: push funding-submission-line-json-id down to the CentreDashboardWorksheetsMonthlyWorksheetPage level
+        and make a child component of CentreDashboardWorksheetsMonthlyWorksheetPage that renders with _only_ the id.
+      -->
       <component
         :is="Component"
         :funding-submission-line-json-id="selectedFundingSubmissionLineJson.id"
@@ -56,11 +61,9 @@ import { useNotificationStore } from "@/store/NotificationStore"
 import useFundingSubmissionLineJsonsStore, {
   FundingSubmissionLineJson,
 } from "@/store/funding-submission-line-jsons"
-import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 
 const notificationStore = useNotificationStore()
 const fundingSubmissionLineJsonsStore = useFundingSubmissionLineJsonsStore()
-const submissionLinesStore = useSubmissionLinesStore()
 const router = useRouter()
 const route = useRoute()
 
@@ -69,13 +72,17 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+  fiscalYearSlug: {
+    type: String,
+    required: true,
+  },
   month: {
     type: String,
     default: "",
   },
 })
 
-const fiscalYear = computed(() => submissionLinesStore.currentFiscalYear)
+const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
 
 const fundingSubmissionLineJsons = ref<FundingSubmissionLineJson[]>()
 const fundingSubmissionLineJsonsByMonth = computed(() =>
@@ -151,7 +158,7 @@ async function initializeWorksheetsForFiscalYear() {
 }
 
 watchEffect(() => {
-  if (route.name !== "CentreDashboard-WorksheetsTab") {
+  if (route.name !== "CentreDashboardWorksheetsPage") {
     return
   }
 
@@ -161,9 +168,10 @@ watchEffect(() => {
 
   const firstFundingSubmissionLineJson = fundingSubmissionLineJsons.value[0]
   router.push({
-    name: "CentreDashboard-WorksheetsTab-MonthlyWorksheetTab",
+    name: "CentreDashboardWorksheetsMonthlyWorksheetPage",
     params: {
       centreId: props.centreId,
+      fiscalYearSlug: props.fiscalYearSlug,
       month: firstFundingSubmissionLineJson.dateName.toLowerCase(),
     },
   })

@@ -68,19 +68,24 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: "worksheets",
-            name: "CentreDashboard-WorksheetsTab",
-            component: () => import("./components/CentreDashboardWorksheetsTab.vue"),
+            name: "CentreDashboardWorksheetsPage",
+            component: () => import("@/modules/centre/pages/CentreDashboardWorksheetsPage.vue"),
             props: (route) => ({
               centreId: parseInt(route.params.centreId as string),
+              fiscalYearSlug: route.params.fiscalYearSlug,
+              month: route.params.month,
             }),
             children: [
               {
                 path: ":month",
-                name: "CentreDashboard-WorksheetsTab-MonthlyWorksheetTab",
+                name: "CentreDashboardWorksheetsMonthlyWorksheetPage",
                 component: () =>
-                  import("./components/CentreDashboardWorksheetsTabMonthlyWorksheetTab.vue"),
+                  import(
+                    "@/modules/centre/pages/CentreDashboardWorksheetsMonthlyWorksheetPage.vue"
+                  ),
                 props: (route) => ({
                   centreId: parseInt(route.params.centreId as string),
+                  fiscalYearSlug: route.params.fiscalYearSlug,
                   month: route.params.month,
                 }),
               },
