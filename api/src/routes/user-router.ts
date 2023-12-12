@@ -19,9 +19,11 @@ userRouter.get("/me", async (req: Request, res: Response) => {
 })
 
 userRouter.get("/", async (req: Request, res: Response) => {
-  const users = await User.findAll()
+  const users = await User.findAll({
+    include: ["roles"],
+  })
 
-  const serializedUsers = UserSerializer.serialize(users, { view: "default" })
+  const serializedUsers = UserSerializer.asDetailedTable(users)
 
   return res.json({ data: serializedUsers })
 })

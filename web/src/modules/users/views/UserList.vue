@@ -59,7 +59,7 @@
           color="yg_moss"
           >Admin</v-chip
         >
-        <div v-else>{{ item.scopes.length }}</div>
+        <div v-else>{{ item.roles.length }}</div>
       </template>
     </v-data-table>
   </base-card>
