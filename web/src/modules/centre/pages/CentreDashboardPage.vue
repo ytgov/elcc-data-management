@@ -22,15 +22,15 @@
   </v-breadcrumbs>
 
   <div class="float-right">
-    <v-select
-      v-model="currentFiscalYear"
+    <FiscalYearSelect
+      v-model="fiscalYear"
       label="Fiscal year"
-      :items="fiscalYears"
       class="float-right"
       style="width: 200px"
       variant="outlined"
       density="compact"
-    ></v-select>
+      @update:modelValue="updateFiscalYearAndRedirect"
+    />
   </div>
   <h1 class="mb-4">{{ currentCentre.name }}</h1>
 
@@ -138,7 +138,7 @@
         <v-card-title style="background-color: #0097a968">Latest Enrollment</v-card-title>
         <v-divider></v-divider>
         <v-card-text class="pt-3">
-          <EnrollmentChart :centre-id="centreId" />
+          <EnrollmentChart :centre-id="centreId.toString()" />
         </v-card-text>
       </v-card>
     </v-col>
@@ -188,16 +188,15 @@
 </template>
 
 <script lang="ts">
-import { isNil } from "lodash"
+import { isNil, isEmpty } from "lodash"
 
 import { FormatDate, FormatYesNo } from "@/utils"
-import { mapActions, mapState, mapWritableState } from "pinia"
+import { mapActions, mapState } from "pinia"
 import VueApexCharts from "vue3-apexcharts"
 
 import EnrollmentChart from "../components/EnrollmentChart.vue"
 import CentreEditor from "../components/CentreEditor.vue"
 import { type ChildCareCentre, useCentreStore } from "../store"
-import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 
 export default {
   name: "CentreDashboard",
@@ -208,38 +207,25 @@ export default {
   },
   props: {
     centreId: {
-      type: String,
+      type: Number,
       required: true,
+    },
+    fiscalYearSlug: {
+      type: String,
+      default: "",
     },
   },
   data() {
     return {
-      submissions: [
-        { month: "September 2022", payment: "$12,232", enrollment: 43 },
-        { month: "October 2022", payment: "$10,134", enrollment: 41 },
-        { month: "November 2022", payment: "$11,025", enrollment: 42 },
-        { month: "December 2022", payment: "$9,447", enrollment: 39 },
-      ],
       currentCentre: { name: "" } as ChildCareCentre,
-
-      options: {
-        stroke: { show: false },
-        colors: ["#0094A9", "#002EB7", "#FFAE00", "#FF7A00", "#04DDFB", "#A65000", "#1851FC"],
-        labels: [
-          "Infant",
-          "Toddler",
-          "Preschool",
-          "Kindergarten PT",
-          "Kindergarten FT",
-          "School Age PT",
-          "School Age FT",
-        ],
-      },
-      series: [2, 8, 14, 5, 2, 4, 2],
     }
   },
   async mounted() {
-    const centre = await this.selectCentreById(parseInt(this.centreId as string))
+    if (isEmpty(this.fiscalYearSlug)) {
+      this.updateFiscalYearAndRedirect(this.currentFiscalYearSlug)
+    }
+
+    const centre = await this.selectCentreById(this.centreId)
     if (isNil(centre)) {
       throw new Error(`Could not load centre from id=${this.centreId}`)
     }
@@ -251,14 +237,30 @@ export default {
   },
   computed: {
     ...mapState(useCentreStore, ["selectedCentre"]),
-    ...mapState(useSubmissionLinesStore, ["fiscalYears"]),
-    ...mapWritableState(useSubmissionLinesStore, ["currentFiscalYear"]),
     breadcrumbs() {
       return [
         { to: "/dashboard", title: "Home" },
         { to: "/child-care-centres", title: "Child Care Centres" },
         { title: this.currentCentre.name },
       ]
+    },
+    fiscalYear() {
+      return this.fiscalYearSlug.replace("-", "/")
+    },
+    // TODO: if fiscal year start date ends up being configurable
+    // this should be loaded from the funding_periods table instead of computed here.
+    currentFiscalYearSlug() {
+      const APRIL = 3 // April is the 4th month but JavaScript months are 0-indexed
+      const currentDate = new Date()
+      const currentYear = currentDate.getFullYear()
+      const isAfterFiscalYearStart = currentDate.getMonth() >= APRIL
+
+      // If the current date is after the start of the fiscal year, the fiscal year is the current year and the next year.
+      // Otherwise, the fiscal year is the previous year and the current year.
+      const startYear = isAfterFiscalYearStart ? currentYear : currentYear - 1
+      const endYear = startYear + 1
+      const endYearShort = endYear.toString().slice(-2)
+      return `${startYear}-${endYearShort}`
     },
   },
   methods: {
@@ -271,6 +273,15 @@ export default {
     },
     editClick() {
       if (this.selectedCentre) this.editCentre(this.selectedCentre)
+    },
+    updateFiscalYearAndRedirect(value: string) {
+      this.$router.push({
+        name: "CentreDashboardPage",
+        params: {
+          centreId: this.centreId,
+          fiscalYearSlug: value.replace("/", "-"),
+        },
+      })
     },
   },
 }

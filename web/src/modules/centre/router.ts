@@ -14,10 +14,13 @@ const routes: RouteRecordRaw[] = [
       {
         // TODO: replace centerId with a slug using https://github.com/simov/slugify on center name
         // also add the appropriate slug column to the centre table and model
-        path: ":centreId",
+        path: ":centreId/:fiscalYearSlug?",
         component: () => import("@/modules/centre/pages/CentreDashboardPage.vue"),
         beforeEnter: authGuard,
-        props: (route) => ({ centreId: route.params.centreId }),
+        props: (route) => ({
+          centreId: parseInt(route.params.centreId as string),
+          fiscalYearSlug: route.params.fiscalYearSlug,
+        }),
         children: [
           {
             path: "",
@@ -84,6 +87,12 @@ const routes: RouteRecordRaw[] = [
             props: (route) => ({
               centreId: parseInt(route.params.centreId as string),
             }),
+            // children: [
+            //   {
+            //     path: ":month",
+            //     name: "CentreDashboardEmployeesMonthlyWorksheetPage",
+            //   },
+            // ],
           },
         ],
       },

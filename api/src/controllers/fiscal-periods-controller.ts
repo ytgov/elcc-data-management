@@ -10,7 +10,10 @@ export class FiscalPeriodsController extends BaseController {
     try {
       const fiscalPeriods = await FiscalPeriod.findAll({
         where,
-        order: ["dateStart", "dateEnd"],
+        order: [
+          ["dateStart", "ASC"],
+          ["dateEnd", "ASC"],
+        ],
       })
       return this.response.json({
         fiscalPeriods,

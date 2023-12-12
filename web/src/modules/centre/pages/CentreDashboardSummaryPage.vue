@@ -9,7 +9,7 @@
           name: 'CentreDashboardSummaryReconciliationPage',
           params: {
             centreId,
-            // fiscalYear, // TODO: support fiscal year as param
+            fiscalYearSlug,
           },
         }"
       >
@@ -41,9 +41,9 @@ defineProps({
     type: String,
     required: true,
   },
-  // fiscalYear: { // TODO: add support for this prop
-  //   type: String,
-  //   required: true,
-  // },
+  fiscalYearSlug: {
+    type: String,
+    required: true,
+  },
 })
 </script>
