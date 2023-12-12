@@ -187,21 +187,30 @@
   </div>
 </template>
 <script lang="ts">
-import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
-import { mapState } from "pinia"
-import { clone } from "lodash"
+import { mapActions, mapState } from "pinia"
+
 import { useCentreStore } from "../store"
 
 export default {
-  name: "WorksheetSummry",
+  name: "CentreDashboardSummaryWorksheetsPage.vue",
   data: () => ({}),
-
+  props: {
+    centreId: {
+      type: Number,
+      required: true,
+    },
+    fiscalYearSlug: {
+      type: String,
+      required: true,
+    },
+  },
   computed: {
     ...mapState(useCentreStore, ["worksheets"]),
-    ...mapState(useSubmissionLinesStore, ["currentFiscalYear"]),
-
+    fiscalYear() {
+      return this.fiscalYearSlug.replace("-", "/")
+    },
     yearWorksheets() {
-      const t = this.worksheets.filter((w) => w.fiscalYear == this.currentFiscalYear)
+      const t = this.worksheets.filter((w) => w.fiscalYear == this.fiscalYear)
       return t
     },
     allSheets() {
@@ -294,7 +303,21 @@ export default {
       return lines
     },
   },
+  watch: {
+    centerId: {
+      async handler(newCenterId, oldCenterId) {
+        if (newCenterId === undefined || newCenterId === oldCenterId) return
+
+        await this.loadWorksheets(newCenterId)
+      },
+      immediate: true,
+    },
+  },
+  async mounted() {
+    await this.loadWorksheets(this.centreId)
+  },
   methods: {
+    ...mapActions(useCentreStore, ["loadWorksheets"]),
     formatMoney(amount: any, decimalCount = 2, decimal = ".", thousands = ",") {
       try {
         decimalCount = Math.abs(decimalCount)

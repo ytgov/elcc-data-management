@@ -4,6 +4,10 @@ Depends on:
 
 Fixes (link to Jira ticket or github issue)
 
+Relates to:
+
+- (delete this section if unneeded)
+
 # Context
 
 (detailed context about the issue the pull request is solving)
@@ -19,7 +23,5 @@ Fixes (link to Jira ticket or github issue)
 # Testing Instructions
 
 1. Boot the app via `dev up`
-
 2. Check that the app complies, and that you can log in at http://localhost:8080.
-
 3. Check that you can do ...

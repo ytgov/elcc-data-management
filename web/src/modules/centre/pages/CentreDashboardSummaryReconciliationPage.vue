@@ -99,15 +99,14 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  // fiscalYear: { // TODO: support fical year as prop
-  //   type: String,
-  //   required: true,
-  // },
+  fiscalYearSlug: {
+    type: String,
+    required: true,
+  },
 })
 
 const centreIdNumber = computed(() => parseInt(props.centreId))
-const submissionLinesStore = useSubmissionLinesStore()
-const fiscalYear = computed(() => submissionLinesStore.currentFiscalYear)
+const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
 const paymentsStore = usePaymentsStore()
 const payments = computed(() => paymentsStore.items)
 const fundingSubmissionLineJsonsStore = useFundingSubmissionLineJsonsStore()
@@ -160,7 +159,6 @@ const paymentsTotal = computed(() => sumBy(payments.value, "amountInCents"))
 const expensesTotal = computed(() => sumBy(expenses.value, "amountInCents"))
 
 onMounted(async () => {
-  await submissionLinesStore.initialize() // TODO: push this to a higher plane
   await paymentsStore.initialize({
     where: {
       centreId: centreIdNumber.value,

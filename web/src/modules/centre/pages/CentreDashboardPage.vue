@@ -22,15 +22,15 @@
   </v-breadcrumbs>
 
   <div class="float-right">
-    <v-select
-      v-model="currentFiscalYear"
+    <FiscalYearSelect
+      :model-value="fiscalYear"
       label="Fiscal year"
-      :items="fiscalYears"
       class="float-right"
       style="width: 200px"
       variant="outlined"
       density="compact"
-    ></v-select>
+      @update:modelValue="updateFiscalYearAndRedirect"
+    />
   </div>
   <h1 class="mb-4">{{ currentCentre.name }}</h1>
 
@@ -138,7 +138,7 @@
         <v-card-title style="background-color: #0097a968">Latest Enrollment</v-card-title>
         <v-divider></v-divider>
         <v-card-text class="pt-3">
-          <EnrollmentChart :centre-id="centreId" />
+          <EnrollmentChart :centre-id="centreId.toString()" />
         </v-card-text>
       </v-card>
     </v-col>
@@ -150,56 +150,53 @@
         class="mb-5 fill-height"
         elevation="3"
       >
-        <v-tabs
-          v-model="tab"
-          grow
-        >
+        <v-tabs grow>
           <v-tab
-            value="option-1"
-            :to="{ name: 'CentreDashboard-SummaryTab' }"
+            :to="{
+              name: 'CentreDashboardSummaryPage',
+              params: { centreId, fiscalYearSlug },
+            }"
           >
             Summary
           </v-tab>
           <v-tab
-            value="option-2"
-            :to="{ name: 'CentreDashboard-WorksheetsTab' }"
+            :to="{
+              name: 'CentreDashboardWorksheetsPage',
+              params: { centreId, fiscalYearSlug },
+            }"
           >
             Worksheets
           </v-tab>
-          <v-tab value="option-3"> Employees </v-tab>
+          <v-tab
+            :to="{
+              name: 'CentreDashboardEmployeesPage',
+              params: { centreId, fiscalYearSlug },
+            }"
+          >
+            Employees
+          </v-tab>
         </v-tabs>
+
         <v-divider></v-divider>
 
-        <div v-if="['option-1', 'option-2'].includes(tab)">
-          <router-view></router-view>
-        </div>
-        <v-window
-          v-else
-          v-model="tab"
-          class="fill-height"
-        >
-          <v-window-item value="option-3">
-            <h4>Employees</h4>
-          </v-window-item>
-        </v-window>
+        <router-view></router-view>
       </v-card>
     </v-col>
   </v-row>
 
-  <centre-editor></centre-editor>
+  <CentreEditor />
 </template>
 
 <script lang="ts">
-import { isNil } from "lodash"
+import { isNil, isEmpty } from "lodash"
 
 import { FormatDate, FormatYesNo } from "@/utils"
-import { mapActions, mapState, mapWritableState } from "pinia"
+import { mapActions, mapState } from "pinia"
 import VueApexCharts from "vue3-apexcharts"
 
 import EnrollmentChart from "../components/EnrollmentChart.vue"
 import CentreEditor from "../components/CentreEditor.vue"
 import { type ChildCareCentre, useCentreStore } from "../store"
-import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 
 export default {
   name: "CentreDashboard",
@@ -210,67 +207,36 @@ export default {
   },
   props: {
     centreId: {
-      type: String,
+      type: Number,
       required: true,
+    },
+    fiscalYearSlug: {
+      type: String,
+      default: "",
     },
   },
   data() {
     return {
-      submissions: [
-        { month: "September 2022", payment: "$12,232", enrollment: 43 },
-        { month: "October 2022", payment: "$10,134", enrollment: 41 },
-        { month: "November 2022", payment: "$11,025", enrollment: 42 },
-        { month: "December 2022", payment: "$9,447", enrollment: 39 },
-      ],
-      tab: "option-1",
-      month: "",
       currentCentre: { name: "" } as ChildCareCentre,
-
-      options: {
-        stroke: { show: false },
-        colors: ["#0094A9", "#002EB7", "#FFAE00", "#FF7A00", "#04DDFB", "#A65000", "#1851FC"],
-        labels: [
-          "Infant",
-          "Toddler",
-          "Preschool",
-          "Kindergarten PT",
-          "Kindergarten FT",
-          "School Age PT",
-          "School Age FT",
-        ],
-      },
-      series: [2, 8, 14, 5, 2, 4, 2],
     }
   },
-  watch: {
-    tab(newValue) {
-      if (!["option-1", "option-2"].includes(newValue)) {
-        this.$router.push({ name: "CentreDashboard", params: { centreId: this.centreId } })
-      }
-    },
-  },
   async mounted() {
-    const centre = await this.selectCentreById(parseInt(this.centreId as string))
+    if (isEmpty(this.fiscalYearSlug)) {
+      this.updateFiscalYearAndRedirect(this.currentFiscalYearSlug)
+    }
+
+    const centre = await this.selectCentreById(this.centreId)
     if (isNil(centre)) {
       throw new Error(`Could not load centre from id=${this.centreId}`)
     }
 
     this.currentCentre = centre
-
-    // TODO: remove this patch once all tabs are loaded from the url
-    if (this.tab === "option-1" && this.$route.name === "CentreDashboard") {
-      this.$router.push({ name: "CentreDashboard-SummaryTab", params: { centreId: this.centreId } })
-    }
-
-    await this.loadWorksheets(parseInt(this.centreId as string))
   },
   unmounted() {
     this.unselectCentre()
   },
   computed: {
-    ...mapState(useCentreStore, ["selectedCentre", "worksheets"]),
-    ...mapState(useSubmissionLinesStore, ["fiscalYears"]),
-    ...mapWritableState(useSubmissionLinesStore, ["currentFiscalYear"]),
+    ...mapState(useCentreStore, ["selectedCentre"]),
     breadcrumbs() {
       return [
         { to: "/dashboard", title: "Home" },
@@ -278,18 +244,27 @@ export default {
         { title: this.currentCentre.name },
       ]
     },
-    yearWorksheets() {
-      const t = this.worksheets.filter((w) => w.fiscalYear == this.currentFiscalYear)
-      return t
+    fiscalYear() {
+      return this.fiscalYearSlug.replace("-", "/")
+    },
+    // TODO: if fiscal year start date ends up being configurable
+    // this should be loaded from the funding_periods table instead of computed here.
+    currentFiscalYearSlug() {
+      const APRIL = 3 // April is the 4th month but JavaScript months are 0-indexed
+      const currentDate = new Date()
+      const currentYear = currentDate.getFullYear()
+      const isAfterFiscalYearStart = currentDate.getMonth() >= APRIL
+
+      // If the current date is after the start of the fiscal year, the fiscal year is the current year and the next year.
+      // Otherwise, the fiscal year is the previous year and the current year.
+      const startYear = isAfterFiscalYearStart ? currentYear : currentYear - 1
+      const endYear = startYear + 1
+      const endYearShort = endYear.toString().slice(-2)
+      return `${startYear}-${endYearShort}`
     },
   },
   methods: {
-    ...mapActions(useCentreStore, [
-      "selectCentreById",
-      "unselectCentre",
-      "loadWorksheets",
-      "editCentre",
-    ]),
+    ...mapActions(useCentreStore, ["selectCentreById", "unselectCentre", "editCentre"]),
     FormatDate(input: Date | undefined) {
       return input != null ? FormatDate(input) : ""
     },
@@ -298,6 +273,16 @@ export default {
     },
     editClick() {
       if (this.selectedCentre) this.editCentre(this.selectedCentre)
+    },
+    updateFiscalYearAndRedirect(value: string) {
+      this.$router.push({
+        name: this.$route.name || "CentreDashboard",
+        params: {
+          ...this.$route.params,
+          fiscalYearSlug: value.replace("/", "-"),
+        },
+        query: this.$route.query,
+      })
     },
   },
 }

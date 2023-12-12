@@ -83,7 +83,7 @@ class DevHelper
   end
 
   def api(*args, **kwargs)
-    run(*%w[web], *args, **kwargs)
+    run(*%w[api], *args, **kwargs)
   end
 
   def npm(*args, **kwargs)

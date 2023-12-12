@@ -3,32 +3,35 @@
     color="#0097a966"
     density="compact"
   >
-    <v-tabs v-model="value">
+    <v-tabs>
       <v-tab
-        value="0"
         :to="{
-          name: 'CentreDashboard-SummaryTab-ReconciliationTab',
+          name: 'CentreDashboardSummaryReconciliationPage',
           params: {
             centreId,
-            // fiscalYear, // TODO: support fiscal year as param
+            fiscalYearSlug,
           },
         }"
       >
         Reconciliation
       </v-tab>
       <v-tab
-        value="1"
-        :to="{ name: 'CentreDashboard-SummaryTab-WorksheetsTab' }"
+        :to="{
+          name: 'CentreDashboardSummaryWorksheetsPage',
+          params: {
+            centreId,
+            fiscalYearSlug,
+          },
+        }"
       >
         Worksheets
       </v-tab>
       <v-tab
-        value="2"
         :to="{
-          name: 'CentreDashboard-SummaryTab-PaymentsTab',
+          name: 'CentreDashboardSummaryPaymentsPage',
           params: {
             centreId,
-            // fiscalYear, // TODO: support fiscal year as param
+            fiscalYearSlug,
           },
         }"
       >
@@ -41,18 +44,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue"
-
 defineProps({
   centreId: {
     type: String,
     required: true,
   },
-  // fiscalYear: { // TODO: add support for this prop
-  //   type: String,
-  //   required: true,
-  // },
+  fiscalYearSlug: {
+    type: String,
+    required: true,
+  },
 })
-
-const value = ref("0")
 </script>

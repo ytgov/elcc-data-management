@@ -12,9 +12,20 @@ export function sequelizeAutoTransactionResolver({
     name,
     up: async () => {
       const migration = await import(path)
-      return context.sequelize.transaction(() => {
-        return migration.up({ context })
-      })
+      return context.sequelize
+        .transaction(() => {
+          return migration.up({ context })
+        })
+        .catch((error) => {
+          console.info(
+            `FUTURE DEV: If you see "The ROLLBACK TRANSACTION request has no corresponding BEGIN TRANSACTION." in the logs,
+             there is probably a typo in a foreign key reference, a data type error, in your migration.
+             This is a know bug when using MSSQL see: https://github.com/sequelize/sequelize/issues/8660 - PAST DEV
+            `.replace(/\s+/g, " ")
+          )
+
+          throw error
+        })
     },
     down: async () => {
       const migration = await import(path)

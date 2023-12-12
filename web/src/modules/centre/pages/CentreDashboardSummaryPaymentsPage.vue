@@ -118,7 +118,6 @@ import {
   type Payment,
   type NonPersistedPayment,
 } from "@/store/payments"
-import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 
 import { dateRule } from "@/utils/validators"
 import { centsToDollars, dollarsToCents } from "@/utils/format-money"
@@ -127,18 +126,16 @@ import CurrencyInput from "@/components/CurrencyInput.vue"
 
 const props = defineProps({
   centreId: {
+    type: Number,
+    required: true,
+  },
+  fiscalYearSlug: {
     type: String,
     required: true,
   },
-  // fiscalYear: { // TODO: support fical year as prop
-  //   type: String,
-  //   required: true,
-  // },
 })
 
-const centreIdNumber = computed(() => parseInt(props.centreId))
-const submissionLinesStore = useSubmissionLinesStore()
-const fiscalYear = computed(() => submissionLinesStore.currentFiscalYear)
+const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
 const paymentsStore = usePaymentsStore()
 
 const { isLoading } = storeToRefs(paymentsStore)
@@ -161,10 +158,9 @@ const paymentNames = ref([
 ])
 
 onMounted(async () => {
-  await submissionLinesStore.initialize() // TODO: push this to a higher plane
   await paymentsStore.initialize({
     where: {
-      centreId: centreIdNumber.value,
+      centreId: props.centreId,
       fiscalYear: fiscalYear.value,
     },
   })
@@ -183,7 +179,7 @@ function addRow() {
   const name = paymentNames.value[allPayments.value.length]
   const paidOn = fiscalYear.value.split("/")[0] + "-"
   nonPersistedPayments.value.push({
-    centreId: centreIdNumber.value,
+    centreId: props.centreId,
     fiscalYear: fiscalYear.value,
     name: name,
     amountInCents: 0,
