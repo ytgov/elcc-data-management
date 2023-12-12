@@ -1,4 +1,12 @@
-<template>TODO: some employee stuff like employee benefits</template>
+<template>
+  TODO: some employee stuff like employee benefits
+
+  <pre>
+    centreId: {{ centreId }}
+    fiscalYearSlug: {{ fiscalYearSlug }}
+    month: {{ month }}
+  </pre>
+</template>
 
 <script lang="ts" setup>
 defineProps({

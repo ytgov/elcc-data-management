@@ -1,23 +1,9 @@
 <template>
   <div
-    v-if="isLoading"
+    v-if="isLoading || isEmpty(fiscalPeriods)"
     class="d-flex justify-center mt-10"
   >
     <v-progress-circular indeterminate />
-  </div>
-
-  <div
-    v-else-if="!isLoading && isEmpty(fiscalPeriods)"
-    class="ma-5"
-  >
-    <p>There are currently no worksheets for {{ fiscalYear }}.</p>
-    <v-btn
-      color="primary"
-      size="small"
-      class="mt-3"
-      @click="initializeBenefitsForFiscalYear"
-      >Add worksheets for {{ fiscalYear }}</v-btn
-    >
   </div>
   <div v-else>
     <v-toolbar
@@ -33,7 +19,7 @@
             params: {
               centreId,
               fiscalYearSlug,
-              month: month.toLowerCase(),
+              month,
             },
           }"
         >
@@ -42,14 +28,21 @@
       </v-tabs>
     </v-toolbar>
 
-    <router-view v-if="!isEmpty(fiscalPeriods)"> </router-view>
+    <router-view v-if="!isEmpty(defaultMonth)"></router-view>
   </div>
 </template>
 
 <script lang="ts" setup>
-import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"
 import { isEmpty } from "lodash"
-import { computed, ref, watchEffect } from "vue"
+import { ref, watch, watchEffect, computed } from "vue"
+import { useRoute, useRouter } from "vue-router"
+
+import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"
+import { useNotificationStore } from "@/store/NotificationStore"
+
+const route = useRoute()
+const router = useRouter()
+const notificationStore = useNotificationStore()
 
 const props = defineProps({
   centreId: {
@@ -62,27 +55,57 @@ const props = defineProps({
   },
 })
 
-const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
 const isLoading = ref(true)
 const fiscalPeriods = ref<FiscalPeriod[]>([])
+const firstPeriod = computed(() => fiscalPeriods.value[0])
+const defaultMonth = computed(() => firstPeriod.value?.month)
 
-watchEffect(async () => {
+async function fetchFiscalPeriods(fiscalYear: string) {
   isLoading.value = true
   try {
     const { fiscalPeriods: newFiscalPeriods } = await fiscalPeriodsApi.list({
       where: {
-        fiscalYear: fiscalYear.value,
+        fiscalYear,
       },
     })
     fiscalPeriods.value = newFiscalPeriods
   } catch (error) {
     console.error(error)
+    notificationStore.notify({
+      text: `Failed to fetch fiscal periods: ${error}`,
+      variant: "error",
+    })
   } finally {
     isLoading.value = false
   }
-})
-
-async function initializeBenefitsForFiscalYear() {
-  alert("TODO: initializeBenefitsForFiscalYear")
 }
+
+watch<string, true>(
+  () => props.fiscalYearSlug,
+  async (newSlug) => {
+    await fetchFiscalPeriods(newSlug)
+  },
+  {
+    immediate: true,
+  }
+)
+
+watchEffect(async () => {
+  if (route.name !== "CentreDashboardEmployeesPage") {
+    return
+  }
+
+  if (isEmpty(defaultMonth.value)) {
+    return
+  }
+
+  await router.push({
+    name: "CentreDashboardEmployeesMonthlyWorksheetPage",
+    params: {
+      centreId: props.centreId,
+      fiscalYearSlug: props.fiscalYearSlug,
+      month: defaultMonth.value,
+    },
+  })
+})
 </script>
