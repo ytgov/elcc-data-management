@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, defineProps, defineEmits } from "vue"
+import { ref, onMounted } from "vue"
 import { uniqBy } from "lodash"
 
 import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"
