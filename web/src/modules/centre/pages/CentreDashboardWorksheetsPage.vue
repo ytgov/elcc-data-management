@@ -1,4 +1,5 @@
 <template>
+  <!-- TODO: add loader to this section as it shows empty for a few seconds before loading completes -->
   <div
     v-if="isEmpty(fundingSubmissionLineJsons)"
     class="ma-5"
