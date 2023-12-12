@@ -83,7 +83,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
-import { sumBy } from "lodash"
+import { isEmpty, sumBy } from "lodash"
 
 import useFundingSubmissionLineJsonsStore from "@/store/funding-submission-line-jsons"
 import usePaymentsStore from "@/store/payments"
@@ -99,15 +99,14 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  // fiscalYear: { // TODO: support fical year as prop
-  //   type: String,
-  //   required: true,
-  // },
+  fiscalYearSlug: {
+    type: String,
+    required: true,
+  },
 })
 
 const centreIdNumber = computed(() => parseInt(props.centreId))
-const submissionLinesStore = useSubmissionLinesStore()
-const fiscalYear = computed(() => submissionLinesStore.currentFiscalYear)
+const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
 const paymentsStore = usePaymentsStore()
 const payments = computed(() => paymentsStore.items)
 const fundingSubmissionLineJsonsStore = useFundingSubmissionLineJsonsStore()
@@ -160,7 +159,6 @@ const paymentsTotal = computed(() => sumBy(payments.value, "amountInCents"))
 const expensesTotal = computed(() => sumBy(expenses.value, "amountInCents"))
 
 onMounted(async () => {
-  await submissionLinesStore.initialize() // TODO: push this to a higher plane
   await paymentsStore.initialize({
     where: {
       centreId: centreIdNumber.value,
@@ -174,7 +172,9 @@ onMounted(async () => {
         fiscalYear: fiscalYear.value,
       },
     })
-    .then(() => {
+    .then((fundingSubmissionLineJsons) => {
+      if (isEmpty(fundingSubmissionLineJsons)) return
+
       updateExpenseValues()
     })
 })

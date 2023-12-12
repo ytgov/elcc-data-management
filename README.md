@@ -32,7 +32,16 @@
 
 3. Run `docker compose up --build` to build the application and boot it locally.
 
-4. Go to http://localhost:8080/ and sign in to the app.
+4. (optional) If you want to run seeds you can do that manually via:
+
+   ```
+   dc exec app sh
+   NODE_ENV=development node
+   const { runSeeds } = require("./dist/initializers/30-run-seeds.js")
+   runSeeds().then(console.log)
+   ```
+
+5. Go to http://localhost:8080/ and sign in to the app.
 
 ## Development
 
@@ -118,6 +127,8 @@ All commands are just strings joined together, so it's easy to add new commmands
 3. The front-end is viewable at http://localhost:8080.
 
 > NOTE: make sure you delete the .env file before runing a development setup again as it is auto-loaded by docker compose.
+
+> NOTE: You can also skip seeding when database is not empty by setting the `SKIP_SEEDING_UNLESS_EMPTY=true` environment variable.
 
 ### Editor Setup
 

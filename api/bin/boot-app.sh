@@ -1,16 +1,16 @@
 #!/bin/sh
 
-# Start the script to run the migrations
-cd /usr/src/api
-
-npm run migrate up && \
-  npm run seed up
-
-initialization_status=$?
-if [ $initialization_status -ne 0 ]; then
-  echo "Failed to complete initialization, exit code was $initialization_status"
-  exit 1
+if [ "$NODE_ENV" != "production" ]; then
+  # Run initializers in development
+  npm run ts-node -- --files src/initializers/index.ts
+else
+  # Run initializers in production
+  node ./dist/initializers/index.js
 fi
 
-# Start Express Server
-npm run start
+# Start the application
+if [ "$NODE_ENV" != "production" ]; then
+  npm run start
+else
+  node ./dist/server.js
+fi

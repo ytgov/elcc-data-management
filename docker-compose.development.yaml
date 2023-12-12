@@ -2,9 +2,9 @@ version: "3"
 
 x-default-environment: &default-environment
   NODE_ENV: development
-  DB_NAME: "${DB_NAME:-ELCC}"
   DB_HOST: db
   DB_USER: sa
+  DB_NAME: elcc_development
   DB_PASS: &default-db-password DevPwd99!
   DB_PORT: &default-db-port 1433
 
@@ -60,9 +60,7 @@ services:
         condition: service_healthy
 
   db:
-    build:
-      context: ./db
-      dockerfile: development.Dockerfile
+    image: mcr.microsoft.com/mssql/server:2019-latest
     user: root
     environment:
       <<: *default-environment
@@ -73,7 +71,6 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - ./db:/usr/src/db
       - db_data:/var/opt/mssql/data
     healthcheck:
       # Ensures that server is started and that "ELCC" database is in an "online" state.

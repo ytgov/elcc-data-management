@@ -1,4 +1,4 @@
-@startuml
+@startuml Entity Relationship Diagrams
 
 class "SequelizeMeta" {
   +name: nvarchar(255)
@@ -17,6 +17,32 @@ class "centres" {
   +last_submission: date
   +created_at: datetime2
   +updated_at: datetime2
+}
+
+
+class "employee_benefits" {
+  +id: int
+  +centre_id: int
+  +fiscal_period_id: int
+  +gross_payroll_monthly_actual: decimal(10, 2)
+  +gross_payroll_monthly_estimated: decimal(10, 2)
+  +cost_cap_percentage: decimal(5, 2)
+  +employee_cost_actual: decimal(10, 2)
+  +employee_cost_estimated: decimal(10, 2)
+  +employer_cost_actual: decimal(10, 2)
+  +employer_cost_estimated: decimal(10, 2)
+  +created_at: datetime2(0)
+  +updated_at: datetime2(0)
+}
+
+class "fiscal_periods" {
+  +id: int
+  +fiscal_year: nvarchar(10)
+  +month: nvarchar(10)
+  +date_start: datetime2(0)
+  +date_end: datetime2(0)
+  +created_at: datetime2(0)
+  +updated_at: datetime2(0)
 }
 
 class "funding_periods" {
@@ -120,5 +146,6 @@ class "user_roles" {
 "centres" --|> "centre_funding_periods" : centre_id
 "centres" --|> "funding_submission_line_jsons" : centre_id
 "users" --|> "user_roles" : user_id
+"fiscal_periods" --|> "employee_benefits" : fiscal_period_id
 
 @enduml

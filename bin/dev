@@ -78,6 +78,14 @@ class DevHelper
     exit 0
   end
 
+  def web(*args, **kwargs)
+    run(*%w[web], *args, **kwargs)
+  end
+
+  def api(*args, **kwargs)
+    run(*%w[api], *args, **kwargs)
+  end
+
   def npm(*args, **kwargs)
     run(*%w[api npm], *args, **kwargs)
   end
