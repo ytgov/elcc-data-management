@@ -276,11 +276,12 @@ export default {
     },
     updateFiscalYearAndRedirect(value: string) {
       this.$router.push({
-        name: "CentreDashboardPage",
+        name: this.$route.name || "CentreDashboard",
         params: {
-          centreId: this.centreId,
+          ...this.$route.params,
           fiscalYearSlug: value.replace("/", "-"),
         },
+        query: this.$route.query,
       })
     },
   },
