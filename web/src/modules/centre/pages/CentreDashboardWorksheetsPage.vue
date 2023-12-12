@@ -1,7 +1,12 @@
 <template>
-  <!-- TODO: add loader to this section as it shows empty for a few seconds before loading completes -->
   <div
-    v-if="isEmpty(fundingSubmissionLineJsons)"
+    v-if="isLoading && isEmpty(fundingSubmissionLineJsons)"
+    class="d-flex justify-center mt-10"
+  >
+    <v-progress-circular indeterminate />
+  </div>
+  <div
+    v-else-if="!isLoading && isEmpty(fundingSubmissionLineJsons)"
     class="ma-5"
   >
     <p>There are currently no worksheets for {{ fiscalYear }}.</p>
