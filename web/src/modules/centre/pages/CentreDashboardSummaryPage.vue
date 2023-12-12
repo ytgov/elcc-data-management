@@ -15,13 +15,23 @@
       >
         Reconciliation
       </v-tab>
-      <v-tab :to="{ name: 'CentreDashboard-SummaryTab-WorksheetsTab' }"> Worksheets </v-tab>
       <v-tab
         :to="{
-          name: 'CentreDashboard-SummaryTab-PaymentsTab',
+          name: 'CentreDashboardSummaryWorksheetsPage',
           params: {
             centreId,
-            // fiscalYear, // TODO: support fiscal year as param
+            fiscalYearSlug,
+          },
+        }"
+      >
+        Worksheets
+      </v-tab>
+      <v-tab
+        :to="{
+          name: 'CentreDashboardSummaryPaymentsPage',
+          params: {
+            centreId,
+            fiscalYearSlug,
           },
         }"
       >
@@ -34,8 +44,6 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue"
-
 defineProps({
   centreId: {
     type: String,

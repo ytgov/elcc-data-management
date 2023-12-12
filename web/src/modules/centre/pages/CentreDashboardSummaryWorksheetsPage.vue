@@ -189,24 +189,28 @@
 <script lang="ts">
 import { mapActions, mapState } from "pinia"
 
-import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 import { useCentreStore } from "../store"
 
 export default {
-  name: "WorksheetSummry",
+  name: "CentreDashboardSummaryWorksheetsPage.vue",
   data: () => ({}),
   props: {
     centreId: {
       type: Number,
       required: true,
     },
+    fiscalYearSlug: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
     ...mapState(useCentreStore, ["worksheets"]),
-    ...mapState(useSubmissionLinesStore, ["currentFiscalYear"]),
-
+    fiscalYear() {
+      return this.fiscalYearSlug.replace("-", "/")
+    },
     yearWorksheets() {
-      const t = this.worksheets.filter((w) => w.fiscalYear == this.currentFiscalYear)
+      const t = this.worksheets.filter((w) => w.fiscalYear == this.fiscalYear)
       return t
     },
     allSheets() {

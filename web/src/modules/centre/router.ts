@@ -46,17 +46,23 @@ const routes: RouteRecordRaw[] = [
               },
               {
                 path: "worksheets",
-                name: "CentreDashboard-SummaryTab-WorksheetsTab",
-                component: () => import("./components/WorksheetSummary.vue"),
+                name: "CentreDashboardSummaryWorksheetsPage",
+                component: () =>
+                  import("@/modules/centre/pages/CentreDashboardSummaryWorksheetsPage.vue"),
                 props: (route) => ({
                   centreId: parseInt(route.params.centreId as string),
+                  fiscalYearSlug: route.params.fiscalYearSlug,
                 }),
               },
               {
                 path: "payments",
-                name: "CentreDashboard-SummaryTab-PaymentsTab",
-                component: () => import("./components/PaymentsTable.vue"),
-                props: true,
+                name: "CentreDashboardSummaryPaymentsPage",
+                component: () =>
+                  import("@/modules/centre/pages/CentreDashboardSummaryPaymentsPage.vue"),
+                props: (route) => ({
+                  centreId: parseInt(route.params.centreId as string),
+                  fiscalYearSlug: route.params.fiscalYearSlug,
+                }),
               },
             ],
           },

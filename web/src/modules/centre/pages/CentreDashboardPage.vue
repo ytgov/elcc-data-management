@@ -23,7 +23,7 @@
 
   <div class="float-right">
     <FiscalYearSelect
-      v-model="fiscalYear"
+      :model-value="fiscalYear"
       label="Fiscal year"
       class="float-right"
       style="width: 200px"
@@ -154,7 +154,7 @@
           <v-tab
             :to="{
               name: 'CentreDashboardSummaryPage',
-              params: { centreId },
+              params: { centreId, fiscalYearSlug },
             }"
           >
             Summary
@@ -162,7 +162,7 @@
           <v-tab
             :to="{
               name: 'CentreDashboard-WorksheetsTab',
-              params: { centreId },
+              params: { centreId, fiscalYearSlug },
             }"
           >
             Worksheets
@@ -170,7 +170,7 @@
           <v-tab
             :to="{
               name: 'CentreDashboardEmployeesPage',
-              params: { centreId },
+              params: { centreId, fiscalYearSlug },
             }"
           >
             Employees
