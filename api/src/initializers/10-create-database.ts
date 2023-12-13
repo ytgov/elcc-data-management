@@ -11,8 +11,13 @@ async function databaseExists(db: Sequelize, databaseName: string): Promise<bool
 }
 
 async function createDatabase(): Promise<void> {
-  if (NODE_ENV === "production") {
-    console.info("Skipping database creation initializer in production")
+  if (
+    NODE_ENV === "production" &&
+    process.env.PRODUCTION_DATABASE_SA_MASTER_CREDS_AVAILABLE !== "true"
+  ) {
+    console.info(
+      "Skipping database creation initializer because production database sa:master credentials are not available."
+    )
     return
   }
 

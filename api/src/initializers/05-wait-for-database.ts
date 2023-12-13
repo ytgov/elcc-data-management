@@ -35,7 +35,13 @@ export async function waitForDatabase({
 } = {}): Promise<void> {
   let username: string
   let database: string
-  if (NODE_ENV === "production") {
+  if (
+    NODE_ENV === "production" &&
+    process.env.PRODUCTION_DATABASE_SA_MASTER_CREDS_AVAILABLE !== "true"
+  ) {
+    console.info(
+      "Falling back to local database credentials because production database sa:master credentials are not available."
+    )
     username = DB_USER
     database = DB_NAME
   } else {
