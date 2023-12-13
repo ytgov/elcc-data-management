@@ -67,7 +67,7 @@ async function fetchFiscalPeriods(fiscalYear: string, month: string) {
       },
     })
 
-    if (newFiscalPeriods.length === 0) {
+    if (isEmpty(newFiscalPeriods)) {
       throw new Error(`No fiscal periods found for ${fiscalYear} ${month}`)
     } else if (newFiscalPeriods.length > 1) {
       throw new Error(`Multiple fiscal periods found for ${fiscalYear} ${month}`)
