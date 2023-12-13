@@ -128,6 +128,12 @@ EmployeeBenefit.init(
   },
   {
     sequelize,
+    indexes: [
+      {
+        unique: true,
+        fields: ["centre_id", "fiscal_period_id"], // not sure if these need to be snake_case?
+      },
+    ],
   }
 )
 
