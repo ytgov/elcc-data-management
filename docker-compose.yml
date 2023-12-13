@@ -5,6 +5,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
+      PRODUCTION_DATABASE_SA_MASTER_CREDS_AVAILABLE: "true"
     env_file:
       - .env
     ports:
