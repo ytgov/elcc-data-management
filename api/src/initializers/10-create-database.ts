@@ -1,18 +1,7 @@
 import { DB_NAME, DB_HOST, DB_PASS, DB_PORT, NODE_ENV } from "@/config"
 import { QueryTypes, Sequelize } from "sequelize"
 
-const db = new Sequelize({
-  dialect: "mssql",
-  username: "sa", // default user that should always exist
-  database: "master", // default database that should always exist
-  password: DB_PASS,
-  host: DB_HOST,
-  port: DB_PORT,
-  schema: "dbo",
-  logging: NODE_ENV === "development" ? console.log : false,
-})
-
-async function databaseExists(databaseName: string): Promise<boolean> {
+async function databaseExists(db: Sequelize, databaseName: string): Promise<boolean> {
   const result = await db.query("SELECT 1 FROM sys.databases WHERE name = ?", {
     type: QueryTypes.SELECT,
     replacements: [databaseName],
@@ -22,7 +11,23 @@ async function databaseExists(databaseName: string): Promise<boolean> {
 }
 
 async function createDatabase(): Promise<void> {
-  if (await databaseExists(DB_NAME)) return
+  if (NODE_ENV === "production") {
+    console.info("Skipping database creation initializer in production")
+    return
+  }
+
+  const db = new Sequelize({
+    dialect: "mssql",
+    username: "sa", // default user that should always exist
+    database: "master", // default database that should always exist
+    password: DB_PASS,
+    host: DB_HOST,
+    port: DB_PORT,
+    schema: "dbo",
+    logging: NODE_ENV === "development" ? console.log : false,
+  })
+
+  if (await databaseExists(db, DB_NAME)) return
 
   console.log(`Database ${DB_NAME} does not exist: creating...`)
   await db.query(`CREATE DATABASE ${DB_NAME}`, { raw: true }).catch((error) => {
