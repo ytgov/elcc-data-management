@@ -2,6 +2,7 @@ import { Router, type Request, type Response } from "express"
 
 import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 import {
+  EmployeeBenefitsController,
   FiscalPeriodsController,
   FundingSubmissionLineJsonsController,
   PaymentsController,
@@ -32,7 +33,18 @@ apiRouter.delete(
   "/api/funding-submission-line-jsons/:fundingSubmissionLineJsonId",
   FundingSubmissionLineJsonsController.destroy
 )
+
 apiRouter.get("/api/fiscal-periods", FiscalPeriodsController.index)
+
+apiRouter
+  .route("/api/employee-benefits")
+  .get(EmployeeBenefitsController.index)
+  .post(EmployeeBenefitsController.create)
+apiRouter
+  .route("/api/employee-benefits/:employeeBenefitId")
+  .get(EmployeeBenefitsController.show)
+  .patch(EmployeeBenefitsController.update)
+  .delete(EmployeeBenefitsController.destroy)
 
 apiRouter.use("/api", (req: Request, res: Response) => {
   return res.status(404).json({ error: `Api endpoint "${req.originalUrl}" not found` })

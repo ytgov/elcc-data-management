@@ -76,20 +76,7 @@
 <script lang="ts" setup>
 import { ref } from "vue"
 
-type EmployeeBenefit = {
-  id: number
-  centreId: number
-  fiscalPeriodId: number
-  grossPayrollMonthlyActual: number
-  grossPayrollMonthlyEstimated: number
-  costCapPercentage: number
-  employeeCostActual: number
-  employeeCostEstimated: number
-  employerCostActual: number
-  employerCostEstimated: number
-  createdAt: Date
-  updatedAt: Date
-}
+import { EmployeeBenefit } from "@/api/employee-benefits-api"
 
 defineProps({
   centreId: {
