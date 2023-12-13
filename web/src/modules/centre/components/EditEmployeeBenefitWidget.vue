@@ -79,7 +79,7 @@ import { ref } from "vue"
 type EmployeeBenefit = {
   id: number
   centreId: number
-  fislcalPeriodId: number
+  fiscalPeriodId: number
   grossPayrollMonthlyActual: number
   grossPayrollMonthlyEstimated: number
   costCapPercentage: number
@@ -105,7 +105,7 @@ defineProps({
 const fakeDate = {
   id: 979,
   centreId: 33,
-  fislcalPeriodId: 12,
+  fiscalPeriodId: 12,
   grossPayrollMonthlyActual: 6466,
   grossPayrollMonthlyEstimated: 4015,
   costCapPercentage: 0.08,
