@@ -6,9 +6,28 @@ import { PROFILE_URL, USERS_URL } from "@/urls"
 
 const m = useNotificationStore()
 
+export type Role = {
+  id: number
+  userId: number
+  role: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type User = {
+  id: number
+  email: string
+  firstName: string
+  lastName: string
+  displayName: string
+  isAdmin: boolean
+  status: string
+  roles: Role[]
+}
+
 interface AdminState {
-  users: AppUser[]
-  selectedUser: AppUser | undefined
+  users: User[]
+  selectedUser: User | undefined
   isLoading: boolean
 }
 
@@ -70,12 +89,3 @@ export const useUserAdminStore = defineStore("userAdmin", {
     },
   },
 })
-
-export interface AppUser {
-  email: string
-  firstName: string
-  lastName: string
-  displayName: string
-  isAdmin: boolean
-  status: string
-}
