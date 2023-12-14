@@ -1,5 +1,4 @@
 export * from "./api-router"
-export * from "./centre-funding-router"
 export * from "./centre-router"
 export * from "./funding-period-router"
 export * from "./submission-line-router"
