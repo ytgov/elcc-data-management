@@ -3,9 +3,9 @@
     <thead>
       <tr>
         <th></th>
-        <th class="text-left">Est Total</th>
+        <th class="text-left">Est. Total</th>
         <th></th>
-        <th class="text-left">Act Total</th>
+        <th class="text-left">Act. Total</th>
       </tr>
     </thead>
     <tbody v-if="employeeBenefit !== undefined">
