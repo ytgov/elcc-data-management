@@ -3,6 +3,7 @@ import { Router, type Request, type Response } from "express"
 import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 import {
   EmployeeBenefitsController,
+  EmployeeWageTiersController,
   FiscalPeriodsController,
   FundingSubmissionLineJsonsController,
   PaymentsController,
@@ -42,6 +43,8 @@ apiRouter
   .get(EmployeeBenefitsController.show)
   .patch(EmployeeBenefitsController.update)
   .delete(EmployeeBenefitsController.destroy)
+
+apiRouter.route("/api/employee-wage-tiers").get(EmployeeWageTiersController.index)
 
 apiRouter
   .route("/api/wage-enhancements")
