@@ -8,17 +8,17 @@ import {
   ForeignKey,
   InferAttributes,
   InferCreationAttributes,
-  Model,
   NonAttribute,
 } from "sequelize"
 
 import sequelize from "@/db/db-client"
 
+import BaseModel from "@/models/base-model"
 import Centre from "@/models/centre"
 import FundingLineValue from "@/models/funding-line-value"
 
 // TODO: consider renaming this to MonthlyWorksheet?
-export class FundingSubmissionLineJson extends Model<
+export class FundingSubmissionLineJson extends BaseModel<
   InferAttributes<FundingSubmissionLineJson>,
   InferCreationAttributes<FundingSubmissionLineJson>
 > {
