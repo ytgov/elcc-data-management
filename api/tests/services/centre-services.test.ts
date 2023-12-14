@@ -1,6 +1,7 @@
 import { Transaction } from "sequelize"
 
-import { Centre, LogOperationTypes } from "@/models"
+import { Centre } from "@/models"
+import { LogOperationTypes } from "@/models/log"
 import { CentreServices } from "@/services"
 
 import { LogServices } from "@/services/log-services" // import separately for easier mocking.

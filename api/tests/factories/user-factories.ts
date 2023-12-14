@@ -1,7 +1,8 @@
 import { Factory } from "fishery"
 import { faker } from "@faker-js/faker"
 
-import { User, UserStatus } from "@/models"
+import { User } from "@/models"
+import { UserStatus } from "@/models/user"
 
 export const userFactory = Factory.define<User>(({ sequence, onCreate }) => {
   onCreate((user) => user.save())
