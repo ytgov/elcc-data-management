@@ -40,7 +40,31 @@
         </td>
       </tr>
       <tr>
-        <td>{{ employeeBenefit.costCapPercentage * 100 }}% of above</td>
+        <td>
+          {{ costCapPercentage }}% of above
+          <!-- TODO: clean up this code -->
+          <v-btn
+            aria-label="show/hide cost cap percentage input"
+            size="x-small"
+            icon="mdi-pencil"
+            density="comfortable"
+            color="yg-blue"
+            :variant="isEditingCostCapPercentage ? 'outlined' : 'tonal'"
+            @click="isEditingCostCapPercentage = !isEditingCostCapPercentage"
+          >
+          </v-btn>
+          <v-text-field
+            v-if="isEditingCostCapPercentage"
+            :model-value="costCapPercentage"
+            aria-label="Cost Cap Percentage"
+            color="primary"
+            density="compact"
+            type="number"
+            variant="plain"
+            hide-details
+            @update:model-value="updateCostCapPercentage"
+          />
+        </td>
         <td>
           <v-text-field
             :model-value="formatMoney(monthlyBenefitCostCapEstimated)"
@@ -135,8 +159,8 @@
               >
             </template>
             <span class="text-white">
-              Totaling the lesser of either {{ employeeBenefit.costCapPercentage * 100 }}% of Gross
-              Payroll or Employee Cost plus Employer Cost
+              Totaling the lesser of either {{ costCapPercentage }}% of Gross Payroll or Employee
+              Cost plus Employer Cost
             </span>
           </v-tooltip>
         </td>
@@ -186,7 +210,7 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
-import { isEmpty, isUndefined } from "lodash"
+import { isEmpty, isUndefined, round } from "lodash"
 
 import employeeBenefitsApi, { type EmployeeBenefit } from "@/api/employee-benefits-api"
 import { useNotificationStore } from "@/store/NotificationStore"
@@ -211,6 +235,26 @@ const props = defineProps({
 
 const employeeBenefit = ref<EmployeeBenefit | NonPersistedEmployeeBenefit>()
 const isLoading = ref(true)
+const isEditingCostCapPercentage = ref(false)
+
+// NOTE: if you type 8.215, it will round to 8.22
+// successive presses of 5 or higher will continue increasing the value
+const costCapPercentage = computed(() => {
+  if (isUndefined(employeeBenefit.value)) return 0
+
+  return round(employeeBenefit.value.costCapPercentage * 100, 2)
+})
+function updateCostCapPercentage(newValue: any) {
+  if (isUndefined(employeeBenefit.value)) return
+
+  const newValueNumber = parseFloat(newValue)
+  if (isNaN(newValueNumber)) {
+    employeeBenefit.value.costCapPercentage = 0
+  } else {
+    employeeBenefit.value.costCapPercentage = round(newValueNumber / 100, 4)
+  }
+}
+
 const monthlyBenefitCostCapEstimated = computed(() => {
   if (isUndefined(employeeBenefit.value)) return 0
 
