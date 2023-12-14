@@ -19,7 +19,9 @@
             density="compact"
             variant="underlined"
             hide-details
-            @update:model-value="updateEmployeeBenefit('grossPayrollMonthlyEstimated', $event)"
+            @update:model-value="
+              updateEmployeeBenefitCurrencyValue('grossPayrollMonthlyEstimated', $event)
+            "
           />
         </td>
         <td></td>
@@ -31,7 +33,9 @@
             density="compact"
             variant="underlined"
             hide-details
-            @update:model-value="updateEmployeeBenefit('grossPayrollMonthlyActual', $event)"
+            @update:model-value="
+              updateEmployeeBenefitCurrencyValue('grossPayrollMonthlyActual', $event)
+            "
           />
         </td>
       </tr>
@@ -39,8 +43,8 @@
         <td>{{ employeeBenefit.costCapPercentage * 100 }}% of above</td>
         <td>
           <v-text-field
-            :model-value="formatMoney(estimatedMonthlyBenefitCostCap)"
-            aria-label="Estimated Monthly Benefit Cost Cap"
+            :model-value="formatMoney(monthlyBenefitCostCapEstimated)"
+            aria-label="Monthly Benefit Cost Cap Estimated"
             color="primary"
             density="compact"
             tabindex="-1"
@@ -52,8 +56,8 @@
         <td></td>
         <td>
           <v-text-field
-            :model-value="formatMoney(actualMonthlyBenefitCostCap)"
-            aria-label="Actual Monthly Benefit Cost Cap"
+            :model-value="formatMoney(monthlyBenefitCostCapActual)"
+            aria-label="Monthly Benefit Cost Cap Actual"
             color="primary"
             density="compact"
             tabindex="-1"
@@ -66,41 +70,99 @@
       <tr>
         <td>Employee Cost</td>
         <td>
-          <v-text-field v-model="employeeBenefit.employeeCostEstimated" />
+          <CurrencyInput
+            :model-value="employeeBenefit.employeeCostEstimated"
+            aria-label="Employee Cost Estimated"
+            color="primary"
+            density="compact"
+            variant="underlined"
+            hide-details
+            @update:model-value="
+              updateEmployeeBenefitCurrencyValue('employeeCostEstimated', $event)
+            "
+          />
         </td>
         <td></td>
         <td>
-          <v-text-field v-model="employeeBenefit.employeeCostActual" />
+          <CurrencyInput
+            :model-value="employeeBenefit.employeeCostActual"
+            aria-label="Employee Cost Actual"
+            color="primary"
+            density="compact"
+            variant="underlined"
+            hide-details
+            @update:model-value="updateEmployeeBenefitCurrencyValue('employeeCostActual', $event)"
+          />
         </td>
       </tr>
       <tr>
         <td>Employer Cost</td>
         <td>
-          <v-text-field v-model="employeeBenefit.employerCostEstimated" />
+          <CurrencyInput
+            :model-value="employeeBenefit.employerCostEstimated"
+            aria-label="Employer Cost Estimated"
+            color="primary"
+            density="compact"
+            variant="underlined"
+            hide-details
+            @update:model-value="
+              updateEmployeeBenefitCurrencyValue('employerCostEstimated', $event)
+            "
+          />
         </td>
         <td></td>
         <td>
-          <v-text-field v-model="employeeBenefit.employerCostActual" />
+          <CurrencyInput
+            :model-value="employeeBenefit.employerCostActual"
+            aria-label="Employer Cost Actual"
+            color="primary"
+            density="compact"
+            variant="underlined"
+            hide-details
+            @update:model-value="updateEmployeeBenefitCurrencyValue('employerCostActual', $event)"
+          />
         </td>
       </tr>
       <tr>
         <td class="text-uppercase">Section Total</td>
         <td>
-          {{
-            Math.min(
-              employeeBenefit.employeeCostEstimated + employeeBenefit.employerCostEstimated,
-              employeeBenefit.grossPayrollMonthlyEstimated * employeeBenefit.costCapPercentage
-            )
-          }}
+          <v-text-field
+            :model-value="formatMoney(minimumTotalCostEstimated)"
+            aria-label="Minimum Total Cost Estimated"
+            color="primary"
+            density="compact"
+            tabindex="-1"
+            variant="plain"
+            hide-details
+            readonly
+          />
         </td>
         <td></td>
         <td>
-          {{
-            Math.min(
-              employeeBenefit.employeeCostActual + employeeBenefit.employerCostActual,
-              employeeBenefit.grossPayrollMonthlyActual * employeeBenefit.costCapPercentage
-            )
-          }}
+          <v-text-field
+            :model-value="formatMoney(minimumTotalCostActual)"
+            aria-label="Minimum Total Cost Actual"
+            color="primary"
+            density="compact"
+            tabindex="-1"
+            variant="plain"
+            hide-details
+            readonly
+          />
+        </td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="d-flex justify-end pt-4">
+          <v-btn
+            color="success"
+            :loading="isLoading"
+            @click="save"
+          >
+            Save
+          </v-btn>
         </td>
       </tr>
     </tbody>
@@ -134,17 +196,33 @@ const props = defineProps({
 
 const employeeBenefit = ref<EmployeeBenefit | NonPersistedEmployeeBenefit>()
 const isLoading = ref(true)
-const estimatedMonthlyBenefitCostCap = computed(() => {
+const monthlyBenefitCostCapEstimated = computed(() => {
   if (isUndefined(employeeBenefit.value)) return 0
 
   return (
     employeeBenefit.value.grossPayrollMonthlyEstimated * employeeBenefit.value.costCapPercentage
   )
 })
-const actualMonthlyBenefitCostCap = computed(() => {
+const monthlyBenefitCostCapActual = computed(() => {
   if (isUndefined(employeeBenefit.value)) return 0
 
   return employeeBenefit.value.grossPayrollMonthlyActual * employeeBenefit.value.costCapPercentage
+})
+const minimumTotalCostEstimated = computed(() => {
+  if (isUndefined(employeeBenefit.value)) return 0
+
+  return Math.min(
+    employeeBenefit.value.employeeCostEstimated + employeeBenefit.value.employerCostEstimated,
+    monthlyBenefitCostCapEstimated.value
+  )
+})
+const minimumTotalCostActual = computed(() => {
+  if (isUndefined(employeeBenefit.value)) return 0
+
+  return Math.min(
+    employeeBenefit.value.employeeCostActual + employeeBenefit.value.employerCostActual,
+    monthlyBenefitCostCapActual.value
+  )
 })
 
 function buildEmployeeBenefit(attributes: Partial<EmployeeBenefit>): NonPersistedEmployeeBenefit {
@@ -199,7 +277,7 @@ watch<[number, number], true>(
   { immediate: true }
 )
 
-function updateEmployeeBenefit(
+function updateEmployeeBenefitCurrencyValue(
   attribute: keyof (EmployeeBenefit | NonPersistedEmployeeBenefit),
   newValue: any
 ) {
@@ -210,6 +288,68 @@ function updateEmployeeBenefit(
   } else {
     const newValueNumber = parseFloat(newValue)
     employeeBenefit.value[attribute] = newValueNumber
+  }
+}
+
+function isPersisted(
+  employeeBenefit: EmployeeBenefit | NonPersistedEmployeeBenefit
+): employeeBenefit is EmployeeBenefit {
+  return "id" in employeeBenefit && !isUndefined(employeeBenefit.id)
+}
+
+async function save() {
+  if (isUndefined(employeeBenefit.value)) return
+
+  if (isPersisted(employeeBenefit.value)) {
+    await update(employeeBenefit.value.id, employeeBenefit.value)
+  } else {
+    await create(employeeBenefit.value)
+  }
+}
+
+async function update(employeeBenefitId: number, employeeBenefitAttributes: EmployeeBenefit) {
+  isLoading.value = true
+  try {
+    const { employeeBenefit: newEmployeeBenefit } = await employeeBenefitsApi.update(
+      employeeBenefitId,
+      employeeBenefitAttributes
+    )
+
+    employeeBenefit.value = newEmployeeBenefit
+    notificationStore.notify({
+      text: "Employee benefit saved",
+      variant: "success",
+    })
+  } catch (error) {
+    console.error(error)
+    notificationStore.notify({
+      text: `Failed to save employee benefit: ${error}`,
+      variant: "error",
+    })
+  } finally {
+    isLoading.value = false
+  }
+}
+
+async function create(employeeBenefitAttributes: NonPersistedEmployeeBenefit) {
+  isLoading.value = true
+  try {
+    const { employeeBenefit: newEmployeeBenefit } =
+      await employeeBenefitsApi.create(employeeBenefitAttributes)
+
+    employeeBenefit.value = newEmployeeBenefit
+    notificationStore.notify({
+      text: "Employee benefit created",
+      variant: "success",
+    })
+  } catch (error) {
+    console.error(error)
+    notificationStore.notify({
+      text: `Failed to create employee benefit: ${error}`,
+      variant: "error",
+    })
+  } finally {
+    isLoading.value = false
   }
 }
 </script>
