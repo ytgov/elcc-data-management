@@ -1,7 +1,8 @@
 import { CreationAttributes } from "sequelize"
 
 import db from "@/db/db-client"
-import { Centre, LogOperationTypes, User } from "@/models"
+import { Centre, User } from "@/models"
+import { LogOperationTypes } from "@/models/log"
 
 import BaseService from "@/services/base-service"
 import LogServices from "@/services/log-services"

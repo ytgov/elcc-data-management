@@ -4,7 +4,8 @@ import jwksRsa from "jwks-rsa"
 import { isNil } from "lodash"
 
 import { AUTH0_DOMAIN, AUTH0_AUDIENCE } from "@/config"
-import { User, UserStatus } from "@/models"
+import { User } from "@/models"
+import { UserStatus } from "@/models/user"
 import auth0Integration from "@/integrations/auth0-integration"
 
 export const checkJwt = jwt({
