@@ -7,6 +7,7 @@ import User from "@/models/user"
 import UserRole from "@/models/user-role"
 import Payment from "@/models/payment"
 import EmployeeBenefit from "@/models/employee-benefit"
+import { EmployeeWageTier } from "@/models/employee-wage-tier"
 
 // Order matters here, though may be somewhat flexible
 Centre.establishAssociations()
@@ -16,6 +17,7 @@ User.establishAssociations()
 UserRole.establishAssociations()
 Payment.establishAssociations()
 EmployeeBenefit.establishAssociations()
+EmployeeWageTier.establishAssociations()
 
 // Alphabetically - order does not matter
 // TODO: swap to named exports see https://github.com/icefoganalytics/travel-authorization/pull/126
@@ -30,7 +32,7 @@ export * from "@/models/log"
 export * from "@/models/payment"
 export * from "@/models/user-role"
 export * from "@/models/user"
-export { EmployeeBenefit }
+export { EmployeeBenefit, EmployeeWageTier }
 
 // special db instance that has access to all models.
 export default db
