@@ -58,6 +58,12 @@ FiscalPeriod.init(
   },
   {
     sequelize,
+    indexes: [
+      {
+        unique: true,
+        fields: ["fiscal_year", "month"], // not sure if these need to be snake_case?
+      },
+    ],
   }
 )
 

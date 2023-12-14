@@ -1,6 +1,6 @@
 import { sortBy, uniq, pick, omit } from "lodash"
 import moment from "moment"
-import { FundingSubmissionLineJson } from "@/models"
+import { FundingLineValue, FundingSubmissionLineJson } from "@/models"
 
 import BaseSerializer from "@/serializers/base-serializer"
 
@@ -45,7 +45,7 @@ export class FundingSubmissionLineJsonSerializer extends BaseSerializer<FundingS
   // It looks like we might be missing a database model for a worksheet?
   // Or maybe a model for a line entry?
   static serializeWorksheetsView(worksheets: FundingSubmissionLineJson[]) {
-    const groups = new Array<any>()
+    const groups = []
     const years = uniq(worksheets.map((m) => m.fiscalYear))
 
     for (const fiscalYear of years) {
@@ -60,12 +60,18 @@ export class FundingSubmissionLineJsonSerializer extends BaseSerializer<FundingS
         const monthSheets = yearSheets.filter((m) => month == m.dateName)[0]
 
         const sections = uniq(monthSheets.lines.map((w) => w.sectionName))
-        const monthRow = {
+        const monthRow: {
+          id: number
+          fiscalYear: string
+          month: string
+          year: string
+          sections: { sectionName: string; lines: FundingLineValue[] }[]
+        } = {
           id: monthSheets.id,
           fiscalYear,
           month,
           year: moment.utc(monthSheets.dateStart).format("YYYY"),
-          sections: new Array<any>(),
+          sections: [],
         }
 
         for (const section of sections) {

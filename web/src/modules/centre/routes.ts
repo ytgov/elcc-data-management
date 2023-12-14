@@ -94,16 +94,24 @@ const routes: RouteRecordRaw[] = [
           {
             path: "employees",
             name: "CentreDashboardEmployeesPage",
-            component: () => import("./pages/CentreDashboardEmployeesPage.vue"),
+            component: () => import("@/modules/centre/pages/CentreDashboardEmployeesPage.vue"),
             props: (route) => ({
               centreId: parseInt(route.params.centreId as string),
+              fiscalYearSlug: route.params.fiscalYearSlug,
             }),
-            // children: [
-            //   {
-            //     path: ":month",
-            //     name: "CentreDashboardEmployeesMonthlyWorksheetPage",
-            //   },
-            // ],
+            children: [
+              {
+                path: ":month",
+                name: "CentreDashboardEmployeesMonthlyWorksheetPage",
+                component: () =>
+                  import("@/modules/centre/pages/CentreDashboardEmployeesMonthlyWorksheetPage.vue"),
+                props: (route) => ({
+                  centreId: parseInt(route.params.centreId as string),
+                  fiscalYearSlug: route.params.fiscalYearSlug,
+                  month: route.params.month,
+                }),
+              },
+            ],
           },
         ],
       },

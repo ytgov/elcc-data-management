@@ -23,7 +23,7 @@ export class EmployeeBenefit extends Model<
 > {
   declare id: CreationOptional<number>
   declare centreId: ForeignKey<Centre["id"]>
-  declare fislcalPeriodId: ForeignKey<FiscalPeriod["id"]>
+  declare fiscalPeriodId: ForeignKey<FiscalPeriod["id"]>
   declare grossPayrollMonthlyActual: number
   declare grossPayrollMonthlyEstimated: number
   declare costCapPercentage: number
@@ -79,7 +79,7 @@ EmployeeBenefit.init(
         key: "id",
       },
     },
-    fislcalPeriodId: {
+    fiscalPeriodId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
@@ -128,6 +128,12 @@ EmployeeBenefit.init(
   },
   {
     sequelize,
+    indexes: [
+      {
+        unique: true,
+        fields: ["centre_id", "fiscal_period_id"], // not sure if these need to be snake_case?
+      },
+    ],
   }
 )
 
