@@ -11,30 +11,26 @@ import {
 export const apiRouter = Router()
 
 // TODO: move all routing logic to this file, and move all route actions into controllers
-apiRouter.use("/api", checkJwt)
-apiRouter.use("/api", autheticateAndLoadUser)
+apiRouter.use("/api", checkJwt, autheticateAndLoadUser)
 
-apiRouter.get("/api/payments", PaymentsController.index)
-apiRouter.post("/api/payments", PaymentsController.create)
-apiRouter.patch("/api/payments/:paymentId", PaymentsController.update)
-apiRouter.delete("/api/payments/:paymentId", PaymentsController.destroy)
+apiRouter.route("/api/payments").get(PaymentsController.index).post(PaymentsController.create)
+apiRouter
+  .route("/api/payments/:paymentId")
+  .get(PaymentsController.show)
+  .patch(PaymentsController.update)
+  .delete(PaymentsController.destroy)
 
-apiRouter.get("/api/funding-submission-line-jsons", FundingSubmissionLineJsonsController.index)
-apiRouter.post("/api/funding-submission-line-jsons", FundingSubmissionLineJsonsController.create)
-apiRouter.get(
-  "/api/funding-submission-line-jsons/:fundingSubmissionLineJsonId",
-  FundingSubmissionLineJsonsController.show
-)
-apiRouter.patch(
-  "/api/funding-submission-line-jsons/:fundingSubmissionLineJsonId",
-  FundingSubmissionLineJsonsController.update
-)
-apiRouter.delete(
-  "/api/funding-submission-line-jsons/:fundingSubmissionLineJsonId",
-  FundingSubmissionLineJsonsController.destroy
-)
+apiRouter
+  .route("/api/funding-submission-line-jsons")
+  .get(FundingSubmissionLineJsonsController.index)
+  .post(FundingSubmissionLineJsonsController.create)
+apiRouter
+  .route("/api/funding-submission-line-jsons/:fundingSubmissionLineJsonId")
+  .get(FundingSubmissionLineJsonsController.show)
+  .patch(FundingSubmissionLineJsonsController.update)
+  .delete(FundingSubmissionLineJsonsController.destroy)
 
-apiRouter.get("/api/fiscal-periods", FiscalPeriodsController.index)
+apiRouter.route("/api/fiscal-periods").get(FiscalPeriodsController.index)
 
 apiRouter
   .route("/api/employee-benefits")

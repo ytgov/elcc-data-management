@@ -11,7 +11,6 @@ export class EmployeeBenefitsController extends BaseController {
     const where = this.query.where as WhereOptions<EmployeeBenefit>
     return EmployeeBenefit.findAll({
       where,
-      order: ["dateStart"],
     })
       .then((employeeBenefits) => {
         const serializedEmployeeBenefits = EmployeeBenefitSerializer.asTable(employeeBenefits)

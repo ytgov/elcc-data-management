@@ -17,12 +17,11 @@ export type EmployeeBenefit = {
 
 export type Params = {
   where?: {
-    centreId?: number
-    fiscalPeriodId?: string
+    centreId?: EmployeeBenefit["centreId"]
+    fiscalPeriodId?: EmployeeBenefit["fiscalPeriodId"]
   }
   page?: number
   perPage?: number
-  otherParams?: any
 }
 
 export const employeeBenefitsApi = {
