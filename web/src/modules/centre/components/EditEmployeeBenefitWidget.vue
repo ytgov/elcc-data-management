@@ -124,7 +124,22 @@
         </td>
       </tr>
       <tr>
-        <td class="text-uppercase">Section Total</td>
+        <td class="text-uppercase d-flex align-center">
+          Section Total
+          <v-tooltip bottom>
+            <template #activator="{ props }">
+              <v-icon
+                class="ml-1"
+                v-bind="props"
+                >mdi-help-circle-outline</v-icon
+              >
+            </template>
+            <span class="text-white">
+              Totaling the lesser of either {{ employeeBenefit.costCapPercentage * 100 }}% of Gross
+              Payroll or Employee Cost plus Employer Cost
+            </span>
+          </v-tooltip>
+        </td>
         <td>
           <v-text-field
             :model-value="formatMoney(minimumTotalCostEstimated)"
