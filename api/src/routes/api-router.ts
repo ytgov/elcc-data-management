@@ -6,6 +6,7 @@ import {
   FiscalPeriodsController,
   FundingSubmissionLineJsonsController,
   PaymentsController,
+  WageEnhancementsController,
 } from "@/controllers"
 
 export const apiRouter = Router()
@@ -41,6 +42,16 @@ apiRouter
   .get(EmployeeBenefitsController.show)
   .patch(EmployeeBenefitsController.update)
   .delete(EmployeeBenefitsController.destroy)
+
+apiRouter
+  .route("/api/wage-enhancements")
+  .get(WageEnhancementsController.index)
+  .post(WageEnhancementsController.create)
+apiRouter
+  .route("/api/wage-enhancements/:wageEnhancementId")
+  .get(WageEnhancementsController.show)
+  .patch(WageEnhancementsController.update)
+  .delete(WageEnhancementsController.destroy)
 
 apiRouter.use("/api", (req: Request, res: Response) => {
   return res.status(404).json({ error: `Api endpoint "${req.originalUrl}" not found` })
