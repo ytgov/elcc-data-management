@@ -6,6 +6,16 @@ import {
   CreationOptional,
   DataTypes,
   ForeignKey,
+  HasManyAddAssociationMixin,
+  HasManyAddAssociationsMixin,
+  HasManyCountAssociationsMixin,
+  HasManyCreateAssociationMixin,
+  HasManyGetAssociationsMixin,
+  HasManyHasAssociationMixin,
+  HasManyHasAssociationsMixin,
+  HasManyRemoveAssociationMixin,
+  HasManyRemoveAssociationsMixin,
+  HasManySetAssociationsMixin,
   InferAttributes,
   InferCreationAttributes,
   NonAttribute,
@@ -14,6 +24,7 @@ import {
 import sequelize from "@/db/db-client"
 import BaseModel from "@/models/base-model"
 import FiscalPeriod from "@/models/fiscal-period"
+import WageEnhancement from "./wage-enhancement"
 
 export class EmployeeWageTier extends BaseModel<
   InferAttributes<EmployeeWageTier>,
@@ -34,15 +45,53 @@ export class EmployeeWageTier extends BaseModel<
   declare setFiscalPeriod: BelongsToSetAssociationMixin<FiscalPeriod, FiscalPeriod["id"]>
   declare createFiscalPeriod: BelongsToCreateAssociationMixin<FiscalPeriod>
 
-  declare fiscalPeriod?: NonAttribute<FiscalPeriod>
+  declare getWageEnhancements: HasManyGetAssociationsMixin<WageEnhancement>
+  declare setWageEnhancements: HasManySetAssociationsMixin<
+    WageEnhancement,
+    WageEnhancement["employeeWageTierId"]
+  >
+  declare hasWageEnhancement: HasManyHasAssociationMixin<
+    WageEnhancement,
+    WageEnhancement["employeeWageTierId"]
+  >
+  declare hasWageEnhancements: HasManyHasAssociationsMixin<
+    WageEnhancement,
+    WageEnhancement["employeeWageTierId"]
+  >
+  declare addWageEnhancement: HasManyAddAssociationMixin<
+    WageEnhancement,
+    WageEnhancement["employeeWageTierId"]
+  >
+  declare addWageEnhancements: HasManyAddAssociationsMixin<
+    WageEnhancement,
+    WageEnhancement["employeeWageTierId"]
+  >
+  declare removeWageEnhancement: HasManyRemoveAssociationMixin<
+    WageEnhancement,
+    WageEnhancement["employeeWageTierId"]
+  >
+  declare removeWageEnhancements: HasManyRemoveAssociationsMixin<
+    WageEnhancement,
+    WageEnhancement["employeeWageTierId"]
+  >
+  declare countWageEnhancements: HasManyCountAssociationsMixin
+  declare createWageEnhancement: HasManyCreateAssociationMixin<WageEnhancement>
 
+  declare fiscalPeriod?: NonAttribute<FiscalPeriod>
+  declare wageEnhancements?: NonAttribute<WageEnhancement[]>
   declare static associations: {
     fiscalPeriod: Association<EmployeeWageTier, FiscalPeriod>
+    wageEnhancements: Association<EmployeeWageTier, WageEnhancement>
   }
 
   static establishAssociations() {
     this.belongsTo(FiscalPeriod, {
       foreignKey: "fiscalPeriodId",
+    })
+    this.hasMany(WageEnhancement, {
+      sourceKey: "id",
+      foreignKey: "employeeWageTierId",
+      as: "wageEnhancements",
     })
   }
 }

@@ -8,6 +8,7 @@ import { UserRole } from "@/models/user-role"
 import { Payment } from "@/models/payment"
 import { EmployeeBenefit } from "@/models/employee-benefit"
 import { EmployeeWageTier } from "@/models/employee-wage-tier"
+import { WageEnhancement } from "@/models/wage-enhancement"
 
 // Order matters here, though may be somewhat flexible
 Centre.establishAssociations()
@@ -18,6 +19,7 @@ UserRole.establishAssociations()
 Payment.establishAssociations()
 EmployeeBenefit.establishAssociations()
 EmployeeWageTier.establishAssociations()
+WageEnhancement.establishAssociations()
 
 // Alphabetically - order does not matter
 export { FiscalPeriod } from "@/models/fiscal-period"
@@ -34,6 +36,7 @@ export {
   Payment,
   User,
   UserRole,
+  WageEnhancement,
 }
 
 // special db instance that has access to all models.
