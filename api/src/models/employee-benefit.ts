@@ -15,7 +15,6 @@ import {
 import sequelize from "@/db/db-client"
 import Centre from "./centre"
 import FiscalPeriod from "./fiscal-period"
-import FundingSubmissionLineJson from "./funding-submission-line-json"
 
 export class EmployeeBenefit extends Model<
   InferAttributes<EmployeeBenefit>,
@@ -49,8 +48,8 @@ export class EmployeeBenefit extends Model<
   declare fiscalPeriod?: NonAttribute<FiscalPeriod>
 
   declare static associations: {
-    centre: Association<FundingSubmissionLineJson, Centre>
-    fiscalPeriod: Association<FundingSubmissionLineJson, FiscalPeriod>
+    centre: Association<EmployeeBenefit, Centre>
+    fiscalPeriod: Association<EmployeeBenefit, FiscalPeriod>
   }
 
   static establishAssociations() {
