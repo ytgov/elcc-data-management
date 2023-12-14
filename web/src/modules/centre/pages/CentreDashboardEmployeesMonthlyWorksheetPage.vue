@@ -16,6 +16,17 @@
         />
       </v-col>
     </v-row>
+    <v-row>
+      <v-col>
+        <h3 class="section-header">Wage Enhancements</h3>
+
+        <EditWageEnhancementsWidget
+          v-if="fiscalPeriodId !== undefined"
+          :centre-id="props.centreId"
+          :fiscal-period-id="fiscalPeriodId"
+        />
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -28,6 +39,7 @@ import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"
 import { isEmpty } from "lodash"
 
 import EditEmployeeBenefitWidget from "@/modules/centre/components/EditEmployeeBenefitWidget.vue"
+import EditWageEnhancementsWidget from "@/modules/centre/components/EditWageEnhancementsWidget.vue"
 
 const notificationStore = useNotificationStore()
 
