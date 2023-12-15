@@ -22,7 +22,7 @@ export class WageEnhancement extends Model<
 > {
   declare id: CreationOptional<number>
   declare centreId: ForeignKey<Centre["id"]>
-  declare employeeWageTierId: number
+  declare employeeWageTierId: ForeignKey<EmployeeWageTier["id"]>
   declare employeeName: string
   declare hoursEstimated: number
   declare hoursActual: number
@@ -81,7 +81,7 @@ WageEnhancement.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "employee_wage_tiers",
+        model: "employee_wage_tiers", // use real table name here
         key: "id",
       },
     },
