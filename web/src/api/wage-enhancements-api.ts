@@ -17,7 +17,9 @@ export type WageEnhancement = {
 export type Params = {
   where?: {
     centreId?: WageEnhancement["centreId"]
-    employeeWageTierId?: WageEnhancement["employeeWageTierId"]
+    employeeWageTierId?:
+      | WageEnhancement["employeeWageTierId"]
+      | WageEnhancement["employeeWageTierId"][]
   }
 }
 
