@@ -18,7 +18,7 @@
     <tbody>
       <template
         v-for="employeeWageTier in employeeWageTiers"
-        :key="employeeWageTier.id"
+        :key="`employee-wage-tier-${employeeWageTier.id}`"
       >
         <tr class="bg-grey-lighten-2">
           <td>{{ employeeWageTier.tierLabel }}</td>
@@ -36,7 +36,7 @@
         </tr>
         <tr
           v-for="wageEnhancement in wageEnhancementsByEmployeeWageTierId[employeeWageTier.id]"
-          :key="wageEnhancement.id"
+          :key="`wage-enhancement-${wageEnhancement.id}`"
         >
           <td>
             <v-text-field
