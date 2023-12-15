@@ -1,5 +1,9 @@
 <template>
-  <v-table>
+  <v-skeleton-loader
+    type="table"
+    v-if="isEmpty(employeeWageTiers) && isEmpty(wageEnhancementsByEmployeeWageTierId) && isLoading"
+  ></v-skeleton-loader>
+  <v-table v-else>
     <thead>
       <!-- TODO: add vertical column striping bg-grey-lighten-2 -->
       <tr>
@@ -126,8 +130,7 @@
           </td>
         </tr>
       </template>
-      <tr class="sub-totals-border">
-        <!-- totals before EI, CPP, WCB -->
+      <tr class="thin-solid-black-top-border">
         <td colspan="3"></td>
         <td>
           <v-text-field
@@ -199,7 +202,7 @@
         <td></td>
       </tr>
       <!-- TODO: add total row striping bg-grey-lighten-2 -->
-      <tr class="final-total-borders">
+      <tr class="thin-solid-black-top-border">
         <td class="text-uppercase">Section Total</td>
         <td colspan="2"></td>
         <td>
@@ -229,13 +232,25 @@
         </td>
         <td></td>
       </tr>
+      <tr class="thin-double-black-top-border">
+        <td colspan="6"></td>
+        <td class="d-flex justify-end pt-4">
+          <v-btn
+            color="success"
+            :loading="isLoading"
+            @click="updateAllWageEnhancements"
+          >
+            Save
+          </v-btn>
+        </td>
+      </tr>
     </tbody>
   </v-table>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref, watch, reactive } from "vue"
-import { groupBy, keyBy, mapValues, round } from "lodash"
+import { groupBy, keyBy, mapValues, round, isEmpty } from "lodash"
 
 import employeeWageTiersApi, { type EmployeeWageTier } from "@/api/employee-wage-tiers-api"
 import wageEnhancementsApi, { type WageEnhancement } from "@/api/wage-enhancements-api"
@@ -302,6 +317,15 @@ const wageEnhancementsActualTotal = computed(
 const eiCppWcbRatePercentage = computed(() => {
   return round(EI_CPP_WCB_RATE * 100, 2)
 })
+
+watch(
+  () => props.fiscalPeriodId,
+  async () => {
+    await fetchEmployeeWageTiers()
+    await fetchWageEnhancements()
+  },
+  { immediate: true }
+)
 
 async function fetchEmployeeWageTiers() {
   isLoading.value = true
@@ -427,23 +451,35 @@ async function deleteWageEnhancement(wageEnhancementId: number) {
   }
 }
 
-watch(
-  () => props.fiscalPeriodId,
-  async () => {
-    await fetchEmployeeWageTiers()
-    await fetchWageEnhancements()
-  },
-  { immediate: true }
-)
+async function updateAllWageEnhancements() {
+  isLoading.value = true
+  try {
+    const updateWageEnhancementPromises = wageEnhancements.value.map(({ id, ...attributes }) =>
+      wageEnhancementsApi.update(id, attributes)
+    )
+    await Promise.all(updateWageEnhancementPromises)
+    notificationStore.notify({
+      text: "All wage enhancements saved",
+      variant: "success",
+    })
+  } catch (error) {
+    console.error(error)
+    notificationStore.notify({
+      text: `Failed to update all wage enhancements: ${error}`,
+      variant: "error",
+    })
+  } finally {
+    isLoading.value = false
+  }
+}
 </script>
 
 <style scoped>
-.sub-totals-border > td {
+.thin-solid-black-top-border > td {
   border-top: thin solid black;
 }
 
-.final-total-borders > td {
-  border-top: thin solid black;
-  border-bottom: 3px double black;
+.thin-double-black-top-border > td {
+  border-top: 3px double black;
 }
 </style>
