@@ -200,7 +200,7 @@
         </td>
         <td></td>
       </tr>
-      <tr class="thin-solid-black-top-border">
+      <tr class="thin-solid-black-top-border thicker-double-black-bottom-border">
         <td class="text-uppercase">Section Total</td>
         <td colspan="2"></td>
         <td>
@@ -230,20 +230,21 @@
         </td>
         <td></td>
       </tr>
-      <tr class="thin-double-black-top-border">
-        <td colspan="6"></td>
-        <td class="d-flex justify-end pt-4">
-          <v-btn
-            color="success"
-            :loading="isLoading"
-            @click="updateAllWageEnhancements"
-          >
-            Save
-          </v-btn>
-        </td>
-      </tr>
     </tbody>
   </v-table>
+  <v-container>
+    <v-row>
+      <v-col class="d-flex justify-end">
+        <v-btn
+          color="success"
+          :loading="isLoading"
+          @click="updateAllWageEnhancements"
+        >
+          Save
+        </v-btn>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script lang="ts" setup>
@@ -477,7 +478,7 @@ async function updateAllWageEnhancements() {
   border-top: thin solid black;
 }
 
-.thin-double-black-top-border > td {
-  border-top: 3px double black;
+.thicker-double-black-bottom-border > td {
+  border-bottom: 3px double black;
 }
 </style>
