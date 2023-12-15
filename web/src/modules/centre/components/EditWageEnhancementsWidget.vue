@@ -19,24 +19,20 @@
       >
         <tr class="bg-grey-lighten-2">
           <td>{{ employeeWageTier.tierLabel }}</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+          <td colspan="5"></td>
           <td class="d-flex justify-end align-center">
             <v-btn
               title="Add employee"
               icon="$plus"
               density="comfortable"
               color="yg-blue"
-              :loading="isLoadingByEmployeeWageTier.get(employeeWageTier.id)"
+              :loading="isLoadingByEmployeeWageTierId.get(employeeWageTier.id)"
               @click="createWageEnhancement(employeeWageTier.id)"
             ></v-btn>
           </td>
         </tr>
         <tr
-          v-for="wageEnhancement in wageEnhancementsByEmployeeWageTier[employeeWageTier.id]"
+          v-for="wageEnhancement in wageEnhancementsByEmployeeWageTierId[employeeWageTier.id]"
           :key="wageEnhancement.id"
         >
           <td>
@@ -48,18 +44,71 @@
               hide-details
             />
           </td>
-          <td>{{ formatMoney(employeeWageTier.wageRatePerHour) }}</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+          <td>
+            <v-text-field
+              :model-value="formatMoney(employeeWageTier.wageRatePerHour)"
+              aria-label="Wage Rate Per Hour"
+              color="primary"
+              density="compact"
+              tabindex="-1"
+              variant="plain"
+              hide-details
+              readonly
+            />
+          </td>
+          <td>
+            <v-text-field
+              v-model="wageEnhancement.hoursEstimated"
+              aria-label="Hours Estimated"
+              density="compact"
+              variant="underlined"
+              hide-details
+            />
+          </td>
+          <td>
+            <v-text-field
+              :model-value="
+                formatMoney(wageEnhancement.hoursEstimated * employeeWageTier.wageRatePerHour)
+              "
+              aria-label="Wage Enhancement Total Estimated"
+              color="primary"
+              density="compact"
+              tabindex="-1"
+              variant="plain"
+              hide-details
+              readonly
+            />
+          </td>
+          <td>
+            <v-text-field
+              v-model="wageEnhancement.hoursActual"
+              aria-label="Hours Actual"
+              density="compact"
+              variant="underlined"
+              hide-details
+            />
+          </td>
+          <td>
+            <v-text-field
+              :model-value="
+                formatMoney(wageEnhancement.hoursActual * employeeWageTier.wageRatePerHour)
+              "
+              aria-label="Wage Enhancement Total Actual"
+              color="primary"
+              density="compact"
+              tabindex="-1"
+              variant="plain"
+              hide-details
+              readonly
+            />
+          </td>
           <td class="d-flex justify-end align-center">
             <v-btn
               icon="mdi-content-save"
               title="Save"
               density="comfortable"
               variant="text"
-              :loading="isLoadingByWageEnhancement.get(wageEnhancement.id)"
+              :loading="isLoadingByWageEnhancementId.get(wageEnhancement.id)"
               @click="updateWageEnhancement(wageEnhancement.id, wageEnhancement)"
             >
             </v-btn>
@@ -70,21 +119,115 @@
               color="error"
               density="comfortable"
               variant="text"
-              :loading="isLoadingByWageEnhancement.get(wageEnhancement.id)"
+              :loading="isLoadingByWageEnhancementId.get(wageEnhancement.id)"
               @click="deleteWageEnhancement(wageEnhancement.id)"
             >
             </v-btn>
           </td>
         </tr>
       </template>
-      <!--
-        wage total:                $88,988.52
-        plus 14%, EI, CPP, WCB      14% -> $12,458.39
-				final total:                $101,446.91
-       -->
-      <!-- TODO: add total row striping bg-grey-lighten-2 -->
+      <tr class="sub-totals-border">
+        <!-- totals before EI, CPP, WCB -->
+        <td colspan="3"></td>
+        <td>
+          <v-text-field
+            :model-value="formatMoney(wageEnhancementsEstimatedSubtotal)"
+            aria-label="Wage Enhancement Total Estimated"
+            color="primary"
+            density="compact"
+            tabindex="-1"
+            variant="plain"
+            hide-details
+            readonly
+          />
+        </td>
+        <td></td>
+        <td>
+          <v-text-field
+            :model-value="formatMoney(wageEnhancementsActualSubtotal)"
+            aria-label="Wage Enhancement Total Actual"
+            color="primary"
+            density="compact"
+            tabindex="-1"
+            variant="plain"
+            hide-details
+            readonly
+          />
+        </td>
+        <td></td>
+      </tr>
       <tr>
+        <td>Plus {{ eiCppWcbRatePercentage }}%, EI, CPP, WCB</td>
+        <td></td>
+        <td>
+          <v-text-field
+            :model-value="`${eiCppWcbRatePercentage}%`"
+            aria-label="EI CPP WCB Rate Percentage"
+            color="primary"
+            density="compact"
+            tabindex="-1"
+            variant="plain"
+            hide-details
+            readonly
+          />
+        </td>
+        <td>
+          <v-text-field
+            :model-value="formatMoney(wageEnhancementsEstimatedEiCppWcbTotal)"
+            aria-label="Wage Enhancement Estimated EI CPP WCB Total"
+            color="primary"
+            density="compact"
+            tabindex="-1"
+            variant="plain"
+            hide-details
+            readonly
+          />
+        </td>
+        <td></td>
+        <td>
+          <v-text-field
+            :model-value="formatMoney(wageEnhancementsActualEiCppWcbTotal)"
+            aria-label="Wage Enhancement Actual EI CPP WCB Total"
+            color="primary"
+            density="compact"
+            tabindex="-1"
+            variant="plain"
+            hide-details
+            readonly
+          />
+        </td>
+        <td></td>
+      </tr>
+      <!-- TODO: add total row striping bg-grey-lighten-2 -->
+      <tr class="final-total-borders">
         <td class="text-uppercase">Section Total</td>
+        <td colspan="2"></td>
+        <td>
+          <v-text-field
+            :model-value="formatMoney(wageEnhancementsEstimatedTotal)"
+            aria-label="Wage Enhancement Estimated Total"
+            color="primary"
+            density="compact"
+            tabindex="-1"
+            variant="plain"
+            hide-details
+            readonly
+          />
+        </td>
+        <td></td>
+        <td>
+          <v-text-field
+            :model-value="formatMoney(wageEnhancementsActualTotal)"
+            aria-label="Wage Enhancement Actual Total"
+            color="primary"
+            density="compact"
+            tabindex="-1"
+            variant="plain"
+            hide-details
+            readonly
+          />
+        </td>
+        <td></td>
       </tr>
     </tbody>
   </v-table>
@@ -92,7 +235,7 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch, reactive } from "vue"
-import { groupBy } from "lodash"
+import { groupBy, keyBy, mapValues, round } from "lodash"
 
 import employeeWageTiersApi, { type EmployeeWageTier } from "@/api/employee-wage-tiers-api"
 import wageEnhancementsApi, { type WageEnhancement } from "@/api/wage-enhancements-api"
@@ -116,16 +259,49 @@ const props = defineProps({
 })
 
 const isLoading = ref(true)
+const isLoadingByEmployeeWageTierId = reactive(new Map<number, boolean>())
+const isLoadingByWageEnhancementId = reactive(new Map<number, boolean>())
 
 const employeeWageTiers = ref<EmployeeWageTier[]>([])
 const employeeWageTierIds = computed(() => employeeWageTiers.value.map(({ id }) => id))
 
 const wageEnhancements = ref<WageEnhancement[]>([])
-const wageEnhancementsByEmployeeWageTier = computed(() =>
+const wageEnhancementsByEmployeeWageTierId = computed(() =>
   groupBy(wageEnhancements.value, "employeeWageTierId")
 )
-const isLoadingByEmployeeWageTier = reactive(new Map<number, boolean>())
-const isLoadingByWageEnhancement = reactive(new Map<number, boolean>())
+const wageRatePerHoursByEmployeeWageTierId = computed(() =>
+  mapValues(keyBy(employeeWageTiers.value, "id"), "wageRatePerHour")
+)
+const wageEnhancementsEstimatedSubtotal = computed(() =>
+  wageEnhancements.value.reduce((total, { hoursEstimated, employeeWageTierId }) => {
+    const wageRatePerHour = wageRatePerHoursByEmployeeWageTierId.value[employeeWageTierId]
+
+    return total + hoursEstimated * wageRatePerHour
+  }, 0)
+)
+const wageEnhancementsActualSubtotal = computed(() =>
+  wageEnhancements.value.reduce((total, { hoursActual, employeeWageTierId }) => {
+    const wageRatePerHour = wageRatePerHoursByEmployeeWageTierId.value[employeeWageTierId]
+
+    return total + hoursActual * wageRatePerHour
+  }, 0)
+)
+const wageEnhancementsEstimatedEiCppWcbTotal = computed(
+  () => wageEnhancementsEstimatedSubtotal.value * EI_CPP_WCB_RATE
+)
+const wageEnhancementsActualEiCppWcbTotal = computed(
+  () => wageEnhancementsActualSubtotal.value * EI_CPP_WCB_RATE
+)
+const wageEnhancementsEstimatedTotal = computed(
+  () => wageEnhancementsEstimatedSubtotal.value * (1 + EI_CPP_WCB_RATE)
+)
+const wageEnhancementsActualTotal = computed(
+  () => wageEnhancementsActualSubtotal.value * (1 + EI_CPP_WCB_RATE)
+)
+
+const eiCppWcbRatePercentage = computed(() => {
+  return round(EI_CPP_WCB_RATE * 100, 2)
+})
 
 async function fetchEmployeeWageTiers() {
   isLoading.value = true
@@ -170,7 +346,7 @@ async function fetchWageEnhancements() {
 }
 
 async function createWageEnhancement(employeeWageTierId: number) {
-  isLoadingByEmployeeWageTier.set(employeeWageTierId, true)
+  isLoadingByEmployeeWageTierId.set(employeeWageTierId, true)
   try {
     const { wageEnhancement: newWageEnhancement } = await wageEnhancementsApi.create({
       employeeWageTierId,
@@ -191,7 +367,7 @@ async function createWageEnhancement(employeeWageTierId: number) {
       variant: "error",
     })
   } finally {
-    isLoadingByEmployeeWageTier.set(employeeWageTierId, false)
+    isLoadingByEmployeeWageTierId.set(employeeWageTierId, false)
   }
 }
 
@@ -199,7 +375,7 @@ async function updateWageEnhancement(
   wageEnhancementId: number,
   attributes: Partial<WageEnhancement>
 ) {
-  isLoadingByWageEnhancement.set(wageEnhancementId, true)
+  isLoadingByWageEnhancementId.set(wageEnhancementId, true)
   try {
     const { wageEnhancement: newWageEnhancement } = await wageEnhancementsApi.update(
       wageEnhancementId,
@@ -223,12 +399,12 @@ async function updateWageEnhancement(
       variant: "error",
     })
   } finally {
-    isLoadingByWageEnhancement.set(wageEnhancementId, false)
+    isLoadingByWageEnhancementId.set(wageEnhancementId, false)
   }
 }
 
 async function deleteWageEnhancement(wageEnhancementId: number) {
-  isLoadingByWageEnhancement.set(wageEnhancementId, true)
+  isLoadingByWageEnhancementId.set(wageEnhancementId, true)
   try {
     await wageEnhancementsApi.delete(wageEnhancementId)
     const index = wageEnhancements.value.findIndex(({ id }) => id === wageEnhancementId)
@@ -247,7 +423,7 @@ async function deleteWageEnhancement(wageEnhancementId: number) {
       variant: "error",
     })
   } finally {
-    isLoadingByWageEnhancement.delete(wageEnhancementId)
+    isLoadingByWageEnhancementId.delete(wageEnhancementId)
   }
 }
 
@@ -260,3 +436,14 @@ watch(
   { immediate: true }
 )
 </script>
+
+<style scoped>
+.sub-totals-border > td {
+  border-top: thin solid black;
+}
+
+.final-total-borders > td {
+  border-top: thin solid black;
+  border-bottom: 3px double black;
+}
+</style>
