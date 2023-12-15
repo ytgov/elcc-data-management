@@ -5,7 +5,6 @@
   ></v-skeleton-loader>
   <v-table v-else>
     <thead>
-      <!-- TODO: add vertical column striping bg-grey-lighten-2 -->
       <tr>
         <th></th>
         <th class="text-left">Per Employee</th>
@@ -201,7 +200,6 @@
         </td>
         <td></td>
       </tr>
-      <!-- TODO: add total row striping bg-grey-lighten-2 -->
       <tr class="thin-solid-black-top-border">
         <td class="text-uppercase">Section Total</td>
         <td colspan="2"></td>
