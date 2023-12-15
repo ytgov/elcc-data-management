@@ -21,12 +21,12 @@ export const up: Migration = async ({ context: queryInterface }) => {
       allowNull: false,
       defaultValue: false,
     },
-    createdAt: {
+    created_at: {
       type: MssqlSimpleTypes.DATETIME2(0),
       allowNull: false,
       defaultValue: MssqlSimpleTypes.NOW,
     },
-    updatedAt: {
+    updated_at: {
       type: MssqlSimpleTypes.DATETIME2(0),
       allowNull: false,
       defaultValue: MssqlSimpleTypes.NOW,

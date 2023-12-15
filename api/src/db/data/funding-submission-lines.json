@@ -391,36 +391,6 @@
   },
   {
     "fiscalYear": "2022/23",
-    "sectionName": "Employee Benefits",
-    "lineName": "Gross Payroll",
-    "fromAge": 0,
-    "toAge": 0,
-    "monthlyAmount": 0.0,
-    "createdAt": "2023-09-29T17:43:40.870Z",
-    "updatedAt": "2023-09-29T17:43:40.870Z"
-  },
-  {
-    "fiscalYear": "2022/23",
-    "sectionName": "Employee Benefits",
-    "lineName": "Employee Cost",
-    "fromAge": 0,
-    "toAge": 0,
-    "monthlyAmount": 0.0,
-    "createdAt": "2023-09-29T17:43:40.876Z",
-    "updatedAt": "2023-09-29T17:43:40.876Z"
-  },
-  {
-    "fiscalYear": "2022/23",
-    "sectionName": "Employee Benefits",
-    "lineName": "Employer Cost",
-    "fromAge": 0,
-    "toAge": 0,
-    "monthlyAmount": 0.0,
-    "createdAt": "2023-09-29T17:43:40.883Z",
-    "updatedAt": "2023-09-29T17:43:40.883Z"
-  },
-  {
-    "fiscalYear": "2022/23",
     "sectionName": "Wage Enhancement",
     "lineName": "Level 0",
     "fromAge": 0,
@@ -878,36 +848,6 @@
     "monthlyAmount": 0.37,
     "createdAt": "2023-09-29T17:43:41.160Z",
     "updatedAt": "2023-09-29T17:43:41.160Z"
-  },
-  {
-    "fiscalYear": "2023/24",
-    "sectionName": "Employee Benefits",
-    "lineName": "Gross Payroll",
-    "fromAge": 0,
-    "toAge": 0,
-    "monthlyAmount": 0.0,
-    "createdAt": "2023-09-29T17:43:41.166Z",
-    "updatedAt": "2023-09-29T17:43:41.166Z"
-  },
-  {
-    "fiscalYear": "2023/24",
-    "sectionName": "Employee Benefits",
-    "lineName": "Employee Cost",
-    "fromAge": 0,
-    "toAge": 0,
-    "monthlyAmount": 0.0,
-    "createdAt": "2023-09-29T17:43:41.170Z",
-    "updatedAt": "2023-09-29T17:43:41.170Z"
-  },
-  {
-    "fiscalYear": "2023/24",
-    "sectionName": "Employee Benefits",
-    "lineName": "Employer Cost",
-    "fromAge": 0,
-    "toAge": 0,
-    "monthlyAmount": 0.0,
-    "createdAt": "2023-09-29T17:43:41.176Z",
-    "updatedAt": "2023-09-29T17:43:41.176Z"
   },
   {
     "fiscalYear": "2023/24",

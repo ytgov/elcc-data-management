@@ -1,5 +1,5 @@
 import { type NextFunction, type Request, type Response } from "express"
-import { UserStatus } from "@/models"
+import { UserStatus } from "@/models/user"
 
 export function RequireAdmin(req: Request, res: Response, next: NextFunction) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment

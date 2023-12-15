@@ -150,36 +150,38 @@
         class="mb-5 fill-height"
         elevation="3"
       >
-        <v-tabs grow>
-          <v-tab
-            :to="{
-              name: 'CentreDashboardSummaryPage',
-              params: { centreId, fiscalYearSlug },
-            }"
-          >
-            Summary
-          </v-tab>
-          <v-tab
-            :to="{
-              name: 'CentreDashboardWorksheetsPage',
-              params: { centreId, fiscalYearSlug },
-            }"
-          >
-            Worksheets
-          </v-tab>
-          <v-tab
-            :to="{
-              name: 'CentreDashboardEmployeesPage',
-              params: { centreId, fiscalYearSlug },
-            }"
-          >
-            Employees
-          </v-tab>
-        </v-tabs>
+        <template v-if="!isEmpty(fiscalYearSlug)">
+          <v-tabs grow>
+            <v-tab
+              :to="{
+                name: 'CentreDashboardSummaryPage',
+                params: { centreId, fiscalYearSlug },
+              }"
+            >
+              Summary
+            </v-tab>
+            <v-tab
+              :to="{
+                name: 'CentreDashboardWorksheetsPage',
+                params: { centreId, fiscalYearSlug },
+              }"
+            >
+              Worksheets
+            </v-tab>
+            <v-tab
+              :to="{
+                name: 'CentreDashboardEmployeesPage',
+                params: { centreId, fiscalYearSlug },
+              }"
+            >
+              Employees
+            </v-tab>
+          </v-tabs>
 
-        <v-divider></v-divider>
+          <v-divider></v-divider>
 
-        <router-view></router-view>
+          <router-view></router-view>
+        </template>
       </v-card>
     </v-col>
   </v-row>
@@ -264,6 +266,7 @@ export default {
     },
   },
   methods: {
+    isEmpty,
     ...mapActions(useCentreStore, ["selectCentreById", "unselectCentre", "editCentre"]),
     FormatDate(input: Date | undefined) {
       return input != null ? FormatDate(input) : ""

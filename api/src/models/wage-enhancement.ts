@@ -14,22 +14,18 @@ import {
 
 import sequelize from "@/db/db-client"
 import Centre from "./centre"
-import FiscalPeriod from "./fiscal-period"
+import EmployeeWageTier from "./employee-wage-tier"
 
-export class EmployeeBenefit extends Model<
-  InferAttributes<EmployeeBenefit>,
-  InferCreationAttributes<EmployeeBenefit>
+export class WageEnhancement extends Model<
+  InferAttributes<WageEnhancement>,
+  InferCreationAttributes<WageEnhancement>
 > {
   declare id: CreationOptional<number>
   declare centreId: ForeignKey<Centre["id"]>
-  declare fiscalPeriodId: ForeignKey<FiscalPeriod["id"]>
-  declare grossPayrollMonthlyActual: number
-  declare grossPayrollMonthlyEstimated: number
-  declare costCapPercentage: number
-  declare employeeCostActual: number
-  declare employeeCostEstimated: number
-  declare employerCostActual: number
-  declare employerCostEstimated: number
+  declare employeeWageTierId: ForeignKey<EmployeeWageTier["id"]>
+  declare employeeName: string
+  declare hoursEstimated: number
+  declare hoursActual: number
   declare createdAt: CreationOptional<Date>
   declare updatedAt: CreationOptional<Date>
 
@@ -40,29 +36,32 @@ export class EmployeeBenefit extends Model<
   declare setCentre: BelongsToSetAssociationMixin<Centre, Centre["id"]>
   declare createCentre: BelongsToCreateAssociationMixin<Centre>
 
-  declare getFiscalPeriod: BelongsToGetAssociationMixin<FiscalPeriod>
-  declare setFiscalPeriod: BelongsToSetAssociationMixin<FiscalPeriod, FiscalPeriod["id"]>
-  declare createFiscalPeriod: BelongsToCreateAssociationMixin<FiscalPeriod>
+  declare getEmployeeWageTier: BelongsToGetAssociationMixin<EmployeeWageTier>
+  declare setEmployeeWageTier: BelongsToSetAssociationMixin<
+    EmployeeWageTier,
+    EmployeeWageTier["id"]
+  >
+  declare createEmployeeWageTier: BelongsToCreateAssociationMixin<EmployeeWageTier>
 
   declare centre?: NonAttribute<Centre>
-  declare fiscalPeriod?: NonAttribute<FiscalPeriod>
+  declare employeeWageTier?: NonAttribute<EmployeeWageTier>
 
   declare static associations: {
-    centre: Association<EmployeeBenefit, Centre>
-    fiscalPeriod: Association<EmployeeBenefit, FiscalPeriod>
+    centre: Association<WageEnhancement, Centre>
+    employeeWageTier: Association<WageEnhancement, EmployeeWageTier>
   }
 
   static establishAssociations() {
     this.belongsTo(Centre, {
       foreignKey: "centreId",
     })
-    this.belongsTo(FiscalPeriod, {
-      foreignKey: "fiscalPeriodId",
+    this.belongsTo(EmployeeWageTier, {
+      foreignKey: "employeeWageTierId",
     })
   }
 }
 
-EmployeeBenefit.init(
+WageEnhancement.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -78,40 +77,24 @@ EmployeeBenefit.init(
         key: "id",
       },
     },
-    fiscalPeriodId: {
+    employeeWageTierId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "fiscal_periods", // use real table name here
+        model: "employee_wage_tiers", // use real table name here
         key: "id",
       },
     },
-    grossPayrollMonthlyActual: {
-      type: DataTypes.DECIMAL(10, 2),
+    employeeName: {
+      type: DataTypes.STRING(100),
       allowNull: false,
     },
-    grossPayrollMonthlyEstimated: {
-      type: DataTypes.DECIMAL(10, 2),
+    hoursEstimated: {
+      type: DataTypes.FLOAT,
       allowNull: false,
     },
-    costCapPercentage: {
-      type: DataTypes.DECIMAL(5, 2),
-      allowNull: false,
-    },
-    employeeCostActual: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-    },
-    employeeCostEstimated: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-    },
-    employerCostActual: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-    },
-    employerCostEstimated: {
-      type: DataTypes.DECIMAL(10, 2),
+    hoursActual: {
+      type: DataTypes.FLOAT,
       allowNull: false,
     },
     createdAt: {
@@ -130,10 +113,10 @@ EmployeeBenefit.init(
     indexes: [
       {
         unique: true,
-        fields: ["centre_id", "fiscal_period_id"], // not sure if these need to be snake_case?
+        fields: ["centre_id", "employee_wage_tier_id"], // not sure if these need to be snake_case?
       },
     ],
   }
 )
 
-export default EmployeeBenefit
+export default WageEnhancement

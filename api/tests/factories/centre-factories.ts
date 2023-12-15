@@ -1,7 +1,8 @@
 import { Factory } from "fishery"
 import { faker } from "@faker-js/faker"
 
-import { Centre, CentreStatus } from "@/models"
+import { Centre } from "@/models"
+import { CentreStatus } from "@/models/centre"
 
 const yukonCommunities = [
   "Carmacks",

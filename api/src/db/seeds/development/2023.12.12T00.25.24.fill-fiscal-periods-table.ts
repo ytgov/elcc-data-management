@@ -11,7 +11,7 @@ export const up: SeedMigration = async ({ context: { FiscalPeriod } }) => {
     for (let i = 0; i < 12; i++) {
       const dateStart = moment(date).startOf("month")
       const dateEnd = moment(dateStart).endOf("month").milliseconds(0)
-      const dateName = dateStart.format("MMMM")
+      const dateName = dateStart.format("MMMM").toLowerCase()
 
       const fiscalYear = `${year}-${(year + 1).toString().slice(-2)}`
 

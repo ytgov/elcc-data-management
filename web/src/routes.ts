@@ -2,7 +2,7 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router"
 import homeRoutes from "@/modules/home/router"
 import adminstrationRoutes from "@/modules/administration/router"
 import authenticationRoutes from "@/modules/authentication/router"
-import centreRoutes from "@/modules/centre/router"
+import centreRoutes from "@/modules/centre/routes"
 
 const routes: RouteRecordRaw[] = [
   {
