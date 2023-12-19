@@ -20,7 +20,9 @@ const props = defineProps({
   options: {
     type: Object,
     default: () => ({
-      currency: "USD",
+      currency: "CAD",
+      locale: "en-CA",
+      currencyDisplay: "symbol",
       precision: 2,
       // accountingSign: true,
       hideCurrencySymbolOnFocus: false,

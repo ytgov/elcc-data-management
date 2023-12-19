@@ -8,12 +8,17 @@ export function dollarsToCents(value: number) {
 
 export function formatMoney(
   input: number | undefined,
-  locales: string | string[] | undefined = "en-US",
-  options: Intl.NumberFormatOptions = {}
+  options: Intl.NumberFormatOptions & {
+    locales?: string | string[] | undefined
+  } = {}
 ) {
+  const locales = options.locales || "en-CA"
+  delete options.locales
+
   const formatter = new Intl.NumberFormat(locales, {
     style: "currency",
-    currency: "USD",
+    currency: "CAD",
+    currencyDisplay: "symbol",
     ...options,
     // These options are needed to round to whole numbers if that's what you want.
     //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
