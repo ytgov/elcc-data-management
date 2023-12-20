@@ -111,9 +111,9 @@ export const usePaymentsStore = defineStore("payments", () => {
   }
 
   // Private Methods
-  function replacePayment(paymentId: Number, payment: Payment) {
+  function replacePayment(paymentId: Number, newPayment: Payment) {
     items.value = items.value.map((payment) => {
-      if (payment.id === paymentId) return payment
+      if (payment.id === paymentId) return newPayment
 
       return payment
     })
