@@ -111,6 +111,20 @@ import usePaymentsStore from "@/store/payments"
 
 const PAYMENT_TYPE = "payment"
 const EXPENSE_TYPE = "expense"
+const DATE_NAMES = [
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+  "January",
+  "February",
+  "March",
+]
 
 type Expense = {
   dateName: string
@@ -143,44 +157,15 @@ const employeeBenefits = ref<
 >([])
 const employeeBenefitsByMonth = computed(() => keyBy(employeeBenefits.value, "fiscalPeriod.month"))
 
-const expenses = ref<Expense[]>([
-  { dateName: "April", name: "April Expenses", amountInCents: 0, note: "", type: EXPENSE_TYPE },
-  { dateName: "May", name: "May Expenses", amountInCents: 0, note: "", type: EXPENSE_TYPE },
-  { dateName: "June", name: "June Expenses", amountInCents: 0, note: "", type: EXPENSE_TYPE },
-  { dateName: "July", name: "July Expenses", amountInCents: 0, note: "", type: EXPENSE_TYPE },
-  { dateName: "August", name: "August Expenses", amountInCents: 0, note: "", type: EXPENSE_TYPE },
-  {
-    dateName: "September",
-    name: "September Expenses",
+const expenses = ref<Expense[]>(
+  DATE_NAMES.map((dateName) => ({
+    dateName,
+    name: `${dateName} Expenses`,
     amountInCents: 0,
     note: "",
     type: EXPENSE_TYPE,
-  },
-  { dateName: "October", name: "October Expenses", amountInCents: 0, note: "", type: EXPENSE_TYPE },
-  {
-    dateName: "November",
-    name: "November Expenses",
-    amountInCents: 0,
-    note: "",
-    type: EXPENSE_TYPE,
-  },
-  {
-    dateName: "December",
-    name: "December Expenses",
-    amountInCents: 0,
-    note: "",
-    type: EXPENSE_TYPE,
-  },
-  { dateName: "January", name: "January Expenses", amountInCents: 0, note: "", type: EXPENSE_TYPE },
-  {
-    dateName: "February",
-    name: "February Expenses",
-    amountInCents: 0,
-    note: "",
-    type: EXPENSE_TYPE,
-  },
-  { dateName: "March", name: "March Expenses", amountInCents: 0, note: "", type: EXPENSE_TYPE },
-])
+  }))
+)
 
 const typedPayments = computed(() =>
   payments.value.map((payment) => ({
