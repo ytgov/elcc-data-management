@@ -20,7 +20,7 @@ export type NonPersistedEmployeeBenefit = Omit<EmployeeBenefit, "id" | "createdA
 export type Params = {
   where?: {
     centreId?: EmployeeBenefit["centreId"]
-    fiscalPeriodId?: EmployeeBenefit["fiscalPeriodId"]
+    fiscalPeriodId?: EmployeeBenefit["fiscalPeriodId"] | EmployeeBenefit["fiscalPeriodId"][]
   }
   page?: number
   perPage?: number

@@ -22,11 +22,26 @@
             <td class="text-right"></td>
             <td class="text-right"></td>
           </template>
-          <template v-else-if="adjustment.type === EXPENSE_TYPE">
+          <template v-else-if="isExpenseTypeAdjustment(adjustment)">
             <td class="text-right"></td>
             <td class="text-right"></td>
-            <td class="text-right">
+            <td class="adjustment-cell text-right">
               {{ formatMoney(centsToDollars(adjustment.amountInCents)) }}
+              <v-tooltip
+                v-if="!isEmpty(adjustment.note)"
+                bottom
+              >
+                <template #activator="{ props }">
+                  <sup class="asterisk-icon">
+                    <v-icon
+                      size="small"
+                      v-bind="props"
+                      >mdi-asterisk-circle-outline</v-icon
+                    >
+                  </sup>
+                </template>
+                <span class="text-white">{{ adjustment.note }}</span>
+              </v-tooltip>
             </td>
           </template>
 
@@ -83,15 +98,27 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
-import { isEmpty, sumBy } from "lodash"
+import { isEmpty, isNil, keyBy, sumBy } from "lodash"
 
-import useFundingSubmissionLineJsonsStore from "@/store/funding-submission-line-jsons"
-import usePaymentsStore from "@/store/payments"
 import { formatMoney, centsToDollars, dollarsToCents } from "@/utils/format-money"
 import { interleaveArrays } from "@/utils/interleave-arrays"
 
+import employeeBenefitsApi, { EmployeeBenefit } from "@/api/employee-benefits-api"
+import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"
+
+import useFundingSubmissionLineJsonsStore from "@/store/funding-submission-line-jsons"
+import usePaymentsStore from "@/store/payments"
+
 const PAYMENT_TYPE = "payment"
 const EXPENSE_TYPE = "expense"
+
+type Expense = {
+  dateName: string
+  name: string
+  amountInCents: number
+  note: string
+  type: typeof EXPENSE_TYPE
+}
 
 const props = defineProps({
   centreId: {
@@ -109,20 +136,50 @@ const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
 const paymentsStore = usePaymentsStore()
 const payments = computed(() => paymentsStore.items)
 const fundingSubmissionLineJsonsStore = useFundingSubmissionLineJsonsStore()
+const employeeBenefits = ref<
+  (EmployeeBenefit & {
+    fiscalPeriod: FiscalPeriod
+  })[]
+>([])
+const employeeBenefitsByMonth = computed(() => keyBy(employeeBenefits.value, "fiscalPeriod.month"))
 
-const expenses = ref([
-  { dateName: "April", name: "April Expenses", amountInCents: 0 },
-  { dateName: "May", name: "May Expenses", amountInCents: 0 },
-  { dateName: "June", name: "June Expenses", amountInCents: 0 },
-  { dateName: "July", name: "July Expenses", amountInCents: 0 },
-  { dateName: "August", name: "August Expenses", amountInCents: 0 },
-  { dateName: "September", name: "September Expenses", amountInCents: 0 },
-  { dateName: "October", name: "October Expenses", amountInCents: 0 },
-  { dateName: "November", name: "November Expenses", amountInCents: 0 },
-  { dateName: "December", name: "December Expenses", amountInCents: 0 },
-  { dateName: "January", name: "January Expenses", amountInCents: 0 },
-  { dateName: "February", name: "February Expenses", amountInCents: 0 },
-  { dateName: "March", name: "March Expenses", amountInCents: 0 },
+const expenses = ref<Expense[]>([
+  { dateName: "April", name: "April Expenses", amountInCents: 0, note: "", type: EXPENSE_TYPE },
+  { dateName: "May", name: "May Expenses", amountInCents: 0, note: "", type: EXPENSE_TYPE },
+  { dateName: "June", name: "June Expenses", amountInCents: 0, note: "", type: EXPENSE_TYPE },
+  { dateName: "July", name: "July Expenses", amountInCents: 0, note: "", type: EXPENSE_TYPE },
+  { dateName: "August", name: "August Expenses", amountInCents: 0, note: "", type: EXPENSE_TYPE },
+  {
+    dateName: "September",
+    name: "September Expenses",
+    amountInCents: 0,
+    note: "",
+    type: EXPENSE_TYPE,
+  },
+  { dateName: "October", name: "October Expenses", amountInCents: 0, note: "", type: EXPENSE_TYPE },
+  {
+    dateName: "November",
+    name: "November Expenses",
+    amountInCents: 0,
+    note: "",
+    type: EXPENSE_TYPE,
+  },
+  {
+    dateName: "December",
+    name: "December Expenses",
+    amountInCents: 0,
+    note: "",
+    type: EXPENSE_TYPE,
+  },
+  { dateName: "January", name: "January Expenses", amountInCents: 0, note: "", type: EXPENSE_TYPE },
+  {
+    dateName: "February",
+    name: "February Expenses",
+    amountInCents: 0,
+    note: "",
+    type: EXPENSE_TYPE,
+  },
+  { dateName: "March", name: "March Expenses", amountInCents: 0, note: "", type: EXPENSE_TYPE },
 ])
 
 const typedPayments = computed(() =>
@@ -131,15 +188,9 @@ const typedPayments = computed(() =>
     type: PAYMENT_TYPE,
   }))
 )
-const typedExpenses = computed(() =>
-  expenses.value.map((expense) => ({
-    ...expense,
-    type: EXPENSE_TYPE,
-  }))
-)
 
 const allAdjustments = computed(() => {
-  return interleaveArrays(typedPayments.value, typedExpenses.value, { chunkSize: 2 })
+  return interleaveArrays(typedPayments.value, expenses.value, { chunkSize: 2 })
 })
 
 const allAdjustmentsRunningTotals = computed(() => {
@@ -157,6 +208,13 @@ const allAdjustmentsRunningTotals = computed(() => {
 const paymentsTotal = computed(() => sumBy(payments.value, "amountInCents"))
 const expensesTotal = computed(() => sumBy(expenses.value, "amountInCents"))
 
+function isExpenseTypeAdjustment(adjustment: unknown): adjustment is Expense {
+  if (typeof adjustment !== "object" || adjustment === null) return false
+  if (!("type" in adjustment)) return false
+
+  return adjustment.type === EXPENSE_TYPE
+}
+
 onMounted(async () => {
   await paymentsStore.initialize({
     where: {
@@ -164,6 +222,7 @@ onMounted(async () => {
       fiscalYear: fiscalYear.value,
     },
   })
+  await enusureEmployeeBenefits()
   await fundingSubmissionLineJsonsStore
     .initialize({
       where: {
@@ -178,13 +237,68 @@ onMounted(async () => {
     })
 })
 
+async function enusureEmployeeBenefits(): Promise<void> {
+  const { fiscalPeriods } = await fiscalPeriodsApi.list({
+    where: {
+      fiscalYear: props.fiscalYearSlug,
+    },
+  })
+  const fiscalPeriodIds = fiscalPeriods.map((fiscalPeriod) => fiscalPeriod.id)
+  const fiscalPeriodsById = keyBy(fiscalPeriods, "id")
+  const { employeeBenefits: newEmployeeBenefits } = await employeeBenefitsApi.list({
+    where: {
+      centreId: centreIdNumber.value,
+      fiscalPeriodId: fiscalPeriodIds,
+    },
+  })
+
+  employeeBenefits.value = newEmployeeBenefits.map((employeeBenefit) => ({
+    ...employeeBenefit,
+    fiscalPeriod: fiscalPeriodsById[employeeBenefit.fiscalPeriodId],
+  }))
+}
+
 function updateExpenseValues() {
   expenses.value.map((expense) => {
     const { dateName } = expense
     const linesForMonth = fundingSubmissionLineJsonsStore.linesForMonth(dateName)
 
     expense.amountInCents = dollarsToCents(sumBy(linesForMonth, "actualComputedTotal"))
+
+    injectEmployeeBenefitMonthlyCost(expense, dateName.toLowerCase())
   })
+}
+
+/*
+  This function injects the estimated paid amount, until the actual paid amount is available.
+*/
+function injectEmployeeBenefitMonthlyCost(expense: Expense, month: string): void {
+  const employeeBenefitForMonth = employeeBenefitsByMonth.value[month]
+  if (isNil(employeeBenefitForMonth)) return
+
+  const {
+    employerCostEstimated,
+    employerCostActual,
+    grossPayrollMonthlyEstimated,
+    grossPayrollMonthlyActual,
+    costCapPercentage,
+  } = employeeBenefitForMonth
+  const estimatedPaidAmount = Math.min(
+    employerCostEstimated,
+    grossPayrollMonthlyEstimated * costCapPercentage
+  )
+  const actualPaidAmount = Math.min(
+    employerCostActual,
+    grossPayrollMonthlyActual * costCapPercentage
+  )
+  const isCostActual = actualPaidAmount > 0
+  const paidAmountInDollars = isCostActual ? actualPaidAmount : estimatedPaidAmount
+
+  if (!isCostActual) {
+    expense.note = "This is an estimated expense."
+  }
+
+  expense.amountInCents += dollarsToCents(paidAmountInDollars)
 }
 
 function rowClasses(index: number): string[] {
@@ -199,4 +313,15 @@ function rowClasses(index: number): string[] {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.adjustment-cell {
+  position: relative;
+}
+
+.asterisk-icon {
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  transform: translate(100%, 0%); /* Position the asterisk outside the content */
+}
+</style>
