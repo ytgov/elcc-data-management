@@ -252,13 +252,15 @@
 import { computed, ref, watch } from "vue"
 import { isEmpty, isUndefined, round } from "lodash"
 
-import employeeBenefitsApi, { type EmployeeBenefit } from "@/api/employee-benefits-api"
+import employeeBenefitsApi, {
+  isPersistedEmployeeBenefit,
+  type EmployeeBenefit,
+  type NonPersistedEmployeeBenefit,
+} from "@/api/employee-benefits-api"
 import { useNotificationStore } from "@/store/NotificationStore"
 import { formatMoney } from "@/utils/format-money"
 
 import CurrencyInput from "@/components/CurrencyInput.vue"
-
-type NonPersistedEmployeeBenefit = Omit<EmployeeBenefit, "id" | "createdAt" | "updatedAt">
 
 const notificationStore = useNotificationStore()
 
@@ -394,16 +396,10 @@ function updateEmployeeBenefitCurrencyValue(
   }
 }
 
-function isPersisted(
-  employeeBenefit: EmployeeBenefit | NonPersistedEmployeeBenefit
-): employeeBenefit is EmployeeBenefit {
-  return "id" in employeeBenefit && !isUndefined(employeeBenefit.id)
-}
-
 async function save() {
   if (isUndefined(employeeBenefit.value)) return
 
-  if (isPersisted(employeeBenefit.value)) {
+  if (isPersistedEmployeeBenefit(employeeBenefit.value)) {
     await update(employeeBenefit.value.id, employeeBenefit.value)
   } else {
     await create(employeeBenefit.value)

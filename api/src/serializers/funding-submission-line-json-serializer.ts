@@ -30,21 +30,11 @@ export class FundingSubmissionLineJsonSerializer extends BaseSerializer<FundingS
     }
   }
 
-  constructor(modelOrModels: FundingSubmissionLineJson | FundingSubmissionLineJson[]) {
-    super(modelOrModels)
-  }
-
-  protected registerDefaultView() {
-    const view = this.addView("default")
-    view.addFields("id", "centreId", "fiscalYear", "dateName", "dateStart", "dateEnd")
-    return view
-  }
-
   // I have no clue what this code is trying to accomplish.
   // I hope to be able to fully rebuild this code, until it fits into a standard view -> fields paradigm.
   // It looks like we might be missing a database model for a worksheet?
   // Or maybe a model for a line entry?
-  static serializeWorksheetsView(worksheets: FundingSubmissionLineJson[]) {
+  static asWorksheet(worksheets: FundingSubmissionLineJson[]) {
     const groups = []
     const years = uniq(worksheets.map((m) => m.fiscalYear))
 
