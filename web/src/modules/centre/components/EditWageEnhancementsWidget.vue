@@ -252,12 +252,12 @@ import { computed, ref, watch, reactive } from "vue"
 import { groupBy, keyBy, mapValues, round, isEmpty } from "lodash"
 
 import employeeWageTiersApi, { type EmployeeWageTier } from "@/api/employee-wage-tiers-api"
-import wageEnhancementsApi, { type WageEnhancement } from "@/api/wage-enhancements-api"
+import wageEnhancementsApi, {
+  EI_CPP_WCB_RATE,
+  type WageEnhancement,
+} from "@/api/wage-enhancements-api"
 import { useNotificationStore } from "@/store/NotificationStore"
 import { formatMoney } from "@/utils"
-
-// TODO: store this in the back-end, probably in the fiscal_periods table
-const EI_CPP_WCB_RATE = 0.14
 
 const notificationStore = useNotificationStore()
 
