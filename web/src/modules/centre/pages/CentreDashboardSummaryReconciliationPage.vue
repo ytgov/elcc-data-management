@@ -98,13 +98,15 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
-import { isEmpty, isNil, keyBy, sumBy } from "lodash"
+import { isEmpty, isNil, keyBy, mapValues, sumBy } from "lodash"
 
 import { formatMoney, centsToDollars, dollarsToCents } from "@/utils/format-money"
 import { interleaveArrays } from "@/utils/interleave-arrays"
 
 import employeeBenefitsApi, { EmployeeBenefit } from "@/api/employee-benefits-api"
+import employeeWageTiersApi from "@/api/employee-wage-tiers-api"
 import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"
+import wageEnhancementsApi, { EI_CPP_WCB_RATE } from "@/api/wage-enhancements-api"
 
 import useFundingSubmissionLineJsonsStore from "@/store/funding-submission-line-jsons"
 import usePaymentsStore from "@/store/payments"
@@ -150,6 +152,10 @@ const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
 const paymentsStore = usePaymentsStore()
 const payments = computed(() => paymentsStore.items)
 const fundingSubmissionLineJsonsStore = useFundingSubmissionLineJsonsStore()
+const fiscalPeriods = ref<FiscalPeriod[]>([])
+const fiscalPeriodIds = computed(() => fiscalPeriods.value.map((fiscalPeriod) => fiscalPeriod.id))
+const fiscalPeriodsById = computed(() => keyBy(fiscalPeriods.value, "id"))
+const fiscalPeriodsByMonth = computed(() => keyBy(fiscalPeriods.value, "month"))
 const employeeBenefits = ref<
   (EmployeeBenefit & {
     fiscalPeriod: FiscalPeriod
@@ -207,43 +213,43 @@ onMounted(async () => {
       fiscalYear: fiscalYear.value,
     },
   })
-  await enusureEmployeeBenefits()
-  await fundingSubmissionLineJsonsStore
-    .initialize({
-      where: {
-        centreId: centreIdNumber.value,
-        fiscalYear: fiscalYear.value,
-      },
-    })
-    .then((fundingSubmissionLineJsons) => {
-      if (isEmpty(fundingSubmissionLineJsons)) return
+  await fetchFiscalPeriods()
+  await fetchEmployeeBenefits()
+  await fundingSubmissionLineJsonsStore.initialize({
+    where: {
+      centreId: centreIdNumber.value,
+      fiscalYear: fiscalYear.value,
+    },
+  })
+  if (isEmpty(fundingSubmissionLineJsonsStore.items)) return
 
-      updateExpenseValues()
-    })
+  await updateExpenseValues()
 })
 
-async function enusureEmployeeBenefits(): Promise<void> {
-  const { fiscalPeriods } = await fiscalPeriodsApi.list({
+async function fetchFiscalPeriods() {
+  const { fiscalPeriods: newFiscalPeriods } = await fiscalPeriodsApi.list({
     where: {
       fiscalYear: props.fiscalYearSlug,
     },
   })
-  const fiscalPeriodIds = fiscalPeriods.map((fiscalPeriod) => fiscalPeriod.id)
-  const fiscalPeriodsById = keyBy(fiscalPeriods, "id")
+  fiscalPeriods.value = newFiscalPeriods
+}
+
+async function fetchEmployeeBenefits(): Promise<void> {
   const { employeeBenefits: newEmployeeBenefits } = await employeeBenefitsApi.list({
     where: {
       centreId: centreIdNumber.value,
-      fiscalPeriodId: fiscalPeriodIds,
+      fiscalPeriodId: fiscalPeriodIds.value,
     },
   })
 
   employeeBenefits.value = newEmployeeBenefits.map((employeeBenefit) => ({
     ...employeeBenefit,
-    fiscalPeriod: fiscalPeriodsById[employeeBenefit.fiscalPeriodId],
+    fiscalPeriod: fiscalPeriodsById.value[employeeBenefit.fiscalPeriodId],
   }))
 }
 
-function updateExpenseValues() {
+async function updateExpenseValues() {
   expenses.value.map((expense) => {
     const { dateName } = expense
     const linesForMonth = fundingSubmissionLineJsonsStore.linesForMonth(dateName)
@@ -251,6 +257,7 @@ function updateExpenseValues() {
     expense.amountInCents = dollarsToCents(sumBy(linesForMonth, "actualComputedTotal"))
 
     injectEmployeeBenefitMonthlyCost(expense, dateName.toLowerCase())
+    lazyInjectWageEnhancementMonthlyCost(expense, dateName.toLowerCase())
   })
 }
 
@@ -284,6 +291,58 @@ function injectEmployeeBenefitMonthlyCost(expense: Expense, month: string): void
   }
 
   expense.amountInCents += dollarsToCents(paidAmountInDollars)
+}
+
+/*
+  This function injects the estimated total amount, until the actual total amount is available.
+*/
+async function lazyInjectWageEnhancementMonthlyCost(expense: Expense, month: string) {
+  const fiscalPeriod = fiscalPeriodsByMonth.value[month]
+  const { employeeWageTiers } = await employeeWageTiersApi.list({
+    where: {
+      fiscalPeriodId: fiscalPeriod.id,
+    },
+  })
+  const employeeWageTierIds = employeeWageTiers.map((employeeWageTier) => employeeWageTier.id)
+  const { wageEnhancements } = await wageEnhancementsApi.list({
+    where: {
+      centreId: centreIdNumber.value,
+      employeeWageTierId: employeeWageTierIds,
+    },
+  })
+  if (isEmpty(wageEnhancements)) return
+
+  const wageRatePerHoursByEmployeeWageTierId = mapValues(
+    keyBy(employeeWageTiers, "id"),
+    "wageRatePerHour"
+  )
+  const wageEnhancementsEstimatedSubtotal = wageEnhancements.reduce(
+    (total, { hoursEstimated, employeeWageTierId }) => {
+      const wageRatePerHour = wageRatePerHoursByEmployeeWageTierId[employeeWageTierId]
+
+      return total + hoursEstimated * wageRatePerHour
+    },
+    0
+  )
+  const wageEnhancementsActualSubtotal = wageEnhancements.reduce(
+    (total, { hoursActual, employeeWageTierId }) => {
+      const wageRatePerHour = wageRatePerHoursByEmployeeWageTierId[employeeWageTierId]
+
+      return total + hoursActual * wageRatePerHour
+    },
+    0
+  )
+  const wageEnhancementsEstimatedTotal = wageEnhancementsEstimatedSubtotal * (1 + EI_CPP_WCB_RATE)
+  const wageEnhancementsActualTotal = wageEnhancementsActualSubtotal * (1 + EI_CPP_WCB_RATE)
+
+  const isCostActual = wageEnhancementsActualTotal > 0
+  const totalInDollars = isCostActual ? wageEnhancementsActualTotal : wageEnhancementsEstimatedTotal
+
+  if (!isCostActual) {
+    expense.note = "This is an estimated expense."
+  }
+
+  expense.amountInCents += dollarsToCents(totalInDollars)
 }
 
 function rowClasses(index: number): string[] {
