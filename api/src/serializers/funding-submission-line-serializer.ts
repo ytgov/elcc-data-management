@@ -1,35 +1,33 @@
+import { pick } from "lodash"
+
+import { formatDollar } from "@/utils/formatter"
+
 import { FundingSubmissionLine } from "@/models"
 
 import BaseSerializer from "@/serializers/base-serializer"
 
-import { formatDollar } from "@/utils/formatter"
-
 export class FundingSubmissionLineSerializer extends BaseSerializer<FundingSubmissionLine> {
-  constructor(modelOrModels: FundingSubmissionLine | FundingSubmissionLine[]) {
-    super(modelOrModels)
+  static asTable(fundingSubmissionLines: FundingSubmissionLine[]) {
+    return fundingSubmissionLines.map((fundingSubmissionLine) => {
+      return new this(fundingSubmissionLine).asTable()
+    })
   }
 
-  protected registerDefaultView() {
-    const view = this.addView("default")
-    view.addFields(
-      "id",
-      "fiscalYear",
-      "sectionName",
-      "lineName",
-      "fromAge",
-      "toAge",
-      "monthlyAmount"
-    )
-
-    view.addField(
-      "ageRange",
-      (model: FundingSubmissionLine): string => `${model.fromAge} ${model.toAge}`
-    )
-    // TODO: switch money to being stored as cents and move all formating of it to the front-end
-    view.addField("monthlyAmountDisplay", (model: FundingSubmissionLine): string =>
-      formatDollar(model.monthlyAmount)
-    )
-    return view
+  private asTable() {
+    return {
+      ...pick(this.record, [
+        "id",
+        "fiscalYear",
+        "sectionName",
+        "lineName",
+        "fromAge",
+        "toAge",
+        "monthlyAmount",
+      ]),
+      ageRange: `${this.record.fromAge} ${this.record.toAge}`,
+      // TODO: move formating of it to the front-end
+      monthlyAmountDisplay: formatDollar(this.record.monthlyAmount),
+    }
   }
 }
 

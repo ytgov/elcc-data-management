@@ -17,7 +17,7 @@ submissionLineRouter.get("/", async (req: Request, res: Response) => {
   const fundingSubmissionLines = await FundingSubmissionLine.findAll()
 
   const serailizedFundingSubmissionLines =
-    FundingSubmissionLineSerializer.serialize(fundingSubmissionLines)
+    FundingSubmissionLineSerializer.asTable(fundingSubmissionLines)
 
   res.json({ data: serailizedFundingSubmissionLines })
 })
