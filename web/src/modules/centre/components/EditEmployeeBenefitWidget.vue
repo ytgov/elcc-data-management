@@ -148,8 +148,8 @@
         </td>
       </tr>
       <tr>
-        <td class="text-uppercase d-flex align-center">
-          Section Total
+        <td class="d-flex align-center">
+          Total Cost
           <v-tooltip bottom>
             <template #activator="{ props }">
               <v-icon
@@ -158,16 +158,13 @@
                 >mdi-help-circle-outline</v-icon
               >
             </template>
-            <span class="text-white">
-              Totaling the lesser of either {{ costCapPercentage }}% of Gross Payroll or Employee
-              Cost plus Employer Cost
-            </span>
+            <span class="text-white"> Totaling the sum of Employee Cost plus Employer Cost </span>
           </v-tooltip>
         </td>
         <td>
           <v-text-field
-            :model-value="formatMoney(minimumTotalCostEstimated)"
-            aria-label="Minimum Total Cost Estimated"
+            :model-value="formatMoney(totalCostEstimated)"
+            aria-label="Total Cost Estimated"
             color="primary"
             density="compact"
             tabindex="-1"
@@ -179,8 +176,51 @@
         <td></td>
         <td>
           <v-text-field
-            :model-value="formatMoney(minimumTotalCostActual)"
-            aria-label="Minimum Total Cost Actual"
+            :model-value="formatMoney(totalCostActual)"
+            aria-label="Total Cost Actual"
+            color="primary"
+            density="compact"
+            tabindex="-1"
+            variant="plain"
+            hide-details
+            readonly
+          />
+        </td>
+      </tr>
+      <tr>
+        <td class="text-uppercase d-flex align-center">
+          Paid Amount
+          <v-tooltip bottom>
+            <template #activator="{ props }">
+              <v-icon
+                class="ml-1"
+                v-bind="props"
+                >mdi-help-circle-outline</v-icon
+              >
+            </template>
+            <span class="text-white">
+              Totaling the lesser of either {{ costCapPercentage }}% of Gross Payroll or Employer
+              Cost
+            </span>
+          </v-tooltip>
+        </td>
+        <td>
+          <v-text-field
+            :model-value="formatMoney(minimumPaidAmountEstimated)"
+            aria-label="Minimum Paid Amount Estimated"
+            color="primary"
+            density="compact"
+            tabindex="-1"
+            variant="plain"
+            hide-details
+            readonly
+          />
+        </td>
+        <td></td>
+        <td>
+          <v-text-field
+            :model-value="formatMoney(minimumPaidAmountActual)"
+            aria-label="Minimum Paid Amount Actual"
             color="primary"
             density="compact"
             tabindex="-1"
@@ -212,13 +252,15 @@
 import { computed, ref, watch } from "vue"
 import { isEmpty, isUndefined, round } from "lodash"
 
-import employeeBenefitsApi, { type EmployeeBenefit } from "@/api/employee-benefits-api"
+import employeeBenefitsApi, {
+  isPersistedEmployeeBenefit,
+  type EmployeeBenefit,
+  type NonPersistedEmployeeBenefit,
+} from "@/api/employee-benefits-api"
 import { useNotificationStore } from "@/store/NotificationStore"
 import { formatMoney } from "@/utils/format-money"
 
 import CurrencyInput from "@/components/CurrencyInput.vue"
-
-type NonPersistedEmployeeBenefit = Omit<EmployeeBenefit, "id" | "createdAt" | "updatedAt">
 
 const notificationStore = useNotificationStore()
 
@@ -267,21 +309,25 @@ const monthlyBenefitCostCapActual = computed(() => {
 
   return employeeBenefit.value.grossPayrollMonthlyActual * employeeBenefit.value.costCapPercentage
 })
-const minimumTotalCostEstimated = computed(() => {
+const totalCostEstimated = computed(() => {
   if (isUndefined(employeeBenefit.value)) return 0
 
-  return Math.min(
-    employeeBenefit.value.employeeCostEstimated + employeeBenefit.value.employerCostEstimated,
-    monthlyBenefitCostCapEstimated.value
-  )
+  return employeeBenefit.value.employeeCostEstimated + employeeBenefit.value.employerCostEstimated
 })
-const minimumTotalCostActual = computed(() => {
+const totalCostActual = computed(() => {
   if (isUndefined(employeeBenefit.value)) return 0
 
-  return Math.min(
-    employeeBenefit.value.employeeCostActual + employeeBenefit.value.employerCostActual,
-    monthlyBenefitCostCapActual.value
-  )
+  return employeeBenefit.value.employeeCostActual + employeeBenefit.value.employerCostActual
+})
+const minimumPaidAmountEstimated = computed(() => {
+  if (isUndefined(employeeBenefit.value)) return 0
+
+  return Math.min(employeeBenefit.value.employerCostEstimated, monthlyBenefitCostCapEstimated.value)
+})
+const minimumPaidAmountActual = computed(() => {
+  if (isUndefined(employeeBenefit.value)) return 0
+
+  return Math.min(employeeBenefit.value.employerCostActual, monthlyBenefitCostCapActual.value)
 })
 
 function buildEmployeeBenefit(attributes: Partial<EmployeeBenefit>): NonPersistedEmployeeBenefit {
@@ -350,16 +396,10 @@ function updateEmployeeBenefitCurrencyValue(
   }
 }
 
-function isPersisted(
-  employeeBenefit: EmployeeBenefit | NonPersistedEmployeeBenefit
-): employeeBenefit is EmployeeBenefit {
-  return "id" in employeeBenefit && !isUndefined(employeeBenefit.id)
-}
-
 async function save() {
   if (isUndefined(employeeBenefit.value)) return
 
-  if (isPersisted(employeeBenefit.value)) {
+  if (isPersistedEmployeeBenefit(employeeBenefit.value)) {
     await update(employeeBenefit.value.id, employeeBenefit.value)
   } else {
     await create(employeeBenefit.value)

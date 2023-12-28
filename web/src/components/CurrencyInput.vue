@@ -1,39 +1,74 @@
 <template>
-  <!--
-    Supress default update:model-value emit, then triggers on blur instead
-    This fixes the annoying cursor jump to end bug
-  -->
   <v-text-field
     ref="inputRef"
-    :model-value="modelValue"
+    :model-value="formattedValue"
     type="text"
+    @focus="onFocus"
     @blur="onBlur"
-    @update:model-value="false"
+    @keydown.escape="resetValue"
   />
 </template>
 
 <script setup lang="ts">
-import { useCurrencyInput, type CurrencyInputOptions } from "vue-currency-input"
+import { ref, watch } from "vue"
+import { useCurrencyInput, type CurrencyInputOptions, CurrencyDisplay } from "vue-currency-input"
 
-const props = defineProps({
-  modelValue: Number,
-  options: {
-    type: Object,
-    default: () => ({
-      currency: "USD",
-      precision: 2,
-      // accountingSign: true,
-      hideCurrencySymbolOnFocus: false,
-    }),
-  },
-})
+const DEFAULT_OPTIONS = {
+  currency: "CAD",
+  locale: "en-CA",
+  currencyDisplay: CurrencyDisplay.symbol,
+  precision: 2,
+  // accountingSign: true,
+  hideCurrencySymbolOnFocus: true,
+}
 
+const props = defineProps<{
+  modelValue: number | null
+  options?: Partial<CurrencyInputOptions>
+}>()
+
+const initialNumberValue = ref(props.modelValue)
 const emit = defineEmits(["update:modelValue"])
 
-const autoEmit = false
-const { inputRef, numberValue } = useCurrencyInput(props.options as CurrencyInputOptions, autoEmit)
+const { inputRef, numberValue, setValue, setOptions, formattedValue } = useCurrencyInput(
+  {
+    ...DEFAULT_OPTIONS,
+    ...props.options,
+  },
+  false
+)
 
-function onBlur() {
-  emit("update:modelValue", numberValue.value)
+watch(
+  () => props.modelValue,
+  (value) => {
+    setValue(value)
+  }
+)
+
+watch(
+  () => props.options,
+  (options) => {
+    setOptions({
+      ...DEFAULT_OPTIONS,
+      ...options,
+    })
+  }
+)
+
+function onFocus() {
+  initialNumberValue.value = numberValue.value
+}
+
+async function onBlur() {
+  if (numberValue.value === null) {
+    resetValue()
+  } else {
+    emit("update:modelValue", numberValue.value)
+  }
+}
+
+function resetValue() {
+  setValue(initialNumberValue.value)
+  emit("update:modelValue", initialNumberValue.value)
 }
 </script>

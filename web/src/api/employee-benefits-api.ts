@@ -15,13 +15,21 @@ export type EmployeeBenefit = {
   updatedAt: Date
 }
 
+export type NonPersistedEmployeeBenefit = Omit<EmployeeBenefit, "id" | "createdAt" | "updatedAt">
+
 export type Params = {
   where?: {
     centreId?: EmployeeBenefit["centreId"]
-    fiscalPeriodId?: EmployeeBenefit["fiscalPeriodId"]
+    fiscalPeriodId?: EmployeeBenefit["fiscalPeriodId"] | EmployeeBenefit["fiscalPeriodId"][]
   }
   page?: number
   perPage?: number
+}
+
+export function isPersistedEmployeeBenefit(
+  employeeBenefit: EmployeeBenefit | NonPersistedEmployeeBenefit
+): employeeBenefit is EmployeeBenefit {
+  return "id" in employeeBenefit && employeeBenefit.id !== undefined
 }
 
 export const employeeBenefitsApi = {

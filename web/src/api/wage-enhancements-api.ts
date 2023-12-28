@@ -23,6 +23,9 @@ export type Params = {
   }
 }
 
+// TODO: store this in the back-end, probably in the fiscal_periods table
+export const EI_CPP_WCB_RATE = 0.14
+
 export const wageEnhancementsApi = {
   list(params: Params = {}): Promise<{
     wageEnhancements: WageEnhancement[]

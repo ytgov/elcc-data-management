@@ -60,7 +60,7 @@ centreRouter.get("/:id/worksheets", async (req: Request, res: Response) => {
     where: { centreId: id },
     order: ["dateStart"],
   })
-  const serializedGroups = FundingSubmissionLineJsonSerializer.serializeWorksheetsView(worksheets)
+  const serializedGroups = FundingSubmissionLineJsonSerializer.asWorksheet(worksheets)
   return res.json({ data: serializedGroups })
 })
 
