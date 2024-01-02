@@ -1,0 +1,5 @@
+// Helps VSCode detect typescript path aliases in test files
+{
+  "extends": "../tsconfig.json",
+  "include": ["./**/*.test.ts"]
+}
