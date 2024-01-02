@@ -21,7 +21,7 @@ export class Payment extends Model<InferAttributes<Payment>, InferCreationAttrib
   declare id: CreationOptional<number>
   declare centreId: ForeignKey<Centre["id"]>
   declare fiscalYear: string
-  declare paidOn: Date
+  declare paidOn: string
   declare amountInCents: number
   declare name: string
   declare createdAt: CreationOptional<Date>
