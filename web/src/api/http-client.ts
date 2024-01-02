@@ -22,9 +22,16 @@ httpClient.interceptors.request.use(async (config) => {
   return config
 })
 
-httpClient.interceptors.response.use(null, (error) => {
-  // Any status codes that falls outside the range of 2xx causes this function to trigger
-  if (error?.response?.data?.message) {
+// Any status codes that falls outside the range of 2xx causes this function to trigger
+httpClient.interceptors.response.use(null, async (error) => {
+  // Auth0 error type is unknown but it sets the error.error property to "login_required"
+  // Bounce the user if they hit a login required error when trying to access a protected route
+  // It would probably be better to move this code to a route guard or something?
+  if (error?.error === "login_required") {
+    await auth0.loginWithRedirect({
+      appState: { targetUrl: window.location.pathname },
+    })
+  } else if (error?.response?.data?.message) {
     throw new Error(error.response.data.message)
   } else if (error.message) {
     throw new Error(error.message)
