@@ -59,6 +59,18 @@ services:
       db:
         condition: service_healthy
 
+  test_web:
+    build:
+      context: ./web
+      dockerfile: development.Dockerfile
+    command: /bin/true
+    environment:
+      <<: *default-environment
+      NODE_ENV: test
+    tty: true
+    volumes:
+      - ./web:/usr/src/web
+
   db:
     image: mcr.microsoft.com/mssql/server:2019-latest
     user: root

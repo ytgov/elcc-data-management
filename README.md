@@ -236,3 +236,13 @@ Seeds currently don't keep track of whether they have run or not. An alternative
 If you want to take over a directory or file in Linux you can use `dev ownit <path-to-directory-or-file>`.
 
 If you are on Windows or Mac, and you want that to work, you should implement it in the `bin/dev` file. You might never actually need to take ownership of anything, so this might not be relevant to you.
+
+## Testing
+
+### Back-end
+
+Run `dev test_api` to run the back-end tests.
+
+### Front-end
+
+Run `dev test_web` to run the front-end tests.
