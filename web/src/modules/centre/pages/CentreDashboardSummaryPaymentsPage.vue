@@ -108,7 +108,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, onMounted, type Ref } from "vue"
+import { computed, ref, type Ref, watch } from "vue"
 import { isEmpty } from "lodash"
 import { storeToRefs } from "pinia"
 
@@ -157,14 +157,18 @@ const paymentNames = ref([
   "Reconciliation",
 ])
 
-onMounted(async () => {
-  await paymentsStore.initialize({
-    where: {
-      centreId: props.centreId,
-      fiscalYear: fiscalYear.value,
-    },
-  })
-})
+watch<[number, string], true>(
+  () => [props.centreId, fiscalYear.value],
+  ([newCenterId, newFiscalYear], _oldValues) => {
+    paymentsStore.fetch({
+      where: {
+        centreId: newCenterId,
+        fiscalYear: newFiscalYear,
+      },
+    })
+  },
+  { immediate: true }
+)
 
 function updatePaymentAmount(payment: Payment | NonPersistedPayment, newValue: string) {
   if (["-", "", null].includes(newValue)) {

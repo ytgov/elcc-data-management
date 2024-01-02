@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 // Plugins
 import vue from "@vitejs/plugin-vue"
 import vuetify from "vite-plugin-vuetify"
@@ -28,5 +29,8 @@ export default defineConfig({
   },
   server: {
     port: 8080,
+  },
+  test: {
+    globals: true, // https://vitest.dev/config/#globals
   },
 })

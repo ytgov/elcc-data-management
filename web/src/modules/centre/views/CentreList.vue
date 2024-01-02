@@ -51,6 +51,7 @@
           :search="search"
           class="row-clickable"
           @click:row="tableRowClick"
+          @dblclick:row="goToCentre"
         ></v-data-table>
       </v-card>
     </v-col>
