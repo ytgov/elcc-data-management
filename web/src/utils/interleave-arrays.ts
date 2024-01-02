@@ -20,12 +20,17 @@ export function interleaveArrays<A, B>(
   bArray: B[],
   { chunkSize = 2 }: { chunkSize?: number } = {}
 ): (A | B)[] {
-  return bArray.flatMap((b, bIndex) => {
-    const a = aArray[bIndex]
-    if (a !== undefined && bIndex % chunkSize === 0) {
+  let aIndex = 0
+  const interleavedArray = bArray.flatMap((b, bIndex) => {
+    if (aIndex < aArray.length && bIndex % chunkSize === 0) {
+      const a = aArray[aIndex]
+      aIndex += 1
       return [a, b]
     }
 
     return b
   })
+
+  const remainingAElements = aArray.slice(aIndex)
+  return interleavedArray.concat(remainingAElements)
 }
