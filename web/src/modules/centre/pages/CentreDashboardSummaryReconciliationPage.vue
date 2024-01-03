@@ -11,42 +11,36 @@
     </thead>
     <tbody>
       <template
-        v-for="(adjustment, adjustmentIndex) in allAdjustments"
+        v-for="({ label, expense, payment, runningTotal }, adjustmentIndex) in allAdjustments"
         :key="`adjustment-${adjustmentIndex}`"
       >
         <tr :class="rowClasses(adjustmentIndex)">
-          <td class="text-left font-weight-bold">{{ adjustment.name }}</td>
-
-          <template v-if="adjustment.type === PAYMENT_TYPE">
-            <td class="text-right">{{ formatMoney(centsToDollars(adjustment.amountInCents)) }}</td>
-            <td class="text-right"></td>
-            <td class="text-right"></td>
-          </template>
-          <template v-else-if="isExpenseTypeAdjustment(adjustment)">
-            <td class="text-right"></td>
-            <td class="text-right"></td>
-            <td class="adjustment-cell text-right">
-              {{ formatMoney(centsToDollars(adjustment.amountInCents)) }}
-              <v-tooltip
-                v-if="!isEmpty(adjustment.note)"
-                bottom
-              >
-                <template #activator="{ props }">
-                  <sup class="asterisk-icon">
-                    <v-icon
-                      size="small"
-                      v-bind="props"
-                      >mdi-asterisk-circle-outline</v-icon
-                    >
-                  </sup>
-                </template>
-                <span class="text-white">{{ adjustment.note }}</span>
-              </v-tooltip>
-            </td>
-          </template>
+          <td class="text-left font-weight-bold">{{ label }}</td>
+          <td class="text-right">
+            {{ formatMoney(centsToDollars(payment.amountInCents)) }}
+          </td>
+          <td class="text-right"></td>
+          <td class="adjustment-cell text-right">
+            {{ formatMoney(centsToDollars(expense.amountInCents)) }}
+            <v-tooltip
+              v-if="!isEmpty(expense.note)"
+              bottom
+            >
+              <template #activator="{ props }">
+                <sup class="asterisk-icon">
+                  <v-icon
+                    size="small"
+                    v-bind="props"
+                    >mdi-asterisk-circle-outline</v-icon
+                  >
+                </sup>
+              </template>
+              <span class="text-white">{{ expense.note }}</span>
+            </v-tooltip>
+          </td>
 
           <td class="text-right">
-            {{ formatMoney(centsToDollars(allAdjustmentsRunningTotals[adjustmentIndex])) }}
+            {{ formatMoney(centsToDollars(runningTotal)) }}
           </td>
         </tr>
       </template>
@@ -56,7 +50,7 @@
         <td class="text-right"></td>
         <td class="text-right">{{ formatMoney(centsToDollars(expensesTotal)) }}</td>
         <td class="text-right">
-          {{ formatMoney(centsToDollars(allAdjustmentsRunningTotals[allAdjustments.length - 1])) }}
+          {{ formatMoney(centsToDollars(allAdjustmentsTotalInCents)) }}
         </td>
       </tr>
       <tr>
@@ -97,11 +91,11 @@
 </template>
 
 <script setup lang="ts">
+import { isEmpty, isNil, keyBy, mapValues, sumBy, upperFirst } from "lodash"
 import { ref, computed, onMounted } from "vue"
-import { isEmpty, isNil, keyBy, mapValues, sumBy } from "lodash"
+import { DateTime, Interval } from "luxon"
 
 import { formatMoney, centsToDollars, dollarsToCents } from "@/utils/format-money"
-import { interleaveArrays } from "@/utils/interleave-arrays"
 
 import employeeBenefitsApi, { EmployeeBenefit } from "@/api/employee-benefits-api"
 import employeeWageTiersApi from "@/api/employee-wage-tiers-api"
@@ -111,29 +105,10 @@ import wageEnhancementsApi, { EI_CPP_WCB_RATE } from "@/api/wage-enhancements-ap
 import useFundingSubmissionLineJsonsStore from "@/store/funding-submission-line-jsons"
 import usePaymentsStore from "@/store/payments"
 
-const PAYMENT_TYPE = "payment"
-const EXPENSE_TYPE = "expense"
-const DATE_NAMES = [
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-  "January",
-  "February",
-  "March",
-]
-
-type Expense = {
-  dateName: string
-  name: string
+type Adjustment = {
+  fiscalPeriodId: number
   amountInCents: number
   note: string
-  type: typeof EXPENSE_TYPE
 }
 
 const props = defineProps({
@@ -163,48 +138,68 @@ const employeeBenefits = ref<
 >([])
 const employeeBenefitsByMonth = computed(() => keyBy(employeeBenefits.value, "fiscalPeriod.month"))
 
-const expenses = ref<Expense[]>(
-  DATE_NAMES.map((dateName) => ({
-    dateName,
-    name: `${dateName} Expenses`,
-    amountInCents: 0,
-    note: "",
-    type: EXPENSE_TYPE,
-  }))
+const expenses = ref<Adjustment[]>([])
+const expensesByFiscalPeriodId = computed(() => keyBy(expenses.value, "fiscalPeriodId"))
+const paymentAdujstments = computed<Adjustment[]>(() => {
+  return fiscalPeriods.value.map((fiscalPeriod) => {
+    const fiscalPeriodInterval = Interval.fromDateTimes(
+      fiscalPeriod.dateStart,
+      fiscalPeriod.dateEnd
+    )
+    // TODO: update data model so payments have a fiscal period id
+    const paymentsForPeriod = payments.value.filter((payment) => {
+      const paidOn = DateTime.fromFormat(payment.paidOn, "yyyy-MM-dd")
+      return fiscalPeriodInterval.contains(paidOn)
+    })
+
+    const amountInCents = sumBy(paymentsForPeriod, "amountInCents")
+
+    return {
+      fiscalPeriodId: fiscalPeriod.id,
+      amountInCents,
+      note: "",
+    }
+  })
+})
+const paymentAdujstmentsByFiscalPeriodId = computed(() =>
+  keyBy(paymentAdujstments.value, "fiscalPeriodId")
 )
 
-const typedPayments = computed(() =>
-  payments.value.map((payment) => ({
-    ...payment,
-    type: PAYMENT_TYPE,
-  }))
-)
+const allAdjustments = computed<
+  {
+    fiscalPeriodId: number
+    label: string
+    expense: Adjustment
+    payment: Adjustment
+    runningTotal: number
+  }[]
+>(() => {
+  let runningTotal = 0
+  return fiscalPeriods.value.map((fiscalPeriod) => {
+    const monthName = upperFirst(fiscalPeriod.month)
+    const paymentsForPeriod = paymentAdujstmentsByFiscalPeriodId.value[fiscalPeriod.id]
+    const expensesForPeriod = expensesByFiscalPeriodId.value[fiscalPeriod.id]
 
-const allAdjustments = computed(() => {
-  return interleaveArrays(typedPayments.value, expenses.value, { chunkSize: 2 })
+    runningTotal += paymentsForPeriod.amountInCents
+    runningTotal -= expensesForPeriod.amountInCents
+
+    return {
+      fiscalPeriodId: fiscalPeriod.id,
+      label: `${monthName} Expenses`,
+      expense: expensesForPeriod,
+      payment: paymentsForPeriod,
+      runningTotal,
+    }
+  })
 })
 
-const allAdjustmentsRunningTotals = computed(() => {
-  let total = 0
-  return allAdjustments.value.map((adjustment) => {
-    if (adjustment.type === PAYMENT_TYPE) {
-      total += adjustment.amountInCents
-    } else if (adjustment.type === EXPENSE_TYPE) {
-      total -= adjustment.amountInCents
-    }
-    return total
-  })
+const allAdjustmentsTotalInCents = computed(() => {
+  const lastAdjustment = allAdjustments.value[allAdjustments.value.length - 1]
+  return lastAdjustment?.runningTotal || 0
 })
 
 const paymentsTotal = computed(() => sumBy(payments.value, "amountInCents"))
 const expensesTotal = computed(() => sumBy(expenses.value, "amountInCents"))
-
-function isExpenseTypeAdjustment(adjustment: unknown): adjustment is Expense {
-  if (typeof adjustment !== "object" || adjustment === null) return false
-  if (!("type" in adjustment)) return false
-
-  return adjustment.type === EXPENSE_TYPE
-}
 
 onMounted(async () => {
   await paymentsStore.initialize({
@@ -223,7 +218,7 @@ onMounted(async () => {
   })
   if (isEmpty(fundingSubmissionLineJsonsStore.items)) return
 
-  await updateExpenseValues()
+  expenses.value = await buildExpenseValues(fiscalPeriods.value)
 })
 
 async function fetchFiscalPeriods() {
@@ -249,22 +244,32 @@ async function fetchEmployeeBenefits(): Promise<void> {
   }))
 }
 
-async function updateExpenseValues() {
-  expenses.value.map((expense) => {
-    const { dateName } = expense
-    const linesForMonth = fundingSubmissionLineJsonsStore.linesForMonth(dateName)
+async function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjustment[]> {
+  const expensePromises = fiscalPeriods.map(async (fiscalPeriod) => {
+    const { month } = fiscalPeriod
+    const monthAsDateName = upperFirst(month)
+    const linesForMonth = fundingSubmissionLineJsonsStore.linesForMonth(monthAsDateName)
 
+    const expense = {
+      fiscalPeriodId: fiscalPeriod.id,
+      amountInCents: 0,
+      note: "",
+    }
     expense.amountInCents = dollarsToCents(sumBy(linesForMonth, "actualComputedTotal"))
 
-    injectEmployeeBenefitMonthlyCost(expense, dateName.toLowerCase())
-    lazyInjectWageEnhancementMonthlyCost(expense, dateName.toLowerCase())
+    injectEmployeeBenefitMonthlyCost(expense, month)
+    await lazyInjectWageEnhancementMonthlyCost(expense, month)
+
+    return expense
   })
+
+  return Promise.all(expensePromises)
 }
 
 /*
   This function injects the estimated paid amount, until the actual paid amount is available.
 */
-function injectEmployeeBenefitMonthlyCost(expense: Expense, month: string): void {
+function injectEmployeeBenefitMonthlyCost(expense: Adjustment, month: string): void {
   const employeeBenefitForMonth = employeeBenefitsByMonth.value[month]
   if (isNil(employeeBenefitForMonth)) return
 
@@ -296,7 +301,7 @@ function injectEmployeeBenefitMonthlyCost(expense: Expense, month: string): void
 /*
   This function injects the estimated total amount, until the actual total amount is available.
 */
-async function lazyInjectWageEnhancementMonthlyCost(expense: Expense, month: string) {
+async function lazyInjectWageEnhancementMonthlyCost(expense: Adjustment, month: string) {
   const fiscalPeriod = fiscalPeriodsByMonth.value[month]
   const { employeeWageTiers } = await employeeWageTiersApi.list({
     where: {
