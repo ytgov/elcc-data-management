@@ -11,7 +11,7 @@
     </thead>
     <tbody>
       <template
-        v-for="({ label, expense, payment, runningTotal }, adjustmentIndex) in allAdjustments"
+        v-for="({ label, expense, payment, runningTotal }, adjustmentIndex) in adjustmentRows"
         :key="`adjustment-${adjustmentIndex}`"
       >
         <tr :class="rowClasses(adjustmentIndex)">
@@ -50,7 +50,7 @@
         <td class="text-right"></td>
         <td class="text-right">{{ formatMoney(centsToDollars(expensesTotal)) }}</td>
         <td class="text-right">
-          {{ formatMoney(centsToDollars(allAdjustmentsTotalInCents)) }}
+          {{ formatMoney(centsToDollars(adjustmentsTotal)) }}
         </td>
       </tr>
       <tr>
@@ -91,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { isEmpty, isNil, keyBy, mapValues, sumBy, upperFirst } from "lodash"
+import { compact, isEmpty, isNil, keyBy, mapValues, sumBy, upperFirst } from "lodash"
 import { ref, computed, onMounted } from "vue"
 import { DateTime, Interval } from "luxon"
 
@@ -165,7 +165,7 @@ const paymentAdujstmentsByFiscalPeriodId = computed(() =>
   keyBy(paymentAdujstments.value, "fiscalPeriodId")
 )
 
-const allAdjustments = computed<
+const adjustmentRows = computed<
   {
     fiscalPeriodId: number
     label: string
@@ -175,10 +175,14 @@ const allAdjustments = computed<
   }[]
 >(() => {
   let runningTotal = 0
-  return fiscalPeriods.value.map((fiscalPeriod) => {
+  const rows = fiscalPeriods.value.map((fiscalPeriod) => {
     const monthName = upperFirst(fiscalPeriod.month)
     const paymentsForPeriod = paymentAdujstmentsByFiscalPeriodId.value[fiscalPeriod.id]
     const expensesForPeriod = expensesByFiscalPeriodId.value[fiscalPeriod.id]
+
+    if (isNil(paymentsForPeriod) || isNil(expensesForPeriod)) {
+      return null
+    }
 
     runningTotal += paymentsForPeriod.amountInCents
     runningTotal -= expensesForPeriod.amountInCents
@@ -191,15 +195,13 @@ const allAdjustments = computed<
       runningTotal,
     }
   })
-})
 
-const allAdjustmentsTotalInCents = computed(() => {
-  const lastAdjustment = allAdjustments.value[allAdjustments.value.length - 1]
-  return lastAdjustment?.runningTotal || 0
+  return compact(rows)
 })
 
 const paymentsTotal = computed(() => sumBy(payments.value, "amountInCents"))
 const expensesTotal = computed(() => sumBy(expenses.value, "amountInCents"))
+const adjustmentsTotal = computed(() => paymentsTotal.value - expensesTotal.value)
 
 onMounted(async () => {
   await paymentsStore.initialize({
