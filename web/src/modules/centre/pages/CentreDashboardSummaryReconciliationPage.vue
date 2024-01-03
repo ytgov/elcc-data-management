@@ -10,6 +10,13 @@
       </tr>
     </thead>
     <tbody>
+      <v-skeleton-loader
+        v-if="adjustmentRows.length === 0"
+        :loading="true"
+        :rows="10"
+        :columns="5"
+        type="table"
+      />
       <template
         v-for="({ label, expense, payment, runningTotal }, adjustmentIndex) in adjustmentRows"
         :key="`adjustment-${adjustmentIndex}`"
