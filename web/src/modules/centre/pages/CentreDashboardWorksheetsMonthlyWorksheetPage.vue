@@ -50,7 +50,7 @@
 <script lang="ts" setup>
 import { watch, computed, ref } from "vue"
 import { groupBy, isEmpty, isEqual, isNil } from "lodash"
-import moment from "moment"
+import moment from "moment" // TODO: deprecated; replace with luxon
 
 import fundingSubmissionLineJsonsApi, {
   FundingSubmissionLineJson,

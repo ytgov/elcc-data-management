@@ -1,4 +1,4 @@
-import moment from "moment"
+import moment from "moment" // TODO: deprecated; replace with luxon
 
 export { formatMoney } from "./format-money"
 
