@@ -32,7 +32,7 @@
 
 <script lang="ts" setup>
 import { computed, ref, watchEffect } from "vue"
-import moment from "moment"
+import moment from "moment" // TODO: deprecated; replace with luxon
 
 import { useNotificationStore } from "@/store/NotificationStore"
 import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"

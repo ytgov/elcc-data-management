@@ -51,7 +51,7 @@
   </BaseCard>
 </template>
 <script lang="ts">
-import moment from "moment"
+import moment from "moment" // TODO: deprecated; replace with luxon
 // import { CareCentre } from "@models";
 
 export default {
