@@ -51,7 +51,7 @@
           <td>
             <v-text-field
               v-model="payment.paidOn"
-              :rules="[dateRule]"
+              :rules="[dateRule, containedInFiscalYear]"
               aria-label="Paid On"
               color="primary"
               density="compact"
@@ -109,9 +109,11 @@
 
 <script lang="ts" setup>
 import { computed, ref, type Ref, watch } from "vue"
-import { isEmpty } from "lodash"
+import { DateTime, Interval } from "luxon"
+import { first, isEmpty, isNil, last } from "lodash"
 import { storeToRefs } from "pinia"
 
+import { useFiscalPeriodsStore } from "@/store/fiscal-periods"
 import {
   usePaymentsStore,
   isPersistedPayment,
@@ -136,6 +138,7 @@ const props = defineProps({
 })
 
 const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
+const fiscalPeriodsStore = useFiscalPeriodsStore()
 const paymentsStore = usePaymentsStore()
 
 const { isLoading } = storeToRefs(paymentsStore)
@@ -157,18 +160,43 @@ const paymentNames = ref([
   "Reconciliation",
 ])
 
+const fiscalYearInterval = computed(() => {
+  const firstFiscalPeriod = first(fiscalPeriodsStore.fiscalPeriods)
+  const lastFiscalPeriod = last(fiscalPeriodsStore.fiscalPeriods)
+  const fiscalYearStart = firstFiscalPeriod?.dateStart
+  const fiscalYearEnd = lastFiscalPeriod?.dateEnd
+
+  if (isNil(fiscalYearStart) || isNil(fiscalYearEnd)) {
+    return
+  }
+
+  return Interval.fromDateTimes(fiscalYearStart, fiscalYearEnd)
+})
+
 watch<[number, string], true>(
-  () => [props.centreId, fiscalYear.value],
-  ([newCenterId, newFiscalYear], _oldValues) => {
+  () => [props.centreId, props.fiscalYearSlug],
+  ([newCenterId, newFiscalYearSlug], _oldValues) => {
+    const newFiscalYear = newFiscalYearSlug.replace("-", "/")
     paymentsStore.fetch({
       where: {
         centreId: newCenterId,
         fiscalYear: newFiscalYear,
       },
     })
+    fiscalPeriodsStore.fetch({
+      where: {
+        fiscalYear: newFiscalYearSlug,
+      },
+    })
   },
   { immediate: true }
 )
+
+function containedInFiscalYear(value: string) {
+  const date = DateTime.fromFormat(value, "yyyy-MM-dd")
+
+  return fiscalYearInterval.value?.contains(date) || "Date must be within the fiscal year"
+}
 
 function updatePaymentAmount(payment: Payment | NonPersistedPayment, newValue: string) {
   if (["-", "", null].includes(newValue)) {
