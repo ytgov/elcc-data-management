@@ -46,7 +46,7 @@
 <script lang="ts" setup>
 defineProps({
   centreId: {
-    type: String,
+    type: Number,
     required: true,
   },
   fiscalYearSlug: {

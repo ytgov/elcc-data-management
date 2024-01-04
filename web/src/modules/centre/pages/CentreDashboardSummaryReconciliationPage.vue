@@ -11,7 +11,7 @@
     </thead>
     <tbody>
       <v-skeleton-loader
-        v-if="adjustmentRows.length === 0"
+        v-if="isLoading"
         :loading="true"
         :rows="10"
         :columns="5"
@@ -99,8 +99,8 @@
 
 <script setup lang="ts">
 import { compact, isEmpty, isNil, keyBy, mapValues, sumBy, upperFirst } from "lodash"
-import { ref, computed, onMounted } from "vue"
 import { DateTime, Interval } from "luxon"
+import { ref, computed, watch } from "vue"
 
 import { formatMoney, centsToDollars, dollarsToCents } from "@/utils/format-money"
 
@@ -120,7 +120,7 @@ type Adjustment = {
 
 const props = defineProps({
   centreId: {
-    type: String,
+    type: Number,
     required: true,
   },
   fiscalYearSlug: {
@@ -129,13 +129,11 @@ const props = defineProps({
   },
 })
 
-const centreIdNumber = computed(() => parseInt(props.centreId))
-const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
+const isLoading = ref(false)
 const paymentsStore = usePaymentsStore()
 const payments = computed(() => paymentsStore.items)
 const fundingSubmissionLineJsonsStore = useFundingSubmissionLineJsonsStore()
 const fiscalPeriods = ref<FiscalPeriod[]>([])
-const fiscalPeriodIds = computed(() => fiscalPeriods.value.map((fiscalPeriod) => fiscalPeriod.id))
 const fiscalPeriodsById = computed(() => keyBy(fiscalPeriods.value, "id"))
 const fiscalPeriodsByMonth = computed(() => keyBy(fiscalPeriods.value, "month"))
 const employeeBenefits = ref<
@@ -210,40 +208,51 @@ const paymentsTotal = computed(() => sumBy(payments.value, "amountInCents"))
 const expensesTotal = computed(() => sumBy(expenses.value, "amountInCents"))
 const adjustmentsTotal = computed(() => paymentsTotal.value - expensesTotal.value)
 
-onMounted(async () => {
-  await paymentsStore.initialize({
-    where: {
-      centreId: centreIdNumber.value,
-      fiscalYear: fiscalYear.value,
-    },
-  })
-  await fetchFiscalPeriods()
-  await fetchEmployeeBenefits()
-  await fundingSubmissionLineJsonsStore.initialize({
-    where: {
-      centreId: centreIdNumber.value,
-      fiscalYear: fiscalYear.value,
-    },
-  })
-  if (isEmpty(fundingSubmissionLineJsonsStore.items)) return
+watch<[number, string], true>(
+  () => [props.centreId, props.fiscalYearSlug],
+  async ([newCentreId, newFiscalYearSlug], _oldValues) => {
+    isLoading.value = true
 
-  expenses.value = await buildExpenseValues(fiscalPeriods.value)
-})
+    const newFiscalYear = newFiscalYearSlug.replace("-", "/")
 
-async function fetchFiscalPeriods() {
-  const { fiscalPeriods: newFiscalPeriods } = await fiscalPeriodsApi.list({
+    await paymentsStore.fetch({
+      where: {
+        centreId: newCentreId,
+        fiscalYear: newFiscalYear,
+      },
+    })
+    fiscalPeriods.value = await fetchFiscalPeriods(newFiscalYearSlug)
+    const fiscalPeriodIds = fiscalPeriods.value.map((fiscalPeriod) => fiscalPeriod.id)
+    await fetchEmployeeBenefits(newCentreId, fiscalPeriodIds)
+    await fundingSubmissionLineJsonsStore.initialize({
+      where: {
+        centreId: newCentreId,
+        fiscalYear: newFiscalYear,
+      },
+    })
+    expenses.value = await buildExpenseValues(fiscalPeriods.value)
+
+    isLoading.value = false
+  },
+  {
+    immediate: true,
+  }
+)
+
+async function fetchFiscalPeriods(fiscalYearSlug: string): Promise<FiscalPeriod[]> {
+  const { fiscalPeriods } = await fiscalPeriodsApi.list({
     where: {
-      fiscalYear: props.fiscalYearSlug,
+      fiscalYear: fiscalYearSlug,
     },
   })
-  fiscalPeriods.value = newFiscalPeriods
+  return fiscalPeriods
 }
 
-async function fetchEmployeeBenefits(): Promise<void> {
+async function fetchEmployeeBenefits(centreId: number, fiscalPeriodsIds: number[]): Promise<void> {
   const { employeeBenefits: newEmployeeBenefits } = await employeeBenefitsApi.list({
     where: {
-      centreId: centreIdNumber.value,
-      fiscalPeriodId: fiscalPeriodIds.value,
+      centreId,
+      fiscalPeriodId: fiscalPeriodsIds,
     },
   })
 
@@ -255,16 +264,18 @@ async function fetchEmployeeBenefits(): Promise<void> {
 
 async function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjustment[]> {
   const expensePromises = fiscalPeriods.map(async (fiscalPeriod) => {
-    const { month } = fiscalPeriod
-    const monthAsDateName = upperFirst(month)
-    const linesForMonth = fundingSubmissionLineJsonsStore.linesForMonth(monthAsDateName)
-
     const expense = {
       fiscalPeriodId: fiscalPeriod.id,
       amountInCents: 0,
       note: "",
     }
-    expense.amountInCents = dollarsToCents(sumBy(linesForMonth, "actualComputedTotal"))
+    const { month } = fiscalPeriod
+    const monthAsDateName = upperFirst(month)
+
+    const linesForMonth = fundingSubmissionLineJsonsStore.linesForMonth(monthAsDateName)
+    if (!isNil(linesForMonth)) {
+      expense.amountInCents += dollarsToCents(sumBy(linesForMonth, "actualComputedTotal"))
+    }
 
     injectEmployeeBenefitMonthlyCost(expense, month)
     await lazyInjectWageEnhancementMonthlyCost(expense, month)
@@ -320,7 +331,7 @@ async function lazyInjectWageEnhancementMonthlyCost(expense: Adjustment, month: 
   const employeeWageTierIds = employeeWageTiers.map((employeeWageTier) => employeeWageTier.id)
   const { wageEnhancements } = await wageEnhancementsApi.list({
     where: {
-      centreId: centreIdNumber.value,
+      centreId: props.centreId,
       employeeWageTierId: employeeWageTierIds,
     },
   })
