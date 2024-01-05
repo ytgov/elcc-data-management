@@ -30,7 +30,10 @@ const routes: RouteRecordRaw[] = [
           {
             path: "summary",
             component: () => import("@/modules/centre/pages/CentreDashboardSummaryPage.vue"),
-            props: true,
+            props: (route) => ({
+              centreId: parseInt(route.params.centreId as string),
+              fiscalYearSlug: route.params.fiscalYearSlug,
+            }),
             children: [
               {
                 path: "",
@@ -42,7 +45,10 @@ const routes: RouteRecordRaw[] = [
                 name: "CentreDashboardSummaryReconciliationPage",
                 component: () =>
                   import("@/modules/centre/pages/CentreDashboardSummaryReconciliationPage.vue"),
-                props: true,
+                props: (route) => ({
+                  centreId: parseInt(route.params.centreId as string),
+                  fiscalYearSlug: route.params.fiscalYearSlug,
+                }),
               },
               {
                 path: "worksheets",

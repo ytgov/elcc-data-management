@@ -43,10 +43,7 @@ export const useFundingSubmissionLineJsonsStore = defineStore("fundingSubmission
   function linesForMonth(dateName: string): FundingLineValue[] | undefined {
     const itemForMonth = items.value.find((time) => time.dateName === dateName)
 
-    if (isNil(itemForMonth)) {
-      console.error(`Could not find funding submission line json for month ${dateName}`)
-      return
-    }
+    if (isNil(itemForMonth)) return
 
     return itemForMonth.lines
   }
