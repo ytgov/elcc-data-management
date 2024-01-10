@@ -30,12 +30,19 @@ jobs:
           tag_prefix: "v"
           tag_template: "yyyy.mm.dd.i"
 
+      - name: Extract Git Commit Hash
+        id: git_commit_hash
+        run: echo "commit_hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
           context: .
           push: true
           tags: ghcr.io/${{ github.repository }}:${{ steps.generate_release_tag.outputs.next_release_tag }}
+          build-args: |
+            RELEASE_TAG=${{ steps.generate_release_tag.outputs.next_release_tag }}
+            GIT_COMMIT_HASH=${{ steps.git_commit_hash.outputs.commit_hash }}
 
       - name: Create release
         uses: ncipollo/release-action@v1

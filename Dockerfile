@@ -1,5 +1,10 @@
+# Stage 0 - base node customizations
+FROM node:18-alpine3.17 as base-node
+
+RUN npm install -g npm@10.2.5
+
 # Stage 1 - api build - requires development environment because typescript
-FROM node:18-alpine3.17 as api-build-stage
+FROM base-node as api-build-stage
 
 ENV NODE_ENV=development
 
@@ -17,7 +22,7 @@ RUN npm run build
 COPY ./api/src/db/data/*.json ./dist/src/db/data/
 
 # State 2 - web build - requires development environment because typescript
-FROM node:18-alpine3.17 as web-build-stage
+FROM base-node as web-build-stage
 
 ENV NODE_ENV=development
 
@@ -33,7 +38,13 @@ COPY web ./
 RUN npm run build
 
 # Stage 3 - production setup
-FROM node:18-alpine3.17
+FROM base-node
+
+ARG RELEASE_TAG
+ARG GIT_COMMIT_HASH
+
+ENV RELEASE_TAG=${RELEASE_TAG}
+ENV GIT_COMMIT_HASH=${GIT_COMMIT_HASH}
 
 RUN apk add --no-cache tzdata
 
@@ -52,6 +63,9 @@ RUN npm install && npm cache clean --force --loglevel=error
 
 COPY --from=api-build-stage --chown=node:node /usr/src/api/dist/src ./dist
 COPY --from=web-build-stage --chown=node:node /usr/src/web/dist ./dist/web
+
+RUN echo "RELEASE_TAG=${RELEASE_TAG}" >> VERSION
+RUN echo "GIT_COMMIT_HASH=${GIT_COMMIT_HASH}" >> VERSION
 
 EXPOSE 8080
 
