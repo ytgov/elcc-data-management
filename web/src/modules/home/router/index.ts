@@ -6,6 +6,7 @@ const routes = [
     component: async () => await import("@/layouts/Default.vue"),
     children: [
       {
+        name: "Dashboard",
         path: "/dashboard",
         component: async () => await import("../views/Dashboard.vue"),
         beforeEnter: authGuard,
