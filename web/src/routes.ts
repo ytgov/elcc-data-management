@@ -16,7 +16,11 @@ const routes: RouteRecordRaw[] = [
       ...homeRoutes,
       ...adminstrationRoutes,
       ...centreRoutes,
-
+      {
+        name: "StatusPage",
+        path: "/status",
+        component: () => import("@/pages/StatusPage.vue"),
+      },
       {
         path: "*",
         component: async () => await import("@/views/NotFound.vue"),

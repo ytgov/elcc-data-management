@@ -2,7 +2,7 @@ import express, { type Request, type Response } from "express"
 import cors from "cors"
 import path from "path"
 import helmet from "helmet"
-import { VUE_APP_FRONTEND_URL } from "@/config"
+import { GIT_COMMIT_HASH, RELEASE_TAG, VUE_APP_FRONTEND_URL } from "@/config"
 import {
   apiRouter,
   userRouter,
@@ -43,12 +43,14 @@ app.use(
     credentials: true,
   })
 )
-/*
-app.get("/api/healthCheck", RequiresData, (req: Request, res: Response) => {
-  // app.get("/api/healthCheck",  (req: Request, res: Response) => {
-  doHealthCheck(req, res);
-});
- */
+
+app.route("/_status").get((req: Request, res: Response) => {
+  res.json({
+    RELEASE_TAG,
+    GIT_COMMIT_HASH,
+  })
+})
+
 app.use("/api/user", userRouter)
 app.use("/api/migrate", migrationRouter)
 app.use("/api/centre", checkJwt, autheticateAndLoadUser, centreRouter)

@@ -80,6 +80,12 @@
               >
             </v-list-item>
             <v-divider />
+            <v-list-item :to="{ name: 'StatusPage' }">
+              <template #prepend>
+                <v-icon>mdi-clock</v-icon>
+              </template>
+              <v-list-item-title>{{ releaseTag }}</v-list-item-title>
+            </v-list-item>
             <v-list-item @click="logoutClick">
               <template #prepend>
                 <v-icon>mdi-exit-run</v-icon>
@@ -124,13 +130,18 @@
 </template>
 
 <script lang="ts">
+import { mapState, mapActions, mapWritableState } from "pinia"
+
+import http from "@/api/http-client"
+
 import { useUserStore } from "@/store/UserStore"
 import { useNotificationStore } from "@/store/NotificationStore"
 
 import { useCentreStore } from "@/modules/centre/store"
 import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 
-import { mapState, mapActions, mapWritableState } from "pinia"
+const UNSET_RELEASE_TAG = "2024.01.10.0"
+
 export default {
   name: "Default",
 
@@ -139,6 +150,7 @@ export default {
       isAuthenticated: this.$auth0.isAuthenticated,
       authUser: this.$auth0.user,
       showOverlay: true,
+      releaseTag: UNSET_RELEASE_TAG,
     }
   },
   computed: {
@@ -157,6 +169,7 @@ export default {
     await this.initialize()
     await this.initCentres()
     await this.initLines()
+    await this.fetchVersion()
     this.showOverlay = false
   },
   methods: {
@@ -166,6 +179,16 @@ export default {
 
     logoutClick() {
       this.$auth.logout({ logoutParams: { returnTo: window.location.origin } })
+    },
+    fetchVersion() {
+      http
+        .get("/_status")
+        .then(({ data }) => {
+          this.releaseTag = data.RELEASE_TAG
+        })
+        .catch((error: unknown) => {
+          console.error(`Error fetching version: ${error}`)
+        })
     },
   },
 }
