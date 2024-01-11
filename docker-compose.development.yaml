@@ -2,6 +2,7 @@ version: "3"
 
 x-default-environment: &default-environment
   NODE_ENV: development
+  TZ: "UTC"
   DB_HOST: db
   DB_USER: sa
   DB_NAME: elcc_development
@@ -80,7 +81,6 @@ services:
       <<: *default-environment
       DB_HOST: "localhost"
       MSSQL_SA_PASSWORD: *default-db-password
-      TZ: "America/Whitehorse"
       ACCEPT_EULA: "Y"
     ports:
       - "1433:1433"
