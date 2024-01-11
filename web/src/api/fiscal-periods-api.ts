@@ -37,8 +37,8 @@ export const fiscalPeriodsApi = {
         const { dateStart, dateEnd, createdAt, updatedAt } = fiscalPeriod
         return {
           ...fiscalPeriod,
-          dateStart: DateTimeUtils.fromISO(dateStart),
-          dateEnd: DateTimeUtils.fromISO(dateEnd),
+          dateStart: DateTimeUtils.fromISO(dateStart).toUTC(),
+          dateEnd: DateTimeUtils.fromISO(dateEnd).toUTC(),
           createdAt: DateTimeUtils.fromISO(createdAt),
           updatedAt: DateTimeUtils.fromISO(updatedAt),
         }
