@@ -31,8 +31,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watchEffect } from "vue"
-import moment from "moment" // TODO: deprecated; replace with luxon
+import { computed, ref, watch } from "vue"
 
 import { useNotificationStore } from "@/store/NotificationStore"
 import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"
@@ -65,7 +64,7 @@ const fiscalPeriodFormattedDate = computed(() => {
   if (isEmpty(fiscalPeriod.value)) return ""
 
   const { dateStart } = fiscalPeriod.value
-  const formattedDate = moment.utc(dateStart).format("MMMM YYYY")
+  const formattedDate = dateStart.toFormat("MMMM yyyy")
   return formattedDate
 })
 
@@ -97,9 +96,13 @@ async function fetchFiscalPeriods(fiscalYear: string, month: string) {
   }
 }
 
-watchEffect(async () => {
-  await fetchFiscalPeriods(props.fiscalYearSlug, props.month)
-})
+watch(
+  () => [props.fiscalYearSlug, props.month],
+  async ([newFiscalYearSlug, newMonth], _) => {
+    await fetchFiscalPeriods(newFiscalYearSlug, newMonth)
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>
