@@ -1,4 +1,5 @@
 version: "3"
+
 services:
   app:
     build: .
@@ -20,7 +21,7 @@ services:
     environment:
       # default user is `sa`
       MSSQL_SA_PASSWORD: "${DB_PASS}"
-      TZ: "America/Whitehorse"
+      TZ: "UTC"
       ACCEPT_EULA: "Y"
     ports:
       - "1433:1433"
