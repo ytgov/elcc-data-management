@@ -46,11 +46,10 @@ ARG GIT_COMMIT_HASH
 ENV RELEASE_TAG=${RELEASE_TAG}
 ENV GIT_COMMIT_HASH=${GIT_COMMIT_HASH}
 
-RUN apk add --no-cache tzdata
-
-RUN cp /usr/share/zoneinfo/America/Whitehorse /etc/localtime
-RUN echo "America/Whitehorse" > /etc/timezone
-RUN apk del tzdata
+# Persists TZ=UTC effect after container build and into container run
+# Ensures dates/times are consistently formated as UTC
+# Conversion to local time should happen in the UI
+ENV TZ=UTC
 
 ENV NODE_ENV=production
 USER node
