@@ -1,5 +1,14 @@
 <template>
-  <v-table class="ma-4">
+  <v-skeleton-loader
+    v-if="isLoading"
+    :rows="10"
+    :columns="5"
+    type="table"
+  />
+  <v-table
+    v-else
+    class="ma-4"
+  >
     <thead>
       <tr>
         <th class="text-left"></th>
@@ -10,13 +19,6 @@
       </tr>
     </thead>
     <tbody>
-      <v-skeleton-loader
-        v-if="isLoading"
-        :loading="true"
-        :rows="10"
-        :columns="5"
-        type="table"
-      />
       <template
         v-for="({ label, expense, payment, runningTotal }, adjustmentIndex) in adjustmentRows"
         :key="`adjustment-${adjustmentIndex}`"
