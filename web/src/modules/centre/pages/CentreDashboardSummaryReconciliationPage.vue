@@ -1,5 +1,14 @@
 <template>
-  <v-table class="ma-4">
+  <v-skeleton-loader
+    v-if="isLoading"
+    :rows="10"
+    :columns="5"
+    type="table"
+  />
+  <v-table
+    v-else
+    class="ma-4"
+  >
     <thead>
       <tr>
         <th class="text-left"></th>
@@ -10,13 +19,6 @@
       </tr>
     </thead>
     <tbody>
-      <v-skeleton-loader
-        v-if="isLoading"
-        :loading="true"
-        :rows="10"
-        :columns="5"
-        type="table"
-      />
       <template
         v-for="({ label, expense, payment, runningTotal }, adjustmentIndex) in adjustmentRows"
         :key="`adjustment-${adjustmentIndex}`"
@@ -28,22 +30,21 @@
           </td>
           <td class="text-right"></td>
           <td class="adjustment-cell text-right">
-            {{ formatMoney(centsToDollars(expense.amountInCents)) }}
             <v-tooltip
-              v-if="!isEmpty(expense.note)"
+              v-if="expense.includesEstimates"
               bottom
             >
               <template #activator="{ props }">
-                <sup class="asterisk-icon">
-                  <v-icon
-                    size="small"
-                    v-bind="props"
-                    >mdi-asterisk-circle-outline</v-icon
-                  >
-                </sup>
+                <span v-bind="props">
+                  {{ formatMoney(centsToDollars(expense.amountInCents)) }}
+                  <sup class="asterisk-icon">
+                    <v-icon size="small">mdi-asterisk-circle-outline</v-icon>
+                  </sup>
+                </span>
               </template>
-              <span class="text-white">{{ expense.note }}</span>
+              <span class="text-white">This expense includes estimated values.</span>
             </v-tooltip>
+            <span v-else>{{ formatMoney(centsToDollars(expense.amountInCents)) }}</span>
           </td>
 
           <td class="text-right">
@@ -115,7 +116,7 @@ import usePaymentsStore from "@/store/payments"
 type Adjustment = {
   fiscalPeriodId: number
   amountInCents: number
-  note: string
+  includesEstimates: boolean
 }
 
 const props = defineProps({
@@ -162,7 +163,7 @@ const paymentAdujstments = computed<Adjustment[]>(() => {
     return {
       fiscalPeriodId: fiscalPeriod.id,
       amountInCents,
-      note: "",
+      includesEstimates: false,
     }
   })
 })
@@ -224,7 +225,7 @@ watch<[number, string], true>(
     fiscalPeriods.value = await fetchFiscalPeriods(newFiscalYearSlug)
     const fiscalPeriodIds = fiscalPeriods.value.map((fiscalPeriod) => fiscalPeriod.id)
     await fetchEmployeeBenefits(newCentreId, fiscalPeriodIds)
-    await fundingSubmissionLineJsonsStore.initialize({
+    await fundingSubmissionLineJsonsStore.fetch({
       where: {
         centreId: newCentreId,
         fiscalYear: newFiscalYear,
@@ -264,17 +265,25 @@ async function fetchEmployeeBenefits(centreId: number, fiscalPeriodsIds: number[
 
 async function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjustment[]> {
   const expensePromises = fiscalPeriods.map(async (fiscalPeriod) => {
-    const expense = {
+    const expense: Adjustment = {
       fiscalPeriodId: fiscalPeriod.id,
       amountInCents: 0,
-      note: "",
+      includesEstimates: false,
     }
     const { month } = fiscalPeriod
     const monthAsDateName = upperFirst(month)
 
     const linesForMonth = fundingSubmissionLineJsonsStore.linesForMonth(monthAsDateName)
+
     if (!isNil(linesForMonth)) {
-      expense.amountInCents += dollarsToCents(sumBy(linesForMonth, "actualComputedTotal"))
+      const actualSectionsTotal = sumBy(linesForMonth, "actualComputedTotal")
+      const estimatedSectionsTotal = sumBy(linesForMonth, "estimatedComputedTotal")
+
+      const includesEstimates = estimatedSectionsTotal > 0 && actualSectionsTotal === 0
+      const sectionsTotal = includesEstimates ? estimatedSectionsTotal : actualSectionsTotal
+
+      expense.includesEstimates ||= includesEstimates
+      expense.amountInCents += dollarsToCents(sectionsTotal)
     }
 
     injectEmployeeBenefitMonthlyCost(expense, month)
@@ -308,13 +317,10 @@ function injectEmployeeBenefitMonthlyCost(expense: Adjustment, month: string): v
     employerCostActual,
     grossPayrollMonthlyActual * costCapPercentage
   )
-  const isCostActual = actualPaidAmount > 0
-  const paidAmountInDollars = isCostActual ? actualPaidAmount : estimatedPaidAmount
+  const includesEstimates = estimatedPaidAmount > 0 && actualPaidAmount === 0
+  const paidAmountInDollars = includesEstimates ? estimatedPaidAmount : actualPaidAmount
 
-  if (!isCostActual) {
-    expense.note = "This is an estimated expense."
-  }
-
+  expense.includesEstimates ||= includesEstimates
   expense.amountInCents += dollarsToCents(paidAmountInDollars)
 }
 
@@ -360,13 +366,12 @@ async function lazyInjectWageEnhancementMonthlyCost(expense: Adjustment, month: 
   const wageEnhancementsEstimatedTotal = wageEnhancementsEstimatedSubtotal * (1 + EI_CPP_WCB_RATE)
   const wageEnhancementsActualTotal = wageEnhancementsActualSubtotal * (1 + EI_CPP_WCB_RATE)
 
-  const isCostActual = wageEnhancementsActualTotal > 0
-  const totalInDollars = isCostActual ? wageEnhancementsActualTotal : wageEnhancementsEstimatedTotal
+  const includesEstimates = wageEnhancementsEstimatedTotal > 0 && wageEnhancementsActualTotal === 0
+  const totalInDollars = includesEstimates
+    ? wageEnhancementsEstimatedTotal
+    : wageEnhancementsActualTotal
 
-  if (!isCostActual) {
-    expense.note = "This is an estimated expense."
-  }
-
+  expense.includesEstimates ||= includesEstimates
   expense.amountInCents += dollarsToCents(totalInDollars)
 }
 
