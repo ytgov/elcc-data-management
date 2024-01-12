@@ -279,8 +279,8 @@ async function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjust
       const actualSectionsTotal = sumBy(linesForMonth, "actualComputedTotal")
       const estimatedSectionsTotal = sumBy(linesForMonth, "estimatedComputedTotal")
 
-      const includesEstimates = actualSectionsTotal > 0
-      const sectionsTotal = includesEstimates ? actualSectionsTotal : estimatedSectionsTotal
+      const includesEstimates = actualSectionsTotal === 0
+      const sectionsTotal = includesEstimates ? estimatedSectionsTotal : actualSectionsTotal
 
       expense.includesEstimates ||= includesEstimates
       expense.amountInCents += dollarsToCents(sectionsTotal)
@@ -317,13 +317,10 @@ function injectEmployeeBenefitMonthlyCost(expense: Adjustment, month: string): v
     employerCostActual,
     grossPayrollMonthlyActual * costCapPercentage
   )
-  const isCostActual = actualPaidAmount > 0
-  const paidAmountInDollars = isCostActual ? actualPaidAmount : estimatedPaidAmount
+  const includesEstimates = actualPaidAmount === 0
+  const paidAmountInDollars = includesEstimates ? estimatedPaidAmount : actualPaidAmount
 
-  if (!isCostActual) {
-    expense.includesEstimates = true
-  }
-
+  expense.includesEstimates ||= includesEstimates
   expense.amountInCents += dollarsToCents(paidAmountInDollars)
 }
 
@@ -369,13 +366,12 @@ async function lazyInjectWageEnhancementMonthlyCost(expense: Adjustment, month: 
   const wageEnhancementsEstimatedTotal = wageEnhancementsEstimatedSubtotal * (1 + EI_CPP_WCB_RATE)
   const wageEnhancementsActualTotal = wageEnhancementsActualSubtotal * (1 + EI_CPP_WCB_RATE)
 
-  const isCostActual = wageEnhancementsActualTotal > 0
-  const totalInDollars = isCostActual ? wageEnhancementsActualTotal : wageEnhancementsEstimatedTotal
+  const includesEstimates = wageEnhancementsActualTotal === 0
+  const totalInDollars = includesEstimates
+    ? wageEnhancementsEstimatedTotal
+    : wageEnhancementsActualTotal
 
-  if (!isCostActual) {
-    expense.includesEstimates = true
-  }
-
+  expense.includesEstimates ||= includesEstimates
   expense.amountInCents += dollarsToCents(totalInDollars)
 }
 
