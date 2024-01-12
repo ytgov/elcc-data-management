@@ -35,14 +35,12 @@
               bottom
             >
               <template #activator="{ props }">
-                {{ formatMoney(centsToDollars(expense.amountInCents)) }}
-                <sup class="asterisk-icon">
-                  <v-icon
-                    size="small"
-                    v-bind="props"
-                    >mdi-asterisk-circle-outline</v-icon
-                  >
-                </sup>
+                <span v-bind="props">
+                  {{ formatMoney(centsToDollars(expense.amountInCents)) }}
+                  <sup class="asterisk-icon">
+                    <v-icon size="small">mdi-asterisk-circle-outline</v-icon>
+                  </sup>
+                </span>
               </template>
               <span class="text-white">This expense includes estimated values.</span>
             </v-tooltip>
