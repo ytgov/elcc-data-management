@@ -30,12 +30,12 @@
           </td>
           <td class="text-right"></td>
           <td class="adjustment-cell text-right">
-            {{ formatMoney(centsToDollars(expense.amountInCents)) }}
             <v-tooltip
-              v-if="!isEmpty(expense.note)"
+              v-if="expense.includesEstimates"
               bottom
             >
               <template #activator="{ props }">
+                {{ formatMoney(centsToDollars(expense.amountInCents)) }}
                 <sup class="asterisk-icon">
                   <v-icon
                     size="small"
@@ -44,8 +44,9 @@
                   >
                 </sup>
               </template>
-              <span class="text-white">{{ expense.note }}</span>
+              <span class="text-white">This expense includes estimated values.</span>
             </v-tooltip>
+            <span v-else>{{ formatMoney(centsToDollars(expense.amountInCents)) }}</span>
           </td>
 
           <td class="text-right">
@@ -117,7 +118,7 @@ import usePaymentsStore from "@/store/payments"
 type Adjustment = {
   fiscalPeriodId: number
   amountInCents: number
-  note: string
+  includesEstimates: boolean
 }
 
 const props = defineProps({
@@ -164,7 +165,7 @@ const paymentAdujstments = computed<Adjustment[]>(() => {
     return {
       fiscalPeriodId: fiscalPeriod.id,
       amountInCents,
-      note: "",
+      includesEstimates: false,
     }
   })
 })
@@ -266,17 +267,25 @@ async function fetchEmployeeBenefits(centreId: number, fiscalPeriodsIds: number[
 
 async function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjustment[]> {
   const expensePromises = fiscalPeriods.map(async (fiscalPeriod) => {
-    const expense = {
+    const expense: Adjustment = {
       fiscalPeriodId: fiscalPeriod.id,
       amountInCents: 0,
-      note: "",
+      includesEstimates: false,
     }
     const { month } = fiscalPeriod
     const monthAsDateName = upperFirst(month)
 
     const linesForMonth = fundingSubmissionLineJsonsStore.linesForMonth(monthAsDateName)
+
     if (!isNil(linesForMonth)) {
-      expense.amountInCents += dollarsToCents(sumBy(linesForMonth, "actualComputedTotal"))
+      const actualSectionsTotal = sumBy(linesForMonth, "actualComputedTotal")
+      const estimatedSectionsTotal = sumBy(linesForMonth, "estimatedComputedTotal")
+
+      const includesEstimates = actualSectionsTotal > 0
+      const sectionsTotal = includesEstimates ? actualSectionsTotal : estimatedSectionsTotal
+
+      expense.includesEstimates ||= includesEstimates
+      expense.amountInCents += dollarsToCents(sectionsTotal)
     }
 
     injectEmployeeBenefitMonthlyCost(expense, month)
@@ -314,7 +323,7 @@ function injectEmployeeBenefitMonthlyCost(expense: Adjustment, month: string): v
   const paidAmountInDollars = isCostActual ? actualPaidAmount : estimatedPaidAmount
 
   if (!isCostActual) {
-    expense.note = "This is an estimated expense."
+    expense.includesEstimates = true
   }
 
   expense.amountInCents += dollarsToCents(paidAmountInDollars)
@@ -366,7 +375,7 @@ async function lazyInjectWageEnhancementMonthlyCost(expense: Adjustment, month: 
   const totalInDollars = isCostActual ? wageEnhancementsActualTotal : wageEnhancementsEstimatedTotal
 
   if (!isCostActual) {
-    expense.note = "This is an estimated expense."
+    expense.includesEstimates = true
   }
 
   expense.amountInCents += dollarsToCents(totalInDollars)
