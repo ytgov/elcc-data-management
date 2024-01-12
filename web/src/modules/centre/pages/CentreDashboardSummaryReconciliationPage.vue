@@ -279,7 +279,7 @@ async function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjust
       const actualSectionsTotal = sumBy(linesForMonth, "actualComputedTotal")
       const estimatedSectionsTotal = sumBy(linesForMonth, "estimatedComputedTotal")
 
-      const includesEstimates = actualSectionsTotal === 0
+      const includesEstimates = estimatedSectionsTotal > 0 && actualSectionsTotal === 0
       const sectionsTotal = includesEstimates ? estimatedSectionsTotal : actualSectionsTotal
 
       expense.includesEstimates ||= includesEstimates
@@ -317,7 +317,7 @@ function injectEmployeeBenefitMonthlyCost(expense: Adjustment, month: string): v
     employerCostActual,
     grossPayrollMonthlyActual * costCapPercentage
   )
-  const includesEstimates = actualPaidAmount === 0
+  const includesEstimates = estimatedPaidAmount > 0 && actualPaidAmount === 0
   const paidAmountInDollars = includesEstimates ? estimatedPaidAmount : actualPaidAmount
 
   expense.includesEstimates ||= includesEstimates
@@ -366,7 +366,7 @@ async function lazyInjectWageEnhancementMonthlyCost(expense: Adjustment, month: 
   const wageEnhancementsEstimatedTotal = wageEnhancementsEstimatedSubtotal * (1 + EI_CPP_WCB_RATE)
   const wageEnhancementsActualTotal = wageEnhancementsActualSubtotal * (1 + EI_CPP_WCB_RATE)
 
-  const includesEstimates = wageEnhancementsActualTotal === 0
+  const includesEstimates = wageEnhancementsEstimatedTotal > 0 && wageEnhancementsActualTotal === 0
   const totalInDollars = includesEstimates
     ? wageEnhancementsEstimatedTotal
     : wageEnhancementsActualTotal
