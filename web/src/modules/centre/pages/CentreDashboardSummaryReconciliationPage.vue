@@ -225,7 +225,7 @@ watch<[number, string], true>(
     fiscalPeriods.value = await fetchFiscalPeriods(newFiscalYearSlug)
     const fiscalPeriodIds = fiscalPeriods.value.map((fiscalPeriod) => fiscalPeriod.id)
     await fetchEmployeeBenefits(newCentreId, fiscalPeriodIds)
-    await fundingSubmissionLineJsonsStore.initialize({
+    await fundingSubmissionLineJsonsStore.fetch({
       where: {
         centreId: newCentreId,
         fiscalYear: newFiscalYear,
