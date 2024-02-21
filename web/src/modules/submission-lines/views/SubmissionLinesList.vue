@@ -124,7 +124,7 @@ export default {
       await this.getAllSubmissionLines()
     },
     rowClick(event: Event, thing: any) {
-      this.selectLine(thing.item.value)
+      this.selectLine(thing.item)
     },
   },
 }
