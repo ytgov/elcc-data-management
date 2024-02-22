@@ -104,8 +104,7 @@ export default {
       await this.getAllFundingPeriods()
     },
     rowClick(event: Event, thing: any) {
-      this.selectPeriod(thing.item.value)
-      console.log(thing.item.value)
+      this.selectPeriod(thing.item)
     },
   },
 }

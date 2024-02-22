@@ -112,7 +112,7 @@ export default {
       await this.getAllUsers()
     },
     rowClick(event: Event, thing: any) {
-      this.selectUser(thing.item.value)
+      this.selectUser(thing.item)
     },
   },
 }
