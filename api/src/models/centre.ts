@@ -26,7 +26,14 @@ export enum CentreStatus {
   UP_TO_DATE = "Up to date",
 }
 
+export enum CentreRegions {
+  WHITEHORSE = "whitehorse",
+  COMMUNITIES = "communities",
+}
+
 export class Centre extends BaseModel<InferAttributes<Centre>, InferCreationAttributes<Centre>> {
+  static readonly Regions = CentreRegions
+
   declare id: CreationOptional<number>
   declare name: string
   declare license: string | null
@@ -231,6 +238,9 @@ Centre.init(
     region: {
       type: DataTypes.STRING(100),
       allowNull: true,
+      validate: {
+        isIn: [Object.values(CentreRegions)],
+      },
     },
     lastSubmission: {
       type: DataTypes.DATEONLY,
