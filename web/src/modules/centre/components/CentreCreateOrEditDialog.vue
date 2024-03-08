@@ -36,6 +36,14 @@
             required
           ></v-text-field>
           <v-text-field
+            v-model="editingCentre.community"
+            label="Community *"
+            :rules="[required]"
+            variant="outlined"
+            density="comfortable"
+            required
+          ></v-text-field>
+          <v-text-field
             v-model="editingCentre.license"
             label="License"
             variant="outlined"
@@ -46,14 +54,6 @@
             label="Licensed for"
             variant="outlined"
             density="comfortable"
-          ></v-text-field>
-          <v-text-field
-            v-model="editingCentre.community"
-            label="Community *"
-            :rules="[required]"
-            variant="outlined"
-            density="comfortable"
-            required
           ></v-text-field>
           <v-checkbox
             v-model="editingCentre.hotMeal"
