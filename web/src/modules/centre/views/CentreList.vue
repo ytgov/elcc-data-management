@@ -155,18 +155,18 @@
     </v-col>
   </v-row>
 
-  <centre-editor></centre-editor>
+  <CentreCreateOrEditDialog />
 </template>
 
 <script lang="ts">
 import { FormatDate, FormatYesNo } from "@/utils"
 import { mapActions, mapState } from "pinia"
 import { type ChildCareCentre, useCentreStore } from "../store"
-import CentreEditor from "../components/CentreEditor.vue"
+import CentreCreateOrEditDialog from "@/modules/centre/components/CentreCreateOrEditDialog.vue"
 
 export default {
   name: "CentreList",
-  components: { CentreEditor },
+  components: { CentreCreateOrEditDialog },
   setup() {},
   data() {
     return {

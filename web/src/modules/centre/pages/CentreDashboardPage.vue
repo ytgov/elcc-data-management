@@ -186,7 +186,7 @@
     </v-col>
   </v-row>
 
-  <CentreEditor />
+  <CentreCreateOrEditDialog />
 </template>
 
 <script lang="ts">
@@ -197,7 +197,7 @@ import { mapActions, mapState } from "pinia"
 import VueApexCharts from "vue3-apexcharts"
 
 import EnrollmentChart from "../components/EnrollmentChart.vue"
-import CentreEditor from "../components/CentreEditor.vue"
+import CentreCreateOrEditDialog from "@/modules/centre/components/CentreCreateOrEditDialog.vue"
 import { type ChildCareCentre, useCentreStore } from "../store"
 
 export default {
@@ -205,7 +205,7 @@ export default {
   components: {
     VueApexCharts,
     EnrollmentChart,
-    CentreEditor,
+    CentreCreateOrEditDialog,
   },
   props: {
     centreId: {
