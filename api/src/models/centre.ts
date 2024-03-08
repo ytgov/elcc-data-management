@@ -237,7 +237,7 @@ Centre.init(
     },
     region: {
       type: DataTypes.STRING(100),
-      allowNull: true,
+      allowNull: false,
       validate: {
         isIn: [Object.values(CentreRegions)],
       },
