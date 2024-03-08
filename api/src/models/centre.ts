@@ -34,6 +34,20 @@ export class Centre extends Model<InferAttributes<Centre>, InferCreationAttribut
   declare status: string
   declare hotMeal: boolean | null
   declare licensedFor: number | null // licensed for xx number of children
+  declare licenseHolderName: string | null
+  declare contactName: string | null
+  declare physicalAddress: string | null
+  declare mailingAddress: string | null
+  declare email: string | null
+  declare altEmail: string | null
+  declare phoneNumber: string | null
+  declare altPhoneNumber: string | null
+  declare faxNumber: string | null
+  declare vendorIdentifier: string | null
+  declare isFirstNationProgram: boolean
+  declare inspectorName: string | null
+  declare neighborhood: string | null
+  declare region: string | null
   declare lastSubmission: Date | null
   declare createdAt: CreationOptional<Date>
   declare updatedAt: CreationOptional<Date>
@@ -159,6 +173,63 @@ Centre.init(
     },
     licensedFor: {
       type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    licenseHolderName: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    contactName: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    physicalAddress: {
+      type: DataTypes.STRING(250),
+      allowNull: true,
+    },
+    mailingAddress: {
+      type: DataTypes.STRING(250),
+      allowNull: true,
+    },
+    email: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    altEmail: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    phoneNumber: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    altPhoneNumber: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    faxNumber: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    vendorIdentifier: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    isFirstNationProgram: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    inspectorName: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    neighborhood: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    region: {
+      type: DataTypes.STRING(100),
       allowNull: true,
     },
     lastSubmission: {
