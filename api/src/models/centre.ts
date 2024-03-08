@@ -14,19 +14,19 @@ import {
   HasManySetAssociationsMixin,
   InferAttributes,
   InferCreationAttributes,
-  Model,
   NonAttribute,
 } from "sequelize"
 
 import sequelize from "@/db/db-client"
 import CentreFundingPeriod from "@/models/centre-funding-period"
 import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
+import BaseModel from "@/models/base-model"
 
 export enum CentreStatus {
   UP_TO_DATE = "Up to date",
 }
 
-export class Centre extends Model<InferAttributes<Centre>, InferCreationAttributes<Centre>> {
+export class Centre extends BaseModel<InferAttributes<Centre>, InferCreationAttributes<Centre>> {
   declare id: CreationOptional<number>
   declare name: string
   declare license: string | null
