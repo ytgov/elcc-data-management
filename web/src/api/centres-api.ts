@@ -2,17 +2,37 @@ import http from "@/api/http-client"
 
 import { FundingSubmissionLineJson } from "./funding-submission-line-jsons-api"
 
+// Keep in sync with api/src/models/centre.ts
+export enum CentreRegions {
+  WHITEHORSE = "whitehorse",
+  COMMUNITIES = "communities",
+}
+
 export type Centre = {
-  id: number
+  id?: number
   name: string
-  license: string | null
   community: string
+  isFirstNationProgram: boolean
+  region: string
   status: string
-  hotMeal: boolean | null
-  licensedFor: number | null // licensed for xx number of children
-  lastSubmission: Date | null
-  createdAt: Date
-  updatedAt: Date
+  license?: string | null
+  hotMeal?: boolean | null
+  licensedFor?: number | null // licensed for xx number of children
+  licenseHolderName?: string | null
+  contactName?: string | null
+  physicalAddress?: string | null
+  mailingAddress?: string | null
+  email?: string | null
+  altEmail?: string | null
+  phoneNumber?: string | null
+  altPhoneNumber?: string | null
+  faxNumber?: string | null
+  vendorIdentifier?: string | null
+  inspectorName?: string | null
+  neighborhood?: string | null
+  lastSubmission?: string | null // stringified DateOnly
+  createdAt?: string // stringified DateTime
+  updatedAt?: string // stringified DateTime
 }
 
 export const centresApi = {
