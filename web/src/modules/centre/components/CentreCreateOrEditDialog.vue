@@ -51,6 +51,14 @@
             density="comfortable"
             required
           />
+          <v-checkbox
+            v-model="editingCentre.isFirstNationProgram"
+            label="Program Type (FN/non-FN) *"
+            :rules="[required]"
+            variant="outlined"
+            density="comfortable"
+            required
+          ></v-checkbox>
           <v-text-field
             v-model="editingCentre.license"
             label="License"
