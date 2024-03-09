@@ -26,6 +26,7 @@ export enum CentreStatus {
   UP_TO_DATE = "Up to date",
 }
 
+// Keep in sync with web/src/api/centres-api.ts
 export enum CentreRegions {
   WHITEHORSE = "whitehorse",
   COMMUNITIES = "communities",
@@ -36,26 +37,26 @@ export class Centre extends BaseModel<InferAttributes<Centre>, InferCreationAttr
 
   declare id: CreationOptional<number>
   declare name: string
-  declare license: string | null
   declare community: string
+  declare region: string
   declare status: string
-  declare hotMeal: boolean | null
-  declare licensedFor: number | null // licensed for xx number of children
-  declare licenseHolderName: string | null
-  declare contactName: string | null
-  declare physicalAddress: string | null
-  declare mailingAddress: string | null
-  declare email: string | null
-  declare altEmail: string | null
-  declare phoneNumber: string | null
-  declare altPhoneNumber: string | null
-  declare faxNumber: string | null
-  declare vendorIdentifier: string | null
   declare isFirstNationProgram: boolean
-  declare inspectorName: string | null
-  declare neighborhood: string | null
-  declare region: string | null
-  declare lastSubmission: Date | null
+  declare license: CreationOptional<string | null>
+  declare hotMeal: CreationOptional<boolean | null>
+  declare licensedFor: CreationOptional<number | null> // licensed for xx number of children
+  declare licenseHolderName: CreationOptional<string | null>
+  declare contactName: CreationOptional<string | null>
+  declare physicalAddress: CreationOptional<string | null>
+  declare mailingAddress: CreationOptional<string | null>
+  declare email: CreationOptional<string | null>
+  declare altEmail: CreationOptional<string | null>
+  declare phoneNumber: CreationOptional<string | null>
+  declare altPhoneNumber: CreationOptional<string | null>
+  declare faxNumber: CreationOptional<string | null>
+  declare vendorIdentifier: CreationOptional<string | null>
+  declare inspectorName: CreationOptional<string | null>
+  declare neighborhood: CreationOptional<string | null>
+  declare lastSubmission: CreationOptional<Date | null>
   declare createdAt: CreationOptional<Date>
   declare updatedAt: CreationOptional<Date>
 
@@ -159,13 +160,21 @@ Centre.init(
       type: DataTypes.STRING(200),
       allowNull: false,
     },
-    license: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-    },
     community: {
       type: DataTypes.STRING(255),
       allowNull: false,
+    },
+    isFirstNationProgram: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    region: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      validate: {
+        isIn: [Object.values(CentreRegions)],
+      },
     },
     status: {
       type: DataTypes.STRING(255),
@@ -173,6 +182,10 @@ Centre.init(
       validate: {
         isIn: [Object.values(CentreStatus)],
       },
+    },
+    license: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
     },
     hotMeal: {
       type: DataTypes.BOOLEAN,
@@ -222,11 +235,6 @@ Centre.init(
       type: DataTypes.STRING(20),
       allowNull: true,
     },
-    isFirstNationProgram: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
     inspectorName: {
       type: DataTypes.STRING(100),
       allowNull: true,
@@ -234,13 +242,6 @@ Centre.init(
     neighborhood: {
       type: DataTypes.STRING(100),
       allowNull: true,
-    },
-    region: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-      validate: {
-        isIn: [Object.values(CentreRegions)],
-      },
     },
     lastSubmission: {
       type: DataTypes.DATEONLY,
