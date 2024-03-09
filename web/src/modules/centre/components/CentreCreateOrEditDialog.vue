@@ -43,6 +43,14 @@
             density="comfortable"
             required
           ></v-text-field>
+          <CentreRegionSelect
+            v-model="editingCentre.region"
+            label="Region *"
+            :rules="[required]"
+            variant="outlined"
+            density="comfortable"
+            required
+          />
           <v-text-field
             v-model="editingCentre.license"
             label="License"
@@ -90,6 +98,8 @@ import { isNil } from "lodash"
 
 import { required } from "@/utils/validators"
 import { useCentreStore } from "@/modules/centre/store"
+
+import CentreRegionSelect from "@/modules/centre/components/CentreRegionSelect.vue"
 
 const router = useRouter()
 const centreStore = useCentreStore()
