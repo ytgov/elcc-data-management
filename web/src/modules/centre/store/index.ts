@@ -1,6 +1,7 @@
 import { defineStore } from "pinia"
 import { uniq, cloneDeep, isNil } from "lodash"
 
+import { type Centre } from "@/api/centres-api"
 import { useNotificationStore } from "@/store/NotificationStore"
 import { useApiStore } from "@/store/ApiStore"
 import { CENTRE_URL } from "@/urls"
@@ -8,9 +9,9 @@ import { CENTRE_URL } from "@/urls"
 const m = useNotificationStore()
 
 interface CentreState {
-  centres: ChildCareCentre[]
-  selectedCentre: ChildCareCentre | undefined
-  editingCentre: ChildCareCentre | undefined
+  centres: Centre[]
+  selectedCentre: Centre | undefined
+  editingCentre: Centre | undefined
   isLoading: boolean
   enrollmentChartLoading: boolean
   enrollmentChartData: number[]
@@ -57,10 +58,10 @@ export const useCentreStore = defineStore("centre", {
         })
     },
 
-    selectCentre(centre: ChildCareCentre) {
+    selectCentre(centre: Centre) {
       this.selectedCentre = centre
     },
-    async selectCentreById(id: number): Promise<ChildCareCentre | undefined> {
+    async selectCentreById(id: number): Promise<Centre | undefined> {
       const centreFromStore = this.centres.find((centre) => centre.id === id)
       if (!isNil(centreFromStore)) {
         this.selectedCentre = centreFromStore
@@ -76,7 +77,7 @@ export const useCentreStore = defineStore("centre", {
       this.selectedCentre = undefined
     },
 
-    editCentre(item: ChildCareCentre) {
+    editCentre(item: Centre) {
       this.editingCentre = cloneDeep(item)
     },
     doneEdit() {
@@ -153,15 +154,3 @@ export const useCentreStore = defineStore("centre", {
     },
   },
 })
-
-export interface ChildCareCentre {
-  id?: number
-  name: string
-  license: string
-  community: string
-  status: string
-  hotMeal: boolean
-  licensedFor: number
-  lastSubmission?: Date
-  createDate: Date
-}

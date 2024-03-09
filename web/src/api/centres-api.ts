@@ -8,6 +8,7 @@ export enum CentreRegions {
   COMMUNITIES = "communities",
 }
 
+// TODO: separate new Centre from existing Centre typing
 export type Centre = {
   id?: number
   name: string
