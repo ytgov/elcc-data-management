@@ -76,7 +76,7 @@
             >
               <v-list-item
                 title="License"
-                :subtitle="selectedItem.license"
+                :subtitle="selectedItem.license || ''"
                 class="pl-0"
               >
                 <template #prepend>
@@ -89,7 +89,7 @@
               <v-divider></v-divider>
               <v-list-item
                 title="Hot Meal"
-                :subtitle="FormatYesNo(selectedItem.hotMeal)"
+                :subtitle="FormatYesNo(selectedItem.hotMeal || false)"
                 class="pl-0"
               >
                 <template #prepend>
@@ -102,7 +102,7 @@
               <v-divider></v-divider>
               <v-list-item
                 title="Licensed For"
-                :subtitle="selectedItem.licensedFor"
+                :subtitle="selectedItem.licensedFor ?? undefined"
                 class="pl-0"
               >
                 <template #prepend>
@@ -128,7 +128,7 @@
               <v-divider></v-divider>
               <v-list-item
                 title="Last Submission"
-                :subtitle="FormatDate(selectedItem.lastSubmission)"
+                :subtitle="formatDate(selectedItem.lastSubmission)"
                 class="pl-0"
               >
                 <template #prepend>
@@ -161,7 +161,7 @@
 <script lang="ts">
 import { FormatDate, FormatYesNo } from "@/utils"
 import { mapActions, mapState } from "pinia"
-import { type ChildCareCentre, useCentreStore } from "../store"
+import { useCentreStore, Centre, CentreRegions } from "@/modules/centre/store"
 import CentreCreateOrEditDialog from "@/modules/centre/components/CentreCreateOrEditDialog.vue"
 
 export default {
@@ -175,7 +175,7 @@ export default {
         { to: "/dashboard", title: "Home" },
         { to: "/child-care-centres", title: "Child Care Centres" },
       ],
-      selectedItem: {} as ChildCareCentre,
+      selectedItem: {} as Centre,
     }
   },
   computed: {
@@ -192,16 +192,17 @@ export default {
     },
     addCentreClick() {
       this.editCentre({
-        status: "Active",
         community: "Whitehorse",
-        createDate: new Date(),
         hotMeal: true,
+        isFirstNationProgram: false,
         license: "",
         licensedFor: 10,
         name: "",
+        region: CentreRegions.WHITEHORSE,
+        status: "Active",
       })
     },
-    FormatDate(input: Date | undefined) {
+    formatDate(input: Date | string | null | undefined) {
       return input != null ? FormatDate(input) : ""
     },
     FormatYesNo(input: boolean) {

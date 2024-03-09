@@ -2,7 +2,7 @@ import moment from "moment" // TODO: deprecated; replace with luxon
 
 export { formatMoney } from "./format-money"
 
-export function FormatDate(input: Date): string {
+export function FormatDate(input: Date | string): string {
   return moment.utc(input).format("MMMM D, YYYY")
 }
 

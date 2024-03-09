@@ -66,7 +66,7 @@
           >
             <v-list-item
               title="License"
-              :subtitle="currentCentre.license"
+              :subtitle="currentCentre.license || ''"
               class="pl-0"
             >
               <template #prepend>
@@ -79,7 +79,7 @@
             <v-divider></v-divider>
             <v-list-item
               title="Hot Meal"
-              :subtitle="FormatYesNo(currentCentre.hotMeal)"
+              :subtitle="FormatYesNo(currentCentre.hotMeal || false)"
               class="pl-0"
             >
               <template #prepend>
@@ -92,7 +92,7 @@
             <v-divider></v-divider>
             <v-list-item
               title="Licensed For"
-              :subtitle="currentCentre.licensedFor"
+              :subtitle="currentCentre.licensedFor || ''"
               class="pl-0"
             >
               <template #prepend>
@@ -118,7 +118,7 @@
             <v-divider></v-divider>
             <v-list-item
               title="Last Submission"
-              :subtitle="FormatDate(currentCentre.lastSubmission)"
+              :subtitle="formatDate(currentCentre.lastSubmission)"
               class="pl-0"
             >
               <template #prepend>
@@ -198,7 +198,7 @@ import VueApexCharts from "vue3-apexcharts"
 
 import EnrollmentChart from "../components/EnrollmentChart.vue"
 import CentreCreateOrEditDialog from "@/modules/centre/components/CentreCreateOrEditDialog.vue"
-import { type ChildCareCentre, useCentreStore } from "../store"
+import { type Centre, useCentreStore } from "@/modules/centre/store"
 
 export default {
   name: "CentreDashboard",
@@ -219,7 +219,7 @@ export default {
   },
   data() {
     return {
-      currentCentre: { name: "" } as ChildCareCentre,
+      currentCentre: { name: "" } as Centre,
     }
   },
   async mounted() {
@@ -268,7 +268,7 @@ export default {
   methods: {
     isEmpty,
     ...mapActions(useCentreStore, ["selectCentreById", "unselectCentre", "editCentre"]),
-    FormatDate(input: Date | undefined) {
+    formatDate(input: Date | string | null | undefined) {
       return input != null ? FormatDate(input) : ""
     },
     FormatYesNo(input: boolean) {
