@@ -34,7 +34,7 @@
             variant="outlined"
             density="comfortable"
             required
-          ></v-text-field>
+          />
           <v-text-field
             v-model="editingCentre.community"
             label="Community *"
@@ -42,7 +42,7 @@
             variant="outlined"
             density="comfortable"
             required
-          ></v-text-field>
+          />
           <CentreRegionSelect
             v-model="editingCentre.region"
             label="Region *"
@@ -58,25 +58,97 @@
             variant="outlined"
             density="comfortable"
             required
-          ></v-checkbox>
+          />
           <v-text-field
             v-model="editingCentre.license"
             label="License"
             variant="outlined"
             density="comfortable"
-          ></v-text-field>
+          />
           <v-text-field
             v-model="editingCentre.licensedFor"
             label="Licensed for"
             variant="outlined"
             density="comfortable"
-          ></v-text-field>
+          />
           <v-checkbox
             v-model="editingCentre.hotMeal"
             label="Hot meal?"
             variant="outlined"
             density="comfortable"
-          ></v-checkbox>
+          />
+          <v-text-field
+            v-model="editingCentre.licenseHolderName"
+            label="License Holder Name"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-text-field
+            v-model="editingCentre.contactName"
+            label="Contact Name"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-text-field
+            v-model="editingCentre.physicalAddress"
+            label="Physical Address"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-text-field
+            v-model="editingCentre.mailingAddress"
+            label="Mailing Address"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-text-field
+            v-model="editingCentre.email"
+            label="Email"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-text-field
+            v-model="editingCentre.altEmail"
+            label="Alt Email"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-text-field
+            v-model="editingCentre.phoneNumber"
+            label="Phone Number"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-text-field
+            v-model="editingCentre.altPhoneNumber"
+            label="Alt Phone Number"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-text-field
+            v-model="editingCentre.faxNumber"
+            label="Fax Number"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-text-field
+            v-model="editingCentre.vendorIdentifier"
+            label="Vendor ID"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-text-field
+            v-model="editingCentre.inspectorName"
+            label="Inspector Name"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-text-field
+            v-model="editingCentre.neighborhood"
+            label="Neighborhood"
+            variant="outlined"
+            density="comfortable"
+          />
         </v-card-text>
         <v-card-actions class="mx-4 mb-2">
           <v-btn
