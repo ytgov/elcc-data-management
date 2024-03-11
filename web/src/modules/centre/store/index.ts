@@ -113,17 +113,15 @@ export const useCentreStore = defineStore("centre", {
       const api = useApiStore()
 
       if (!isNil(this.editingCentre) && this.editingCentre.id) {
-        await api
-          .secureCall("put", `${CENTRE_URL}/${this.editingCentre.id}`, this.editingCentre)
-          .then((resp) => {
-            // this.worksheets = resp.data;
-            this.editingCentre = undefined
-            this.selectedCentre = resp.data
-            console.log("SELECT", this.selectCentre)
-
-            m.notify({ text: "Centre saved", variant: "success" })
-          })
-          .finally(() => {})
+        try {
+          const { centre } = await centresApi.update(this.editingCentre.id, this.editingCentre)
+          delete this.editingCentre
+          this.selectedCentre = centre
+          m.notify({ text: "Centre saved", variant: "success" })
+        } catch (error) {
+          console.error(`Error saving centre: ${error}`)
+          api.doApiErrorMessage(error)
+        }
       } else if (!isNil(this.editingCentre)) {
         try {
           const { centre } = await centresApi.create(this.editingCentre)

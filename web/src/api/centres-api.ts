@@ -47,6 +47,10 @@ export const centresApi = {
     const { data } = await http.post("/api/centre", attributes)
     return data
   },
+  async update(centreId: number, attributes: Partial<Centre>): Promise<{ centre: Centre }> {
+    const { data } = await http.patch(`/api/centre/${centreId}`, attributes)
+    return data
+  },
   fiscalYear: {
     // TODO: normalize this route return type and format
     async create(centerId: number, fiscalYear: string): Promise<FundingSubmissionLineJson[]> {
