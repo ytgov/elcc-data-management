@@ -109,34 +109,44 @@ export const useCentreStore = defineStore("centre", {
         })
         .finally(() => {})
     },
-    async save() {
-      const api = useApiStore()
-
-      if (!isNil(this.editingCentre) && this.editingCentre.id) {
-        try {
-          const { centre } = await centresApi.update(this.editingCentre.id, this.editingCentre)
-          delete this.editingCentre
-          this.selectedCentre = centre
-          m.notify({ text: "Centre saved", variant: "success" })
-        } catch (error) {
-          console.error(`Error saving centre: ${error}`)
-          api.doApiErrorMessage(error)
-        }
-      } else if (!isNil(this.editingCentre)) {
-        try {
-          const { centre } = await centresApi.create(this.editingCentre)
-          delete this.editingCentre
-          this.selectedCentre = centre
-          m.notify({ text: "Centre created", variant: "success" })
-        } catch (error) {
-          console.error(`Error saving centre: ${error}`)
-          api.doApiErrorMessage(error)
-        }
-      } else {
-        console.error("No centre to save")
+    /**
+     * TODO: spit this into creation and update methods.
+     */
+    async save(): Promise<Centre> {
+      const localCentre = this.editingCentre
+      if (isNil(localCentre)) {
+        throw new Error("No centre to save")
       }
 
-      this.getAllCentres()
+      const api = useApiStore()
+
+      if (localCentre.id) {
+        try {
+          const { centre } = await centresApi.update(localCentre.id, localCentre)
+          this.editingCentre = undefined
+          this.selectedCentre = centre
+          m.notify({ text: "Centre saved", variant: "success" })
+          await this.getAllCentres()
+          return centre
+        } catch (error) {
+          console.error(`Error saving centre: ${error}`)
+          api.doApiErrorMessage(error)
+        }
+      }
+
+      try {
+        const { centre } = await centresApi.create(localCentre)
+        this.editingCentre = undefined
+        this.selectedCentre = centre
+        m.notify({ text: "Centre created", variant: "success" })
+        await this.getAllCentres()
+        return centre
+      } catch (error) {
+        console.error(`Error saving centre: ${error}`)
+        api.doApiErrorMessage(error)
+      }
+
+      throw new Error("Failed to save centre")
     },
 
     async saveWorksheet(worksheet: any, reload = true) {

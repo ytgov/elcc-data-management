@@ -51,7 +51,7 @@
           :search="search"
           class="row-clickable"
           @click:row="tableRowClick"
-          @dblclick:row="goToCentre"
+          @dblclick:row="(_event: any, { item }: any) => goToCentre(item.id)"
         ></v-data-table>
       </v-card>
     </v-col>
@@ -155,7 +155,7 @@
     </v-col>
   </v-row>
 
-  <CentreCreateOrEditDialog />
+  <CentreCreateOrEditDialog @saved="goToCentre" />
 </template>
 
 <script lang="ts">
@@ -186,9 +186,11 @@ export default {
     tableRowClick(event: any, item: any) {
       this.selectedItem = item.item
     },
-    goToCentre() {
-      this.selectCentre(this.selectedItem)
-      this.$router.push(`/child-care-centres/${this.selectedItem.id}`)
+    goToCentre(centreId: string | number) {
+      this.$router.push({
+        name: "CentreDashboardPage",
+        params: { centreId },
+      })
     },
     addCentreClick() {
       this.editCentre({

@@ -187,7 +187,6 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { useRouter } from "vue-router"
 import { isNil } from "lodash"
 
 import { required } from "@/utils/validators"
@@ -195,10 +194,10 @@ import { useCentreStore } from "@/modules/centre/store"
 
 import CentreRegionSelect from "@/modules/centre/components/CentreRegionSelect.vue"
 
-const router = useRouter()
+const emit = defineEmits(["saved"])
+
 const centreStore = useCentreStore()
 
-const selectedCentre = computed(() => centreStore.selectedCentre)
 const editingCentre = computed(() => centreStore.editingCentre)
 const visible = computed(() => !!editingCentre.value)
 
@@ -209,13 +208,11 @@ function close() {
 }
 
 async function save() {
-  await centreStore.save()
-
-  if (selectedCentre.value) {
-    router.push({
-      name: "CentreDashboardPage",
-      params: { centreId: selectedCentre.value.id },
-    })
+  try {
+    const centre = await centreStore.save()
+    emit("saved", centre.id)
+  } catch (error) {
+    console.error(error)
   }
 }
 </script>

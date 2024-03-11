@@ -196,12 +196,13 @@ import { FormatDate, FormatYesNo } from "@/utils"
 import { mapActions, mapState } from "pinia"
 import VueApexCharts from "vue3-apexcharts"
 
+import { getCurrentFiscalYearSlug } from "@/api/fiscal-periods-api"
 import EnrollmentChart from "../components/EnrollmentChart.vue"
 import CentreCreateOrEditDialog from "@/modules/centre/components/CentreCreateOrEditDialog.vue"
 import { useCentreStore } from "@/modules/centre/store"
 
 export default {
-  name: "CentreDashboard",
+  name: "CentreDashboardPage",
   components: {
     VueApexCharts,
     EnrollmentChart,
@@ -219,7 +220,7 @@ export default {
   },
   async mounted() {
     if (isEmpty(this.fiscalYearSlug)) {
-      this.updateFiscalYearAndRedirect(this.currentFiscalYearSlug)
+      this.updateFiscalYearAndRedirect(getCurrentFiscalYearSlug())
     }
 
     const centre = await this.selectCentreById(this.centreId)
@@ -242,21 +243,6 @@ export default {
     fiscalYear() {
       return this.fiscalYearSlug.replace("-", "/")
     },
-    // TODO: if fiscal year start date ends up being configurable
-    // this should be loaded from the funding_periods table instead of computed here.
-    currentFiscalYearSlug() {
-      const APRIL = 3 // April is the 4th month but JavaScript months are 0-indexed
-      const currentDate = new Date()
-      const currentYear = currentDate.getFullYear()
-      const isAfterFiscalYearStart = currentDate.getMonth() >= APRIL
-
-      // If the current date is after the start of the fiscal year, the fiscal year is the current year and the next year.
-      // Otherwise, the fiscal year is the previous year and the current year.
-      const startYear = isAfterFiscalYearStart ? currentYear : currentYear - 1
-      const endYear = startYear + 1
-      const endYearShort = endYear.toString().slice(-2)
-      return `${startYear}-${endYearShort}`
-    },
   },
   methods: {
     isEmpty,
@@ -277,7 +263,7 @@ export default {
     },
     updateFiscalYearAndRedirect(value: string) {
       this.$router.push({
-        name: this.$route.name || "CentreDashboard",
+        name: this.$route.name || "CentreDashboardPage",
         params: {
           ...this.$route.params,
           fiscalYearSlug: value.replace("/", "-"),
