@@ -185,8 +185,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref } from "vue"
 import { cloneDeep } from "lodash"
+import { computed, nextTick, ref, watch } from "vue"
+import { useRoute, useRouter } from "vue-router"
 
 import { VForm } from "vuetify/lib/components/index.mjs"
 
@@ -201,6 +202,8 @@ const emit = defineEmits(["saved"])
 
 const centreStore = useCentreStore()
 const notificationStore = useNotificationStore()
+const router = useRouter()
+const route = useRoute()
 
 const centre = ref<Partial<Centre>>({})
 const centreId = computed(() => centre.value.id)
@@ -209,6 +212,21 @@ const showDialog = ref(false)
 const form = ref<InstanceType<typeof VForm> | null>(null)
 const isLoading = ref(false)
 const isValid = ref(false)
+
+watch(
+  () => showDialog.value,
+  (value) => {
+    if (value) {
+      if (route.query.showCentreEdit === "true") {
+        return
+      }
+
+      router.push({ query: { showCentreEdit: "true" } })
+    } else {
+      router.push({ query: { showCentreEdit: undefined } })
+    }
+  }
+)
 
 function show(newCentre: Centre) {
   centre.value = cloneDeep(newCentre)
