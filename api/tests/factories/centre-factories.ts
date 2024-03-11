@@ -2,7 +2,7 @@ import { Factory } from "fishery"
 import { faker } from "@faker-js/faker"
 
 import { Centre } from "@/models"
-import { CentreStatus } from "@/models/centre"
+import { CentreStatuses } from "@/models/centre"
 
 const yukonCommunities = [
   "Carmacks",
@@ -35,7 +35,7 @@ export const centreFactory = Factory.define<Centre>(({ sequence, onCreate }) => 
     community: faker.helpers.arrayElement(yukonCommunities),
     region: faker.helpers.enumValue(Centre.Regions),
     isFirstNationProgram: faker.datatype.boolean({ probability: 0.3 }),
-    status: faker.helpers.objectValue(CentreStatus),
+    status: faker.helpers.objectValue(CentreStatuses),
     hotMeal: faker.helpers.arrayElement([true, false, null]),
     licensedFor: faker.helpers.arrayElement([faker.number.int({ min: 1, max: 100 }), null]),
     lastSubmission: faker.helpers.arrayElement([faker.date.recent(), null]),

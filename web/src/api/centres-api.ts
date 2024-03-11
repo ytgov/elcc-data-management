@@ -8,6 +8,12 @@ export enum CentreRegions {
   COMMUNITIES = "communities",
 }
 
+export enum CentreStatuses {
+  ACTIVE = "Active",
+  INACTIVE = "Inactive",
+  UP_TO_DATE = "Up to date",
+}
+
 // TODO: separate new Centre from existing Centre typing
 export type Centre = {
   id?: number
