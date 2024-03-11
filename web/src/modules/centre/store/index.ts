@@ -1,7 +1,7 @@
 import { defineStore } from "pinia"
-import { uniq, cloneDeep, isNil } from "lodash"
+import { uniq, isNil } from "lodash"
 
-import centresApi, { type Centre, CentreRegions, CentreStatuses } from "@/api/centres-api"
+import { type Centre, CentreRegions, CentreStatuses } from "@/api/centres-api"
 import { useNotificationStore } from "@/store/NotificationStore"
 import { useApiStore } from "@/store/ApiStore"
 import { CENTRE_URL } from "@/urls"
@@ -13,7 +13,6 @@ const m = useNotificationStore()
 interface CentreState {
   centres: Centre[]
   selectedCentre: Centre | undefined
-  editingCentre: Centre | undefined
   isLoading: boolean
   enrollmentChartLoading: boolean
   enrollmentChartData: number[]
@@ -24,7 +23,6 @@ export const useCentreStore = defineStore("centre", {
   state: (): CentreState => ({
     centres: [],
     selectedCentre: undefined,
-    editingCentre: undefined,
     isLoading: false,
     enrollmentChartLoading: true,
     enrollmentChartData: [],
@@ -79,13 +77,6 @@ export const useCentreStore = defineStore("centre", {
       this.selectedCentre = undefined
     },
 
-    editCentre(item: Centre) {
-      this.editingCentre = cloneDeep(item)
-    },
-    doneEdit() {
-      this.editingCentre = undefined
-    },
-
     async loadEnrollmentData(id: number) {
       this.enrollmentChartLoading = true
 
@@ -108,30 +99,6 @@ export const useCentreStore = defineStore("centre", {
           this.worksheets = resp.data
         })
         .finally(() => {})
-    },
-    /**
-     * TODO: spit this into creation and update methods.
-     */
-    async save(): Promise<Centre> {
-      const localCentre = this.editingCentre
-      if (isNil(localCentre)) {
-        throw new Error("No centre to save")
-      }
-
-      const api = useApiStore()
-      try {
-        const { centre } = await centresApi.create(localCentre)
-        this.editingCentre = undefined
-        this.selectedCentre = centre
-        m.notify({ text: "Centre created", variant: "success" })
-        await this.getAllCentres()
-        return centre
-      } catch (error) {
-        console.error(`Error saving centre: ${error}`)
-        api.doApiErrorMessage(error)
-      }
-
-      throw new Error("Failed to save centre")
     },
 
     async saveWorksheet(worksheet: any, reload = true) {

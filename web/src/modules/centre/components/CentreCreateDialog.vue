@@ -1,18 +1,15 @@
 <template>
   <v-dialog
-    v-model="visible"
+    v-model="showDialog"
     persistent
     max-width="500"
   >
-    <v-skeleton-loader
-      v-if="isNil(editingCentre)"
-      type="card"
-    />
     <v-form
-      v-else
+      ref="form"
       v-model="isValid"
+      @submit.prevent="createAndClose"
     >
-      <v-card>
+      <v-card :loading="isLoading">
         <v-toolbar
           color="primary"
           variant="dark"
@@ -28,7 +25,7 @@
         </v-toolbar>
         <v-card-text>
           <v-text-field
-            v-model="editingCentre.name"
+            v-model="centre.name"
             label="Name *"
             maxlength="200"
             :rules="[required]"
@@ -37,39 +34,39 @@
             required
           />
           <v-text-field
-            v-model="editingCentre.license"
+            v-model="centre.license"
             label="License"
             maxlength="255"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
-            v-model="editingCentre.vendorIdentifier"
+            v-model="centre.vendorIdentifier"
             label="Vendor ID"
             maxlength="20"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
-            v-model="editingCentre.licensedFor"
+            v-model="centre.licensedFor"
             label="Licensed for"
             variant="outlined"
             density="comfortable"
           />
           <v-checkbox
-            v-model="editingCentre.isFirstNationProgram"
+            v-model="centre.isFirstNationProgram"
             label="Program Type (FN/non-FN)"
             variant="outlined"
             density="comfortable"
           />
           <v-checkbox
-            v-model="editingCentre.hotMeal"
+            v-model="centre.hotMeal"
             label="Hot meal?"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
-            v-model="editingCentre.community"
+            v-model="centre.community"
             label="Community *"
             maxlength="255"
             :rules="[required]"
@@ -78,7 +75,7 @@
             required
           />
           <CentreRegionSelect
-            v-model="editingCentre.region"
+            v-model="centre.region"
             label="Region *"
             maxlength="100"
             :rules="[required]"
@@ -89,6 +86,7 @@
         </v-card-text>
         <v-card-actions class="mx-4 mb-2">
           <v-btn
+            :loading="isLoading"
             color="yg_sun"
             variant="outlined"
             @click="close"
@@ -96,10 +94,11 @@
           >
           <v-spacer></v-spacer>
           <v-btn
+            :loading="isLoading"
+            type="submit"
             color="primary"
             variant="flat"
             :disabled="!isValid"
-            @click="save"
             >Save</v-btn
           >
         </v-card-actions>
@@ -109,33 +108,99 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue"
-import { isNil } from "lodash"
+import { cloneDeep, isEmpty } from "lodash"
+import { nextTick, ref, watch } from "vue"
+import { useRoute, useRouter } from "vue-router"
+
+import { VForm } from "vuetify/lib/components/index.mjs"
 
 import { required } from "@/utils/validators"
-import { useCentreStore } from "@/modules/centre/store"
+import centresApi from "@/api/centres-api"
+import { Centre, useCentreStore } from "@/modules/centre/store"
+import { useNotificationStore } from "@/store/NotificationStore"
 
 import CentreRegionSelect from "@/modules/centre/components/CentreRegionSelect.vue"
 
 const emit = defineEmits(["saved"])
 
 const centreStore = useCentreStore()
+const notificationStore = useNotificationStore()
+const router = useRouter()
+const route = useRoute()
 
-const editingCentre = computed(() => centreStore.editingCentre)
-const visible = computed(() => !!editingCentre.value)
+const centre = ref<Partial<Centre>>({})
 
+const showDialog = ref(false)
+const form = ref<InstanceType<typeof VForm> | null>(null)
+const isLoading = ref(false)
 const isValid = ref(false)
 
-function close() {
-  centreStore.doneEdit()
+watch(
+  () => showDialog.value,
+  (value) => {
+    if (value) {
+      if (route.query.showCentreCreate === "true") {
+        return
+      }
+
+      router.push({ query: { showCentreCreate: "true" } })
+    } else {
+      router.push({ query: { showCentreCreate: undefined } })
+    }
+  }
+)
+
+function show(newCentre: Centre) {
+  centre.value = cloneDeep(newCentre)
+  showDialog.value = true
 }
 
-async function save() {
+function close() {
+  showDialog.value = false
+  resetCentre()
+  form.value?.resetValidation()
+}
+
+async function createAndClose() {
+  if (!isValid.value) {
+    notificationStore.notify({
+      text: "Please fill out all required fields",
+      color: "error",
+    })
+    return
+  }
+
+  isLoading.value = true
   try {
-    const centre = await centreStore.save()
-    emit("saved", centre.id)
+    if (isEmpty(centre.value)) {
+      throw new Error("Centre needs some data to save!")
+    }
+
+    const { centre: newCentre } = await centresApi.create(centre.value)
+    centreStore.selectCentre(newCentre)
+    close()
+
+    await nextTick()
+    emit("saved", newCentre.id)
+    notificationStore.notify({
+      text: "Centre saved",
+      color: "success",
+    })
   } catch (error) {
-    console.error(error)
+    notificationStore.notify({
+      text: `Failed to save centre ${error}`,
+      color: "error",
+    })
+  } finally {
+    isLoading.value = false
   }
 }
+
+function resetCentre() {
+  centre.value = {}
+}
+
+defineExpose({
+  show,
+})
 </script>
