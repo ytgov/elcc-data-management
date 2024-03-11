@@ -101,77 +101,72 @@
   <CentreCreateOrEditDialog />
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { isNil, isEmpty } from "lodash"
-
-import { mapActions, mapState } from "pinia"
-import VueApexCharts from "vue3-apexcharts"
+import { useRoute, useRouter } from "vue-router"
+import { computed, onMounted, onUnmounted } from "vue"
+import { storeToRefs } from "pinia"
 
 import { getCurrentFiscalYearSlug } from "@/api/fiscal-periods-api"
 import { useCentreStore } from "@/modules/centre/store"
 
-import EnrollmentChart from "../components/EnrollmentChart.vue"
+import EnrollmentChart from "@/modules/centre/components/EnrollmentChart.vue"
 import CentreCreateOrEditDialog from "@/modules/centre/components/CentreCreateOrEditDialog.vue"
 import CentreDetailsCard from "@/modules/centre/components/CentreDetailsCard.vue"
 
-export default {
-  name: "CentreDashboardPage",
-  components: {
-    VueApexCharts,
-    EnrollmentChart,
-    CentreCreateOrEditDialog,
-    CentreDetailsCard,
+const props = defineProps({
+  centreId: {
+    type: Number,
+    required: true,
   },
-  props: {
-    centreId: {
-      type: Number,
-      required: true,
-    },
-    fiscalYearSlug: {
-      type: String,
-      default: "",
-    },
+  fiscalYearSlug: {
+    type: String,
+    default: "",
   },
-  async mounted() {
-    if (isEmpty(this.fiscalYearSlug)) {
-      const currentFiscalYearSlug = getCurrentFiscalYearSlug()
-      this.updateFiscalYearAndRedirect(currentFiscalYearSlug)
-    }
+})
 
-    const centre = await this.selectCentreById(this.centreId)
-    if (isNil(centre)) {
-      throw new Error(`Could not load centre from id=${this.centreId}`)
-    }
-  },
-  unmounted() {
-    this.unselectCentre()
-  },
-  computed: {
-    ...mapState(useCentreStore, ["selectedCentre"]),
-    breadcrumbs() {
-      return [
-        { to: "/dashboard", title: "Home" },
-        { to: "/child-care-centres", title: "Child Care Centres" },
-        { title: this.selectedCentre?.name || "loading ..." },
-      ]
+const store = useCentreStore()
+const { selectedCentre } = storeToRefs(store)
+
+const fiscalYear = computed(() => {
+  return props.fiscalYearSlug.replace("-", "/")
+})
+
+const route = useRoute()
+const router = useRouter()
+
+function updateFiscalYearAndRedirect(value: string) {
+  router.push({
+    name: route.name || "CentreDashboardPage",
+    params: {
+      ...route.params,
+      fiscalYearSlug: value.replace("/", "-"),
     },
-    fiscalYear() {
-      return this.fiscalYearSlug.replace("-", "/")
-    },
-  },
-  methods: {
-    isEmpty,
-    ...mapActions(useCentreStore, ["selectCentreById", "unselectCentre"]),
-    updateFiscalYearAndRedirect(value: string) {
-      this.$router.push({
-        name: this.$route.name || "CentreDashboardPage",
-        params: {
-          ...this.$route.params,
-          fiscalYearSlug: value.replace("/", "-"),
-        },
-        query: this.$route.query,
-      })
-    },
-  },
+    query: route.query,
+  })
 }
+
+onMounted(async () => {
+  if (isEmpty(props.fiscalYearSlug)) {
+    const currentFiscalYearSlug = getCurrentFiscalYearSlug()
+    updateFiscalYearAndRedirect(currentFiscalYearSlug)
+  }
+
+  const centre = await store.selectCentreById(props.centreId)
+  if (isNil(centre)) {
+    throw new Error(`Could not load centre from id=${props.centreId}`)
+  }
+})
+
+onUnmounted(() => {
+  store.unselectCentre()
+})
+
+const breadcrumbs = computed(() => {
+  return [
+    { to: "/dashboard", title: "Home" },
+    { to: "/child-care-centres", title: "Child Care Centres" },
+    { title: selectedCentre.value?.name || "loading ..." },
+  ]
+})
 </script>
