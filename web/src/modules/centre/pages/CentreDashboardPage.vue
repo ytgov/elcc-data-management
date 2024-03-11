@@ -50,6 +50,7 @@
         <v-card-title style="background-color: #f2a90068">
           <v-btn
             icon="mdi-pencil"
+            title="Edit"
             size="x-small"
             color="primary"
             class="float-right my-0"
