@@ -161,7 +161,7 @@
 <script lang="ts">
 import { FormatDate, FormatYesNo } from "@/utils"
 import { mapActions, mapState } from "pinia"
-import { useCentreStore, Centre, CentreRegions } from "@/modules/centre/store"
+import { useCentreStore, Centre, CentreRegions, CentreStatuses } from "@/modules/centre/store"
 import CentreCreateOrEditDialog from "@/modules/centre/components/CentreCreateOrEditDialog.vue"
 
 export default {
@@ -199,7 +199,7 @@ export default {
         licensedFor: 10,
         name: "",
         region: CentreRegions.WHITEHORSE,
-        status: "Active",
+        status: CentreStatuses.ACTIVE,
       })
     },
     formatDate(input: Date | string | null | undefined) {

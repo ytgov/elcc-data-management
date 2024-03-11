@@ -1,12 +1,12 @@
 import { defineStore } from "pinia"
 import { uniq, cloneDeep, isNil } from "lodash"
 
-import { type Centre, CentreRegions } from "@/api/centres-api"
+import { type Centre, CentreRegions, CentreStatuses } from "@/api/centres-api"
 import { useNotificationStore } from "@/store/NotificationStore"
 import { useApiStore } from "@/store/ApiStore"
 import { CENTRE_URL } from "@/urls"
 
-export { Centre, CentreRegions }
+export { type Centre, CentreRegions, CentreStatuses }
 
 const m = useNotificationStore()
 
