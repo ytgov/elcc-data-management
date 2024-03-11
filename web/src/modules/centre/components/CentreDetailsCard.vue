@@ -48,7 +48,7 @@ import { isEmpty, isNil } from "lodash"
 import { storeToRefs } from "pinia"
 import { computed } from "vue"
 
-import { FormatDate, FormatYesNo } from "@/utils"
+import { FormatDate as formatDate, FormatYesNo as formatYesNo } from "@/utils"
 import { useCentreStore } from "@/modules/centre/store"
 
 const store = useCentreStore()
@@ -69,7 +69,7 @@ const centreDetails = computed<
   },
   {
     title: "Hot Meal",
-    value: FormatYesNo(selectedCentre.value?.hotMeal || false),
+    value: formatYesNo(selectedCentre.value?.hotMeal || false),
     icon: "mdi-silverware",
   },
   {
@@ -84,7 +84,7 @@ const centreDetails = computed<
   },
   {
     title: "Last Submission",
-    value: formatDate(selectedCentre.value?.lastSubmission),
+    value: formatDate(selectedCentre.value?.lastSubmission || ""),
     icon: "mdi-calendar",
   },
 ])
@@ -99,13 +99,5 @@ function startEdit() {
   }
 
   store.editCentre(selectedCentre.value)
-}
-
-function formatDate(input: Date | string | null | undefined) {
-  return input != null ? FormatDate(input) : ""
-}
-
-function formatYesNo(input: boolean) {
-  return FormatYesNo(input)
 }
 </script>
