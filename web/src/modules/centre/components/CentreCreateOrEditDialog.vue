@@ -36,14 +36,6 @@
             density="comfortable"
             required
           />
-          <v-checkbox
-            v-model="editingCentre.isFirstNationProgram"
-            label="Program Type (FN/non-FN) *"
-            :rules="[required]"
-            variant="outlined"
-            density="comfortable"
-            required
-          />
           <v-text-field
             v-model="editingCentre.community"
             label="Community *"
@@ -148,6 +140,12 @@
             v-model="editingCentre.vendorIdentifier"
             label="Vendor ID"
             maxlength="20"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-checkbox
+            v-model="editingCentre.isFirstNationProgram"
+            label="Program Type (FN/non-FN)"
             variant="outlined"
             density="comfortable"
           />
