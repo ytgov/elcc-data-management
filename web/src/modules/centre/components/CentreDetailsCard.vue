@@ -16,7 +16,7 @@
         size="x-small"
         color="primary"
         class="float-right my-0"
-        @click="startEdit"
+        @click="showCentreEditDialog"
       ></v-btn>
       Child Care Centre Details
     </v-card-title>
@@ -40,20 +40,25 @@
         </template>
       </v-list>
     </v-card-text>
+
+    <CentreEditDialog ref="centerEditDialog" />
   </v-card>
 </template>
 
 <script setup lang="ts">
 import { isEmpty, isNil } from "lodash"
 import { storeToRefs } from "pinia"
-import { computed } from "vue"
+import { computed, ref } from "vue"
 
 import { FormatDate as formatDate, FormatYesNo as formatYesNo } from "@/utils"
 import { useCentreStore } from "@/modules/centre/store"
 
+import CentreEditDialog from "@/modules/centre/components/CentreEditDialog.vue"
+
 const store = useCentreStore()
 
 const { selectedCentre } = storeToRefs(store)
+const centerEditDialog = ref<InstanceType<typeof CentreEditDialog> | null>(null)
 
 const centreDetails = computed<
   {
@@ -93,11 +98,11 @@ function isLastRow(index: number) {
   return index === centreDetails.value.length - 1
 }
 
-function startEdit() {
+function showCentreEditDialog() {
   if (isNil(selectedCentre.value)) {
-    throw new Error("No centre selected")
+    throw new Error("Selected centre is missing")
   }
 
-  store.editCentre(selectedCentre.value)
+  centerEditDialog.value?.show(selectedCentre.value)
 }
 </script>

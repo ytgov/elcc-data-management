@@ -119,21 +119,6 @@ export const useCentreStore = defineStore("centre", {
       }
 
       const api = useApiStore()
-
-      if (localCentre.id) {
-        try {
-          const { centre } = await centresApi.update(localCentre.id, localCentre)
-          this.editingCentre = undefined
-          this.selectedCentre = centre
-          m.notify({ text: "Centre saved", variant: "success" })
-          await this.getAllCentres()
-          return centre
-        } catch (error) {
-          console.error(`Error saving centre: ${error}`)
-          api.doApiErrorMessage(error)
-        }
-      }
-
       try {
         const { centre } = await centresApi.create(localCentre)
         this.editingCentre = undefined
