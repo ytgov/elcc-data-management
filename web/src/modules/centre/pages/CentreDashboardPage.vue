@@ -247,12 +247,7 @@ export default {
   },
   methods: {
     isEmpty,
-    ...mapActions(useCentreStore, [
-      "selectCentreById",
-      "selectCentre",
-      "unselectCentre",
-      "editCentre",
-    ]),
+    ...mapActions(useCentreStore, ["selectCentreById", "unselectCentre", "editCentre"]),
     formatDate(input: Date | string | null | undefined) {
       return input != null ? FormatDate(input) : ""
     },
