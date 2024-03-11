@@ -65,7 +65,7 @@ const centerEditDialog = ref<CentreEditDialogInstance>(null)
 
 const lastSubmission = computed(() => {
   if (isNil(selectedCentre.value?.lastSubmission)) {
-    return "No submisions"
+    return "No submision"
   }
 
   return formatDate(selectedCentre.value.lastSubmission)

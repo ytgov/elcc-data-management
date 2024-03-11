@@ -190,7 +190,7 @@ const breadcrumbs = [
 
 const lastSubmission = computed(() => {
   if (isNil(selectedItem.value?.lastSubmission)) {
-    return "No submisions"
+    return "No submision"
   }
 
   return formatDate(selectedItem.value.lastSubmission)
