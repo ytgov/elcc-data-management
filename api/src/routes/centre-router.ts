@@ -29,10 +29,9 @@ centreRouter.post("/", RequireAdmin, async (req: Request, res: Response) => {
 
   try {
     const centre = await CentreServices.create(req.body, { currentUser: req.user })
-    return res.json({ centre })
-  } catch (error) {
-    console.error(error)
-    return res.status(422).json({ message: "Failed to create centre" })
+    return res.json({ data: centre })
+  } catch (err) {
+    return res.status(500).json({ message: err })
   }
 })
 
@@ -105,7 +104,7 @@ centreRouter.post("/:id/fiscal-year", async (req: Request, res: Response) => {
     })
 })
 
-centreRouter.patch("/:id", RequireAdmin, async (req: Request, res: Response) => {
+centreRouter.put("/:id", RequireAdmin, async (req: Request, res: Response) => {
   // TODO: figure out how to push this logic into the authentication layer
   if (!(req.user instanceof User)) {
     return res.status(401).json({ message: "Unauthorized" })
@@ -119,7 +118,7 @@ centreRouter.patch("/:id", RequireAdmin, async (req: Request, res: Response) => 
 
   return CentreServices.update(centre, req.body, { currentUser: req.user })
     .then((updatedCentre) => {
-      return res.json({ centre: updatedCentre })
+      return res.json({ data: updatedCentre })
     })
     .catch((error) => {
       return res.status(429).json({ messaage: error.toString() })
