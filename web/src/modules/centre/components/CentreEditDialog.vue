@@ -34,6 +34,38 @@
             required
           />
           <v-text-field
+            v-model="centre.license"
+            label="License"
+            maxlength="255"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-text-field
+            v-model="centre.vendorIdentifier"
+            label="Vendor ID"
+            maxlength="20"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-text-field
+            v-model="centre.licensedFor"
+            label="Licensed for"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-checkbox
+            v-model="centre.isFirstNationProgram"
+            label="Program Type (FN/non-FN)"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-checkbox
+            v-model="centre.hotMeal"
+            label="Hot meal?"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-text-field
             v-model="centre.community"
             label="Community *"
             maxlength="255"
@@ -50,25 +82,6 @@
             variant="outlined"
             density="comfortable"
             required
-          />
-          <v-text-field
-            v-model="centre.license"
-            label="License"
-            maxlength="255"
-            variant="outlined"
-            density="comfortable"
-          />
-          <v-text-field
-            v-model="centre.licensedFor"
-            label="Licensed for"
-            variant="outlined"
-            density="comfortable"
-          />
-          <v-checkbox
-            v-model="centre.hotMeal"
-            label="Hot meal?"
-            variant="outlined"
-            density="comfortable"
           />
           <v-text-field
             v-model="centre.licenseHolderName"
@@ -130,19 +143,6 @@
             v-model="centre.faxNumber"
             label="Fax Number"
             maxlength="20"
-            variant="outlined"
-            density="comfortable"
-          />
-          <v-text-field
-            v-model="centre.vendorIdentifier"
-            label="Vendor ID"
-            maxlength="20"
-            variant="outlined"
-            density="comfortable"
-          />
-          <v-checkbox
-            v-model="centre.isFirstNationProgram"
-            label="Program Type (FN/non-FN)"
             variant="outlined"
             density="comfortable"
           />
