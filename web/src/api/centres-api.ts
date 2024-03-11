@@ -43,12 +43,15 @@ export type Centre = {
 }
 
 export const centresApi = {
+  async create(attributes: Partial<Centre>): Promise<{ centre: Centre }> {
+    const { data } = await http.post("/api/centre", attributes)
+    return data
+  },
   fiscalYear: {
     // TODO: normalize this route return type and format
-    create(centerId: number, fiscalYear: string): Promise<FundingSubmissionLineJson[]> {
-      return http
-        .post(`/api/centre/${centerId}/fiscal-year`, { fiscalYear })
-        .then(({ data }) => data.data)
+    async create(centerId: number, fiscalYear: string): Promise<FundingSubmissionLineJson[]> {
+      const { data } = await http.post(`/api/centre/${centerId}/fiscal-year`, { fiscalYear })
+      return data.data
     },
   },
 }

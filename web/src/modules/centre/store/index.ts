@@ -1,7 +1,7 @@
 import { defineStore } from "pinia"
 import { uniq, cloneDeep, isNil } from "lodash"
 
-import { type Centre, CentreRegions, CentreStatuses } from "@/api/centres-api"
+import centresApi, { type Centre, CentreRegions, CentreStatuses } from "@/api/centres-api"
 import { useNotificationStore } from "@/store/NotificationStore"
 import { useApiStore } from "@/store/ApiStore"
 import { CENTRE_URL } from "@/urls"
@@ -112,7 +112,7 @@ export const useCentreStore = defineStore("centre", {
     async save() {
       const api = useApiStore()
 
-      if (this.editingCentre != null && this.editingCentre.id) {
+      if (!isNil(this.editingCentre) && this.editingCentre.id) {
         await api
           .secureCall("put", `${CENTRE_URL}/${this.editingCentre.id}`, this.editingCentre)
           .then((resp) => {
@@ -124,18 +124,20 @@ export const useCentreStore = defineStore("centre", {
             m.notify({ text: "Centre saved", variant: "success" })
           })
           .finally(() => {})
+      } else if (!isNil(this.editingCentre)) {
+        try {
+          const { centre } = await centresApi.create(this.editingCentre)
+          delete this.editingCentre
+          this.selectedCentre = centre
+          m.notify({ text: "Centre created", variant: "success" })
+        } catch (error) {
+          console.error(`Error saving centre: ${error}`)
+          api.doApiErrorMessage(error)
+        }
       } else {
-        await api
-          .secureCall("post", `${CENTRE_URL}`, this.editingCentre)
-          .then((resp) => {
-            // this.worksheets = resp.data;
-            this.editingCentre = undefined
-            this.selectedCentre = resp.data
-
-            m.notify({ text: "Centre created", variant: "success" })
-          })
-          .finally(() => {})
+        console.error("No centre to save")
       }
+
       this.getAllCentres()
     },
 
