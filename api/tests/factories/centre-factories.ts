@@ -33,6 +33,8 @@ export const centreFactory = Factory.define<Centre>(({ sequence, onCreate }) => 
       null,
     ]),
     community: faker.helpers.arrayElement(yukonCommunities),
+    region: faker.helpers.enumValue(Centre.Regions),
+    isFirstNationProgram: faker.datatype.boolean({ probability: 0.3 }),
     status: faker.helpers.objectValue(CentreStatus),
     hotMeal: faker.helpers.arrayElement([true, false, null]),
     licensedFor: faker.helpers.arrayElement([faker.number.int({ min: 1, max: 100 }), null]),
