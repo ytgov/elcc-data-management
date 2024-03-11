@@ -256,6 +256,8 @@ async function updateAndClose() {
 
     const { centre: newCentre } = await centresApi.update(centreId.value, centre.value)
     centreStore.selectCentre(newCentre)
+
+    await nextTick()
     close()
 
     await nextTick()
