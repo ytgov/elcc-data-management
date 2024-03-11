@@ -27,35 +27,17 @@
         density="comfortable"
         style="background-color: inherit"
       >
-        <v-list-item
-          title="License"
-          :subtitle="selectedCentre.license || ''"
-          prepend-icon="mdi-file-certificate"
-        />
-        <v-divider />
-        <v-list-item
-          title="Hot Meal"
-          :subtitle="formatYesNo(selectedCentre.hotMeal || false)"
-          prepend-icon="mdi-silverware"
-        />
-        <v-divider />
-        <v-list-item
-          title="Licensed For"
-          :subtitle="selectedCentre.licensedFor || ''"
-          prepend-icon="mdi-account-group"
-        />
-        <v-divider />
-        <v-list-item
-          title="Community"
-          :subtitle="selectedCentre.community"
-          prepend-icon="mdi-map"
-        />
-        <v-divider />
-        <v-list-item
-          title="Last Submission"
-          :subtitle="formatDate(selectedCentre.lastSubmission)"
-          prepend-icon="mdi-calendar"
-        />
+        <template
+          v-for="({ title, value, icon }, index) in centreDetails"
+          :key="title"
+        >
+          <v-list-item
+            :title="title"
+            :subtitle="value"
+            :prepend-icon="icon"
+          />
+          <v-divider v-if="!isLastRow(index)" />
+        </template>
       </v-list>
     </v-card-text>
   </v-card>
@@ -64,6 +46,7 @@
 <script setup lang="ts">
 import { isEmpty, isNil } from "lodash"
 import { storeToRefs } from "pinia"
+import { computed } from "vue"
 
 import { FormatDate, FormatYesNo } from "@/utils"
 import { useCentreStore } from "@/modules/centre/store"
@@ -71,6 +54,44 @@ import { useCentreStore } from "@/modules/centre/store"
 const store = useCentreStore()
 
 const { selectedCentre } = storeToRefs(store)
+
+const centreDetails = computed<
+  {
+    title: string
+    value: string | number
+    icon: string
+  }[]
+>(() => [
+  {
+    title: "Licence",
+    value: selectedCentre.value?.license || "",
+    icon: "mdi-file-certificate",
+  },
+  {
+    title: "Hot Meal",
+    value: FormatYesNo(selectedCentre.value?.hotMeal || false),
+    icon: "mdi-silverware",
+  },
+  {
+    title: "Licensed For",
+    value: selectedCentre.value?.licensedFor || "",
+    icon: "mdi-account-group",
+  },
+  {
+    title: "Community",
+    value: selectedCentre.value?.community || "",
+    icon: "mdi-map",
+  },
+  {
+    title: "Last Submission",
+    value: formatDate(selectedCentre.value?.lastSubmission),
+    icon: "mdi-calendar",
+  },
+])
+
+function isLastRow(index: number) {
+  return index === centreDetails.value.length - 1
+}
 
 function startEdit() {
   if (isNil(selectedCentre.value)) {
