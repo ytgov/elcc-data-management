@@ -32,10 +32,10 @@
       @update:modelValue="updateFiscalYearAndRedirect"
     />
   </div>
-  <h1 class="mb-4">{{ currentCentre.name }}</h1>
+  <h1 class="mb-4">{{ selectedCentre?.name }}</h1>
 
   <v-row
-    v-if="currentCentre && currentCentre.id"
+    v-if="selectedCentre && selectedCentre.id"
     style="clear: both"
   >
     <v-col
@@ -66,7 +66,7 @@
           >
             <v-list-item
               title="License"
-              :subtitle="currentCentre.license || ''"
+              :subtitle="selectedCentre.license || ''"
               class="pl-0"
             >
               <template #prepend>
@@ -79,7 +79,7 @@
             <v-divider></v-divider>
             <v-list-item
               title="Hot Meal"
-              :subtitle="FormatYesNo(currentCentre.hotMeal || false)"
+              :subtitle="FormatYesNo(selectedCentre.hotMeal || false)"
               class="pl-0"
             >
               <template #prepend>
@@ -92,7 +92,7 @@
             <v-divider></v-divider>
             <v-list-item
               title="Licensed For"
-              :subtitle="currentCentre.licensedFor || ''"
+              :subtitle="selectedCentre.licensedFor || ''"
               class="pl-0"
             >
               <template #prepend>
@@ -105,7 +105,7 @@
             <v-divider></v-divider>
             <v-list-item
               title="Community"
-              :subtitle="currentCentre.community"
+              :subtitle="selectedCentre.community"
               class="pl-0"
             >
               <template #prepend>
@@ -118,7 +118,7 @@
             <v-divider></v-divider>
             <v-list-item
               title="Last Submission"
-              :subtitle="formatDate(currentCentre.lastSubmission)"
+              :subtitle="formatDate(selectedCentre.lastSubmission)"
               class="pl-0"
             >
               <template #prepend>
@@ -198,7 +198,7 @@ import VueApexCharts from "vue3-apexcharts"
 
 import EnrollmentChart from "../components/EnrollmentChart.vue"
 import CentreCreateOrEditDialog from "@/modules/centre/components/CentreCreateOrEditDialog.vue"
-import { type Centre, useCentreStore } from "@/modules/centre/store"
+import { useCentreStore } from "@/modules/centre/store"
 
 export default {
   name: "CentreDashboard",
@@ -217,11 +217,6 @@ export default {
       default: "",
     },
   },
-  data() {
-    return {
-      currentCentre: { name: "" } as Centre,
-    }
-  },
   async mounted() {
     if (isEmpty(this.fiscalYearSlug)) {
       this.updateFiscalYearAndRedirect(this.currentFiscalYearSlug)
@@ -231,8 +226,6 @@ export default {
     if (isNil(centre)) {
       throw new Error(`Could not load centre from id=${this.centreId}`)
     }
-
-    this.currentCentre = centre
   },
   unmounted() {
     this.unselectCentre()
@@ -243,7 +236,7 @@ export default {
       return [
         { to: "/dashboard", title: "Home" },
         { to: "/child-care-centres", title: "Child Care Centres" },
-        { title: this.currentCentre.name },
+        { title: this.selectedCentre?.name || "loading ..." },
       ]
     },
     fiscalYear() {
@@ -267,7 +260,12 @@ export default {
   },
   methods: {
     isEmpty,
-    ...mapActions(useCentreStore, ["selectCentreById", "unselectCentre", "editCentre"]),
+    ...mapActions(useCentreStore, [
+      "selectCentreById",
+      "selectCentre",
+      "unselectCentre",
+      "editCentre",
+    ]),
     formatDate(input: Date | string | null | undefined) {
       return input != null ? FormatDate(input) : ""
     },
