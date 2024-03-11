@@ -23,6 +23,8 @@ import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
 import BaseModel from "@/models/base-model"
 
 export enum CentreStatus {
+  ACTIVE = "Active",
+  INACTIVE = "Inactive",
   UP_TO_DATE = "Up to date",
 }
 
