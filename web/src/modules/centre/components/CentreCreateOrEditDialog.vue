@@ -30,6 +30,7 @@
           <v-text-field
             v-model="editingCentre.name"
             label="Name *"
+            maxlength="200"
             :rules="[required]"
             variant="outlined"
             density="comfortable"
@@ -46,6 +47,7 @@
           <v-text-field
             v-model="editingCentre.community"
             label="Community *"
+            maxlength="255"
             :rules="[required]"
             variant="outlined"
             density="comfortable"
@@ -54,6 +56,7 @@
           <CentreRegionSelect
             v-model="editingCentre.region"
             label="Region *"
+            maxlength="100"
             :rules="[required]"
             variant="outlined"
             density="comfortable"
@@ -62,6 +65,7 @@
           <v-text-field
             v-model="editingCentre.license"
             label="License"
+            maxlength="255"
             variant="outlined"
             density="comfortable"
           />
@@ -80,72 +84,84 @@
           <v-text-field
             v-model="editingCentre.licenseHolderName"
             label="License Holder Name"
+            maxlength="100"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
             v-model="editingCentre.contactName"
             label="Contact Name"
+            maxlength="100"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
             v-model="editingCentre.physicalAddress"
             label="Physical Address"
+            maxlength="250"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
             v-model="editingCentre.mailingAddress"
             label="Mailing Address"
+            maxlength="250"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
             v-model="editingCentre.email"
             label="Email"
+            maxlength="100"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
             v-model="editingCentre.altEmail"
             label="Alt Email"
+            maxlength="100"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
             v-model="editingCentre.phoneNumber"
             label="Phone Number"
+            maxlength="20"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
             v-model="editingCentre.altPhoneNumber"
             label="Alt Phone Number"
+            maxlength="20"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
             v-model="editingCentre.faxNumber"
             label="Fax Number"
+            maxlength="20"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
             v-model="editingCentre.vendorIdentifier"
             label="Vendor ID"
+            maxlength="20"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
             v-model="editingCentre.inspectorName"
             label="Inspector Name"
+            maxlength="100"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
             v-model="editingCentre.neighborhood"
             label="Neighborhood"
+            maxlength="100"
             variant="outlined"
             density="comfortable"
           />
