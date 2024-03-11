@@ -1,16 +1,19 @@
 import { defineStore } from "pinia"
 import { uniq, cloneDeep, isNil } from "lodash"
 
+import centresApi, { type Centre, CentreRegions, CentreStatuses } from "@/api/centres-api"
 import { useNotificationStore } from "@/store/NotificationStore"
 import { useApiStore } from "@/store/ApiStore"
 import { CENTRE_URL } from "@/urls"
 
+export { type Centre, CentreRegions, CentreStatuses }
+
 const m = useNotificationStore()
 
 interface CentreState {
-  centres: ChildCareCentre[]
-  selectedCentre: ChildCareCentre | undefined
-  editingCentre: ChildCareCentre | undefined
+  centres: Centre[]
+  selectedCentre: Centre | undefined
+  editingCentre: Centre | undefined
   isLoading: boolean
   enrollmentChartLoading: boolean
   enrollmentChartData: number[]
@@ -57,10 +60,10 @@ export const useCentreStore = defineStore("centre", {
         })
     },
 
-    selectCentre(centre: ChildCareCentre) {
+    selectCentre(centre: Centre) {
       this.selectedCentre = centre
     },
-    async selectCentreById(id: number): Promise<ChildCareCentre | undefined> {
+    async selectCentreById(id: number): Promise<Centre | undefined> {
       const centreFromStore = this.centres.find((centre) => centre.id === id)
       if (!isNil(centreFromStore)) {
         this.selectedCentre = centreFromStore
@@ -76,7 +79,7 @@ export const useCentreStore = defineStore("centre", {
       this.selectedCentre = undefined
     },
 
-    editCentre(item: ChildCareCentre) {
+    editCentre(item: Centre) {
       this.editingCentre = cloneDeep(item)
     },
     doneEdit() {
@@ -106,34 +109,44 @@ export const useCentreStore = defineStore("centre", {
         })
         .finally(() => {})
     },
-    async save() {
+    /**
+     * TODO: spit this into creation and update methods.
+     */
+    async save(): Promise<Centre> {
+      const localCentre = this.editingCentre
+      if (isNil(localCentre)) {
+        throw new Error("No centre to save")
+      }
+
       const api = useApiStore()
 
-      if (this.editingCentre != null && this.editingCentre.id) {
-        await api
-          .secureCall("put", `${CENTRE_URL}/${this.editingCentre.id}`, this.editingCentre)
-          .then((resp) => {
-            // this.worksheets = resp.data;
-            this.editingCentre = undefined
-            this.selectedCentre = resp.data
-            console.log("SELECT", this.selectCentre)
-
-            m.notify({ text: "Centre saved", variant: "success" })
-          })
-          .finally(() => {})
-      } else {
-        await api
-          .secureCall("post", `${CENTRE_URL}`, this.editingCentre)
-          .then((resp) => {
-            // this.worksheets = resp.data;
-            this.editingCentre = undefined
-            this.selectedCentre = resp.data
-
-            m.notify({ text: "Centre created", variant: "success" })
-          })
-          .finally(() => {})
+      if (localCentre.id) {
+        try {
+          const { centre } = await centresApi.update(localCentre.id, localCentre)
+          this.editingCentre = undefined
+          this.selectedCentre = centre
+          m.notify({ text: "Centre saved", variant: "success" })
+          await this.getAllCentres()
+          return centre
+        } catch (error) {
+          console.error(`Error saving centre: ${error}`)
+          api.doApiErrorMessage(error)
+        }
       }
-      this.getAllCentres()
+
+      try {
+        const { centre } = await centresApi.create(localCentre)
+        this.editingCentre = undefined
+        this.selectedCentre = centre
+        m.notify({ text: "Centre created", variant: "success" })
+        await this.getAllCentres()
+        return centre
+      } catch (error) {
+        console.error(`Error saving centre: ${error}`)
+        api.doApiErrorMessage(error)
+      }
+
+      throw new Error("Failed to save centre")
     },
 
     async saveWorksheet(worksheet: any, reload = true) {
@@ -153,15 +166,3 @@ export const useCentreStore = defineStore("centre", {
     },
   },
 })
-
-export interface ChildCareCentre {
-  id?: number
-  name: string
-  license: string
-  community: string
-  status: string
-  hotMeal: boolean
-  licensedFor: number
-  lastSubmission?: Date
-  createDate: Date
-}
