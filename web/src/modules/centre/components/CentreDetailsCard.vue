@@ -30,67 +30,32 @@
         <v-list-item
           title="License"
           :subtitle="selectedCentre.license || ''"
-          class="pl-0"
-        >
-          <template #prepend>
-            <v-icon
-              icon="mdi-file-certificate"
-              style="margin-inline-end: 10px"
-            ></v-icon>
-          </template>
-        </v-list-item>
-        <v-divider></v-divider>
+          prepend-icon="mdi-file-certificate"
+        />
+        <v-divider />
         <v-list-item
           title="Hot Meal"
           :subtitle="formatYesNo(selectedCentre.hotMeal || false)"
-          class="pl-0"
-        >
-          <template #prepend>
-            <v-icon
-              icon="mdi-silverware"
-              style="margin-inline-end: 10px"
-            ></v-icon>
-          </template>
-        </v-list-item>
-        <v-divider></v-divider>
+          prepend-icon="mdi-silverware"
+        />
+        <v-divider />
         <v-list-item
           title="Licensed For"
           :subtitle="selectedCentre.licensedFor || ''"
-          class="pl-0"
-        >
-          <template #prepend>
-            <v-icon
-              icon="mdi-account-group"
-              style="margin-inline-end: 10px"
-            ></v-icon>
-          </template>
-        </v-list-item>
-        <v-divider></v-divider>
+          prepend-icon="mdi-account-group"
+        />
+        <v-divider />
         <v-list-item
           title="Community"
           :subtitle="selectedCentre.community"
-          class="pl-0"
-        >
-          <template #prepend>
-            <v-icon
-              icon="mdi-map"
-              style="margin-inline-end: 10px"
-            ></v-icon>
-          </template>
-        </v-list-item>
-        <v-divider></v-divider>
+          prepend-icon="mdi-map"
+        />
+        <v-divider />
         <v-list-item
           title="Last Submission"
           :subtitle="formatDate(selectedCentre.lastSubmission)"
-          class="pl-0"
-        >
-          <template #prepend>
-            <v-icon
-              icon="mdi-calendar"
-              style="margin-inline-end: 10px"
-            ></v-icon>
-          </template>
-        </v-list-item>
+          prepend-icon="mdi-calendar"
+        />
       </v-list>
     </v-card-text>
   </v-card>
