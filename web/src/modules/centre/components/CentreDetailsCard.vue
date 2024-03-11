@@ -63,6 +63,13 @@ const store = useCentreStore()
 const { selectedCentre } = storeToRefs(store)
 const centerEditDialog = ref<CentreEditDialogInstance>(null)
 
+const lastSubmission = computed(() => {
+  if (isNil(selectedCentre.value?.lastSubmission)) {
+    return "No submisions"
+  }
+
+  return formatDate(selectedCentre.value.lastSubmission)
+})
 const centreDetails = computed<
   {
     title: string
@@ -92,7 +99,7 @@ const centreDetails = computed<
   },
   {
     title: "Last Submission",
-    value: formatDate(selectedCentre.value?.lastSubmission || ""),
+    value: lastSubmission.value,
     icon: "mdi-calendar",
   },
 ])
