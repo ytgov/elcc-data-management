@@ -30,8 +30,9 @@ centreRouter.post("/", RequireAdmin, async (req: Request, res: Response) => {
   try {
     const centre = await CentreServices.create(req.body, { currentUser: req.user })
     return res.json({ data: centre })
-  } catch (err) {
-    return res.status(500).json({ message: err })
+  } catch (error) {
+    console.error(error)
+    return res.status(422).json({ message: "Failed to create centre" })
   }
 })
 
