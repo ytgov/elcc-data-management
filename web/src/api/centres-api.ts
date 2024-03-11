@@ -44,11 +44,11 @@ export type Centre = {
 
 export const centresApi = {
   async create(attributes: Partial<Centre>): Promise<{ centre: Centre }> {
-    const { data } = await http.post("/api/centre", attributes)
+    const { data } = await http.post("/api/centres", attributes)
     return data
   },
   async update(centreId: number, attributes: Partial<Centre>): Promise<{ centre: Centre }> {
-    const { data } = await http.patch(`/api/centre/${centreId}`, attributes)
+    const { data } = await http.patch(`/api/centres/${centreId}`, attributes)
     return data
   },
   fiscalYear: {

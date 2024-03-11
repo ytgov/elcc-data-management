@@ -21,6 +21,9 @@ centreRouter.get("/", async (req: Request, res: Response) => {
   }
 })
 
+/**
+ * @deprecated prefer /api/centres -> CentresController#create
+ */
 centreRouter.post("/", RequireAdmin, async (req: Request, res: Response) => {
   // TODO: figure out how to push this logic into the authentication layer
   if (!(req.user instanceof User)) {
@@ -104,6 +107,9 @@ centreRouter.post("/:id/fiscal-year", async (req: Request, res: Response) => {
     })
 })
 
+/**
+ * @deprecated prefer /api/centres/:centreId -> CentresController#update
+ */
 centreRouter.put("/:id", RequireAdmin, async (req: Request, res: Response) => {
   // TODO: figure out how to push this logic into the authentication layer
   if (!(req.user instanceof User)) {

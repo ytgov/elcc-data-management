@@ -2,6 +2,7 @@ import { Router, type Request, type Response } from "express"
 
 import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 import {
+  CentresController,
   EmployeeBenefitsController,
   EmployeeWageTiersController,
   FiscalPeriodsController,
@@ -14,6 +15,9 @@ export const apiRouter = Router()
 
 // TODO: move all routing logic to this file, and move all route actions into controllers
 apiRouter.use("/api", checkJwt, autheticateAndLoadUser)
+
+apiRouter.route("/api/centres").post(CentresController.create)
+apiRouter.route("/api/centres/:centreId").patch(CentresController.update)
 
 apiRouter.route("/api/payments").get(PaymentsController.index).post(PaymentsController.create)
 apiRouter
