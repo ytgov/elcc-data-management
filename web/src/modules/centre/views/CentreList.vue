@@ -166,8 +166,8 @@
 <script setup lang="ts">
 import { isEmpty, isNil } from "lodash"
 import { storeToRefs } from "pinia"
-import { computed, ref } from "vue"
-import { useRouter } from "vue-router"
+import { computed, ref, watch } from "vue"
+import { useRoute, useRouter } from "vue-router"
 
 import { FormatDate as formatDate, FormatYesNo as formatYesNo } from "@/utils"
 import { useCentreStore, Centre, CentreRegions, CentreStatuses } from "@/modules/centre/store"
@@ -176,6 +176,7 @@ import CentreCreateDialog from "@/modules/centre/components/CentreCreateDialog.v
 
 const centreStore = useCentreStore()
 const router = useRouter()
+const route = useRoute()
 
 const { centres } = storeToRefs(centreStore)
 const search = ref("")
@@ -222,4 +223,16 @@ function openCentreCreateDialog() {
     status: CentreStatuses.ACTIVE,
   })
 }
+
+watch(
+  () => [centreCreateDialog.value],
+  ([newCentreCreateDialog]) => {
+    if (!isNil(newCentreCreateDialog) && route.query.showCentreCreate === "true") {
+      openCentreCreateDialog()
+    }
+  },
+  {
+    immediate: true,
+  }
+)
 </script>
