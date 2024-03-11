@@ -220,7 +220,8 @@ export default {
   },
   async mounted() {
     if (isEmpty(this.fiscalYearSlug)) {
-      this.updateFiscalYearAndRedirect(getCurrentFiscalYearSlug())
+      const currentFiscalYearSlug = getCurrentFiscalYearSlug()
+      this.updateFiscalYearAndRedirect(currentFiscalYearSlug)
     }
 
     const centre = await this.selectCentreById(this.centreId)
