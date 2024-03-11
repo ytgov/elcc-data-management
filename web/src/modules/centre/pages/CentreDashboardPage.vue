@@ -42,96 +42,7 @@
       cols="12"
       md="4"
     >
-      <v-card
-        elevation="3"
-        color="#F2A90066"
-        class="mb-5"
-      >
-        <v-card-title style="background-color: #f2a90068">
-          <v-btn
-            icon="mdi-pencil"
-            title="Edit"
-            size="x-small"
-            color="primary"
-            class="float-right my-0"
-            @click="editClick"
-          ></v-btn>
-          Child Care Centre Details
-        </v-card-title>
-        <v-divider></v-divider>
-        <v-card-text class="pt-0">
-          <v-list
-            lines="one"
-            density="comfortable"
-            style="background-color: inherit"
-          >
-            <v-list-item
-              title="License"
-              :subtitle="selectedCentre.license || ''"
-              class="pl-0"
-            >
-              <template #prepend>
-                <v-icon
-                  icon="mdi-file-certificate"
-                  style="margin-inline-end: 10px"
-                ></v-icon>
-              </template>
-            </v-list-item>
-            <v-divider></v-divider>
-            <v-list-item
-              title="Hot Meal"
-              :subtitle="FormatYesNo(selectedCentre.hotMeal || false)"
-              class="pl-0"
-            >
-              <template #prepend>
-                <v-icon
-                  icon="mdi-silverware"
-                  style="margin-inline-end: 10px"
-                ></v-icon>
-              </template>
-            </v-list-item>
-            <v-divider></v-divider>
-            <v-list-item
-              title="Licensed For"
-              :subtitle="selectedCentre.licensedFor || ''"
-              class="pl-0"
-            >
-              <template #prepend>
-                <v-icon
-                  icon="mdi-account-group"
-                  style="margin-inline-end: 10px"
-                ></v-icon>
-              </template>
-            </v-list-item>
-            <v-divider></v-divider>
-            <v-list-item
-              title="Community"
-              :subtitle="selectedCentre.community"
-              class="pl-0"
-            >
-              <template #prepend>
-                <v-icon
-                  icon="mdi-map"
-                  style="margin-inline-end: 10px"
-                ></v-icon>
-              </template>
-            </v-list-item>
-            <v-divider></v-divider>
-            <v-list-item
-              title="Last Submission"
-              :subtitle="formatDate(selectedCentre.lastSubmission)"
-              class="pl-0"
-            >
-              <template #prepend>
-                <v-icon
-                  icon="mdi-calendar"
-                  style="margin-inline-end: 10px"
-                ></v-icon>
-              </template>
-            </v-list-item>
-          </v-list>
-        </v-card-text>
-      </v-card>
+      <CentreDetailsCard :centreId="selectedCentre.id" />
       <v-card
         elevation="3"
         color="#0097a966"
@@ -193,14 +104,15 @@
 <script lang="ts">
 import { isNil, isEmpty } from "lodash"
 
-import { FormatDate, FormatYesNo } from "@/utils"
 import { mapActions, mapState } from "pinia"
 import VueApexCharts from "vue3-apexcharts"
 
 import { getCurrentFiscalYearSlug } from "@/api/fiscal-periods-api"
+import { useCentreStore } from "@/modules/centre/store"
+
 import EnrollmentChart from "../components/EnrollmentChart.vue"
 import CentreCreateOrEditDialog from "@/modules/centre/components/CentreCreateOrEditDialog.vue"
-import { useCentreStore } from "@/modules/centre/store"
+import CentreDetailsCard from "@/modules/centre/components/CentreDetailsCard.vue"
 
 export default {
   name: "CentreDashboardPage",
@@ -208,6 +120,7 @@ export default {
     VueApexCharts,
     EnrollmentChart,
     CentreCreateOrEditDialog,
+    CentreDetailsCard,
   },
   props: {
     centreId: {
@@ -248,16 +161,7 @@ export default {
   },
   methods: {
     isEmpty,
-    ...mapActions(useCentreStore, ["selectCentreById", "unselectCentre", "editCentre"]),
-    formatDate(input: Date | string | null | undefined) {
-      return input != null ? FormatDate(input) : ""
-    },
-    FormatYesNo(input: boolean) {
-      return FormatYesNo(input)
-    },
-    editClick() {
-      if (this.selectedCentre) this.editCentre(this.selectedCentre)
-    },
+    ...mapActions(useCentreStore, ["selectCentreById", "unselectCentre"]),
     updateFiscalYearAndRedirect(value: string) {
       this.$router.push({
         name: this.$route.name || "CentreDashboardPage",
