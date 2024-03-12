@@ -1,3 +1,4 @@
+export { CentresController } from "./centres-controller"
 export { EmployeeBenefitsController } from "./employee-benefits-controller"
 export { EmployeeWageTiersController } from "./employee-wage-tiers-controller"
 export { FiscalPeriodsController } from "./fiscal-periods-controller"

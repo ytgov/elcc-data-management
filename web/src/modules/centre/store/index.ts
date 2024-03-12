@@ -1,16 +1,18 @@
 import { defineStore } from "pinia"
-import { uniq, cloneDeep, isNil } from "lodash"
+import { uniq, isNil } from "lodash"
 
+import { type Centre, CentreRegions, CentreStatuses } from "@/api/centres-api"
 import { useNotificationStore } from "@/store/NotificationStore"
 import { useApiStore } from "@/store/ApiStore"
 import { CENTRE_URL } from "@/urls"
 
+export { type Centre, CentreRegions, CentreStatuses }
+
 const m = useNotificationStore()
 
 interface CentreState {
-  centres: ChildCareCentre[]
-  selectedCentre: ChildCareCentre | undefined
-  editingCentre: ChildCareCentre | undefined
+  centres: Centre[]
+  selectedCentre: Centre | undefined
   isLoading: boolean
   enrollmentChartLoading: boolean
   enrollmentChartData: number[]
@@ -21,7 +23,6 @@ export const useCentreStore = defineStore("centre", {
   state: (): CentreState => ({
     centres: [],
     selectedCentre: undefined,
-    editingCentre: undefined,
     isLoading: false,
     enrollmentChartLoading: true,
     enrollmentChartData: [],
@@ -57,10 +58,10 @@ export const useCentreStore = defineStore("centre", {
         })
     },
 
-    selectCentre(centre: ChildCareCentre) {
+    selectCentre(centre: Centre) {
       this.selectedCentre = centre
     },
-    async selectCentreById(id: number): Promise<ChildCareCentre | undefined> {
+    async selectCentreById(id: number): Promise<Centre | undefined> {
       const centreFromStore = this.centres.find((centre) => centre.id === id)
       if (!isNil(centreFromStore)) {
         this.selectedCentre = centreFromStore
@@ -74,13 +75,6 @@ export const useCentreStore = defineStore("centre", {
     },
     unselectCentre() {
       this.selectedCentre = undefined
-    },
-
-    editCentre(item: ChildCareCentre) {
-      this.editingCentre = cloneDeep(item)
-    },
-    doneEdit() {
-      this.editingCentre = undefined
     },
 
     async loadEnrollmentData(id: number) {
@@ -106,35 +100,6 @@ export const useCentreStore = defineStore("centre", {
         })
         .finally(() => {})
     },
-    async save() {
-      const api = useApiStore()
-
-      if (this.editingCentre != null && this.editingCentre.id) {
-        await api
-          .secureCall("put", `${CENTRE_URL}/${this.editingCentre.id}`, this.editingCentre)
-          .then((resp) => {
-            // this.worksheets = resp.data;
-            this.editingCentre = undefined
-            this.selectedCentre = resp.data
-            console.log("SELECT", this.selectCentre)
-
-            m.notify({ text: "Centre saved", variant: "success" })
-          })
-          .finally(() => {})
-      } else {
-        await api
-          .secureCall("post", `${CENTRE_URL}`, this.editingCentre)
-          .then((resp) => {
-            // this.worksheets = resp.data;
-            this.editingCentre = undefined
-            this.selectedCentre = resp.data
-
-            m.notify({ text: "Centre created", variant: "success" })
-          })
-          .finally(() => {})
-      }
-      this.getAllCentres()
-    },
 
     async saveWorksheet(worksheet: any, reload = true) {
       let id = 0
@@ -153,15 +118,3 @@ export const useCentreStore = defineStore("centre", {
     },
   },
 })
-
-export interface ChildCareCentre {
-  id?: number
-  name: string
-  license: string
-  community: string
-  status: string
-  hotMeal: boolean
-  licensedFor: number
-  lastSubmission?: Date
-  createDate: Date
-}

@@ -53,6 +53,7 @@ export const useApiStore = defineStore("api", () => {
   }
   return {
     secureCall,
+    doApiErrorMessage,
   }
 })
 
