@@ -64,7 +64,7 @@ const { selectedCentre } = storeToRefs(store)
 const centerEditDialog = ref<CentreEditDialogInstance>(null)
 
 const lastSubmission = computed(() => {
-  if (isNil(selectedCentre.value?.lastSubmission)) {
+  if (isNil(selectedCentre.value) || isNil(selectedCentre.value?.lastSubmission)) {
     return "No submision"
   }
 
