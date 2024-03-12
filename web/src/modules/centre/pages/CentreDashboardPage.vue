@@ -97,21 +97,18 @@
       </v-card>
     </v-col>
   </v-row>
-
-  <CentreCreateOrEditDialog />
 </template>
 
 <script setup lang="ts">
 import { isNil, isEmpty } from "lodash"
 import { useRoute, useRouter } from "vue-router"
-import { computed, onMounted, onUnmounted } from "vue"
+import { computed, onMounted, onUnmounted, ref } from "vue"
 import { storeToRefs } from "pinia"
 
 import { getCurrentFiscalYearSlug } from "@/api/fiscal-periods-api"
 import { useCentreStore } from "@/modules/centre/store"
 
 import EnrollmentChart from "@/modules/centre/components/EnrollmentChart.vue"
-import CentreCreateOrEditDialog from "@/modules/centre/components/CentreCreateOrEditDialog.vue"
 import CentreDetailsCard from "@/modules/centre/components/CentreDetailsCard.vue"
 
 const props = defineProps({
@@ -126,14 +123,13 @@ const props = defineProps({
 })
 
 const store = useCentreStore()
+const route = useRoute()
+const router = useRouter()
 const { selectedCentre } = storeToRefs(store)
 
 const fiscalYear = computed(() => {
   return props.fiscalYearSlug.replace("-", "/")
 })
-
-const route = useRoute()
-const router = useRouter()
 
 function updateFiscalYearAndRedirect(value: string) {
   router.push({

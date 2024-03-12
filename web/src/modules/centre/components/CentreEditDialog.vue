@@ -1,18 +1,15 @@
 <template>
   <v-dialog
-    v-model="visible"
+    v-model="showDialog"
     persistent
     max-width="500"
   >
-    <v-skeleton-loader
-      v-if="isNil(editingCentre)"
-      type="card"
-    />
     <v-form
-      v-else
+      ref="form"
       v-model="isValid"
+      @submit.prevent="updateAndClose"
     >
-      <v-card>
+      <v-card :loading="isLoading">
         <v-toolbar
           color="primary"
           variant="dark"
@@ -28,7 +25,7 @@
         </v-toolbar>
         <v-card-text>
           <v-text-field
-            v-model="editingCentre.name"
+            v-model="centre.name"
             label="Name *"
             maxlength="200"
             :rules="[required]"
@@ -37,7 +34,39 @@
             required
           />
           <v-text-field
-            v-model="editingCentre.community"
+            v-model="centre.license"
+            label="License"
+            maxlength="255"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-text-field
+            v-model="centre.vendorIdentifier"
+            label="Vendor ID"
+            maxlength="20"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-text-field
+            v-model="centre.licensedFor"
+            label="Licensed for"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-checkbox
+            v-model="centre.isFirstNationProgram"
+            label="Program Type (FN/non-FN)"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-checkbox
+            v-model="centre.hotMeal"
+            label="Hot meal?"
+            variant="outlined"
+            density="comfortable"
+          />
+          <v-text-field
+            v-model="centre.community"
             label="Community *"
             maxlength="255"
             :rules="[required]"
@@ -46,7 +75,7 @@
             required
           />
           <CentreRegionSelect
-            v-model="editingCentre.region"
+            v-model="centre.region"
             label="Region *"
             maxlength="100"
             :rules="[required]"
@@ -55,109 +84,77 @@
             required
           />
           <v-text-field
-            v-model="editingCentre.license"
-            label="License"
-            maxlength="255"
-            variant="outlined"
-            density="comfortable"
-          />
-          <v-text-field
-            v-model="editingCentre.licensedFor"
-            label="Licensed for"
-            variant="outlined"
-            density="comfortable"
-          />
-          <v-checkbox
-            v-model="editingCentre.hotMeal"
-            label="Hot meal?"
-            variant="outlined"
-            density="comfortable"
-          />
-          <v-text-field
-            v-model="editingCentre.licenseHolderName"
+            v-model="centre.licenseHolderName"
             label="License Holder Name"
             maxlength="100"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
-            v-model="editingCentre.contactName"
+            v-model="centre.contactName"
             label="Contact Name"
             maxlength="100"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
-            v-model="editingCentre.physicalAddress"
+            v-model="centre.physicalAddress"
             label="Physical Address"
             maxlength="250"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
-            v-model="editingCentre.mailingAddress"
+            v-model="centre.mailingAddress"
             label="Mailing Address"
             maxlength="250"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
-            v-model="editingCentre.email"
+            v-model="centre.email"
             label="Email"
             maxlength="100"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
-            v-model="editingCentre.altEmail"
+            v-model="centre.altEmail"
             label="Alt Email"
             maxlength="100"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
-            v-model="editingCentre.phoneNumber"
+            v-model="centre.phoneNumber"
             label="Phone Number"
             maxlength="20"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
-            v-model="editingCentre.altPhoneNumber"
+            v-model="centre.altPhoneNumber"
             label="Alt Phone Number"
             maxlength="20"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
-            v-model="editingCentre.faxNumber"
+            v-model="centre.faxNumber"
             label="Fax Number"
             maxlength="20"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
-            v-model="editingCentre.vendorIdentifier"
-            label="Vendor ID"
-            maxlength="20"
-            variant="outlined"
-            density="comfortable"
-          />
-          <v-checkbox
-            v-model="editingCentre.isFirstNationProgram"
-            label="Program Type (FN/non-FN)"
-            variant="outlined"
-            density="comfortable"
-          />
-          <v-text-field
-            v-model="editingCentre.inspectorName"
+            v-model="centre.inspectorName"
             label="Inspector Name"
             maxlength="100"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
-            v-model="editingCentre.neighborhood"
+            v-model="centre.neighborhood"
             label="Neighborhood"
             maxlength="100"
             variant="outlined"
@@ -166,6 +163,7 @@
         </v-card-text>
         <v-card-actions class="mx-4 mb-2">
           <v-btn
+            :loading="isLoading"
             color="yg_sun"
             variant="outlined"
             @click="close"
@@ -173,10 +171,11 @@
           >
           <v-spacer></v-spacer>
           <v-btn
+            :loading="isLoading"
+            type="submit"
             color="primary"
             variant="flat"
             :disabled="!isValid"
-            @click="save"
             >Save</v-btn
           >
         </v-card-actions>
@@ -186,33 +185,102 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue"
-import { isNil } from "lodash"
+import { cloneDeep } from "lodash"
+import { computed, nextTick, ref, watch } from "vue"
+import { useRoute, useRouter } from "vue-router"
+
+import { VForm } from "vuetify/lib/components/index.mjs"
 
 import { required } from "@/utils/validators"
-import { useCentreStore } from "@/modules/centre/store"
+import centresApi from "@/api/centres-api"
+import { Centre, useCentreStore } from "@/modules/centre/store"
+import { useNotificationStore } from "@/store/NotificationStore"
 
 import CentreRegionSelect from "@/modules/centre/components/CentreRegionSelect.vue"
 
 const emit = defineEmits(["saved"])
 
 const centreStore = useCentreStore()
+const notificationStore = useNotificationStore()
+const router = useRouter()
+const route = useRoute()
 
-const editingCentre = computed(() => centreStore.editingCentre)
-const visible = computed(() => !!editingCentre.value)
+const centre = ref<Partial<Centre>>({})
+const centreId = computed(() => centre.value.id)
 
+const showDialog = ref(false)
+const form = ref<InstanceType<typeof VForm> | null>(null)
+const isLoading = ref(false)
 const isValid = ref(false)
 
-function close() {
-  centreStore.doneEdit()
+watch(
+  () => showDialog.value,
+  (value) => {
+    if (value) {
+      if (route.query.showCentreEdit === "true") {
+        return
+      }
+
+      router.push({ query: { showCentreEdit: "true" } })
+    } else {
+      router.push({ query: { showCentreEdit: undefined } })
+    }
+  }
+)
+
+function show(newCentre: Centre) {
+  centre.value = cloneDeep(newCentre)
+  showDialog.value = true
 }
 
-async function save() {
+function close() {
+  showDialog.value = false
+  resetCentre()
+  form.value?.resetValidation()
+}
+
+async function updateAndClose() {
+  if (!isValid.value) {
+    notificationStore.notify({
+      text: "Please fill out all required fields",
+      color: "error",
+    })
+    return
+  }
+
+  isLoading.value = true
   try {
-    const centre = await centreStore.save()
-    emit("saved", centre.id)
+    if (centreId.value === undefined) {
+      throw new Error("Centre id could not be found")
+    }
+
+    const { centre: newCentre } = await centresApi.update(centreId.value, centre.value)
+    centreStore.selectCentre(newCentre)
+
+    await nextTick()
+    close()
+
+    await nextTick()
+    emit("saved", newCentre.id)
+    notificationStore.notify({
+      text: "Centre saved",
+      color: "success",
+    })
   } catch (error) {
-    console.error(error)
+    notificationStore.notify({
+      text: `Failed to save centre ${error}`,
+      color: "error",
+    })
+  } finally {
+    isLoading.value = false
   }
 }
+
+function resetCentre() {
+  centre.value = {}
+}
+
+defineExpose({
+  show,
+})
 </script>

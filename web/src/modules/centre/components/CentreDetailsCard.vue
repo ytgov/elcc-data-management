@@ -16,7 +16,7 @@
         size="x-small"
         color="primary"
         class="float-right my-0"
-        @click="startEdit"
+        @click="showCentreEditDialog"
       ></v-btn>
       Child Care Centre Details
     </v-card-title>
@@ -40,21 +40,36 @@
         </template>
       </v-list>
     </v-card-text>
+
+    <CentreEditDialog ref="centerEditDialog" />
   </v-card>
 </template>
 
 <script setup lang="ts">
 import { isEmpty, isNil } from "lodash"
 import { storeToRefs } from "pinia"
-import { computed } from "vue"
+import { computed, ref, watch } from "vue"
 
 import { FormatDate as formatDate, FormatYesNo as formatYesNo } from "@/utils"
-import { useCentreStore } from "@/modules/centre/store"
+import { Centre, useCentreStore } from "@/modules/centre/store"
+
+import CentreEditDialog from "@/modules/centre/components/CentreEditDialog.vue"
+import { useRoute } from "vue-router"
+
+type CentreEditDialogInstance = InstanceType<typeof CentreEditDialog> | null
 
 const store = useCentreStore()
 
 const { selectedCentre } = storeToRefs(store)
+const centerEditDialog = ref<CentreEditDialogInstance>(null)
 
+const lastSubmission = computed(() => {
+  if (isNil(selectedCentre.value?.lastSubmission)) {
+    return "No submision"
+  }
+
+  return formatDate(selectedCentre.value.lastSubmission)
+})
 const centreDetails = computed<
   {
     title: string
@@ -84,20 +99,38 @@ const centreDetails = computed<
   },
   {
     title: "Last Submission",
-    value: formatDate(selectedCentre.value?.lastSubmission || ""),
+    value: lastSubmission.value,
     icon: "mdi-calendar",
   },
 ])
+
+const route = useRoute()
+
+watch<[Centre | undefined, CentreEditDialogInstance], true>(
+  () => [selectedCentre.value, centerEditDialog.value],
+  ([newSelectedCentre, newCenterEditDialog]) => {
+    if (
+      !isNil(newSelectedCentre) &&
+      !isNil(newCenterEditDialog) &&
+      route.query.showCentreEdit === "true"
+    ) {
+      centerEditDialog.value?.show(newSelectedCentre)
+    }
+  },
+  {
+    immediate: true,
+  }
+)
 
 function isLastRow(index: number) {
   return index === centreDetails.value.length - 1
 }
 
-function startEdit() {
+function showCentreEditDialog() {
   if (isNil(selectedCentre.value)) {
-    throw new Error("No centre selected")
+    throw new Error("Selected centre is missing")
   }
 
-  store.editCentre(selectedCentre.value)
+  centerEditDialog.value?.show(selectedCentre.value)
 }
 </script>

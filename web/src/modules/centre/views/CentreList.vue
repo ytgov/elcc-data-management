@@ -24,7 +24,7 @@
   <v-btn
     class="float-right"
     color="primary"
-    @click="addCentreClick"
+    @click="openCentreCreateDialog"
     >Add Centre</v-btn
   >
 
@@ -50,13 +50,15 @@
           :items="centres"
           :search="search"
           class="row-clickable"
-          @click:row="tableRowClick"
+          @click:row="(_event: any, { item }: any) => tableRowClick(item)"
           @dblclick:row="(_event: any, { item }: any) => goToCentre(item.id)"
         ></v-data-table>
       </v-card>
     </v-col>
     <v-col>
+      <!-- TODO: use the CentreDetailsCard here -->
       <v-card
+        v-if="!isEmpty(selectedItem)"
         color="#F2A90066"
         elevation="3"
       >
@@ -89,7 +91,7 @@
               <v-divider></v-divider>
               <v-list-item
                 title="Hot Meal"
-                :subtitle="FormatYesNo(selectedItem.hotMeal || false)"
+                :subtitle="formatYesNo(selectedItem.hotMeal || false)"
                 class="pl-0"
               >
                 <template #prepend>
@@ -128,7 +130,7 @@
               <v-divider></v-divider>
               <v-list-item
                 title="Last Submission"
-                :subtitle="formatDate(selectedItem.lastSubmission)"
+                :subtitle="lastSubmission"
                 class="pl-0"
               >
                 <template #prepend>
@@ -155,61 +157,82 @@
     </v-col>
   </v-row>
 
-  <CentreCreateOrEditDialog @saved="goToCentre" />
+  <CentreCreateDialog
+    ref="centreCreateDialog"
+    @saved="goToCentre"
+  />
 </template>
 
-<script lang="ts">
-import { FormatDate, FormatYesNo } from "@/utils"
-import { mapActions, mapState } from "pinia"
-import { useCentreStore, Centre, CentreRegions, CentreStatuses } from "@/modules/centre/store"
-import CentreCreateOrEditDialog from "@/modules/centre/components/CentreCreateOrEditDialog.vue"
+<script setup lang="ts">
+import { isEmpty, isNil } from "lodash"
+import { storeToRefs } from "pinia"
+import { computed, ref, watch } from "vue"
+import { useRoute, useRouter } from "vue-router"
 
-export default {
-  name: "CentreList",
-  components: { CentreCreateOrEditDialog },
-  setup() {},
-  data() {
-    return {
-      search: "",
-      breadcrumbs: [
-        { to: "/dashboard", title: "Home" },
-        { to: "/child-care-centres", title: "Child Care Centres" },
-      ],
-      selectedItem: {} as Centre,
+import { FormatDate as formatDate, FormatYesNo as formatYesNo } from "@/utils"
+import { useCentreStore, Centre, CentreRegions, CentreStatuses } from "@/modules/centre/store"
+
+import CentreCreateDialog from "@/modules/centre/components/CentreCreateDialog.vue"
+
+const centreStore = useCentreStore()
+const router = useRouter()
+const route = useRoute()
+
+const { centres } = storeToRefs(centreStore)
+const search = ref("")
+const selectedItem = ref<Centre | null>(null)
+const centreCreateDialog = ref<InstanceType<typeof CentreCreateDialog> | null>(null)
+
+const breadcrumbs = [
+  { to: "/dashboard", title: "Home" },
+  { to: "/child-care-centres", title: "Child Care Centres" },
+]
+
+const lastSubmission = computed(() => {
+  if (isNil(selectedItem.value?.lastSubmission)) {
+    return "No submision"
+  }
+
+  return formatDate(selectedItem.value.lastSubmission)
+})
+
+function tableRowClick(centre: Centre) {
+  selectedItem.value = centre
+}
+
+function goToCentre(centreId: string | number) {
+  router.push({
+    name: "CentreDashboardPage",
+    params: { centreId },
+  })
+}
+
+function openCentreCreateDialog() {
+  if (isNil(centreCreateDialog.value)) {
+    throw new Error("Centre create dialog is not ready")
+  }
+
+  centreCreateDialog.value.show({
+    community: "Whitehorse",
+    hotMeal: true,
+    isFirstNationProgram: false,
+    license: "",
+    licensedFor: 10,
+    name: "",
+    region: CentreRegions.WHITEHORSE,
+    status: CentreStatuses.ACTIVE,
+  })
+}
+
+watch(
+  () => [centreCreateDialog.value],
+  ([newCentreCreateDialog]) => {
+    if (!isNil(newCentreCreateDialog) && route.query.showCentreCreate === "true") {
+      openCentreCreateDialog()
     }
   },
-  computed: {
-    ...mapState(useCentreStore, ["centres"]),
-  },
-  methods: {
-    ...mapActions(useCentreStore, ["selectCentre", "editCentre"]),
-    tableRowClick(event: any, item: any) {
-      this.selectedItem = item.item
-    },
-    goToCentre(centreId: string | number) {
-      this.$router.push({
-        name: "CentreDashboardPage",
-        params: { centreId },
-      })
-    },
-    addCentreClick() {
-      this.editCentre({
-        community: "Whitehorse",
-        hotMeal: true,
-        isFirstNationProgram: false,
-        license: "",
-        licensedFor: 10,
-        name: "",
-        region: CentreRegions.WHITEHORSE,
-        status: CentreStatuses.ACTIVE,
-      })
-    },
-    formatDate(input: Date | string | null | undefined) {
-      return input != null ? FormatDate(input) : ""
-    },
-    FormatYesNo(input: boolean) {
-      return FormatYesNo(input)
-    },
-  },
-}
+  {
+    immediate: true,
+  }
+)
 </script>
