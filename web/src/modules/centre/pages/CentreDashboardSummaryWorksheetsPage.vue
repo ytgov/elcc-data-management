@@ -67,8 +67,8 @@
         <tr>
           <td></td>
           <th class="text-center">Advance</th>
-          <th class="text-center">Adjustments</th>
           <th class="text-center">Expenses</th>
+          <th class="text-center">Employees</th>
           <th class="text-center">Balance</th>
         </tr>
         <tr class="g1">
@@ -255,8 +255,6 @@ export default {
         runningestimatedComputedTotal += monthVal.estimatedComputedTotal
         runningactualComputedTotal += monthVal.actualComputedTotal
 
-        console.log(runningestimatedComputedTotal, monthVal.estimatedComputedTotal)
-
         if (line.month == "June") {
           lines.push({
             month: "Initial Advance (3 mos)",
@@ -348,8 +346,6 @@ export default {
       if (den === 0 || num === 0) {
         return 0.0
       }
-
-      console.log(num, den)
 
       return Math.round((num / den) * 100) / 100
     },

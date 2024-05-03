@@ -13,14 +13,16 @@
       <tr>
         <th class="text-left"></th>
         <th class="text-right font-weight-bold">Advance</th>
-        <th class="text-right font-weight-bold">Adjustments</th>
         <th class="text-right font-weight-bold">Expenses</th>
+        <th class="text-right font-weight-bold">Employees</th>
         <th class="text-right font-weight-bold">Balance</th>
       </tr>
     </thead>
     <tbody>
       <template
-        v-for="({ label, expense, payment, runningTotal }, adjustmentIndex) in adjustmentRows"
+        v-for="(
+          { label, employee, expense, payment, runningTotal }, adjustmentIndex
+        ) in adjustmentRows"
         :key="`adjustment-${adjustmentIndex}`"
       >
         <tr :class="rowClasses(adjustmentIndex)">
@@ -28,8 +30,7 @@
           <td class="text-right">
             {{ formatMoney(centsToDollars(payment.amountInCents)) }}
           </td>
-          <td class="text-right"></td>
-          <td class="adjustment-cell text-right">
+          <td class="text-right">
             <v-tooltip
               v-if="expense.includesEstimates"
               bottom
@@ -46,6 +47,23 @@
             </v-tooltip>
             <span v-else>{{ formatMoney(centsToDollars(expense.amountInCents)) }}</span>
           </td>
+          <td class="text-right">
+            <v-tooltip
+              v-if="employee.includesEstimates"
+              bottom
+            >
+              <template #activator="{ props }">
+                <span v-bind="props">
+                  {{ formatMoney(centsToDollars(employee.amountInCents)) }}
+                  <sup class="asterisk-icon">
+                    <v-icon size="small">mdi-asterisk-circle-outline</v-icon>
+                  </sup>
+                </span>
+              </template>
+              <span class="text-white">This amount includes estimated values.</span>
+            </v-tooltip>
+            <span v-else>{{ formatMoney(centsToDollars(employee.amountInCents)) }}</span>
+          </td>
 
           <td class="text-right">
             {{ formatMoney(centsToDollars(runningTotal)) }}
@@ -55,8 +73,8 @@
       <tr class="font-weight-bold bg-green-lighten-4">
         <td class="text-left">Totals</td>
         <td class="text-right">{{ formatMoney(centsToDollars(paymentsTotal)) }}</td>
-        <td class="text-right"></td>
         <td class="text-right">{{ formatMoney(centsToDollars(expensesTotal)) }}</td>
+        <td class="text-right">{{ formatMoney(centsToDollars(employeesTotal)) }}</td>
         <td class="text-right">
           {{ formatMoney(centsToDollars(adjustmentsTotal)) }}
         </td>
@@ -145,7 +163,10 @@ const employeeBenefits = ref<
 const employeeBenefitsByMonth = computed(() => keyBy(employeeBenefits.value, "fiscalPeriod.month"))
 
 const expenses = ref<Adjustment[]>([])
+const employees = ref<Adjustment[]>([])
+
 const expensesByFiscalPeriodId = computed(() => keyBy(expenses.value, "fiscalPeriodId"))
+const employeesByFiscalPeriodId = computed(() => keyBy(employees.value, "fiscalPeriodId"))
 const paymentAdujstments = computed<Adjustment[]>(() => {
   return fiscalPeriods.value.map((fiscalPeriod) => {
     const fiscalPeriodInterval = Interval.fromDateTimes(
@@ -176,6 +197,7 @@ const adjustmentRows = computed<
     fiscalPeriodId: number
     label: string
     expense: Adjustment
+    employee: Adjustment
     payment: Adjustment
     runningTotal: number
   }[]
@@ -185,6 +207,7 @@ const adjustmentRows = computed<
     const monthName = upperFirst(fiscalPeriod.month)
     const paymentsForPeriod = paymentAdujstmentsByFiscalPeriodId.value[fiscalPeriod.id]
     const expensesForPeriod = expensesByFiscalPeriodId.value[fiscalPeriod.id]
+    const employeesForPeriod = employeesByFiscalPeriodId.value[fiscalPeriod.id]
 
     if (isNil(paymentsForPeriod) || isNil(expensesForPeriod)) {
       return null
@@ -192,11 +215,13 @@ const adjustmentRows = computed<
 
     runningTotal += paymentsForPeriod.amountInCents
     runningTotal -= expensesForPeriod.amountInCents
+    runningTotal -= employeesForPeriod.amountInCents
 
     return {
       fiscalPeriodId: fiscalPeriod.id,
       label: `${monthName} Expenses`,
       expense: expensesForPeriod,
+      employee: employeesForPeriod,
       payment: paymentsForPeriod,
       runningTotal,
     }
@@ -207,7 +232,10 @@ const adjustmentRows = computed<
 
 const paymentsTotal = computed(() => sumBy(payments.value, "amountInCents"))
 const expensesTotal = computed(() => sumBy(expenses.value, "amountInCents"))
-const adjustmentsTotal = computed(() => paymentsTotal.value - expensesTotal.value)
+const employeesTotal = computed(() => sumBy(employees.value, "amountInCents"))
+const adjustmentsTotal = computed(
+  () => paymentsTotal.value - expensesTotal.value - employeesTotal.value
+)
 
 watch<[number, string], true>(
   () => [props.centreId, props.fiscalYearSlug],
@@ -232,6 +260,7 @@ watch<[number, string], true>(
       },
     })
     expenses.value = await buildExpenseValues(fiscalPeriods.value)
+    employees.value = await buildEmployeeValues(fiscalPeriods.value)
 
     isLoading.value = false
   },
@@ -293,6 +322,43 @@ async function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjust
   })
 
   return Promise.all(expensePromises)
+}
+
+async function buildEmployeeValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjustment[]> {
+  const employeePromises = fiscalPeriods.map(async (fiscalPeriod) => {
+    const employee: Adjustment = {
+      fiscalPeriodId: fiscalPeriod.id,
+      amountInCents: 0,
+      includesEstimates: false,
+    }
+    const { month } = fiscalPeriod
+    const monthAsDateName = upperFirst(month)
+
+    const linesForMonth = employeeBenefits.value.find((b) => b.fiscalPeriodId == fiscalPeriod.id)
+
+    if (!isNil(linesForMonth)) {
+      if (linesForMonth.grossPayrollMonthlyActual > 0) {
+        let actGrossAmount =
+          linesForMonth.grossPayrollMonthlyActual * linesForMonth.costCapPercentage
+        let actEmployerAmount = linesForMonth.employerCostActual
+        employee.amountInCents = dollarsToCents(Math.min(actGrossAmount, actEmployerAmount))
+        employee.includesEstimates = false
+      } else {
+        let estGrossAmount =
+          linesForMonth.grossPayrollMonthlyEstimated * linesForMonth.costCapPercentage
+        let estEmployerAmount = linesForMonth.employerCostEstimated
+        employee.amountInCents = dollarsToCents(Math.min(estGrossAmount, estEmployerAmount))
+        employee.includesEstimates = true
+      }
+    }
+
+    //injectEmployeeBenefitMonthlyCost(employee, month)
+    //await lazyInjectWageEnhancementMonthlyCost(employee, month)
+
+    return employee
+  })
+
+  return Promise.all(employeePromises)
 }
 
 /*

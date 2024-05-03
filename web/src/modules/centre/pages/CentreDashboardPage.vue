@@ -32,105 +32,17 @@
       @update:modelValue="updateFiscalYearAndRedirect"
     />
   </div>
-  <h1 class="mb-4">{{ currentCentre.name }}</h1>
+  <h1 class="mb-4">{{ selectedCentre?.name }}</h1>
 
   <v-row
-    v-if="currentCentre && currentCentre.id"
+    v-if="selectedCentre && selectedCentre.id"
     style="clear: both"
   >
     <v-col
       cols="12"
       md="4"
     >
-      <v-card
-        elevation="3"
-        color="#F2A90066"
-        class="mb-5"
-      >
-        <v-card-title style="background-color: #f2a90068">
-          <v-btn
-            icon="mdi-pencil"
-            size="x-small"
-            color="primary"
-            class="float-right my-0"
-            @click="editClick"
-          ></v-btn>
-          Child Care Centre Details
-        </v-card-title>
-        <v-divider></v-divider>
-        <v-card-text class="pt-0">
-          <v-list
-            lines="one"
-            density="comfortable"
-            style="background-color: inherit"
-          >
-            <v-list-item
-              title="License"
-              :subtitle="currentCentre.license"
-              class="pl-0"
-            >
-              <template #prepend>
-                <v-icon
-                  icon="mdi-file-certificate"
-                  style="margin-inline-end: 10px"
-                ></v-icon>
-              </template>
-            </v-list-item>
-            <v-divider></v-divider>
-            <v-list-item
-              title="Hot Meal"
-              :subtitle="FormatYesNo(currentCentre.hotMeal)"
-              class="pl-0"
-            >
-              <template #prepend>
-                <v-icon
-                  icon="mdi-silverware"
-                  style="margin-inline-end: 10px"
-                ></v-icon>
-              </template>
-            </v-list-item>
-            <v-divider></v-divider>
-            <v-list-item
-              title="Licensed For"
-              :subtitle="currentCentre.licensedFor"
-              class="pl-0"
-            >
-              <template #prepend>
-                <v-icon
-                  icon="mdi-account-group"
-                  style="margin-inline-end: 10px"
-                ></v-icon>
-              </template>
-            </v-list-item>
-            <v-divider></v-divider>
-            <v-list-item
-              title="Community"
-              :subtitle="currentCentre.community"
-              class="pl-0"
-            >
-              <template #prepend>
-                <v-icon
-                  icon="mdi-map"
-                  style="margin-inline-end: 10px"
-                ></v-icon>
-              </template>
-            </v-list-item>
-            <v-divider></v-divider>
-            <v-list-item
-              title="Last Submission"
-              :subtitle="FormatDate(currentCentre.lastSubmission)"
-              class="pl-0"
-            >
-              <template #prepend>
-                <v-icon
-                  icon="mdi-calendar"
-                  style="margin-inline-end: 10px"
-                ></v-icon>
-              </template>
-            </v-list-item>
-          </v-list>
-        </v-card-text>
-      </v-card>
+      <CentreDetailsCard :centreId="selectedCentre.id" />
       <v-card
         elevation="3"
         color="#0097a966"
@@ -185,108 +97,72 @@
       </v-card>
     </v-col>
   </v-row>
-
-  <CentreEditor />
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { isNil, isEmpty } from "lodash"
+import { useRoute, useRouter } from "vue-router"
+import { computed, onMounted, onUnmounted, ref } from "vue"
+import { storeToRefs } from "pinia"
 
-import { FormatDate, FormatYesNo } from "@/utils"
-import { mapActions, mapState } from "pinia"
-import VueApexCharts from "vue3-apexcharts"
+import { getCurrentFiscalYearSlug } from "@/api/fiscal-periods-api"
+import { useCentreStore } from "@/modules/centre/store"
 
-import EnrollmentChart from "../components/EnrollmentChart.vue"
-import CentreEditor from "../components/CentreEditor.vue"
-import { type ChildCareCentre, useCentreStore } from "../store"
+import EnrollmentChart from "@/modules/centre/components/EnrollmentChart.vue"
+import CentreDetailsCard from "@/modules/centre/components/CentreDetailsCard.vue"
 
-export default {
-  name: "CentreDashboard",
-  components: {
-    VueApexCharts,
-    EnrollmentChart,
-    CentreEditor,
+const props = defineProps({
+  centreId: {
+    type: Number,
+    required: true,
   },
-  props: {
-    centreId: {
-      type: Number,
-      required: true,
-    },
-    fiscalYearSlug: {
-      type: String,
-      default: "",
-    },
+  fiscalYearSlug: {
+    type: String,
+    default: "",
   },
-  data() {
-    return {
-      currentCentre: { name: "" } as ChildCareCentre,
-    }
-  },
-  async mounted() {
-    if (isEmpty(this.fiscalYearSlug)) {
-      this.updateFiscalYearAndRedirect(this.currentFiscalYearSlug)
-    }
+})
 
-    const centre = await this.selectCentreById(this.centreId)
-    if (isNil(centre)) {
-      throw new Error(`Could not load centre from id=${this.centreId}`)
-    }
+const store = useCentreStore()
+const route = useRoute()
+const router = useRouter()
+const { selectedCentre } = storeToRefs(store)
 
-    this.currentCentre = centre
-  },
-  unmounted() {
-    this.unselectCentre()
-  },
-  computed: {
-    ...mapState(useCentreStore, ["selectedCentre"]),
-    breadcrumbs() {
-      return [
-        { to: "/dashboard", title: "Home" },
-        { to: "/child-care-centres", title: "Child Care Centres" },
-        { title: this.currentCentre.name },
-      ]
-    },
-    fiscalYear() {
-      return this.fiscalYearSlug.replace("-", "/")
-    },
-    // TODO: if fiscal year start date ends up being configurable
-    // this should be loaded from the funding_periods table instead of computed here.
-    currentFiscalYearSlug() {
-      const APRIL = 3 // April is the 4th month but JavaScript months are 0-indexed
-      const currentDate = new Date()
-      const currentYear = currentDate.getFullYear()
-      const isAfterFiscalYearStart = currentDate.getMonth() >= APRIL
+const fiscalYear = computed(() => {
+  return props.fiscalYearSlug.replace("-", "/")
+})
 
-      // If the current date is after the start of the fiscal year, the fiscal year is the current year and the next year.
-      // Otherwise, the fiscal year is the previous year and the current year.
-      const startYear = isAfterFiscalYearStart ? currentYear : currentYear - 1
-      const endYear = startYear + 1
-      const endYearShort = endYear.toString().slice(-2)
-      return `${startYear}-${endYearShort}`
+function updateFiscalYearAndRedirect(value: string) {
+  router.push({
+    name: route.name || "CentreDashboardPage",
+    params: {
+      ...route.params,
+      fiscalYearSlug: value.replace("/", "-"),
     },
-  },
-  methods: {
-    isEmpty,
-    ...mapActions(useCentreStore, ["selectCentreById", "unselectCentre", "editCentre"]),
-    FormatDate(input: Date | undefined) {
-      return input != null ? FormatDate(input) : ""
-    },
-    FormatYesNo(input: boolean) {
-      return FormatYesNo(input)
-    },
-    editClick() {
-      if (this.selectedCentre) this.editCentre(this.selectedCentre)
-    },
-    updateFiscalYearAndRedirect(value: string) {
-      this.$router.push({
-        name: this.$route.name || "CentreDashboard",
-        params: {
-          ...this.$route.params,
-          fiscalYearSlug: value.replace("/", "-"),
-        },
-        query: this.$route.query,
-      })
-    },
-  },
+    query: route.query,
+  })
 }
+
+onMounted(async () => {
+  if (isEmpty(props.fiscalYearSlug)) {
+    const currentFiscalYearSlug = getCurrentFiscalYearSlug()
+    updateFiscalYearAndRedirect(currentFiscalYearSlug)
+  }
+
+  const centre = await store.selectCentreById(props.centreId)
+  if (isNil(centre)) {
+    throw new Error(`Could not load centre from id=${props.centreId}`)
+  }
+})
+
+onUnmounted(() => {
+  store.unselectCentre()
+})
+
+const breadcrumbs = computed(() => {
+  return [
+    { to: "/dashboard", title: "Home" },
+    { to: "/child-care-centres", title: "Child Care Centres" },
+    { title: selectedCentre.value?.name || "loading ..." },
+  ]
+})
 </script>

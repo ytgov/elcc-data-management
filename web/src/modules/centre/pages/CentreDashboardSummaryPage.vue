@@ -17,17 +17,6 @@
       </v-tab>
       <v-tab
         :to="{
-          name: 'CentreDashboardSummaryWorksheetsPage',
-          params: {
-            centreId,
-            fiscalYearSlug,
-          },
-        }"
-      >
-        Worksheets
-      </v-tab>
-      <v-tab
-        :to="{
           name: 'CentreDashboardSummaryPaymentsPage',
           params: {
             centreId,

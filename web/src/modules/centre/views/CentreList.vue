@@ -24,7 +24,7 @@
   <v-btn
     class="float-right"
     color="primary"
-    @click="addCentreClick"
+    @click="openCentreCreateDialog"
     >Add Centre</v-btn
   >
 
@@ -50,13 +50,15 @@
           :items="centres"
           :search="search"
           class="row-clickable"
-          @click:row="tableRowClick"
-          @dblclick:row="goToCentre"
+          @click:row="(_event: any, { item }: any) => tableRowClick(item)"
+          @dblclick:row="(_event: any, { item }: any) => goToCentre(item.id)"
         ></v-data-table>
       </v-card>
     </v-col>
     <v-col>
+      <!-- TODO: use the CentreDetailsCard here -->
       <v-card
+        v-if="!isEmpty(selectedItem)"
         color="#F2A90066"
         elevation="3"
       >
@@ -76,7 +78,7 @@
             >
               <v-list-item
                 title="License"
-                :subtitle="selectedItem.license"
+                :subtitle="selectedItem.license || ''"
                 class="pl-0"
               >
                 <template #prepend>
@@ -89,7 +91,7 @@
               <v-divider></v-divider>
               <v-list-item
                 title="Hot Meal"
-                :subtitle="FormatYesNo(selectedItem.hotMeal)"
+                :subtitle="formatYesNo(selectedItem.hotMeal || false)"
                 class="pl-0"
               >
                 <template #prepend>
@@ -102,7 +104,7 @@
               <v-divider></v-divider>
               <v-list-item
                 title="Licensed For"
-                :subtitle="selectedItem.licensedFor"
+                :subtitle="selectedItem.licensedFor ?? undefined"
                 class="pl-0"
               >
                 <template #prepend>
@@ -128,7 +130,7 @@
               <v-divider></v-divider>
               <v-list-item
                 title="Last Submission"
-                :subtitle="FormatDate(selectedItem.lastSubmission)"
+                :subtitle="lastSubmission"
                 class="pl-0"
               >
                 <template #prepend>
@@ -155,58 +157,82 @@
     </v-col>
   </v-row>
 
-  <centre-editor></centre-editor>
+  <CentreCreateDialog
+    ref="centreCreateDialog"
+    @saved="goToCentre"
+  />
 </template>
 
-<script lang="ts">
-import { FormatDate, FormatYesNo } from "@/utils"
-import { mapActions, mapState } from "pinia"
-import { type ChildCareCentre, useCentreStore } from "../store"
-import CentreEditor from "../components/CentreEditor.vue"
+<script setup lang="ts">
+import { isEmpty, isNil } from "lodash"
+import { storeToRefs } from "pinia"
+import { computed, ref, watch } from "vue"
+import { useRoute, useRouter } from "vue-router"
 
-export default {
-  name: "CentreList",
-  components: { CentreEditor },
-  setup() {},
-  data() {
-    return {
-      search: "",
-      breadcrumbs: [
-        { to: "/dashboard", title: "Home" },
-        { to: "/child-care-centres", title: "Child Care Centres" },
-      ],
-      selectedItem: {} as ChildCareCentre,
+import { FormatDate as formatDate, FormatYesNo as formatYesNo } from "@/utils"
+import { useCentreStore, Centre, CentreRegions, CentreStatuses } from "@/modules/centre/store"
+
+import CentreCreateDialog from "@/modules/centre/components/CentreCreateDialog.vue"
+
+const centreStore = useCentreStore()
+const router = useRouter()
+const route = useRoute()
+
+const { centres } = storeToRefs(centreStore)
+const search = ref("")
+const selectedItem = ref<Centre | null>(null)
+const centreCreateDialog = ref<InstanceType<typeof CentreCreateDialog> | null>(null)
+
+const breadcrumbs = [
+  { to: "/dashboard", title: "Home" },
+  { to: "/child-care-centres", title: "Child Care Centres" },
+]
+
+const lastSubmission = computed(() => {
+  if (isNil(selectedItem.value) || isNil(selectedItem.value?.lastSubmission)) {
+    return "No submision"
+  }
+
+  return formatDate(selectedItem.value.lastSubmission)
+})
+
+function tableRowClick(centre: Centre) {
+  selectedItem.value = centre
+}
+
+function goToCentre(centreId: string | number) {
+  router.push({
+    name: "CentreDashboardPage",
+    params: { centreId },
+  })
+}
+
+function openCentreCreateDialog() {
+  if (isNil(centreCreateDialog.value)) {
+    throw new Error("Centre create dialog is not ready")
+  }
+
+  centreCreateDialog.value.show({
+    community: "Whitehorse",
+    hotMeal: true,
+    isFirstNationProgram: false,
+    license: "",
+    licensedFor: 10,
+    name: "",
+    region: CentreRegions.WHITEHORSE,
+    status: CentreStatuses.ACTIVE,
+  })
+}
+
+watch(
+  () => [centreCreateDialog.value],
+  ([newCentreCreateDialog]) => {
+    if (!isNil(newCentreCreateDialog) && route.query.showCentreCreate === "true") {
+      openCentreCreateDialog()
     }
   },
-  computed: {
-    ...mapState(useCentreStore, ["centres"]),
-  },
-  methods: {
-    ...mapActions(useCentreStore, ["selectCentre", "editCentre"]),
-    tableRowClick(event: any, item: any) {
-      this.selectedItem = item.item
-    },
-    goToCentre() {
-      this.selectCentre(this.selectedItem)
-      this.$router.push(`/child-care-centres/${this.selectedItem.id}`)
-    },
-    addCentreClick() {
-      this.editCentre({
-        status: "Active",
-        community: "Whitehorse",
-        createDate: new Date(),
-        hotMeal: true,
-        license: "",
-        licensedFor: 10,
-        name: "",
-      })
-    },
-    FormatDate(input: Date | undefined) {
-      return input != null ? FormatDate(input) : ""
-    },
-    FormatYesNo(input: boolean) {
-      return FormatYesNo(input)
-    },
-  },
-}
+  {
+    immediate: true,
+  }
+)
 </script>
