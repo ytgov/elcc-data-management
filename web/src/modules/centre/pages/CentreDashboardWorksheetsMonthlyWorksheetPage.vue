@@ -49,15 +49,13 @@
 
 <script lang="ts" setup>
 import { watch, computed, ref } from "vue"
-import { groupBy, isEmpty, isEqual, isNil } from "lodash"
+import { groupBy, isEmpty, isEqual } from "lodash"
 import moment from "moment" // TODO: deprecated; replace with luxon
 
 import fundingSubmissionLineJsonsApi, {
   FundingSubmissionLineJson,
 } from "@/api/funding-submission-line-jsons-api"
-import useFundingSubmissionLineJsonsStore, {
-  FundingLineValue,
-} from "@/store/funding-submission-line-jsons"
+import { FundingLineValue } from "@/store/funding-submission-line-jsons"
 import { useNotificationStore } from "@/store/NotificationStore"
 
 import SectionTable from "@/modules/centre/components/centre-dashboard-worksheets-tab-monthly-worksheet-tab/SectionTable.vue"
@@ -65,15 +63,10 @@ import SectionTable from "@/modules/centre/components/centre-dashboard-worksheet
 const FIRST_FISCAL_MONTH_NAME = "April"
 
 const notificationStore = useNotificationStore()
-const fundingSubmissionLineJsonsStore = useFundingSubmissionLineJsonsStore()
 
 const props = defineProps({
   centreId: {
     type: Number,
-    required: true,
-  },
-  fiscalYearSlug: {
-    type: String,
     required: true,
   },
   fundingSubmissionLineJsonId: {
@@ -91,7 +84,6 @@ const dateName = computed(() => fundingSubmissionLineJson.value?.dateName)
 
 const isLoading = ref(true)
 const isReplicatingEstimates = ref(false)
-const fiscalYear = computed(() => fundingSubmissionLineJson.value?.fiscalYear)
 const calendarYear = computed(() =>
   moment.utc(fundingSubmissionLineJson.value?.dateStart).format("YYYY")
 )
@@ -159,27 +151,7 @@ async function replicateFirstEstimateToAllOthers() {
   isReplicatingEstimates.value = true
   try {
     await save()
-
-    const fundingSubmissionLineJsons = await fundingSubmissionLineJsonsStore.fetch({
-      where: {
-        centreId: props.centreId,
-        fiscalYear: fiscalYear.value,
-      },
-    })
-    const firstSubmission = fundingSubmissionLineJsons.find(
-      (submission) => submission.dateName === FIRST_FISCAL_MONTH_NAME
-    )
-    if (isNil(firstSubmission)) {
-      throw new Error(`Could not find submission for ${FIRST_FISCAL_MONTH_NAME}`)
-    }
-
-    const nonFirstSubmissions = fundingSubmissionLineJsons.filter(
-      (submission) => submission.dateName !== FIRST_FISCAL_MONTH_NAME
-    )
-
-    for (const submission of nonFirstSubmissions) {
-      await fundingSubmissionLineJsonsApi.update(submission.id, { lines: firstSubmission.lines })
-    }
+    await fundingSubmissionLineJsonsApi.replicateEstimates(props.fundingSubmissionLineJsonId)
   } catch (error) {
     notificationStore.notify({
       text: `Failed to load worksheets: ${error}`,

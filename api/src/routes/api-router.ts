@@ -14,6 +14,7 @@ import {
   EmployeeBenefitsController,
   EmployeeWageTiersController,
   FiscalPeriodsController,
+  FundingSubmissionLineJsons,
   FundingSubmissionLineJsonsController,
   PaymentsController,
   WageEnhancementsController,
@@ -43,6 +44,9 @@ apiRouter
   .get(FundingSubmissionLineJsonsController.show)
   .patch(FundingSubmissionLineJsonsController.update)
   .delete(FundingSubmissionLineJsonsController.destroy)
+apiRouter
+  .route("/api/funding-submission-line-jsons/:fundingSubmissionLineJsonId/replicate-estimates")
+  .post(FundingSubmissionLineJsons.ReplicateEstimatesController.create)
 
 apiRouter.route("/api/fiscal-periods").get(FiscalPeriodsController.index)
 
