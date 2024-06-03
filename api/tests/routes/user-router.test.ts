@@ -5,13 +5,13 @@ import app from "@/app"
 import { userFactory } from "@/factories"
 import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 
-jest.mock("@/middleware/authz.middleware", () => ({
-  checkJwt: jest.fn(),
-  autheticateAndLoadUser: jest.fn(),
+vi.mock("@/middleware/authz.middleware", () => ({
+  checkJwt: vi.fn(),
+  autheticateAndLoadUser: vi.fn(),
 }))
 
-const mockedCheckJwt = checkJwt as unknown as jest.Mock
-const mockedAutheticateAndLoadUser = autheticateAndLoadUser as unknown as jest.Mock
+const mockedCheckJwt = checkJwt as unknown as vi.Mock
+const mockedAutheticateAndLoadUser = autheticateAndLoadUser as unknown as vi.Mock
 
 describe("api/src/routes/user-router.ts", () => {
   beforeEach(() => {

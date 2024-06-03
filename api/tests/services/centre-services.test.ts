@@ -8,7 +8,7 @@ import { LogServices } from "@/services/log-services" // import separately for e
 
 import { userFactory } from "@/factories"
 
-jest.mock("@/services/log-services")
+vi.mock("@/services/log-services")
 
 describe("api/src/services/centre-services.ts", () => {
   describe("CentreServices", () => {
