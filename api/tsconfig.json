@@ -28,5 +28,6 @@
     "incremental": true,
     "isolatedModules": true,
     "useDefineForClassFields": true
-  }
+  },
+  "include": ["src/**/*"]
 }
