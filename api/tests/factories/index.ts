@@ -1,2 +1,2 @@
-export * from "@/factories/centre-factories"
-export * from "@/factories/user-factories"
+export { centreFactory } from "./centre-factories"
+export { userFactory } from "./user-factories"
