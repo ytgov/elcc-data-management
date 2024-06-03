@@ -4,10 +4,9 @@ import db from "@/db/db-client"
 import { Centre, User } from "@/models"
 import { LogOperationTypes } from "@/models/log"
 
-import BaseService from "@/services/base-service"
 import LogServices from "@/services/log-services"
 
-export class CentreServices implements BaseService {
+export class CentreServices {
   static async create(
     attributes: CreationAttributes<Centre>,
     { currentUser }: { currentUser: User }

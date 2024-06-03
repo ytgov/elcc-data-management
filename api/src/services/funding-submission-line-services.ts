@@ -3,9 +3,7 @@ import { merge, omit } from "lodash"
 
 import { FundingSubmissionLine } from "@/models"
 
-import BaseService from "@/services/base-service"
-
-export class FundingSubmissionLineServices implements BaseService {
+export class FundingSubmissionLineServices {
   static async bulkCreateFrom(
     attributes: Partial<CreationAttributes<FundingSubmissionLine>>,
     fiscalYearsToFilterOn: string[]

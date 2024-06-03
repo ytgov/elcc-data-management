@@ -4,9 +4,7 @@ import moment from "moment"
 import { FundingSubmissionLine, FundingSubmissionLineJson } from "@/models"
 import { FundingLineValue } from "@/models"
 
-import BaseService from "@/services/base-service"
-
-export class FundingSubmissionLineJsonServices implements BaseService {
+export class FundingSubmissionLineJsonServices {
   static async bulkCreate(centreId: number, fiscalYear: string) {
     const worksheets = await FundingSubmissionLineJson.findAll({
       where: { centreId, fiscalYear },
