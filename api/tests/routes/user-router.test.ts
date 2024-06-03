@@ -1,7 +1,6 @@
-import request from "supertest"
 import { Request, Response, NextFunction } from "express"
 
-import app from "@/app"
+import { request } from "@/support"
 import { userFactory } from "@/factories"
 import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 
@@ -26,7 +25,7 @@ describe("api/src/routes/user-router.ts", () => {
         }
       )
 
-      return request(app)
+      return request()
         .get("/api/user/me")
         .expect("Content-Type", /json/)
         .expect(200, { data: JSON.parse(JSON.stringify(user.dataValues)) })
@@ -38,7 +37,7 @@ describe("api/src/routes/user-router.ts", () => {
         throw new Error("Error: getaddrinfo ENOTFOUND xxxxxxxxxxx.eu.auth0.com")
       })
 
-      return request(app)
+      return request()
         .get("/api/user/me")
         .expect("Content-Type", /text/)
         .expect(500)
@@ -53,7 +52,7 @@ describe("api/src/routes/user-router.ts", () => {
         throw new Error("Failed to authenticate user")
       })
 
-      return request(app)
+      return request()
         .get("/api/user/me")
         .expect("Content-Type", /text/)
         .expect(500)
@@ -68,7 +67,7 @@ describe("api/src/routes/user-router.ts", () => {
         return res.status(401).json({ error: "No token provided" })
       })
 
-      return request(app)
+      return request()
         .get("/api/user/me")
         .expect("Content-Type", /json/)
         .expect(401, { error: "No token provided" })
