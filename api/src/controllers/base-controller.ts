@@ -17,59 +17,59 @@ export class BaseController {
   }
 
   static get index() {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       const controllerInstance = new this(req, res, next)
-      return controllerInstance.index()
+      return controllerInstance.index().catch(next)
     }
   }
 
   // Usage app.post("/api/users", UsersController.create)
   // maps /api/users to UsersController#create()
   static get create() {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       const controllerInstance = new this(req, res, next)
-      return controllerInstance.create()
+      return controllerInstance.create().catch(next)
     }
   }
 
   static get show() {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       const controllerInstance = new this(req, res, next)
-      return controllerInstance.show()
+      return controllerInstance.show().catch(next)
     }
   }
 
   static get update() {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       const controllerInstance = new this(req, res, next)
-      return controllerInstance.update()
+      return controllerInstance.update().catch(next)
     }
   }
 
   static get destroy() {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       const controllerInstance = new this(req, res, next)
-      return controllerInstance.destroy()
+      return controllerInstance.destroy().catch(next)
     }
   }
 
-  index() {
+  index(): Promise<unknown> {
     throw new Error("Not Implemented")
   }
 
-  create() {
+  create(): Promise<unknown> {
     throw new Error("Not Implemented")
   }
 
-  show() {
+  show(): Promise<unknown> {
     throw new Error("Not Implemented")
   }
 
-  update() {
+  update(): Promise<unknown> {
     throw new Error("Not Implemented")
   }
 
-  destroy() {
+  destroy(): Promise<unknown> {
     throw new Error("Not Implemented")
   }
 
@@ -94,7 +94,7 @@ export class BaseController {
   get pagination() {
     const page = parseInt(this.query.page?.toString() || "") || 1
     const perPage = parseInt(this.query.perPage?.toString() || "") || 10
-    const limit = perPage === -1 ? 1000 : perPage // restrict max limit to 1000 for safety
+    const limit = perPage === -1 ? 1000 : Math.max(1, Math.min(perPage, 1000))
     const offset = (page - 1) * limit
     return {
       page,

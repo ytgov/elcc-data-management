@@ -6,7 +6,7 @@ import BaseController from "./base-controller"
 import { Payment } from "@/models"
 
 export class PaymentsController extends BaseController {
-  index() {
+  async index() {
     const where = this.query.where as WhereOptions<Payment>
     return Payment.findAll({
       where,
