@@ -26,6 +26,8 @@ services:
       - "3000:3000"
     volumes:
       - ./api:/usr/src/api
+      - ./.gitignore:/usr/src/.gitignore
+      - ./.prettierrc.yaml:/usr/src/.prettierrc.yaml
     depends_on:
       db:
         condition: service_healthy
@@ -41,6 +43,8 @@ services:
       - "8080:8080"
     volumes:
       - ./web:/usr/src/web
+      - ./.gitignore:/usr/src/.gitignore
+      - ./.prettierrc.yaml:/usr/src/.prettierrc.yaml
     depends_on:
       - api
 
