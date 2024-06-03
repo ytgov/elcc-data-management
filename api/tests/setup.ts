@@ -1,4 +1,8 @@
-// Runs after all tests in a file are done
+/**
+ * See https://vitest.dev/config/#setupfiles
+ *
+ * Run some code before each test file.
+ */
 import db from "@/models"
 
 async function truncateAllTables() {
@@ -18,6 +22,6 @@ async function truncateAllTables() {
   }
 }
 
-afterAll(async () => {
+beforeEach(async () => {
   await truncateAllTables()
 })

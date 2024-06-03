@@ -23,7 +23,7 @@ WageEnhancement.establishAssociations()
 
 // Alphabetically - order does not matter
 export { FiscalPeriod } from "@/models/fiscal-period"
-export { FundingLineValue } from "@/models/funding-line-value"
+export { type FundingLineValue } from "@/models/funding-line-value"
 export { FundingPeriod } from "@/models/funding-period"
 export { FundingSubmissionLine } from "@/models/funding-submission-line"
 export { Log } from "@/models/log"

@@ -2,19 +2,19 @@
 
 ## Implementation
 
-Tests are written in [jest](https://jestjs.io/docs/getting-started) and served via [ts-jest](https://kulshekhar.github.io/ts-jest/docs/)
+Tests are written in [vitest](https://vitest.dev/guide/)
 
 Test initialization goes like this:
 
-1. `api/jest.config.ts` loads the ts config and finds the appropriate setup functions.
+1. `api/vitest.config.mts` loads the ts config and finds the appropriate setup functions.
 
 2. Before running the tests, it runs the `globalSetup` function from `api/tests/global-setup.ts`. Things like setting up the database and running migrations and base seeds.
 
-3. Next it loads a specific test file triggers the `setupFilesAfterEnv` files, currently only `api/tests/setup.ts`. These setup files add callbacks that will run before/after _each test file_ runs, so they should be performant. Mostly cleanup functions.
+3. Next it loads a specific test file triggers the `setupFiles` files, currently only `api/tests/setup.ts`. These setup files add callbacks that will run before/after _each test file_ runs, so they should be performant. Mostly cleanup functions.
 
 4. It runs the actual tests in the loaded file.
 
-5. (Currently) Runs `afterAll` callback that cleans the database after each test file has completed all its tests. This may need to run as an `afterEach` instead ...
+5. (Currently) Runs `beforeEach` callback that cleans the database before each test file is run.
 
 6. Runs the next test file, and repeats from step 3.
 
