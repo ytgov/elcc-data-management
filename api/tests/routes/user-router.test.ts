@@ -5,13 +5,10 @@ import app from "@/app"
 import { userFactory } from "@/factories"
 import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 
-vi.mock("@/middleware/authz.middleware", () => ({
-  checkJwt: vi.fn(),
-  autheticateAndLoadUser: vi.fn(),
-}))
+vi.mock("@/middleware/authz.middleware")
 
-const mockedCheckJwt = checkJwt as unknown as vi.Mock
-const mockedAutheticateAndLoadUser = autheticateAndLoadUser as unknown as vi.Mock
+const mockedCheckJwt = vi.mocked(checkJwt)
+const mockedAutheticateAndLoadUser = vi.mocked(autheticateAndLoadUser)
 
 describe("api/src/routes/user-router.ts", () => {
   beforeEach(() => {
@@ -23,7 +20,7 @@ describe("api/src/routes/user-router.ts", () => {
       const user = userFactory.build()
 
       mockedAutheticateAndLoadUser.mockImplementation(
-        (req: Request, res: Response, next: NextFunction) => {
+        async (req: Request, _res: Response, next: NextFunction) => {
           req.user = user
           next()
         }
@@ -67,7 +64,7 @@ describe("api/src/routes/user-router.ts", () => {
 
     // TODO: abstract authorization such that testing it here is not necessary
     test("when autheticateAndLoadUser returns a 401 does not return a user", async () => {
-      mockedAutheticateAndLoadUser.mockImplementation((req: Request, res: Response) => {
+      mockedAutheticateAndLoadUser.mockImplementation(async (req: Request, res: Response) => {
         return res.status(401).json({ error: "No token provided" })
       })
 
