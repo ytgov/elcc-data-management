@@ -105,7 +105,7 @@ import { useRoute, useRouter } from "vue-router"
 import { computed, onMounted, onUnmounted, ref } from "vue"
 import { storeToRefs } from "pinia"
 
-import { getCurrentFiscalYearSlug } from "@/api/fiscal-periods-api"
+import getCurrentFiscalYearSlug from "@/utils/get-current-fiscal-year-slug"
 import { useCentreStore } from "@/modules/centre/store"
 
 import EnrollmentChart from "@/modules/centre/components/EnrollmentChart.vue"
