@@ -3,6 +3,7 @@ import { faker } from "@faker-js/faker"
 import { DateTime } from "luxon"
 
 import { FundingSubmissionLineJson } from "@/models"
+import { formatAsFiscalYear } from "@/factories/helpers"
 
 function assertParamsHasCentreId(
   params: DeepPartial<FundingSubmissionLineJson>
@@ -10,11 +11,6 @@ function assertParamsHasCentreId(
   if (typeof params.centreId !== "number") {
     throw new Error("centreId is must be a number")
   }
-}
-
-function formatAsFiscalYear(startYear: number) {
-  const endYear = (startYear + 1).toString().slice(-2)
-  return `${startYear}/${endYear}`
 }
 
 export const fundingSubmissionLineJsonFactory = Factory.define<FundingSubmissionLineJson>(
@@ -36,8 +32,8 @@ export const fundingSubmissionLineJsonFactory = Factory.define<FundingSubmission
     return FundingSubmissionLineJson.build({
       id: sequence,
       centreId: params.centreId,
-      fiscalYear: fiscalYear,
-      dateName: dateName,
+      fiscalYear,
+      dateName,
       dateStart: dateStart.toJSDate(),
       dateEnd: dateEnd.toJSDate(),
       values: JSON.stringify([]),
