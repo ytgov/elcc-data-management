@@ -1,4 +1,4 @@
-export { centreFactory } from "./centre-factories"
+export { centreFactory } from "./centre-factory"
 export { fundingLineValueFactory } from "./funding-line-value-factory"
-export { fundingSubmissionLineJsonFactory } from "./funding-submission-line-json-factories"
-export { userFactory } from "./user-factories"
+export { fundingSubmissionLineJsonFactory } from "./funding-submission-line-json-factory"
+export { userFactory } from "./user-factory"
