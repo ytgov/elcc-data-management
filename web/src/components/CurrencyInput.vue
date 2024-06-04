@@ -6,6 +6,7 @@
     @focus="onFocus"
     @blur="onBlur"
     @keydown.escape="resetValue"
+    @keydown.enter="onEnter"
   />
 </template>
 
@@ -65,6 +66,10 @@ async function onBlur() {
   } else {
     emit("update:modelValue", numberValue.value)
   }
+}
+
+function onEnter() {
+  emit("update:modelValue", numberValue.value)
 }
 
 function resetValue() {
