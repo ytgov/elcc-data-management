@@ -20,7 +20,7 @@
         color="yg_sun"
         class="float-right mb-3"
         size="small"
-        @click="replicateFirstEstimateToAllOthers"
+        @click="replicateEstimatesForward"
       >
         <v-icon>mdi-content-copy</v-icon> Replicate Estimates
       </v-btn>
@@ -147,7 +147,7 @@ async function save() {
   }
 }
 
-async function replicateFirstEstimateToAllOthers() {
+async function replicateEstimatesForward() {
   isReplicatingEstimates.value = true
   try {
     await save()
