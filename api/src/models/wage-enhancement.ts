@@ -56,6 +56,7 @@ export class WageEnhancement extends Model<
       foreignKey: "centreId",
     })
     this.belongsTo(EmployeeWageTier, {
+      as: "employeeWageTier",
       foreignKey: "employeeWageTierId",
     })
   }
@@ -81,7 +82,7 @@ WageEnhancement.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "employee_wage_tiers", // use real table name here
+        model: EmployeeWageTier,
         key: "id",
       },
     },
