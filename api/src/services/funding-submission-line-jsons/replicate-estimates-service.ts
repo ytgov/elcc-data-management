@@ -8,7 +8,19 @@ export class ReplicateEstimatesService extends BaseService {
     super()
   }
 
+  /**
+   * Replicates the estimates to future submissions.
+   *
+   * NOTE: this function assumes that all future submissions have the same lines as the current submission.
+   */
   async perform() {
+    const cleanLines = this.fundingSubmissionLineJson.lines.map((line) => {
+      return {
+        ...line,
+        actualChildOccupancyRate: 0,
+        actualComputedTotal: 0,
+      }
+    })
     const futureSubmissions = await FundingSubmissionLineJson.findAll({
       attributes: ["id"],
       where: {
@@ -21,7 +33,7 @@ export class ReplicateEstimatesService extends BaseService {
 
     await FundingSubmissionLineJson.update(
       {
-        lines: this.fundingSubmissionLineJson.lines,
+        lines: cleanLines,
       },
       {
         where: {
