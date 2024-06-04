@@ -63,6 +63,14 @@ export const fundingSubmissionLineJsonsApi = {
       .delete(`/api/funding-submission-line-jsons/${fundingSubmissionLineJsonId}`)
       .then(({ data }) => data)
   },
+
+  // Nested endpoints
+  async replicateEstimates(fundingSubmissionLineJsonId: number): Promise<void> {
+    const { data } = await http.post(
+      `/api/funding-submission-line-jsons/${fundingSubmissionLineJsonId}/replicate-estimates`
+    )
+    return data
+  },
 }
 
 export default fundingSubmissionLineJsonsApi

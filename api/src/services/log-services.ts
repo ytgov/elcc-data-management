@@ -2,9 +2,8 @@ import { Model, ModelStatic, Transaction } from "sequelize"
 
 import { Log, User } from "@/models"
 import { LogOperationTypes } from "@/models/log"
-import BaseService from "@/services/base-service"
 
-export class LogServices extends BaseService {
+export class LogServices {
   static async create({
     model,
     currentUser,
