@@ -18,7 +18,20 @@
     </v-row>
     <v-row>
       <v-col>
-        <h3 class="section-header">Wage Enhancements</h3>
+        <h3 class="section-header">
+          Wage Enhancements
+
+          <!-- TODO: consider making this a component -->
+          <v-btn
+            :loading="isLoading || isReplicatingEstimates"
+            color="yg_sun"
+            class="float-right mb-3"
+            size="small"
+            @click="replicateEstimatesForward"
+          >
+            <v-icon start>mdi-content-copy</v-icon> Replicate Estimates
+          </v-btn>
+        </h3>
 
         <EditWageEnhancementsWidget
           v-if="fiscalPeriodId !== undefined"
@@ -32,10 +45,11 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
+import { isEmpty, isNil } from "lodash"
 
 import { useNotificationStore } from "@/store/NotificationStore"
 import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"
-import { isEmpty } from "lodash"
+import wageEnhancementsApi from "@/api/wage-enhancements-api"
 
 import EditEmployeeBenefitWidget from "@/modules/centre/components/EditEmployeeBenefitWidget.vue"
 import EditWageEnhancementsWidget from "@/modules/centre/components/EditWageEnhancementsWidget.vue"
@@ -103,6 +117,30 @@ watch(
   },
   { immediate: true }
 )
+
+const isReplicatingEstimates = ref(false)
+
+async function replicateEstimatesForward() {
+  const fiscalPeriodId = fiscalPeriod.value?.id
+  if (isNil(fiscalPeriodId)) {
+    throw new Error("Fiscal period ID is missing")
+  }
+
+  isReplicatingEstimates.value = true
+  try {
+    await wageEnhancementsApi.replicateEstimates({
+      centreId: props.centreId,
+      fiscalPeriodId: fiscalPeriodId,
+    })
+  } catch (error) {
+    notificationStore.notify({
+      text: `Failed to replicate wage enhancement estimates: ${error}`,
+      variant: "error",
+    })
+  } finally {
+    isReplicatingEstimates.value = false
+  }
+}
 </script>
 
 <style scoped>

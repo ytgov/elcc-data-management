@@ -17,6 +17,7 @@ import {
   FundingSubmissionLineJsons,
   FundingSubmissionLineJsonsController,
   PaymentsController,
+  WageEnhancements,
   WageEnhancementsController,
 } from "@/controllers"
 
@@ -71,6 +72,9 @@ apiRouter
   .get(WageEnhancementsController.show)
   .patch(WageEnhancementsController.update)
   .delete(WageEnhancementsController.destroy)
+apiRouter
+  .route("/api/wage-enhancements/replicate-estimates")
+  .post(WageEnhancements.ReplicateEstimatesController.create)
 
 // if no other routes match, return a 404
 apiRouter.use("/api", (req: Request, res: Response) => {
