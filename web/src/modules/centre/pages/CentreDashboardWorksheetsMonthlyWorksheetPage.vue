@@ -154,7 +154,7 @@ async function replicateEstimatesForward() {
     await fundingSubmissionLineJsonsApi.replicateEstimates(props.fundingSubmissionLineJsonId)
   } catch (error) {
     notificationStore.notify({
-      text: `Failed to load worksheets: ${error}`,
+      text: `Failed to replicate estimates: ${error}`,
       variant: "error",
     })
   } finally {
