@@ -1,5 +1,34 @@
 <template>
-  <v-container>
+  <v-skeleton-loader v-if="isNil(fiscalPeriodId)">
+    <template #default>
+      <v-container>
+        <v-row>
+          <v-col>
+            <v-skeleton-loader type="heading" />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
+            <v-skeleton-loader type="heading" />
+            <v-skeleton-loader
+              type="card"
+              height="200px"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
+            <v-skeleton-loader type="heading" />
+            <v-skeleton-loader
+              type="card"
+              height="200px"
+            />
+          </v-col>
+        </v-row>
+      </v-container>
+    </template>
+  </v-skeleton-loader>
+  <v-container v-else>
     <v-row>
       <v-col>
         <h2>{{ fiscalPeriodFormattedDate }}</h2>
@@ -10,7 +39,6 @@
         <h3 class="section-header">Employee Benefits</h3>
 
         <EditEmployeeBenefitWidget
-          v-if="fiscalPeriodId !== undefined"
           :centre-id="props.centreId"
           :fiscal-period-id="fiscalPeriodId"
         />
@@ -21,20 +49,14 @@
         <h3 class="section-header">
           Wage Enhancements
 
-          <!-- TODO: consider making this a component -->
-          <v-btn
-            :loading="isLoading || isReplicatingEstimates"
-            color="yg_sun"
-            class="float-right mb-3"
-            size="small"
-            @click="replicateEstimatesForward"
-          >
-            <v-icon start>mdi-content-copy</v-icon> Replicate Estimates
-          </v-btn>
+          <ReplicateEstimatesButton
+            :centre-id="props.centreId"
+            :fiscal-period-id="fiscalPeriodId"
+            :loading="isLoading"
+          />
         </h3>
 
         <EditWageEnhancementsWidget
-          v-if="fiscalPeriodId !== undefined"
           :centre-id="props.centreId"
           :fiscal-period-id="fiscalPeriodId"
         />
@@ -49,10 +71,10 @@ import { isEmpty, isNil } from "lodash"
 
 import { useNotificationStore } from "@/store/NotificationStore"
 import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"
-import wageEnhancementsApi from "@/api/wage-enhancements-api"
 
 import EditEmployeeBenefitWidget from "@/modules/centre/components/EditEmployeeBenefitWidget.vue"
 import EditWageEnhancementsWidget from "@/modules/centre/components/EditWageEnhancementsWidget.vue"
+import ReplicateEstimatesButton from "@/components/wage-enhancements/ReplicateEstimatesButton.vue"
 
 const notificationStore = useNotificationStore()
 
@@ -117,30 +139,6 @@ watch(
   },
   { immediate: true }
 )
-
-const isReplicatingEstimates = ref(false)
-
-async function replicateEstimatesForward() {
-  const fiscalPeriodId = fiscalPeriod.value?.id
-  if (isNil(fiscalPeriodId)) {
-    throw new Error("Fiscal period ID is missing")
-  }
-
-  isReplicatingEstimates.value = true
-  try {
-    await wageEnhancementsApi.replicateEstimates({
-      centreId: props.centreId,
-      fiscalPeriodId: fiscalPeriodId,
-    })
-  } catch (error) {
-    notificationStore.notify({
-      text: `Failed to replicate wage enhancement estimates: ${error}`,
-      variant: "error",
-    })
-  } finally {
-    isReplicatingEstimates.value = false
-  }
-}
 </script>
 
 <style scoped>
