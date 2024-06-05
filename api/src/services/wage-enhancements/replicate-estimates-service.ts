@@ -75,6 +75,7 @@ export class ReplicateEstimatesService extends BaseService {
             await futureWageEnhancement.update({
               hoursEstimated: sourceWageEnhancement.hoursEstimated,
             })
+            continue
           }
 
           await WageEnhancement.create({
