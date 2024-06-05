@@ -1,5 +1,34 @@
 <template>
-  <v-container>
+  <v-skeleton-loader v-if="isNil(fiscalPeriodId)">
+    <template #default>
+      <v-container>
+        <v-row>
+          <v-col>
+            <v-skeleton-loader type="heading" />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
+            <v-skeleton-loader type="heading" />
+            <v-skeleton-loader
+              type="card"
+              height="200px"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
+            <v-skeleton-loader type="heading" />
+            <v-skeleton-loader
+              type="card"
+              height="200px"
+            />
+          </v-col>
+        </v-row>
+      </v-container>
+    </template>
+  </v-skeleton-loader>
+  <v-container v-else>
     <v-row>
       <v-col>
         <h2>{{ fiscalPeriodFormattedDate }}</h2>
@@ -10,7 +39,6 @@
         <h3 class="section-header">Employee Benefits</h3>
 
         <EditEmployeeBenefitWidget
-          v-if="fiscalPeriodId !== undefined"
           :centre-id="props.centreId"
           :fiscal-period-id="fiscalPeriodId"
         />
@@ -18,10 +46,17 @@
     </v-row>
     <v-row>
       <v-col>
-        <h3 class="section-header">Wage Enhancements</h3>
+        <h3 class="section-header d-flex justify-space-between">
+          Wage Enhancements
+
+          <ReplicateEstimatesButton
+            :centre-id="props.centreId"
+            :fiscal-period-id="fiscalPeriodId"
+            :loading="isLoading"
+          />
+        </h3>
 
         <EditWageEnhancementsWidget
-          v-if="fiscalPeriodId !== undefined"
           :centre-id="props.centreId"
           :fiscal-period-id="fiscalPeriodId"
         />
@@ -32,13 +67,14 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
+import { isEmpty, isNil } from "lodash"
 
 import { useNotificationStore } from "@/store/NotificationStore"
 import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"
-import { isEmpty } from "lodash"
 
 import EditEmployeeBenefitWidget from "@/modules/centre/components/EditEmployeeBenefitWidget.vue"
 import EditWageEnhancementsWidget from "@/modules/centre/components/EditWageEnhancementsWidget.vue"
+import ReplicateEstimatesButton from "@/components/wage-enhancements/ReplicateEstimatesButton.vue"
 
 const notificationStore = useNotificationStore()
 
