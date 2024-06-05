@@ -41,6 +41,10 @@ async function replicateEstimatesForward() {
       centreId: props.centreId,
       fiscalPeriodId: props.fiscalPeriodId,
     })
+    notificationStore.notify({
+      text: "Wage enhancement estimates replicated forward",
+      variant: "success",
+    })
   } catch (error) {
     notificationStore.notify({
       text: `Failed to replicate wage enhancement estimates: ${error}`,
