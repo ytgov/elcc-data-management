@@ -2,7 +2,6 @@
   <v-btn
     :loading="loading || isReplicatingEstimates"
     color="yg_sun"
-    class="float-right mb-3"
     size="small"
     @click="replicateEstimatesForward"
   >

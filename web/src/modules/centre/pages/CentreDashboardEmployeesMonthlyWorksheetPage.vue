@@ -46,7 +46,7 @@
     </v-row>
     <v-row>
       <v-col>
-        <h3 class="section-header">
+        <h3 class="section-header d-flex justify-space-between">
           Wage Enhancements
 
           <ReplicateEstimatesButton
