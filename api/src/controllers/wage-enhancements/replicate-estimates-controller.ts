@@ -23,6 +23,9 @@ export class ReplicateEstimatesController extends BaseController {
       }
 
       await ReplicateEstimatesService.perform(centreId, fiscalPeriodId)
+      return this.response.status(201).json({
+        message: "Wage enhancement estimates replicated successfully",
+      })
     } catch (error) {
       return this.response.status(422).json({
         message: `Error replicating wage enhancement estimates: ${error}`,
