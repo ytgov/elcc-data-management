@@ -49,6 +49,12 @@ export const wageEnhancementsApi = {
   delete(wageEnhancementId: number): Promise<void> {
     return http.delete(`/api/wage-enhancements/${wageEnhancementId}`).then(({ data }) => data)
   },
+
+  // Nested Endpoints
+  async replicateEstimates(params: { centreId: number; fiscalPeriodId: number }): Promise<void> {
+    const { data } = await http.post("/api/wage-enhancements/replicate-estimates", params)
+    return data
+  },
 }
 
 export default wageEnhancementsApi

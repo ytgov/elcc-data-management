@@ -7,7 +7,7 @@ import { EmployeeBenefit } from "@/models"
 import { EmployeeBenefitSerializer } from "@/serializers"
 
 export class EmployeeBenefitsController extends BaseController {
-  index() {
+  async index() {
     const where = this.query.where as WhereOptions<EmployeeBenefit>
     return EmployeeBenefit.findAll({
       where,

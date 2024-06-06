@@ -1,17 +1,21 @@
-import moment from "moment"
+import { DateTime } from "luxon"
 
 import type { SeedMigration } from "@/db/umzug"
 
 export const up: SeedMigration = async ({ context: { FiscalPeriod } }) => {
-  const APRIL = 3 // JS Date months are zero-indexed
+  const today = DateTime.now()
+  const twoYearsAgo = today.minus({ years: 2 }).year
+  const threeYearsFromNow = today.plus({ years: 3 }).year
 
-  for (let year = 2022; year <= 2026; year++) {
-    const date = moment(new Date(year, APRIL, 1))
+  const APRIL = 4 // Luxon months are 1-indexed
+
+  for (let year = twoYearsAgo; year <= threeYearsFromNow; year++) {
+    let date = DateTime.local(year, APRIL, 1)
 
     for (let i = 0; i < 12; i++) {
-      const dateStart = moment(date).startOf("month")
-      const dateEnd = moment(dateStart).endOf("month").milliseconds(0)
-      const dateName = dateStart.format("MMMM").toLowerCase()
+      const dateStart = date.startOf("month")
+      const dateEnd = date.endOf("month").set({ millisecond: 0 })
+      const dateName = dateStart.toFormat("MMMM").toLowerCase()
 
       const fiscalYear = `${year}-${(year + 1).toString().slice(-2)}`
 
@@ -23,12 +27,12 @@ export const up: SeedMigration = async ({ context: { FiscalPeriod } }) => {
         defaults: {
           fiscalYear,
           month: dateName,
-          dateStart: dateStart.toDate(),
-          dateEnd: dateEnd.toDate(),
+          dateStart: dateStart.toJSDate(),
+          dateEnd: dateEnd.toJSDate(),
         },
       })
 
-      date.add(1, "month")
+      date = date.plus({ months: 1 })
     }
   }
 }

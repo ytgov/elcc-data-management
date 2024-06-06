@@ -26,7 +26,7 @@ export async function waitForDatabase({
   intervalSeconds = INTERVAL_SECONDS,
   timeoutSeconds = TIMEOUT_SECONDS,
   retries = RETRIES,
-  startPeriodSeconds = START_PERIOD_SECONDS,
+  startPeriodSeconds = NODE_ENV === "test" ? 0 : START_PERIOD_SECONDS,
 }: {
   intervalSeconds?: number
   timeoutSeconds?: number

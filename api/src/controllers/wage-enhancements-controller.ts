@@ -7,7 +7,7 @@ import { WageEnhancement } from "@/models"
 import { WageEnhancementSerializer } from "@/serializers"
 
 export class WageEnhancementsController extends BaseController {
-  index() {
+  async index() {
     const where = this.query.where as WhereOptions<WageEnhancement>
     return WageEnhancement.findAll({
       where,

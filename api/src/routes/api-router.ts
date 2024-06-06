@@ -1,4 +1,12 @@
-import { Router, type Request, type Response } from "express"
+import { DatabaseError } from "sequelize"
+import {
+  Router,
+  type ErrorRequestHandler,
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express"
+import { UnauthorizedError } from "express-jwt"
 
 import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 import {
@@ -6,8 +14,10 @@ import {
   EmployeeBenefitsController,
   EmployeeWageTiersController,
   FiscalPeriodsController,
+  FundingSubmissionLineJsons,
   FundingSubmissionLineJsonsController,
   PaymentsController,
+  WageEnhancements,
   WageEnhancementsController,
 } from "@/controllers"
 
@@ -35,6 +45,9 @@ apiRouter
   .get(FundingSubmissionLineJsonsController.show)
   .patch(FundingSubmissionLineJsonsController.update)
   .delete(FundingSubmissionLineJsonsController.destroy)
+apiRouter
+  .route("/api/funding-submission-line-jsons/:fundingSubmissionLineJsonId/replicate-estimates")
+  .post(FundingSubmissionLineJsons.ReplicateEstimatesController.create)
 
 apiRouter.route("/api/fiscal-periods").get(FiscalPeriodsController.index)
 
@@ -59,7 +72,35 @@ apiRouter
   .get(WageEnhancementsController.show)
   .patch(WageEnhancementsController.update)
   .delete(WageEnhancementsController.destroy)
+apiRouter
+  .route("/api/wage-enhancements/replicate-estimates")
+  .post(WageEnhancements.ReplicateEstimatesController.create)
 
+// if no other routes match, return a 404
 apiRouter.use("/api", (req: Request, res: Response) => {
   return res.status(404).json({ error: `Api endpoint "${req.originalUrl}" not found` })
 })
+
+// Special error handler for all api errors
+// See https://expressjs.com/en/guide/error-handling.html#writing-error-handlers
+apiRouter.use(
+  "/api",
+  (err: ErrorRequestHandler, _req: Request, res: Response, next: NextFunction) => {
+    if (res.headersSent) {
+      return next(err)
+    }
+
+    if (err instanceof UnauthorizedError) {
+      console.error(err)
+      return res.status(err.status).json({ message: err.inner.message })
+    }
+
+    if (err instanceof DatabaseError) {
+      console.error(err)
+      return res.status(422).json({ message: "Invalid query against database." })
+    }
+
+    console.error(err)
+    return res.status(500).json({ message: "Internal Server Error" })
+  }
+)

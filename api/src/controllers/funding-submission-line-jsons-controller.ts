@@ -7,7 +7,7 @@ import { FundingSubmissionLineJson } from "@/models"
 import { FundingSubmissionLineJsonSerializer } from "@/serializers"
 
 export class FundingSubmissionLineJsonsController extends BaseController {
-  index() {
+  async index() {
     const where = this.query.where as WhereOptions<FundingSubmissionLineJson>
     return FundingSubmissionLineJson.findAll({
       where,

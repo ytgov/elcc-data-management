@@ -11,7 +11,7 @@
     "moduleResolution": "node" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
     "baseUrl": "." /* Base directory to resolve non-absolute module names. */,
     "paths": {
-      "@/*": ["./src/*", "./dist/src/*", "./tests/*"]
+      "@/*": ["./src/*", "./dist/src/*"]
     },
     // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
     /* List of folders to include type definitions from. */
@@ -25,6 +25,9 @@
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "incremental": true
-  }
+    "incremental": true,
+    "isolatedModules": true,
+    "useDefineForClassFields": true
+  },
+  "include": ["src/**/*"]
 }

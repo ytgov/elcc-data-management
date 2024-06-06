@@ -44,7 +44,7 @@
       </td>
       <td>
         <v-text-field
-          v-model="line.estimatedChildOccupancyRate"
+          v-model.number="line.estimatedChildOccupancyRate"
           density="compact"
           hide-details
           @change="changeLineAndPropagate(line, lineIndex)"
@@ -61,7 +61,7 @@
       </td>
       <td>
         <v-text-field
-          v-model="line.actualChildOccupancyRate"
+          v-model.number="line.actualChildOccupancyRate"
           density="compact"
           hide-details
           @change="changeLineAndPropagate(line, lineIndex)"
