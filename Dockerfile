@@ -19,7 +19,7 @@ COPY api ./
 RUN npm run build
 
 # copy non JS files required in production
-COPY ./api/src/db/data/*.json ./dist/src/db/data/
+COPY ./api/src/db/data/*.json ./dist/db/data/
 
 # State 2 - web build - requires development environment because typescript
 FROM base-node as web-build-stage
@@ -60,7 +60,7 @@ RUN chown -R node:node /home/node/app
 COPY --from=api-build-stage --chown=node:node /usr/src/api/package*.json ./
 RUN npm install && npm cache clean --force --loglevel=error
 
-COPY --from=api-build-stage --chown=node:node /usr/src/api/dist/src ./dist
+COPY --from=api-build-stage --chown=node:node /usr/src/api/dist ./dist
 COPY --from=web-build-stage --chown=node:node /usr/src/web/dist ./dist/web
 
 RUN echo "RELEASE_TAG=${RELEASE_TAG}" >> VERSION
