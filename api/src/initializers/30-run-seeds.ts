@@ -3,14 +3,21 @@ import { Centre } from "@/models"
 
 export async function runSeeds(): Promise<void> {
   if (process.env.SKIP_SEEDING_UNLESS_EMPTY === "true") {
-    const count = await Centre.count()
+    const count = await Centre.count({ logging: false })
+
     if (count > 0) {
-      console.log("Skipping seeding as SKIP_SEEDING_UNLESS_EMPTY set, and data already seeded.")
+      console.warn("Skipping seeding as SKIP_SEEDING_UNLESS_EMPTY set, and data already seeded.")
       return
     }
   }
 
-  await seeder.up()
+  try {
+    await seeder.up()
+  } catch (error) {
+    console.error(`Error running seeds: ${error}`, { error })
+    throw error
+  }
+
   return
 }
 

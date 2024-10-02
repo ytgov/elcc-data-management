@@ -148,11 +148,12 @@ class DevHelper
       <<~BASH,
         exec db sh -c '
           #{environment_hoist}
-          /opt/mssql-tools/bin/sqlcmd \
+          /opt/mssql-tools18/bin/sqlcmd \
             -U "$DB_USER" \
             -P "$DB_PASS" \
             -H "$DB_HOST" \
             -d "$DB_NAME" \
+            -C \
             -I #{args.join(" ")}
           '
       BASH

@@ -36,5 +36,16 @@ export const DB_PASS = process.env.DB_PASS || ""
 export const DB_NAME = process.env.DB_NAME || ""
 export const DB_PORT = parseInt(process.env.DB_PORT || "1433")
 
+export const DB_HEALTH_CHECK_INTERVAL_SECONDS = parseInt(
+  process.env.DB_HEALTH_CHECK_INTERVAL_SECONDS || "5"
+)
+export const DB_HEALTH_CHECK_TIMEOUT_SECONDS = parseInt(
+  process.env.DB_HEALTH_CHECK_TIMEOUT_SECONDS || "10"
+)
+export const DB_HEALTH_CHECK_RETRIES = parseInt(process.env.DB_HEALTH_CHECK_RETRIES || "3")
+export const DB_HEALTH_CHECK_START_PERIOD_SECONDS = parseInt(
+  process.env.DB_HEALTH_CHECK_START_PERIOD_SECONDS || "5"
+)
+
 export const RELEASE_TAG = process.env.RELEASE_TAG || ""
 export const GIT_COMMIT_HASH = process.env.GIT_COMMIT_HASH || ""
