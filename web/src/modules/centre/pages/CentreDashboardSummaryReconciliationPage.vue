@@ -25,7 +25,7 @@
         ) in adjustmentRows"
         :key="`adjustment-${adjustmentIndex}`"
       >
-        <tr :class="rowClasses(adjustmentIndex)">
+        <tr>
           <td class="text-left font-weight-bold">{{ label }}</td>
           <td class="text-right">
             {{ formatMoney(centsToDollars(payment.amountInCents)) }}
@@ -431,17 +431,6 @@ async function lazyInjectWageEnhancementMonthlyCost(expense: Adjustment, month: 
   expense.includesEstimates ||= includesEstimates
   expense.amountInCents += dollarsToCents(totalInDollars)
 }
-
-function rowClasses(index: number): string[] {
-  const classes = []
-  if (index % 2 === 0) {
-    classes.push("bg-grey-lighten-3")
-  } else {
-    classes.push("bg-gray-darken-1")
-  }
-
-  return classes
-}
 </script>
 
 <style scoped>
@@ -454,5 +443,9 @@ function rowClasses(index: number): string[] {
   top: 0.75rem;
   right: 1rem;
   transform: translate(100%, 0%); /* Position the asterisk outside the content */
+}
+
+::v-deep(tbody tr:nth-of-type(even)) {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 </style>
