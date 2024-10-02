@@ -1,10 +1,15 @@
-import { DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER, NODE_ENV } from "@/config"
 import { Sequelize } from "sequelize"
+import { merge } from "lodash"
 
-const INTERVAL_SECONDS = 5
-const TIMEOUT_SECONDS = 5
-const RETRIES = 3
-const START_PERIOD_SECONDS = 10
+import {
+  DB_HEALTH_CHECK_INTERVAL_SECONDS,
+  DB_HEALTH_CHECK_RETRIES,
+  DB_HEALTH_CHECK_START_PERIOD_SECONDS,
+  DB_HEALTH_CHECK_TIMEOUT_SECONDS,
+} from "@/config"
+import { SEQUELIZE_CONFIG } from "@/db/db-client"
+import sleep from "@/utils/sleep"
+import { isCredentialFailure, isNetworkFailure, isSocketFailure } from "@/utils/db-error-helpers"
 
 function checkHealth(db: Sequelize, timeoutSeconds: number) {
   return new Promise((resolve, reject) => {
@@ -18,61 +23,62 @@ function checkHealth(db: Sequelize, timeoutSeconds: number) {
   })
 }
 
-function sleep(seconds: number) {
-  return new Promise((resolve) => setTimeout(resolve, seconds * 1000))
-}
-
 export async function waitForDatabase({
-  intervalSeconds = INTERVAL_SECONDS,
-  timeoutSeconds = TIMEOUT_SECONDS,
-  retries = RETRIES,
-  startPeriodSeconds = NODE_ENV === "test" ? 0 : START_PERIOD_SECONDS,
+  intervalSeconds = DB_HEALTH_CHECK_INTERVAL_SECONDS,
+  timeoutSeconds = DB_HEALTH_CHECK_TIMEOUT_SECONDS,
+  retries = DB_HEALTH_CHECK_RETRIES,
+  startPeriodSeconds = DB_HEALTH_CHECK_START_PERIOD_SECONDS,
 }: {
   intervalSeconds?: number
   timeoutSeconds?: number
   retries?: number
   startPeriodSeconds?: number
 } = {}): Promise<void> {
-  let username: string
-  let database: string
-  if (
-    NODE_ENV === "production" &&
-    process.env.PRODUCTION_DATABASE_SA_MASTER_CREDS_AVAILABLE !== "true"
-  ) {
-    console.info(
-      "Falling back to local database credentials because production database sa:master credentials are not available."
-    )
-    username = DB_USER
-    database = DB_NAME
-  } else {
-    username = "sa" // default user that should always exist
-    database = "master" // default database that should always exist
-  }
+  await sleep(startPeriodSeconds)
 
-  const db = new Sequelize({
-    dialect: "mssql",
-    username,
-    database,
-    password: DB_PASS,
-    host: DB_HOST,
-    port: DB_PORT,
-    schema: "dbo",
-    logging: NODE_ENV === "development" ? console.log : false,
-  })
+  console.info("Attempting direct to database connection...")
+  const databaseConfig = SEQUELIZE_CONFIG
+  let dbMigrationClient = new Sequelize(databaseConfig)
+  let isDatabaseSocketReady = false
 
   await sleep(startPeriodSeconds)
 
   for (let i = 0; i < retries; i++) {
     try {
-      await checkHealth(db, timeoutSeconds)
-      console.log("Database connection successful.")
+      await checkHealth(dbMigrationClient, timeoutSeconds)
+      console.info("Database connection successful.")
       return
     } catch (error) {
-      console.warn("Database connection failed, retrying...", error)
-      await sleep(intervalSeconds)
+      if (isSocketFailure(error)) {
+        console.info(`Database socket is not ready, retrying... ${error}`, { error })
+        await sleep(intervalSeconds)
+      } else if (isNetworkFailure(error)) {
+        console.info(`Network error, retrying... ${error}`, { error })
+        await sleep(intervalSeconds)
+      } else if (isCredentialFailure(error)) {
+        if (isDatabaseSocketReady) {
+          console.error(`Database connection failed due to invalid credentials: ${error}`, {
+            error,
+          })
+          throw error
+        } else {
+          console.info(
+            "Falling back to database server-level connection (database might not exist)..."
+          )
+          const serverLevelConfig = merge(SEQUELIZE_CONFIG, { database: "" })
+          dbMigrationClient = new Sequelize(serverLevelConfig)
+          i -= 1
+          isDatabaseSocketReady = true
+          continue
+        }
+      } else {
+        console.error(`Unknown database connection error: ${error}`, { error })
+        throw error
+      }
     }
   }
-  throw new Error("Failed to connect to the database after retries.")
+
+  throw new Error(`Failed to connect to the database due to timeout.`)
 }
 
 export default waitForDatabase
