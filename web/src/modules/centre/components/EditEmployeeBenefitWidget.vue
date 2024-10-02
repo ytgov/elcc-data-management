@@ -150,7 +150,7 @@
       <tr>
         <td class="d-flex align-center">
           Total Cost
-          <v-tooltip bottom>
+          <v-tooltip location="bottom">
             <template #activator="{ props }">
               <v-icon
                 class="ml-1"
@@ -190,7 +190,7 @@
       <tr>
         <td class="text-uppercase d-flex align-center">
           Paid Amount
-          <v-tooltip bottom>
+          <v-tooltip location="bottom">
             <template #activator="{ props }">
               <v-icon
                 class="ml-1"

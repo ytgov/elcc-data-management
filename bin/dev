@@ -7,6 +7,7 @@ class DevHelper
   COMMAND_TO_METHOD = {
     "ts-node" => :ts_node,
     "branch-from" => :branch_from,
+    "description-from" => :description_from,
   }
   METHOD_TO_COMMAND = COMMAND_TO_METHOD.invert
 
@@ -187,6 +188,18 @@ class DevHelper
   def branch_from(jira_issue_url, *args, **kwargs)
     branch_name = JiraApi.build_branch_name(jira_issue_url)
     system("git checkout -b #{branch_name}")
+  end
+
+  ##
+  # Fetches the description of a Jira issue and prints it to the console in markdown format.
+  # Example:
+  #   dev description-from https://yg-hpw.atlassian.net/browse/ELCC-61
+  #
+  # Produces:
+  #   ... a bunch of markdown text ...
+  def description_from(jira_issue_url, *args, **kwargs)
+    description = JiraApi.fetch_description_as_markdown(jira_issue_url)
+    puts description
   end
 
   def bash_completions

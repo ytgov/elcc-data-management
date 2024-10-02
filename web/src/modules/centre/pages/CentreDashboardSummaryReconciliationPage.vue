@@ -25,44 +25,38 @@
         ) in adjustmentRows"
         :key="`adjustment-${adjustmentIndex}`"
       >
-        <tr :class="rowClasses(adjustmentIndex)">
+        <tr>
           <td class="text-left font-weight-bold">{{ label }}</td>
           <td class="text-right">
             {{ formatMoney(centsToDollars(payment.amountInCents)) }}
           </td>
-          <td class="text-right">
-            <v-tooltip
-              v-if="expense.includesEstimates"
-              bottom
-            >
-              <template #activator="{ props }">
-                <span v-bind="props">
-                  {{ formatMoney(centsToDollars(expense.amountInCents)) }}
-                  <sup class="asterisk-icon">
-                    <v-icon size="small">mdi-asterisk-circle-outline</v-icon>
-                  </sup>
-                </span>
-              </template>
-              <span class="text-white">This expense includes estimated values.</span>
-            </v-tooltip>
-            <span v-else>{{ formatMoney(centsToDollars(expense.amountInCents)) }}</span>
+          <td class="relative text-right">
+            {{ formatMoney(centsToDollars(expense.amountInCents)) }}
+            <template v-if="expense.includesEstimates">
+              <sup class="offset-asterisk-icon">
+                <v-icon size="small">mdi-asterisk-circle-outline</v-icon>
+              </sup>
+              <v-tooltip
+                location="bottom"
+                activator="parent"
+              >
+                <span class="text-white">This expense includes estimated values.</span>
+              </v-tooltip>
+            </template>
           </td>
-          <td class="text-right">
-            <v-tooltip
-              v-if="employee.includesEstimates"
-              bottom
-            >
-              <template #activator="{ props }">
-                <span v-bind="props">
-                  {{ formatMoney(centsToDollars(employee.amountInCents)) }}
-                  <sup class="asterisk-icon">
-                    <v-icon size="small">mdi-asterisk-circle-outline</v-icon>
-                  </sup>
-                </span>
-              </template>
-              <span class="text-white">This amount includes estimated values.</span>
-            </v-tooltip>
-            <span v-else>{{ formatMoney(centsToDollars(employee.amountInCents)) }}</span>
+          <td class="text-right relative">
+            {{ formatMoney(centsToDollars(employee.amountInCents)) }}
+            <template v-if="employee.includesEstimates">
+              <sup class="offset-asterisk-icon">
+                <v-icon size="small">mdi-asterisk-circle-outline</v-icon>
+              </sup>
+              <v-tooltip
+                location="bottom"
+                activator="parent"
+              >
+                <span class="text-white">This amount includes estimated values.</span>
+              </v-tooltip>
+            </template>
           </td>
 
           <td class="text-right">
@@ -315,9 +309,6 @@ async function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjust
       expense.amountInCents += dollarsToCents(sectionsTotal)
     }
 
-    injectEmployeeBenefitMonthlyCost(expense, month)
-    await lazyInjectWageEnhancementMonthlyCost(expense, month)
-
     return expense
   })
 
@@ -352,8 +343,8 @@ async function buildEmployeeValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjus
       }
     }
 
-    //injectEmployeeBenefitMonthlyCost(employee, month)
-    //await lazyInjectWageEnhancementMonthlyCost(employee, month)
+    injectEmployeeBenefitMonthlyCost(employee, month)
+    await lazyInjectWageEnhancementMonthlyCost(employee, month)
 
     return employee
   })
@@ -440,28 +431,21 @@ async function lazyInjectWageEnhancementMonthlyCost(expense: Adjustment, month: 
   expense.includesEstimates ||= includesEstimates
   expense.amountInCents += dollarsToCents(totalInDollars)
 }
-
-function rowClasses(index: number): string[] {
-  const classes = []
-  if (index % 2 === 0) {
-    classes.push("bg-grey-lighten-3")
-  } else {
-    classes.push("bg-gray-darken-1")
-  }
-
-  return classes
-}
 </script>
 
 <style scoped>
-.adjustment-cell {
+.relative {
   position: relative;
 }
 
-.asterisk-icon {
+.offset-asterisk-icon {
   position: absolute;
   top: 0.75rem;
   right: 1rem;
   transform: translate(100%, 0%); /* Position the asterisk outside the content */
+}
+
+::v-deep(tbody tr:nth-of-type(even)) {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 </style>
