@@ -33,14 +33,10 @@
       class="monospace"
     >
       <td>{{ line.lineName }}</td>
-      <td>
-        <v-text-field
-          :value="formatMoney(line.monthlyAmount)"
-          density="compact"
-          hide-details
-          readonly
-          style="background-color: #eee"
-        ></v-text-field>
+      <td class="read-only-td-that-matches-v-text-input">
+        <span class="pl-4">
+          {{ formatMoney(line.monthlyAmount) }}
+        </span>
       </td>
       <td>
         <v-text-field
@@ -50,14 +46,10 @@
           @change="changeLineAndPropagate(line, lineIndex)"
         ></v-text-field>
       </td>
-      <td>
-        <v-text-field
-          :value="formatMoney(line.estimatedComputedTotal)"
-          density="compact"
-          hide-details
-          readonly
-          style="background-color: #eee"
-        ></v-text-field>
+      <td class="read-only-td-that-matches-v-text-input">
+        <span class="pl-4">
+          {{ formatMoney(line.estimatedComputedTotal) }}
+        </span>
       </td>
       <td>
         <v-text-field
@@ -68,14 +60,10 @@
         ></v-text-field>
       </td>
 
-      <td>
-        <v-text-field
-          :value="formatMoney(line.actualComputedTotal)"
-          density="compact"
-          hide-details
-          readonly
-          style="background-color: #eee"
-        ></v-text-field>
+      <td class="read-only-td-that-matches-v-text-input">
+        <span class="pl-4">
+          {{ formatMoney(line.actualComputedTotal) }}
+        </span>
       </td>
     </tr>
     <tr class="monospace total">
@@ -167,6 +155,11 @@ defineExpose({
 </script>
 
 <style scoped>
+.read-only-td-that-matches-v-text-input {
+  background-color: #eee;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.38);
+}
+
 .monospace .v-text-field .v-field input.v-field__input {
   font-family: "Courier Prime", monospace !important;
 }
