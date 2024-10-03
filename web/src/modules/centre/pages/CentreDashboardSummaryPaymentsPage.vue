@@ -113,7 +113,7 @@ import { DateTime, Interval } from "luxon"
 import { first, isEmpty, isNil, last } from "lodash"
 import { storeToRefs } from "pinia"
 
-import { useFiscalPeriodsStore } from "@/store/fiscal-periods"
+import useFiscalPeriods from "@/use/use-fiscal-periods"
 import {
   usePaymentsStore,
   isPersistedPayment,
@@ -138,7 +138,13 @@ const props = defineProps({
 })
 
 const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
-const fiscalPeriodsStore = useFiscalPeriodsStore()
+const fiscalPeriodsQuery = computed(() => ({
+  where: {
+    fiscalYear: props.fiscalYearSlug,
+  },
+}))
+const { fiscalPeriods } = useFiscalPeriods(fiscalPeriodsQuery)
+
 const paymentsStore = usePaymentsStore()
 
 const { isLoading } = storeToRefs(paymentsStore)
@@ -161,8 +167,8 @@ const paymentNames = ref([
 ])
 
 const fiscalYearInterval = computed(() => {
-  const firstFiscalPeriod = first(fiscalPeriodsStore.fiscalPeriods)
-  const lastFiscalPeriod = last(fiscalPeriodsStore.fiscalPeriods)
+  const firstFiscalPeriod = first(fiscalPeriods.value)
+  const lastFiscalPeriod = last(fiscalPeriods.value)
   const fiscalYearStart = firstFiscalPeriod?.dateStart
   const fiscalYearEnd = lastFiscalPeriod?.dateEnd
 
@@ -181,11 +187,6 @@ watch<[number, string], true>(
       where: {
         centreId: newCenterId,
         fiscalYear: newFiscalYear,
-      },
-    })
-    fiscalPeriodsStore.fetch({
-      where: {
-        fiscalYear: newFiscalYearSlug,
       },
     })
   },
