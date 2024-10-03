@@ -34,61 +34,28 @@
 
 <script lang="ts" setup>
 import { isEmpty } from "lodash"
-import { ref, watch, watchEffect, computed } from "vue"
+import { watchEffect, computed } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
-import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"
-import { useNotificationStore } from "@/store/NotificationStore"
+import useFiscalPeriods from "@/use/use-fiscal-periods"
 
 const route = useRoute()
 const router = useRouter()
-const notificationStore = useNotificationStore()
 
-const props = defineProps({
-  centreId: {
-    type: Number,
-    required: true,
-  },
-  fiscalYearSlug: {
-    type: String,
-    required: true,
-  },
-})
+const props = defineProps<{
+  centreId: number
+  fiscalYearSlug: string
+}>()
 
-const isLoading = ref(true)
-const fiscalPeriods = ref<FiscalPeriod[]>([])
+const fiscalPeriodsQuery = computed(() => ({
+  where: {
+    fiscalYear: props.fiscalYearSlug,
+  },
+}))
+const { fiscalPeriods, isLoading } = useFiscalPeriods(fiscalPeriodsQuery)
+
 const firstPeriod = computed(() => fiscalPeriods.value[0])
 const defaultMonth = computed(() => firstPeriod.value?.month)
-
-async function fetchFiscalPeriods(fiscalYear: string) {
-  isLoading.value = true
-  try {
-    const { fiscalPeriods: newFiscalPeriods } = await fiscalPeriodsApi.list({
-      where: {
-        fiscalYear,
-      },
-    })
-    fiscalPeriods.value = newFiscalPeriods
-  } catch (error) {
-    console.error(error)
-    notificationStore.notify({
-      text: `Failed to fetch fiscal periods: ${error}`,
-      variant: "error",
-    })
-  } finally {
-    isLoading.value = false
-  }
-}
-
-watch<string, true>(
-  () => props.fiscalYearSlug,
-  async (newSlug) => {
-    await fetchFiscalPeriods(newSlug)
-  },
-  {
-    immediate: true,
-  }
-)
 
 watchEffect(async () => {
   if (route.name !== "CentreDashboardEmployeesPage") {
