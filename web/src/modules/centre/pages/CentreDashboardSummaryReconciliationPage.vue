@@ -295,7 +295,6 @@ async function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjust
     }
     const { month } = fiscalPeriod
     const monthAsDateName = upperFirst(month)
-
     const linesForMonth = fundingSubmissionLineJsonsStore.linesForMonth(monthAsDateName)
 
     if (!isNil(linesForMonth)) {
@@ -323,8 +322,6 @@ async function buildEmployeeValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjus
       includesEstimates: false,
     }
     const { month } = fiscalPeriod
-    const monthAsDateName = upperFirst(month)
-
     const linesForMonth = employeeBenefits.value.find((b) => b.fiscalPeriodId == fiscalPeriod.id)
 
     if (!isNil(linesForMonth)) {
