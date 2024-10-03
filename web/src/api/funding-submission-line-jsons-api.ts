@@ -53,6 +53,7 @@ export const fundingSubmissionLineJsonsApi = {
     } = {}
   ): Promise<{
     fundingSubmissionLineJsons: FundingSubmissionLineJsonAsIndex[]
+    totalCount: number
   }> {
     const { data } = await http.get("/api/funding-submission-line-jsons", { params })
     return data

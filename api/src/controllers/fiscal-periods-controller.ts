@@ -7,7 +7,10 @@ export class FiscalPeriodsController extends BaseController<FiscalPeriod> {
     try {
       const where = this.buildWhere()
       const scopes = this.buildFilterScopes()
-      const fiscalPeriods = await FiscalPeriod.scope(scopes).findAll({
+      const scopedFiscalPeriods = FiscalPeriod.scope(scopes)
+
+      const totalCount = await scopedFiscalPeriods.count({ where })
+      const fiscalPeriods = await scopedFiscalPeriods.findAll({
         where,
         order: [
           ["dateStart", "ASC"],
@@ -16,6 +19,7 @@ export class FiscalPeriodsController extends BaseController<FiscalPeriod> {
       })
       return this.response.json({
         fiscalPeriods,
+        totalCount,
       })
     } catch (error) {
       return this.response

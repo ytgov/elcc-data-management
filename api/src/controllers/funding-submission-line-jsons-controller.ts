@@ -9,7 +9,10 @@ export class FundingSubmissionLineJsonsController extends BaseController<Funding
     try {
       const where = this.buildWhere()
       const scopes = this.buildFilterScopes()
-      const fundingSubmissionLineJsons = await FundingSubmissionLineJson.scope(scopes).findAll({
+      const scopedFundingSubmissionLineJsons = FundingSubmissionLineJson.scope(scopes)
+
+      const totalCount = await scopedFundingSubmissionLineJsons.count({ where })
+      const fundingSubmissionLineJsons = await scopedFundingSubmissionLineJsons.findAll({
         where,
         order: ["dateStart"],
       })
@@ -18,6 +21,7 @@ export class FundingSubmissionLineJsonsController extends BaseController<Funding
       )
       return this.response.json({
         fundingSubmissionLineJsons: serializedfundingSubmissionLineJsons,
+        totalCount,
       })
     } catch (error) {
       return this.response.status(400).json({
