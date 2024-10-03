@@ -66,35 +66,30 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue"
+import { computed } from "vue"
 import { isEmpty, isNil } from "lodash"
 
-import { useNotificationStore } from "@/store/NotificationStore"
-import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"
+import useFiscalPeriods, { FiscalPeriodMonths } from "@/use/use-fiscal-periods"
 
 import EditEmployeeBenefitWidget from "@/modules/centre/components/EditEmployeeBenefitWidget.vue"
 import EditWageEnhancementsWidget from "@/modules/centre/components/EditWageEnhancementsWidget.vue"
 import ReplicateEstimatesButton from "@/components/wage-enhancements/ReplicateEstimatesButton.vue"
 
-const notificationStore = useNotificationStore()
+const props = defineProps<{
+  centreId: number
+  fiscalYearSlug: string
+  month: FiscalPeriodMonths
+}>()
 
-const props = defineProps({
-  centreId: {
-    type: Number,
-    required: true,
+const fiscalPeriodsQuery = computed(() => ({
+  where: {
+    fiscalYear: props.fiscalYearSlug,
+    month: props.month,
   },
-  fiscalYearSlug: {
-    type: String,
-    required: true,
-  },
-  month: {
-    type: String,
-    required: true,
-  },
-})
-
-const isLoading = ref(true)
-const fiscalPeriod = ref<FiscalPeriod>()
+  perPage: 1,
+}))
+const { fiscalPeriods, isLoading } = useFiscalPeriods(fiscalPeriodsQuery)
+const fiscalPeriod = computed(() => fiscalPeriods.value[0])
 const fiscalPeriodId = computed(() => fiscalPeriod.value?.id)
 const fiscalPeriodFormattedDate = computed(() => {
   if (isEmpty(fiscalPeriod.value)) return ""
@@ -103,42 +98,6 @@ const fiscalPeriodFormattedDate = computed(() => {
   const formattedDate = dateStart.toFormat("MMMM yyyy")
   return formattedDate
 })
-
-async function fetchFiscalPeriods(fiscalYear: string, month: string) {
-  isLoading.value = true
-  try {
-    const { fiscalPeriods: newFiscalPeriods } = await fiscalPeriodsApi.list({
-      where: {
-        fiscalYear,
-        month,
-      },
-    })
-
-    if (isEmpty(newFiscalPeriods)) {
-      throw new Error(`No fiscal periods found for ${fiscalYear} ${month}`)
-    } else if (newFiscalPeriods.length > 1) {
-      throw new Error(`Multiple fiscal periods found for ${fiscalYear} ${month}`)
-    }
-
-    fiscalPeriod.value = newFiscalPeriods[0]
-  } catch (error) {
-    console.error(error)
-    notificationStore.notify({
-      text: `Failed to fetch fiscal periods: ${error}`,
-      variant: "error",
-    })
-  } finally {
-    isLoading.value = false
-  }
-}
-
-watch(
-  () => [props.fiscalYearSlug, props.month],
-  async ([newFiscalYearSlug, newMonth], _) => {
-    await fetchFiscalPeriods(newFiscalYearSlug, newMonth)
-  },
-  { immediate: true }
-)
 </script>
 
 <style scoped>
