@@ -8,6 +8,7 @@ class DevHelper
     "ts-node" => :ts_node,
     "branch-from" => :branch_from,
     "description-from" => :description_from,
+    "check-types" => :check_types,
   }
   METHOD_TO_COMMAND = COMMAND_TO_METHOD.invert
 
@@ -64,6 +65,11 @@ class DevHelper
   end
 
   # Custom helpers
+
+  def check_types(*args, **kwargs)
+    run(*%w[api npm run check-types], *args, **kwargs)
+  end
+
   def sh(*args, **kwargs)
     run(*%w[api sh], *args, **kwargs)
   end
