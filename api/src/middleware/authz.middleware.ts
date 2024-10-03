@@ -8,6 +8,10 @@ import { User } from "@/models"
 import { UserStatus } from "@/models/user"
 import auth0Integration from "@/integrations/auth0-integration"
 
+export type AuthorizedRequest = Request & {
+  user: User
+}
+
 export const checkJwt = jwt({
   secret: jwksRsa.expressJwtSecret({
     cache: true,
@@ -21,7 +25,7 @@ export const checkJwt = jwt({
   algorithms: ["RS256"],
 })
 
-function isAuthenticatedRequest(req: Request): req is Request & { user: User } {
+function isAuthenticatedRequest(req: Request): req is AuthorizedRequest & { user: User } {
   // TODO: check if this should also check user.status or any other fields
   const user = req.user
   if (user instanceof User && !isNil(user.sub) && user.status === UserStatus.ACTIVE) {
