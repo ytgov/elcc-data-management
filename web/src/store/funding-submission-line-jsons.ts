@@ -3,27 +3,47 @@ import { isNil } from "lodash"
 import { ref, type Ref } from "vue"
 
 import fundingSubmissionLineJsonsApi, {
+  type FundingSubmissionLineJsonFiltersOptions,
+  type FundingSubmissionLineJsonWhereOptions,
   type FundingLineValue,
-  type FundingSubmissionLineJson,
-  type Params,
+  type FundingSubmissionLineJsonAsIndex,
 } from "@/api/funding-submission-line-jsons-api"
 
-export { type FundingLineValue, type FundingSubmissionLineJson, type Params }
+export {
+  type FundingLineValue,
+  type FundingSubmissionLineJsonAsIndex,
+  type FundingSubmissionLineJsonFiltersOptions,
+  type FundingSubmissionLineJsonWhereOptions,
+}
 
 export const useFundingSubmissionLineJsonsStore = defineStore("fundingSubmissionLineJsons", () => {
-  const items: Ref<FundingSubmissionLineJson[]> = ref([])
+  const items: Ref<FundingSubmissionLineJsonAsIndex[]> = ref([])
   // TODO: Implement total_count here and in the back-end
   const isLoading = ref(false)
   const isErrored = ref(false)
   const isInitialized = ref(false)
 
-  async function initialize(params: Params = {}): Promise<FundingSubmissionLineJson[]> {
+  async function initialize(
+    params: {
+      where?: FundingSubmissionLineJsonWhereOptions
+      filters?: FundingSubmissionLineJsonFiltersOptions
+      page?: number
+      perPage?: number
+    } = {}
+  ): Promise<FundingSubmissionLineJsonAsIndex[]> {
     if (isInitialized.value) return items.value
 
     return fetch(params)
   }
 
-  async function fetch(params: Params = {}): Promise<FundingSubmissionLineJson[]> {
+  async function fetch(
+    params: {
+      where?: FundingSubmissionLineJsonWhereOptions
+      filters?: FundingSubmissionLineJsonFiltersOptions
+      page?: number
+      perPage?: number
+    } = {}
+  ): Promise<FundingSubmissionLineJsonAsIndex[]> {
     isLoading.value = true
     try {
       const { fundingSubmissionLineJsons } = await fundingSubmissionLineJsonsApi.list(params)

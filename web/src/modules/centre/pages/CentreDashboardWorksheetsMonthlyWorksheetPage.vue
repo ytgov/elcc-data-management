@@ -53,7 +53,7 @@ import { groupBy, isEmpty, isEqual } from "lodash"
 import moment from "moment" // TODO: deprecated; replace with luxon
 
 import fundingSubmissionLineJsonsApi, {
-  FundingSubmissionLineJson,
+  FundingSubmissionLineJsonAsDetailed,
 } from "@/api/funding-submission-line-jsons-api"
 import { FundingLineValue } from "@/store/funding-submission-line-jsons"
 import { useNotificationStore } from "@/store/NotificationStore"
@@ -79,7 +79,7 @@ const props = defineProps({
   },
 })
 
-const fundingSubmissionLineJson = ref<FundingSubmissionLineJson>()
+const fundingSubmissionLineJson = ref<FundingSubmissionLineJsonAsDetailed>()
 const dateName = computed(() => fundingSubmissionLineJson.value?.dateName)
 
 const isLoading = ref(true)
