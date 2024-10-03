@@ -24,6 +24,7 @@ export class FundingSubmissionLineJson extends BaseModel<
 > {
   declare id: CreationOptional<number>
   declare centreId: ForeignKey<Centre["id"]>
+  // TODO: link this to a fiscal period, and remove fiscalYear, dateName, dateStart, and dateEnd
   declare fiscalYear: string
   declare dateName: string
   declare dateStart: Date
