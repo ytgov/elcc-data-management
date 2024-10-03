@@ -91,6 +91,7 @@ const routes: RouteRecordRaw[] = [
                   ),
                 props: (route) => ({
                   centreId: parseInt(route.params.centreId as string),
+                  fiscalYearSlug: route.params.fiscalYearSlug,
                   month: route.params.month,
                 }),
               },
