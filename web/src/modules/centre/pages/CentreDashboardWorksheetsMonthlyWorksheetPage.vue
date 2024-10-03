@@ -1,39 +1,50 @@
 <template>
-  <div class="ma-4">
+  <div
+    v-if="isLoadingFundingSubmissionLineJsons"
+    class="d-flex justify-center mt-10"
+  >
+    <v-progress-circular indeterminate />
+  </div>
+  <div
+    v-else-if="!isLoadingFundingSubmissionLineJsons && isEmpty(fundingSubmissionLineJsons)"
+    class="ma-5"
+  >
+    <p>There are currently no worksheets for {{ fiscalYear }}.</p>
+    <v-btn
+      color="primary"
+      size="small"
+      class="mt-3"
+      @click="initializeWorksheetsForFiscalYear"
+      >Add worksheets for {{ fiscalYear }}</v-btn
+    >
+  </div>
+  <div
+    v-else
+    class="ma-4"
+  >
     <v-btn
       color="primary"
       class="float-right"
-      @click="save"
-      :loading="isLoading"
+      @click="saveFundingSubmissionLineJson"
+      :loading="isSaving"
       >Save</v-btn
     >
 
-    <v-progress-circular
-      v-if="isLoading"
-      indeterminate
-    />
-    <template v-else>
-      <h2 class="mb-3">{{ dateName }} {{ calendarYear }}</h2>
-      <v-btn
-        v-if="dateName == FIRST_FISCAL_MONTH_NAME"
-        :loading="isReplicatingEstimates"
-        color="yg_sun"
-        class="float-right mb-3"
-        size="small"
-        @click="replicateEstimatesForward"
-      >
-        <v-icon>mdi-content-copy</v-icon> Replicate Estimates
-      </v-btn>
-    </template>
-
-    <v-skeleton-loader
-      style="clear: both"
-      type="table"
-      v-if="isLoading"
-    ></v-skeleton-loader>
+    <h2 class="mb-3">{{ dateName }} {{ calendarYear }}</h2>
+    <v-btn
+      v-if="dateName == FIRST_FISCAL_MONTH_NAME"
+      :loading="isReplicatingEstimates"
+      color="yg_sun"
+      class="float-right mb-3"
+      size="small"
+      @click="replicateEstimatesForward"
+    >
+      <v-icon>mdi-content-copy</v-icon> Replicate Estimates
+    </v-btn>
 
     <div
       v-for="({ sectionName, lines }, sectionIndex) in sections"
+      :key="`${sectionName}-${sectionIndex}`"
       style="clear: both"
     >
       <h4>{{ sectionName }}</h4>
@@ -48,15 +59,17 @@
 </template>
 
 <script lang="ts" setup>
-import { watch, computed, ref } from "vue"
-import { groupBy, isEmpty, isEqual } from "lodash"
-import moment from "moment" // TODO: deprecated; replace with luxon
+import { computed, ref } from "vue"
+import { groupBy, isEmpty, upperFirst } from "lodash"
+import { DateTime } from "luxon"
 
-import fundingSubmissionLineJsonsApi, {
-  FundingSubmissionLineJsonAsDetailed,
-} from "@/api/funding-submission-line-jsons-api"
-import { FundingLineValue } from "@/store/funding-submission-line-jsons"
+import centresApi from "@/api/centres-api"
+import { FiscalPeriodMonths } from "@/api/fiscal-periods-api"
+import fundingSubmissionLineJsonsApi from "@/api/funding-submission-line-jsons-api"
 import { useNotificationStore } from "@/store/NotificationStore"
+import useFundingSubmissionLineJsons, {
+  type FundingLineValue,
+} from "@/use/use-funding-submission-line-jsons"
 
 import SectionTable from "@/modules/centre/components/centre-dashboard-worksheets-tab-monthly-worksheet-tab/SectionTable.vue"
 
@@ -64,28 +77,33 @@ const FIRST_FISCAL_MONTH_NAME = "April"
 
 const notificationStore = useNotificationStore()
 
-const props = defineProps({
-  centreId: {
-    type: Number,
-    required: true,
-  },
-  fundingSubmissionLineJsonId: {
-    type: Number,
-    required: true,
-  },
-  month: {
-    type: String,
-    required: true,
-  },
-})
+const props = defineProps<{
+  centreId: number
+  fiscalYearSlug: string
+  month: FiscalPeriodMonths
+}>()
 
-const fundingSubmissionLineJson = ref<FundingSubmissionLineJsonAsDetailed>()
+const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
+const monthAsDateName = computed(() => upperFirst(props.month))
+const fundingSubmissionLineJsonsQuery = computed(() => ({
+  where: {
+    centreId: props.centreId,
+    fiscalYear: fiscalYear.value,
+    dateName: monthAsDateName.value,
+  },
+  perPage: 1,
+}))
+const { fundingSubmissionLineJsons, isLoading: isLoadingFundingSubmissionLineJsons } =
+  useFundingSubmissionLineJsons(fundingSubmissionLineJsonsQuery)
+
+const fundingSubmissionLineJson = computed(() => fundingSubmissionLineJsons.value[0])
+const fundingSubmissionLineJsonId = computed(() => fundingSubmissionLineJson.value?.id)
 const dateName = computed(() => fundingSubmissionLineJson.value?.dateName)
 
-const isLoading = ref(true)
+const isSaving = ref(false)
 const isReplicatingEstimates = ref(false)
 const calendarYear = computed(() =>
-  moment.utc(fundingSubmissionLineJson.value?.dateStart).format("YYYY")
+  DateTime.fromISO(fundingSubmissionLineJson.value?.dateStart).toFormat("yyyy")
 )
 const sections = computed<{ sectionName: string; lines: FundingLineValue[] }[]>(() => {
   if (isEmpty(fundingSubmissionLineJson.value)) {
@@ -100,42 +118,24 @@ const sections = computed<{ sectionName: string; lines: FundingLineValue[] }[]>(
 })
 const sectionTables = ref<InstanceType<typeof SectionTable>[]>([])
 
-async function fetchFundingSubmissionLineJson(fundingSubmissionLineJsonId: number) {
-  isLoading.value = true
+async function initializeWorksheetsForFiscalYear() {
+  isSaving.value = true
   try {
-    fundingSubmissionLineJson.value = await fundingSubmissionLineJsonsApi
-      .get(fundingSubmissionLineJsonId)
-      .then(({ fundingSubmissionLineJson }) => fundingSubmissionLineJson)
-  } catch (error) {
-    console.error(error)
+    await centresApi.fiscalYear.create(props.centreId, fiscalYear.value)
     notificationStore.notify({
-      text: `Failed to fetch worksheet: ${error}`,
-      variant: "error",
+      text: "Fiscal year added",
+      variant: "success",
     })
   } finally {
-    isLoading.value = false
+    isSaving.value = false
   }
 }
 
-watch<[number, number], true>(
-  () => [props.centreId, props.fundingSubmissionLineJsonId],
-  async (newValues, oldValues) => {
-    if (isEqual(newValues, oldValues)) {
-      return
-    }
-
-    await fetchFundingSubmissionLineJson(props.fundingSubmissionLineJsonId)
-  },
-  {
-    immediate: true,
-  }
-)
-
-async function save() {
-  isLoading.value = true
+async function saveFundingSubmissionLineJson() {
+  isSaving.value = true
   try {
     const lines = sections.value.flatMap((section) => section.lines)
-    await fundingSubmissionLineJsonsApi.update(props.fundingSubmissionLineJsonId, { lines })
+    await fundingSubmissionLineJsonsApi.update(fundingSubmissionLineJsonId.value, { lines })
   } catch (error) {
     console.error(error)
     notificationStore.notify({
@@ -143,15 +143,15 @@ async function save() {
       variant: "error",
     })
   } finally {
-    isLoading.value = false
+    isSaving.value = false
   }
 }
 
 async function replicateEstimatesForward() {
   isReplicatingEstimates.value = true
   try {
-    await save()
-    await fundingSubmissionLineJsonsApi.replicateEstimates(props.fundingSubmissionLineJsonId)
+    await saveFundingSubmissionLineJson()
+    await fundingSubmissionLineJsonsApi.replicateEstimates(fundingSubmissionLineJsonId.value)
   } catch (error) {
     notificationStore.notify({
       text: `Failed to replicate estimates: ${error}`,
