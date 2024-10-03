@@ -125,7 +125,7 @@
 </template>
 
 <script lang="ts" setup>
-import { type FundingLineValue } from "@/store/funding-submission-line-jsons"
+import { FundingLineValue } from "@/api/funding-submission-line-jsons-api"
 import { formatMoney } from "@/utils"
 
 defineProps<{
