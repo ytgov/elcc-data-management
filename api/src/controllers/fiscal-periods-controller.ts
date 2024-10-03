@@ -1,14 +1,13 @@
-import { WhereOptions } from "sequelize"
-
 import BaseController from "./base-controller"
 
 import { FiscalPeriod } from "@/models"
 
-export class FiscalPeriodsController extends BaseController {
+export class FiscalPeriodsController extends BaseController<FiscalPeriod> {
   async index() {
-    const where = this.query.where as WhereOptions<FiscalPeriod>
     try {
-      const fiscalPeriods = await FiscalPeriod.findAll({
+      const where = this.buildWhere()
+      const scopes = this.buildFilterScopes()
+      const fiscalPeriods = await FiscalPeriod.scope(scopes).findAll({
         where,
         order: [
           ["dateStart", "ASC"],
