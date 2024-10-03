@@ -8,6 +8,7 @@ import {
 
 import sequelize from "@/db/db-client"
 
+/** Keep in sync with web/src/api/fiscal-periods-api.ts */
 export enum FiscalPeriodMonths {
   APRIL = "april",
   MAY = "may",

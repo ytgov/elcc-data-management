@@ -1,9 +1,13 @@
 import { defineStore } from "pinia"
 import { reactive, toRefs, watch } from "vue"
 
-import fiscalPeriodsApi, { type FiscalPeriod, type Params } from "@/api/fiscal-periods-api"
+import fiscalPeriodsApi, {
+  type FiscalPeriodFiltersOptions,
+  type FiscalPeriodWhereOptions,
+  type FiscalPeriod,
+} from "@/api/fiscal-periods-api"
 
-export { type FiscalPeriod, type Params }
+export { type FiscalPeriodFiltersOptions, type FiscalPeriodWhereOptions, type FiscalPeriod }
 
 export const useFiscalPeriodsStore = defineStore("fiscal-periods", () => {
   const state = reactive<{
@@ -18,7 +22,12 @@ export const useFiscalPeriodsStore = defineStore("fiscal-periods", () => {
     isInitialized: false,
   })
 
-  async function fetch(params: Params = {}): Promise<FiscalPeriod[]> {
+  async function fetch(params: {
+    where?: FiscalPeriodWhereOptions
+    filters?: FiscalPeriodFiltersOptions
+    page?: number
+    perPage?: number
+  }): Promise<FiscalPeriod[]> {
     state.isLoading = true
     try {
       const { fiscalPeriods } = await fiscalPeriodsApi.list(params)
