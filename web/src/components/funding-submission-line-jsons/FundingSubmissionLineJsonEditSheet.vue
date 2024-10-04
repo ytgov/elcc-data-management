@@ -54,8 +54,8 @@ import { useNotificationStore } from "@/store/NotificationStore"
 import useFundingSubmissionLineJson from "@/use/use-funding-submission-line-json"
 
 import SectionTable, {
-  ColumnNames,
-} from "@/modules/centre/components/centre-dashboard-worksheets-tab-monthly-worksheet-tab/SectionTable.vue"
+  type ColumnNames,
+} from "@/components/funding-submission-line-jsons/FundingSubmissionLineJsonSectionTable.vue"
 
 const FIRST_FISCAL_MONTH_NAME = "April"
 const notificationStore = useNotificationStore()
