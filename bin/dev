@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require_relative "./jira_api"
+require_relative "./pull-request-editor"
 
 class DevHelper
   # Support dashes in command names
@@ -9,6 +10,7 @@ class DevHelper
     "branch-from" => :branch_from,
     "description-from" => :description_from,
     "check-types" => :check_types,
+    "edit-pr" => :edit_pr,
   }
   METHOD_TO_COMMAND = COMMAND_TO_METHOD.invert
 
@@ -196,6 +198,15 @@ class DevHelper
   def description_from(jira_issue_url, *args, **kwargs)
     description = JiraApi.fetch_description_as_markdown(jira_issue_url)
     puts description
+  end
+
+  ##
+  # Edits the description of a pull request.
+  # Example:
+  #   dev edit-pr https://github.com/icefoganalytics/travel-authorization/pull/218
+  def edit_pr(pull_request_url, *args, **kwargs)
+    PullRequestEditor.edit_pull_request_description(pull_request_url, *args, **kwargs)
+    exit(0)
   end
 
   def bash_completions
