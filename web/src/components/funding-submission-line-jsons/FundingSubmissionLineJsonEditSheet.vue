@@ -165,3 +165,15 @@ function goToPreviousSection(sectionIndex: number, columnName: ColumnNames) {
   }
 }
 </script>
+
+<style scoped>
+h4 {
+  margin-bottom: 10px;
+  font-weight: 400;
+  background-color: #55b6c2;
+  margin-left: -8px;
+  padding: 8px;
+  border-radius: 4px;
+  margin-top: 13px;
+}
+</style>
