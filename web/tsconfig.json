@@ -18,6 +18,13 @@
       "@models": ["../api/src/data/models"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "src/**/*.js"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "src/**/*.js",
+    ".eslintrc.cjs"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
