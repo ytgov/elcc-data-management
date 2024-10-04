@@ -2,6 +2,7 @@
   <v-dialog
     v-model="show"
     max-width="800px"
+    @esc="close"
   >
     <v-card>
       <div class="d-flex justify-space-between align-center px-4 py-3">
@@ -18,7 +19,6 @@
 
       <v-divider class="border-opacity-50" />
 
-      <!-- Shortcuts Section -->
       <v-card-text class="py-4">
         <v-row>
           <v-col cols="6">
@@ -153,9 +153,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue"
+import { useRouteQuery } from "@vueuse/router"
 
-const show = ref(false)
+// @ts-expect-error - boolean default works just fine.
+const show = useRouteQuery<string, boolean>("showKeyboardShortcuts", false, {
+  transform: (value) => {
+    if (value === "true") return true
+
+    return false
+  },
+})
 
 function close() {
   show.value = false
