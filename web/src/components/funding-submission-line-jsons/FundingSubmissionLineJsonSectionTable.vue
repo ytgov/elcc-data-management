@@ -184,8 +184,7 @@ function focusOnNextInColumn(columnName: ColumnNames, lineIndex: number) {
     const nextField = fields[nextIndex]
     if (isNil(nextField)) return
 
-    nextField.focus()
-    nextField.select()
+    focusOnField(nextField)
   } else {
     emit("focusBeyondLastInColumn", columnName)
   }
@@ -199,8 +198,7 @@ function focusOnPreviousInColumn(columnName: ColumnNames, lineIndex: number) {
     const previousField = fields[previousIndex]
     if (isNil(previousField)) return
 
-    previousField.focus()
-    previousField.select()
+    focusOnField(previousField)
   } else {
     emit("focusBeyondFirstInColumn", columnName)
   }
@@ -223,8 +221,7 @@ function focusOnFirstInColumn(columnName: ColumnNames) {
   const field = fields[0]
   if (isNil(field)) return
 
-  field.focus()
-  field.select()
+  focusOnField(field)
 }
 
 function focusOnLastInColumn(columnName: ColumnNames) {
@@ -232,8 +229,17 @@ function focusOnLastInColumn(columnName: ColumnNames) {
   const field = fields[fields.length - 1]
   if (isNil(field)) return
 
+  focusOnField(field)
+}
+
+function focusOnField(field: HTMLInputElement) {
   field.focus()
   field.select()
+  field.scrollIntoView({
+    behavior: "smooth", // Scroll smoothly
+    block: "center", // Center vertically in the viewport
+    inline: "center", // Center horizontally if needed
+  })
 }
 
 defineExpose({
