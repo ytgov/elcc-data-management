@@ -40,9 +40,11 @@
       </td>
       <td>
         <v-text-field
+          ref="estimatesFields"
           v-model.number="line.estimatedChildOccupancyRate"
           density="compact"
           hide-details
+          @keydown.enter="goToLowerEstimatesField(lineIndex)"
           @change="changeLineAndPropagate(line, lineIndex)"
         ></v-text-field>
       </td>
@@ -53,9 +55,11 @@
       </td>
       <td>
         <v-text-field
+          ref="actualsFields"
           v-model.number="line.actualChildOccupancyRate"
           density="compact"
           hide-details
+          @keydown.enter="goToLowerActualsField(lineIndex)"
           @change="changeLineAndPropagate(line, lineIndex)"
         ></v-text-field>
       </td>
@@ -109,16 +113,22 @@
 </template>
 
 <script lang="ts" setup>
-import { FundingLineValue } from "@/api/funding-submission-line-jsons-api"
-import { formatMoney } from "@/utils"
+import { computed, ref } from "vue"
+import { isNil } from "lodash"
 
-defineProps<{
+import { formatMoney } from "@/utils"
+import { FundingLineValue } from "@/api/funding-submission-line-jsons-api"
+
+const props = defineProps<{
   lines: FundingLineValue[]
 }>()
 
 const emit = defineEmits<{
   lineChanged: [{ line: FundingLineValue; lineIndex: number }]
 }>()
+
+const estimatesFields = ref<HTMLInputElement[]>([])
+const actualsFields = ref<HTMLInputElement[]>([])
 
 function refreshLineTotals(line: FundingLineValue) {
   line.estimatedComputedTotal = line.monthlyAmount * line.estimatedChildOccupancyRate
@@ -131,6 +141,27 @@ function changeLineAndPropagate(line: FundingLineValue, lineIndex: number) {
   refreshLineTotals(line)
 
   emit("lineChanged", { line, lineIndex })
+}
+
+// TODO: figure out why I can't pass the template refs directly to the function.
+// Why I can't pass a string, and then look up the template ref from a computed property,
+// and have to make a custom fuction instead, I have no idea.
+function goToLowerEstimatesField(lineIndex: number) {
+  goToLowerField(estimatesFields.value, lineIndex)
+}
+
+function goToLowerActualsField(lineIndex: number) {
+  goToLowerField(actualsFields.value, lineIndex)
+}
+
+function goToLowerField(fields: HTMLInputElement[], lineIndex: number) {
+  if (lineIndex < props.lines.length - 1) {
+    const nextIndex = lineIndex + 1
+    const nextField = fields[nextIndex]
+    if (isNil(nextField)) return
+
+    nextField.focus()
+  }
 }
 
 defineExpose({
