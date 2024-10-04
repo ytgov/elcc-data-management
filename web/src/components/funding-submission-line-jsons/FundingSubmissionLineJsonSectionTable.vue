@@ -45,8 +45,7 @@
           v-model.number="line.estimatedChildOccupancyRate"
           density="compact"
           hide-details
-          @keydown.enter="focusOnNextInColumn('estimates', lineIndex)"
-          @keydown.shift.enter="focusOnPreviousInColumn('estimates', lineIndex)"
+          @keydown="changeFocusInColumn($event, 'estimates', lineIndex)"
           @change="changeLineAndPropagate(line, lineIndex)"
         ></v-text-field>
       </td>
@@ -61,8 +60,7 @@
           v-model.number="line.actualChildOccupancyRate"
           density="compact"
           hide-details
-          @keydown.enter="focusOnNextInColumn('actuals', lineIndex)"
-          @keydown.shift.enter="focusOnPreviousInColumn('actuals', lineIndex)"
+          @keydown="changeFocusInColumn($event, 'actuals', lineIndex)"
           @change="changeLineAndPropagate(line, lineIndex)"
         ></v-text-field>
       </td>
@@ -154,6 +152,14 @@ function changeLineAndPropagate(line: FundingLineValue, lineIndex: number) {
   refreshLineTotals(line)
 
   emit("lineChanged", { line, lineIndex })
+}
+
+function changeFocusInColumn(event: KeyboardEvent, columnName: ColumnNames, lineIndex: number) {
+  if (event.key === "Enter" && !event.shiftKey) {
+    focusOnNextInColumn(columnName, lineIndex)
+  } else if (event.key === "Enter" && event.shiftKey) {
+    focusOnPreviousInColumn(columnName, lineIndex)
+  }
 }
 
 function focusOnNextInColumn(columnName: ColumnNames, lineIndex: number) {
