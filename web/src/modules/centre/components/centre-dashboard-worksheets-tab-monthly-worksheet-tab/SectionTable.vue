@@ -69,56 +69,40 @@
     <tr class="monospace total">
       <td>SECTION TOTAL</td>
       <td></td>
-      <td>
-        <v-text-field
-          :value="
+      <td class="read-only-td-that-matches-v-text-input py-2">
+        <span class="pl-4">
+          {{
             lines.reduce(
               (a: number, v: any) => a + parseFloat(v.estimatedChildOccupancyRate || 0),
               0
             )
-          "
-          density="compact"
-          hide-details
-          readonly
-          style="background-color: #eee"
-        ></v-text-field>
+          }}
+        </span>
       </td>
-      <td>
-        <v-text-field
-          :value="
+      <td class="read-only-td-that-matches-v-text-input">
+        <span class="pl-4">
+          {{
             formatMoney(
               lines.reduce((a: number, v: any) => a + parseFloat(v.estimatedComputedTotal || 0), 0)
             )
-          "
-          density="compact"
-          hide-details
-          readonly
-          style="background-color: #eee"
-        ></v-text-field>
+          }}
+        </span>
       </td>
-      <td>
-        <v-text-field
-          :value="
+      <td class="read-only-td-that-matches-v-text-input">
+        <span class="pl-4">
+          {{
             lines.reduce((a: number, v: any) => a + parseFloat(v.actualChildOccupancyRate || 0), 0)
-          "
-          density="compact"
-          hide-details
-          readonly
-          style="background-color: #eee"
-        ></v-text-field>
+          }}
+        </span>
       </td>
-      <td>
-        <v-text-field
-          :value="
+      <td class="read-only-td-that-matches-v-text-input">
+        <span class="pl-4">
+          {{
             formatMoney(
               lines.reduce((a: number, v: any) => a + parseFloat(v.actualComputedTotal || 0), 0)
             )
-          "
-          density="compact"
-          hide-details
-          readonly
-          style="background-color: #eee"
-        ></v-text-field>
+          }}
+        </span>
       </td>
     </tr>
   </table>
