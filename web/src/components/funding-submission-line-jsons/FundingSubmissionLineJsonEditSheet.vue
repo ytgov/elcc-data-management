@@ -58,7 +58,6 @@ import SectionTable, {
 } from "@/components/funding-submission-line-jsons/FundingSubmissionLineJsonSectionTable.vue"
 
 const FIRST_FISCAL_MONTH_NAME = "April"
-const notificationStore = useNotificationStore()
 
 const props = defineProps<{
   fundingSubmissionLineJsonId: number
@@ -93,6 +92,7 @@ const sections = computed<{ sectionName: string; lines: FundingLineValue[] }[]>(
   })
 })
 const sectionTables = ref<InstanceType<typeof SectionTable>[]>([])
+const notificationStore = useNotificationStore()
 
 async function saveFundingSubmissionLineJson() {
   isSaving.value = true
