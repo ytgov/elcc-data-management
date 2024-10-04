@@ -62,7 +62,7 @@
   {
     "fiscalYear": "2022/23",
     "sectionName": "Child Care Spaces",
-    "lineName": "School Age (PT)",
+    "lineName": "School Age (FT)",
     "fromAge": 5,
     "toAge": 6,
     "monthlyAmount": 500.0,
@@ -132,7 +132,7 @@
   {
     "fiscalYear": "2022/23",
     "sectionName": "Administration (10% of Spaces)",
-    "lineName": "School Age (PT)",
+    "lineName": "School Age (FT)",
     "fromAge": 5,
     "toAge": 6,
     "monthlyAmount": 50.0,
@@ -202,7 +202,7 @@
   {
     "fiscalYear": "2022/23",
     "sectionName": "Quality Program Enhancement",
-    "lineName": "School Age (PT)",
+    "lineName": "School Age (FT)",
     "fromAge": 5,
     "toAge": 6,
     "monthlyAmount": 97.33,
@@ -522,7 +522,7 @@
   {
     "fiscalYear": "2023/24",
     "sectionName": "Child Care Spaces",
-    "lineName": "School Age (PT)",
+    "lineName": "School Age (FT)",
     "fromAge": 5,
     "toAge": 6,
     "monthlyAmount": 500.0,
@@ -592,7 +592,7 @@
   {
     "fiscalYear": "2023/24",
     "sectionName": "Administration (10% of Spaces)",
-    "lineName": "School Age (PT)",
+    "lineName": "School Age (FT)",
     "fromAge": 5,
     "toAge": 6,
     "monthlyAmount": 50.0,
@@ -662,7 +662,7 @@
   {
     "fiscalYear": "2023/24",
     "sectionName": "Quality Program Enhancement",
-    "lineName": "School Age (PT)",
+    "lineName": "School Age (FT)",
     "fromAge": 5,
     "toAge": 6,
     "monthlyAmount": 97.33,
