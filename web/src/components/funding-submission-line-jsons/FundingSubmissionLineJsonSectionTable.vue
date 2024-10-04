@@ -156,22 +156,30 @@ function changeLineAndPropagate(line: FundingLineValue, lineIndex: number) {
 
 function changeFocusInColumn(event: KeyboardEvent, columnName: ColumnNames, lineIndex: number) {
   const input = event.target as HTMLInputElement | null
+  const isTextFullySelected =
+    input?.selectionStart === 0 && input.selectionEnd === input.value.length
 
   if (event.key === "Enter" && !event.shiftKey) {
     focusOnNextInColumn(columnName, lineIndex)
   } else if (event.key === "Enter" && event.shiftKey) {
     focusOnPreviousInColumn(columnName, lineIndex)
   } else if (event.key === "ArrowUp") {
+    event.preventDefault()
     focusOnPreviousInColumn(columnName, lineIndex)
   } else if (event.key === "ArrowDown") {
+    event.preventDefault()
     focusOnNextInColumn(columnName, lineIndex)
-  } else if (event.key === "ArrowLeft" && !isNil(input) && input.selectionStart === 0) {
+  } else if (event.key === "ArrowLeft" && isTextFullySelected) {
+    event.preventDefault()
+    input.setSelectionRange(0, 0)
+  } else if (event.key === "ArrowLeft" && input?.selectionStart === 0) {
+    event.preventDefault()
     focusOnPreviousColumn(columnName, lineIndex)
-  } else if (
-    event.key === "ArrowRight" &&
-    !isNil(input) &&
-    input.selectionEnd === input.value.length
-  ) {
+  } else if (event.key === "ArrowRight" && isTextFullySelected) {
+    event.preventDefault()
+    input.setSelectionRange(input.value.length, input.value.length)
+  } else if (event.key === "ArrowRight" && input?.selectionEnd === input?.value.length) {
+    event.preventDefault()
     focusOnNextColumn(columnName, lineIndex)
   }
 }
