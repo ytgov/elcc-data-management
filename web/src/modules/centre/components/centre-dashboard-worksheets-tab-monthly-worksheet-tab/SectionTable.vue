@@ -30,6 +30,7 @@
     </tr>
     <tr
       v-for="(line, lineIndex) in lines"
+      :key="`${line.lineName}-${lineIndex}`"
       class="monospace"
     >
       <td>{{ line.lineName }}</td>
