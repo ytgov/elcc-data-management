@@ -155,10 +155,24 @@ function changeLineAndPropagate(line: FundingLineValue, lineIndex: number) {
 }
 
 function changeFocusInColumn(event: KeyboardEvent, columnName: ColumnNames, lineIndex: number) {
+  const input = event.target as HTMLInputElement | null
+
   if (event.key === "Enter" && !event.shiftKey) {
     focusOnNextInColumn(columnName, lineIndex)
   } else if (event.key === "Enter" && event.shiftKey) {
     focusOnPreviousInColumn(columnName, lineIndex)
+  } else if (event.key === "ArrowUp") {
+    focusOnPreviousInColumn(columnName, lineIndex)
+  } else if (event.key === "ArrowDown") {
+    focusOnNextInColumn(columnName, lineIndex)
+  } else if (event.key === "ArrowLeft" && !isNil(input) && input.selectionStart === 0) {
+    focusOnPreviousColumn(columnName, lineIndex)
+  } else if (
+    event.key === "ArrowRight" &&
+    !isNil(input) &&
+    input.selectionEnd === input.value.length
+  ) {
+    focusOnNextColumn(columnName, lineIndex)
   }
 }
 
@@ -188,6 +202,18 @@ function focusOnPreviousInColumn(columnName: ColumnNames, lineIndex: number) {
   } else {
     emit("focusOnPreviousInColumn", columnName)
   }
+}
+
+function focusOnNextColumn(columnName: ColumnNames, lineIndex: number) {
+  if (columnName === "actuals") return
+
+  focusOnNextInColumn("actuals", lineIndex - 1)
+}
+
+function focusOnPreviousColumn(columnName: ColumnNames, lineIndex: number) {
+  if (columnName === "estimates") return
+
+  focusOnNextInColumn("estimates", lineIndex - 1)
 }
 
 function focusOnFirstInColumn(columnName: ColumnNames) {
