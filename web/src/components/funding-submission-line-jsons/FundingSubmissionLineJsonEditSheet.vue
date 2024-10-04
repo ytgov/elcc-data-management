@@ -3,7 +3,10 @@
     v-if="isLoading"
     type="table"
   />
-  <v-sheet v-else>
+  <v-sheet
+    v-else
+    @keydown="activateKeyboardShortcutsModalIfCorrectEvent($event)"
+  >
     <v-btn
       color="primary"
       class="float-right"
@@ -29,7 +32,17 @@
       :key="`${sectionName}-${sectionIndex}`"
       style="clear: both"
     >
-      <h4>{{ sectionName }}</h4>
+      <h4 class="d-flex justify-space-between align-center">
+        {{ sectionName }}
+
+        <v-icon
+          title="Show keyboard shortcuts"
+          class="included"
+          @click="showKeyboardShortcutsModal"
+        >
+          mdi-keyboard
+        </v-icon>
+      </h4>
 
       <SectionTable
         ref="sectionTables"
@@ -39,6 +52,7 @@
         @line-changed="propagateUpdatesAsNeeded(sectionIndex, $event)"
       />
     </div>
+    <KeyboardShortcutsModal ref="keyboardShortcutsModal" />
   </v-sheet>
 </template>
 
@@ -53,6 +67,7 @@ import fundingSubmissionLineJsonsApi, {
 import { useNotificationStore } from "@/store/NotificationStore"
 import useFundingSubmissionLineJson from "@/use/use-funding-submission-line-json"
 
+import KeyboardShortcutsModal from "@/components/common/KeyboardShortcutsModal.vue"
 import SectionTable, {
   type ColumnNames,
 } from "@/components/funding-submission-line-jsons/FundingSubmissionLineJsonSectionTable.vue"
@@ -163,6 +178,20 @@ function goToPreviousSection(sectionIndex: number, columnName: ColumnNames) {
 
     previousSection.focusOnLastInColumn(columnName)
   }
+}
+
+const keyboardShortcutsModal = ref<InstanceType<typeof KeyboardShortcutsModal> | null>(null)
+
+function activateKeyboardShortcutsModalIfCorrectEvent(event: KeyboardEvent) {
+  if (event.ctrlKey && event.key === "/") {
+    showKeyboardShortcutsModal()
+  }
+}
+
+function showKeyboardShortcutsModal() {
+  if (isNil(keyboardShortcutsModal.value)) return
+
+  keyboardShortcutsModal.value.open()
 }
 </script>
 
