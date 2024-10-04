@@ -113,6 +113,7 @@ import { DateTime, Interval } from "luxon"
 import { first, isEmpty, isNil, last } from "lodash"
 import { storeToRefs } from "pinia"
 
+import DateTimeUtils from "@/utils/date-time-utils"
 import useFiscalPeriods from "@/use/use-fiscal-periods"
 import {
   usePaymentsStore,
@@ -176,7 +177,9 @@ const fiscalYearInterval = computed(() => {
     return
   }
 
-  return Interval.fromDateTimes(fiscalYearStart, fiscalYearEnd)
+  const fiscalYearStartUTC = DateTimeUtils.fromISO(fiscalYearStart).toUTC()
+  const fiscalYearEndUTC = DateTimeUtils.fromISO(fiscalYearEnd).toUTC()
+  return Interval.fromDateTimes(fiscalYearStartUTC, fiscalYearEndUTC)
 })
 
 watch<[number, string], true>(

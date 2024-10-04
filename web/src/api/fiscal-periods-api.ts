@@ -1,8 +1,4 @@
-import { DateTime } from "luxon"
-
 import http from "@/api/http-client"
-
-import DateTimeUtils from "@/utils/date-time-utils"
 
 /** Keep in sync with api/src/models/fiscal-period.ts */
 export enum FiscalPeriodMonths {
@@ -24,10 +20,10 @@ export type FiscalPeriod = {
   id: number
   fiscalYear: string
   month: FiscalPeriodMonths
-  dateStart: DateTime<true>
-  dateEnd: DateTime<true>
-  createdAt: DateTime<true>
-  updatedAt: DateTime<true>
+  dateStart: string
+  dateEnd: string
+  createdAt: string
+  updatedAt: string
 }
 
 export type FiscalPeriodWhereOptions = {
@@ -54,24 +50,7 @@ export const fiscalPeriodsApi = {
     totalCount: number
   }> {
     const { data } = await http.get("/api/fiscal-periods", { params })
-    const { fiscalPeriods } = data
-
-    // TODO: consider if this is really a good idea?
-    const fiscalPeriodsWithDates = fiscalPeriods.map((fiscalPeriod: any) => {
-      const { dateStart, dateEnd, createdAt, updatedAt } = fiscalPeriod
-      return {
-        ...fiscalPeriod,
-        dateStart: DateTimeUtils.fromISO(dateStart).toUTC(),
-        dateEnd: DateTimeUtils.fromISO(dateEnd).toUTC(),
-        createdAt: DateTimeUtils.fromISO(createdAt),
-        updatedAt: DateTimeUtils.fromISO(updatedAt),
-      }
-    })
-
-    return {
-      ...data,
-      fiscalPeriods: fiscalPeriodsWithDates,
-    }
+    return data
   },
 }
 

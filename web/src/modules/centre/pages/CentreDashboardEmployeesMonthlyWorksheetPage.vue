@@ -69,6 +69,7 @@
 import { computed } from "vue"
 import { isEmpty, isNil } from "lodash"
 
+import DateTimeUtils from "@/utils/date-time-utils"
 import useFiscalPeriods, { FiscalPeriodMonths } from "@/use/use-fiscal-periods"
 
 import EditEmployeeBenefitWidget from "@/modules/centre/components/EditEmployeeBenefitWidget.vue"
@@ -95,7 +96,7 @@ const fiscalPeriodFormattedDate = computed(() => {
   if (isEmpty(fiscalPeriod.value)) return ""
 
   const { dateStart } = fiscalPeriod.value
-  const formattedDate = dateStart.toFormat("MMMM yyyy")
+  const formattedDate = DateTimeUtils.fromISO(dateStart).toUTC().toFormat("MMMM yyyy")
   return formattedDate
 })
 </script>
