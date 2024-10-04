@@ -1,32 +1,17 @@
 <template>
-  <div
-    v-if="isLoadingFundingSubmissionLineJsons"
-    class="d-flex justify-center mt-10"
-  >
-    <v-progress-circular indeterminate />
-  </div>
-  <div
-    v-else-if="!isLoadingFundingSubmissionLineJsons && isEmpty(fundingSubmissionLineJsons)"
-    class="ma-5"
-  >
-    <p>There are currently no worksheets for {{ fiscalYear }}.</p>
-    <v-btn
-      color="primary"
-      size="small"
-      class="mt-3"
-      @click="initializeWorksheetsForFiscalYear"
-      >Add worksheets for {{ fiscalYear }}</v-btn
-    >
-  </div>
-  <div
+  <v-skeleton-loader
+    v-if="isLoading"
+    type="table"
+  />
+  <v-sheet
     v-else
-    class="ma-4"
+    @keydown="activateKeyboardShortcutsModalIfCorrectEvent($event)"
   >
     <v-btn
       color="primary"
       class="float-right"
-      @click="saveFundingSubmissionLineJson"
       :loading="isSaving"
+      @click="saveFundingSubmissionLineJson"
       >Save</v-btn
     >
 
@@ -47,67 +32,69 @@
       :key="`${sectionName}-${sectionIndex}`"
       style="clear: both"
     >
-      <h4>{{ sectionName }}</h4>
+      <h4 class="d-flex justify-space-between align-center">
+        {{ sectionName }}
+
+        <v-icon
+          title="Show keyboard shortcuts"
+          class="included"
+          @click="showKeyboardShortcutsModal"
+        >
+          mdi-keyboard
+        </v-icon>
+      </h4>
 
       <SectionTable
         ref="sectionTables"
         :lines="lines"
+        @focus-beyond-last-in-column="goToNextSection(sectionIndex, $event)"
+        @focus-beyond-first-in-column="goToPreviousSection(sectionIndex, $event)"
         @line-changed="propagateUpdatesAsNeeded(sectionIndex, $event)"
       />
     </div>
-  </div>
+    <KeyboardShortcutsModal ref="keyboardShortcutsModal" />
+  </v-sheet>
 </template>
 
-<script lang="ts" setup>
-import { computed, ref } from "vue"
-import { groupBy, isEmpty, upperFirst } from "lodash"
+<script setup lang="ts">
 import { DateTime } from "luxon"
+import { computed, ref, toRefs } from "vue"
+import { groupBy, isEmpty, isNil } from "lodash"
 
-import centresApi from "@/api/centres-api"
-import { FiscalPeriodMonths } from "@/api/fiscal-periods-api"
-import fundingSubmissionLineJsonsApi from "@/api/funding-submission-line-jsons-api"
-import { useNotificationStore } from "@/store/NotificationStore"
-import useFundingSubmissionLineJsons, {
+import fundingSubmissionLineJsonsApi, {
   type FundingLineValue,
-} from "@/use/use-funding-submission-line-jsons"
+} from "@/api/funding-submission-line-jsons-api"
+import { useNotificationStore } from "@/store/NotificationStore"
+import useFundingSubmissionLineJson from "@/use/use-funding-submission-line-json"
 
-import SectionTable from "@/modules/centre/components/centre-dashboard-worksheets-tab-monthly-worksheet-tab/SectionTable.vue"
+import KeyboardShortcutsModal from "@/components/common/KeyboardShortcutsModal.vue"
+import SectionTable, {
+  type ColumnNames,
+} from "@/components/funding-submission-line-jsons/FundingSubmissionLineJsonSectionTable.vue"
 
 const FIRST_FISCAL_MONTH_NAME = "April"
 
-const notificationStore = useNotificationStore()
-
 const props = defineProps<{
-  centreId: number
-  fiscalYearSlug: string
-  month: FiscalPeriodMonths
+  fundingSubmissionLineJsonId: number
 }>()
 
-const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
-const monthAsDateName = computed(() => upperFirst(props.month))
-const fundingSubmissionLineJsonsQuery = computed(() => ({
-  where: {
-    centreId: props.centreId,
-    fiscalYear: fiscalYear.value,
-    dateName: monthAsDateName.value,
-  },
-  perPage: 1,
-}))
-const {
-  fundingSubmissionLineJsons,
-  isLoading: isLoadingFundingSubmissionLineJsons,
-  refresh: refreshFundingSubmissionLineJsons,
-} = useFundingSubmissionLineJsons(fundingSubmissionLineJsonsQuery)
-
-const fundingSubmissionLineJson = computed(() => fundingSubmissionLineJsons.value[0])
-const fundingSubmissionLineJsonId = computed(() => fundingSubmissionLineJson.value?.id)
-const dateName = computed(() => fundingSubmissionLineJson.value?.dateName)
+const { fundingSubmissionLineJsonId } = toRefs(props)
+const { fundingSubmissionLineJson, isLoading } = useFundingSubmissionLineJson(
+  fundingSubmissionLineJsonId
+)
 
 const isSaving = ref(false)
 const isReplicatingEstimates = ref(false)
-const calendarYear = computed(() =>
-  DateTime.fromISO(fundingSubmissionLineJson.value?.dateStart).toFormat("yyyy")
-)
+const dateName = computed(() => fundingSubmissionLineJson.value?.dateName)
+const calendarYear = computed(() => {
+  if (isNil(fundingSubmissionLineJson.value)) {
+    return "..."
+  }
+
+  const { dateStart } = fundingSubmissionLineJson.value
+  return DateTime.fromISO(dateStart).toFormat("yyyy")
+})
+
 const sections = computed<{ sectionName: string; lines: FundingLineValue[] }[]>(() => {
   if (isEmpty(fundingSubmissionLineJson.value)) {
     return []
@@ -120,20 +107,7 @@ const sections = computed<{ sectionName: string; lines: FundingLineValue[] }[]>(
   })
 })
 const sectionTables = ref<InstanceType<typeof SectionTable>[]>([])
-
-async function initializeWorksheetsForFiscalYear() {
-  isSaving.value = true
-  try {
-    await centresApi.fiscalYear.create(props.centreId, fiscalYear.value)
-    notificationStore.notify({
-      text: "Fiscal year added",
-      variant: "success",
-    })
-    await refreshFundingSubmissionLineJsons()
-  } finally {
-    isSaving.value = false
-  }
-}
+const notificationStore = useNotificationStore()
 
 async function saveFundingSubmissionLineJson() {
   isSaving.value = true
@@ -184,6 +158,40 @@ function propagateUpdatesAsNeeded(
     section2Line.actualChildOccupancyRate = line.actualChildOccupancyRate
     sectionTables.value[2].refreshLineTotals(section2Line)
   }
+}
+
+function goToNextSection(sectionIndex: number, columnName: ColumnNames) {
+  if (sectionIndex < sections.value.length - 1) {
+    const nextIndex = sectionIndex + 1
+    const nextSection = sectionTables.value[nextIndex]
+    if (isNil(nextSection)) return
+
+    nextSection.focusOnFirstInColumn(columnName)
+  }
+}
+
+function goToPreviousSection(sectionIndex: number, columnName: ColumnNames) {
+  if (sectionIndex > 0) {
+    const previousIndex = sectionIndex - 1
+    const previousSection = sectionTables.value[previousIndex]
+    if (isNil(previousSection)) return
+
+    previousSection.focusOnLastInColumn(columnName)
+  }
+}
+
+const keyboardShortcutsModal = ref<InstanceType<typeof KeyboardShortcutsModal> | null>(null)
+
+function activateKeyboardShortcutsModalIfCorrectEvent(event: KeyboardEvent) {
+  if (event.ctrlKey && event.key === "/") {
+    showKeyboardShortcutsModal()
+  }
+}
+
+function showKeyboardShortcutsModal() {
+  if (isNil(keyboardShortcutsModal.value)) return
+
+  keyboardShortcutsModal.value.open()
 }
 </script>
 

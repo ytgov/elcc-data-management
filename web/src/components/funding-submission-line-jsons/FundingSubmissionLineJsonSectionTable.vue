@@ -30,6 +30,7 @@
     </tr>
     <tr
       v-for="(line, lineIndex) in lines"
+      :key="`${line.lineName}-${lineIndex}`"
       class="monospace"
     >
       <td>{{ line.lineName }}</td>
@@ -40,9 +41,11 @@
       </td>
       <td>
         <v-text-field
+          ref="estimatesFields"
           v-model.number="line.estimatedChildOccupancyRate"
           density="compact"
           hide-details
+          @keydown="changeFocusInColumn($event, 'estimates', lineIndex)"
           @change="changeLineAndPropagate(line, lineIndex)"
         ></v-text-field>
       </td>
@@ -53,9 +56,11 @@
       </td>
       <td>
         <v-text-field
+          ref="actualsFields"
           v-model.number="line.actualChildOccupancyRate"
           density="compact"
           hide-details
+          @keydown="changeFocusInColumn($event, 'actuals', lineIndex)"
           @change="changeLineAndPropagate(line, lineIndex)"
         ></v-text-field>
       </td>
@@ -109,16 +114,32 @@
 </template>
 
 <script lang="ts" setup>
-import { FundingLineValue } from "@/api/funding-submission-line-jsons-api"
-import { formatMoney } from "@/utils"
+import { reactive, Ref, ref } from "vue"
+import { isNil } from "lodash"
 
-defineProps<{
+import { formatMoney } from "@/utils"
+import { FundingLineValue } from "@/api/funding-submission-line-jsons-api"
+
+export type ColumnNames = "estimates" | "actuals"
+
+const props = defineProps<{
   lines: FundingLineValue[]
 }>()
 
 const emit = defineEmits<{
   lineChanged: [{ line: FundingLineValue; lineIndex: number }]
+  focusBeyondLastInColumn: [column: ColumnNames]
+  focusBeyondFirstInColumn: [column: ColumnNames]
 }>()
+
+const estimatesFields = ref<HTMLInputElement[]>([])
+const actualsFields = ref<HTMLInputElement[]>([])
+const fieldsMap = reactive<{
+  [key in ColumnNames]: Ref<HTMLInputElement[]>
+}>({
+  estimates: estimatesFields,
+  actuals: actualsFields,
+})
 
 function refreshLineTotals(line: FundingLineValue) {
   line.estimatedComputedTotal = line.monthlyAmount * line.estimatedChildOccupancyRate
@@ -133,8 +154,106 @@ function changeLineAndPropagate(line: FundingLineValue, lineIndex: number) {
   emit("lineChanged", { line, lineIndex })
 }
 
+function changeFocusInColumn(event: KeyboardEvent, columnName: ColumnNames, lineIndex: number) {
+  const input = event.target as HTMLInputElement | null
+  const isTextFullySelected =
+    input?.selectionStart === 0 && input.selectionEnd === input.value.length
+
+  if (event.key === "Enter" && !event.shiftKey) {
+    focusOnNextInColumn(columnName, lineIndex)
+  } else if (event.key === "Enter" && event.shiftKey) {
+    focusOnPreviousInColumn(columnName, lineIndex)
+  } else if (event.key === "ArrowUp") {
+    event.preventDefault()
+    focusOnPreviousInColumn(columnName, lineIndex)
+  } else if (event.key === "ArrowDown") {
+    event.preventDefault()
+    focusOnNextInColumn(columnName, lineIndex)
+  } else if (event.key === "ArrowLeft" && isTextFullySelected) {
+    event.preventDefault()
+    input.setSelectionRange(0, 0)
+  } else if (event.key === "ArrowLeft" && input?.selectionStart === 0) {
+    event.preventDefault()
+    focusOnPreviousColumn(columnName, lineIndex)
+  } else if (event.key === "ArrowRight" && isTextFullySelected) {
+    event.preventDefault()
+    input.setSelectionRange(input.value.length, input.value.length)
+  } else if (event.key === "ArrowRight" && input?.selectionEnd === input?.value.length) {
+    event.preventDefault()
+    focusOnNextColumn(columnName, lineIndex)
+  }
+}
+
+function focusOnNextInColumn(columnName: ColumnNames, lineIndex: number) {
+  const fields = fieldsMap[columnName]
+
+  if (lineIndex < props.lines.length - 1) {
+    const nextIndex = lineIndex + 1
+    const nextField = fields[nextIndex]
+    if (isNil(nextField)) return
+
+    focusOnField(nextField)
+  } else {
+    emit("focusBeyondLastInColumn", columnName)
+  }
+}
+
+function focusOnPreviousInColumn(columnName: ColumnNames, lineIndex: number) {
+  const fields = fieldsMap[columnName]
+
+  if (lineIndex > 0) {
+    const previousIndex = lineIndex - 1
+    const previousField = fields[previousIndex]
+    if (isNil(previousField)) return
+
+    focusOnField(previousField)
+  } else {
+    emit("focusBeyondFirstInColumn", columnName)
+  }
+}
+
+function focusOnNextColumn(columnName: ColumnNames, lineIndex: number) {
+  if (columnName === "actuals") return
+
+  focusOnNextInColumn("actuals", lineIndex - 1)
+}
+
+function focusOnPreviousColumn(columnName: ColumnNames, lineIndex: number) {
+  if (columnName === "estimates") return
+
+  focusOnNextInColumn("estimates", lineIndex - 1)
+}
+
+function focusOnFirstInColumn(columnName: ColumnNames) {
+  const fields = fieldsMap[columnName]
+  const field = fields[0]
+  if (isNil(field)) return
+
+  focusOnField(field)
+}
+
+function focusOnLastInColumn(columnName: ColumnNames) {
+  const fields = fieldsMap[columnName]
+  const field = fields[fields.length - 1]
+  if (isNil(field)) return
+
+  focusOnField(field)
+}
+
+function focusOnField(field: HTMLInputElement) {
+  field.focus()
+  field.select()
+  field.scrollIntoView({
+    behavior: "smooth", // Scroll smoothly
+    block: "center", // Center vertically in the viewport
+    inline: "center", // Center horizontally if needed
+  })
+}
+
 defineExpose({
   refreshLineTotals,
+  focusOnFirstInColumn,
+  focusOnLastInColumn,
 })
 </script>
 

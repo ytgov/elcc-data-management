@@ -21,15 +21,13 @@ export type FundingSubmissionLineJson = {
   values: string
   createdAt: string
   updatedAt: string
-}
 
-export type FundingSubmissionLineJsonAsDetailed = Omit<FundingSubmissionLineJson, "values"> & {
+  // Virtual Attributes
   lines: FundingLineValue[]
 }
 
-export type FundingSubmissionLineJsonAsIndex = Omit<FundingSubmissionLineJson, "values"> & {
-  lines: FundingLineValue[]
-}
+export type FundingSubmissionLineJsonAsIndex = Omit<FundingSubmissionLineJson, "values">
+export type FundingSubmissionLineJsonAsDetailed = Omit<FundingSubmissionLineJson, "values">
 
 export type FundingSubmissionLineJsonWhereOptions = {
   centreId?: number
@@ -74,7 +72,7 @@ export const fundingSubmissionLineJsonsApi = {
   },
   async update(
     fundingSubmissionLineJsonId: number,
-    attributes: any
+    attributes: Partial<FundingSubmissionLineJson>
   ): Promise<{ fundingSubmissionLineJson: FundingSubmissionLineJsonAsDetailed }> {
     const { data } = await http.patch(
       `/api/funding-submission-line-jsons/${fundingSubmissionLineJsonId}`,
