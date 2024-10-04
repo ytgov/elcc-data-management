@@ -44,8 +44,8 @@
           v-model.number="line.estimatedChildOccupancyRate"
           density="compact"
           hide-details
-          @keydown.enter="goToLowerEstimatesField(lineIndex)"
-          @keydown.shift.enter="goToHigherEstimatesField(lineIndex)"
+          @keydown.enter="goToLowerField('estimatesFields', lineIndex)"
+          @keydown.shift.enter="goToHigherField('estimatesFields', lineIndex)"
           @change="changeLineAndPropagate(line, lineIndex)"
         ></v-text-field>
       </td>
@@ -60,8 +60,8 @@
           v-model.number="line.actualChildOccupancyRate"
           density="compact"
           hide-details
-          @keydown.enter="goToLowerActualsField(lineIndex)"
-          @keydown.shift.enter="goToHigherActualsField(lineIndex)"
+          @keydown.enter="goToLowerField('actualsFields', lineIndex)"
+          @keydown.shift.enter="goToHigherField('actualsFields', lineIndex)"
           @change="changeLineAndPropagate(line, lineIndex)"
         ></v-text-field>
       </td>
@@ -115,7 +115,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { reactive, ref } from "vue"
 import { isNil } from "lodash"
 
 import { formatMoney } from "@/utils"
@@ -129,8 +129,14 @@ const emit = defineEmits<{
   lineChanged: [{ line: FundingLineValue; lineIndex: number }]
 }>()
 
+type FieldsNames = "estimatesFields" | "actualsFields"
+
 const estimatesFields = ref<HTMLInputElement[]>([])
 const actualsFields = ref<HTMLInputElement[]>([])
+const fieldsMap = reactive({
+  estimatesFields,
+  actualsFields,
+})
 
 function refreshLineTotals(line: FundingLineValue) {
   line.estimatedComputedTotal = line.monthlyAmount * line.estimatedChildOccupancyRate
@@ -145,26 +151,9 @@ function changeLineAndPropagate(line: FundingLineValue, lineIndex: number) {
   emit("lineChanged", { line, lineIndex })
 }
 
-// TODO: figure out why I can't pass the template refs directly to the function.
-// Why I can't pass a string, and then look up the template ref from a computed property,
-// and have to make a custom fuction instead, I have no idea.
-function goToLowerEstimatesField(lineIndex: number) {
-  goToLowerField(estimatesFields.value, lineIndex)
-}
+function goToLowerField(fieldsName: FieldsNames, lineIndex: number) {
+  const fields = fieldsMap[fieldsName]
 
-function goToLowerActualsField(lineIndex: number) {
-  goToLowerField(actualsFields.value, lineIndex)
-}
-
-function goToHigherEstimatesField(lineIndex: number) {
-  goToHigherField(estimatesFields.value, lineIndex)
-}
-
-function goToHigherActualsField(lineIndex: number) {
-  goToHigherField(actualsFields.value, lineIndex)
-}
-
-function goToLowerField(fields: HTMLInputElement[], lineIndex: number) {
   if (lineIndex < props.lines.length - 1) {
     const nextIndex = lineIndex + 1
     const nextField = fields[nextIndex]
@@ -174,7 +163,9 @@ function goToLowerField(fields: HTMLInputElement[], lineIndex: number) {
   }
 }
 
-function goToHigherField(fields: HTMLInputElement[], lineIndex: number) {
+function goToHigherField(fieldsName: FieldsNames, lineIndex: number) {
+  const fields = fieldsMap[fieldsName]
+
   if (lineIndex > 0) {
     const previousIndex = lineIndex - 1
     const previousField = fields[previousIndex]
