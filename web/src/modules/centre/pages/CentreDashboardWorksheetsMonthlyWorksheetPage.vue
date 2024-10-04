@@ -93,8 +93,11 @@ const fundingSubmissionLineJsonsQuery = computed(() => ({
   },
   perPage: 1,
 }))
-const { fundingSubmissionLineJsons, isLoading: isLoadingFundingSubmissionLineJsons } =
-  useFundingSubmissionLineJsons(fundingSubmissionLineJsonsQuery)
+const {
+  fundingSubmissionLineJsons,
+  isLoading: isLoadingFundingSubmissionLineJsons,
+  refresh: refreshFundingSubmissionLineJsons,
+} = useFundingSubmissionLineJsons(fundingSubmissionLineJsonsQuery)
 
 const fundingSubmissionLineJson = computed(() => fundingSubmissionLineJsons.value[0])
 const fundingSubmissionLineJsonId = computed(() => fundingSubmissionLineJson.value?.id)
@@ -126,6 +129,7 @@ async function initializeWorksheetsForFiscalYear() {
       text: "Fiscal year added",
       variant: "success",
     })
+    await refreshFundingSubmissionLineJsons()
   } finally {
     isSaving.value = false
   }
