@@ -128,8 +128,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   lineChanged: [{ line: FundingLineValue; lineIndex: number }]
-  focusOnNextInColumn: [column: ColumnNames]
-  focusOnPreviousInColumn: [column: ColumnNames]
+  focusBeyondLastInColumn: [column: ColumnNames]
+  focusBeyondFirstInColumn: [column: ColumnNames]
 }>()
 
 const estimatesFields = ref<HTMLInputElement[]>([])
@@ -187,7 +187,7 @@ function focusOnNextInColumn(columnName: ColumnNames, lineIndex: number) {
     nextField.focus()
     nextField.select()
   } else {
-    emit("focusOnNextInColumn", columnName)
+    emit("focusBeyondLastInColumn", columnName)
   }
 }
 
@@ -202,7 +202,7 @@ function focusOnPreviousInColumn(columnName: ColumnNames, lineIndex: number) {
     previousField.focus()
     previousField.select()
   } else {
-    emit("focusOnPreviousInColumn", columnName)
+    emit("focusBeyondFirstInColumn", columnName)
   }
 }
 

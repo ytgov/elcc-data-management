@@ -34,8 +34,8 @@
       <SectionTable
         ref="sectionTables"
         :lines="lines"
-        @focus-on-next-in-column="goToNextSection(sectionIndex, $event)"
-        @focus-on-previous-in-column="goToPreviousSection(sectionIndex, $event)"
+        @focus-beyond-last-in-column="goToNextSection(sectionIndex, $event)"
+        @focus-beyond-first-in-column="goToPreviousSection(sectionIndex, $event)"
         @line-changed="propagateUpdatesAsNeeded(sectionIndex, $event)"
       />
     </div>
