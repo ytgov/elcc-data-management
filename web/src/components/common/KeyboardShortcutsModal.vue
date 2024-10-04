@@ -1,33 +1,153 @@
 <template>
   <v-dialog
     v-model="show"
-    max-width="500px"
+    max-width="800px"
   >
     <v-card>
-      <v-card-title><h2>Keyboard Shortcuts</h2></v-card-title>
-      <v-divider class="border-opacity-50" />
-      <v-card-text>
-        Use keyboard shortcuts to navigate between inputs:
-        <ul>
-          <li><strong>Enter</strong>: Move down the column</li>
-          <li><strong>Shift + Enter</strong>: Move up the column</li>
-          <li><strong>Arrow Up</strong>: Move up the column</li>
-          <li><strong>Arrow Down</strong>: Move down the column</li>
-          <li><strong>Arrow Left</strong> (at start): Move to previous column</li>
-          <li><strong>Arrow Right</strong> (at end): Move to next column</li>
-          <li><strong>Arrow Left</strong> (text selected): Move to start of input</li>
-          <li><strong>Arrow Right</strong> (text selected): Move to end of input</li>
-          <li><strong>Ctrl + /</strong>: Show help text</li>
-        </ul>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer />
+      <div class="d-flex justify-space-between align-center px-4 py-3">
+        <h2 class="text-h6 font-weight-bold">Keyboard shortcuts</h2>
         <v-btn
-          color="primary"
+          icon
+          aria-label="Close"
+          variant="outlined"
           @click="close"
-          >Close</v-btn
         >
-      </v-card-actions>
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </div>
+
+      <v-divider class="border-opacity-50" />
+
+      <!-- Shortcuts Section -->
+      <v-card-text class="py-4">
+        <v-row>
+          <v-col cols="6">
+            <div class="mb-3 d-flex justify-space-between">
+              <span>Move down the column</span>
+              <div>
+                <v-chip
+                  variant="outlined"
+                  label
+                  small
+                  >Enter</v-chip
+                >
+              </div>
+            </div>
+
+            <div class="mb-3 d-flex justify-space-between">
+              <span>Move up the column</span>
+              <div>
+                <v-chip
+                  variant="outlined"
+                  label
+                  small
+                  >Shift</v-chip
+                >
+                <v-chip
+                  variant="outlined"
+                  label
+                  small
+                  class="ml-2"
+                  >Enter</v-chip
+                >
+              </div>
+            </div>
+
+            <div class="mb-3 d-flex justify-space-between">
+              <span>Move up the column</span>
+              <div>
+                <v-chip
+                  variant="outlined"
+                  label
+                  small
+                  >Arrow Up</v-chip
+                >
+              </div>
+            </div>
+
+            <div class="mb-3 d-flex justify-space-between">
+              <span>Move down the column</span>
+              <div>
+                <v-chip
+                  variant="outlined"
+                  label
+                  small
+                  >Arrow Down</v-chip
+                >
+              </div>
+            </div>
+
+            <div class="mb-3 d-flex justify-space-between">
+              <span>Move to left column</span>
+              <div>
+                <v-chip
+                  variant="outlined"
+                  label
+                  small
+                  >Arrow Left</v-chip
+                >
+              </div>
+            </div>
+          </v-col>
+
+          <v-col cols="6">
+            <div class="mb-3 d-flex justify-space-between">
+              <span>Move to right column</span>
+              <div>
+                <v-chip
+                  variant="outlined"
+                  label
+                  small
+                  >Arrow Right</v-chip
+                >
+              </div>
+            </div>
+
+            <div class="mb-3 d-flex justify-space-between">
+              <span>(text selected) Move to start of input</span>
+              <div>
+                <v-chip
+                  variant="outlined"
+                  label
+                  small
+                  >Arrow Left</v-chip
+                >
+              </div>
+            </div>
+
+            <div class="mb-3 d-flex justify-space-between">
+              <span>(text selected) Move to end of input</span>
+              <div>
+                <v-chip
+                  variant="outlined"
+                  label
+                  small
+                  >Arrow Right</v-chip
+                >
+              </div>
+            </div>
+
+            <div class="mb-3 d-flex justify-space-between">
+              <span>Show help text</span>
+              <div>
+                <v-chip
+                  variant="outlined"
+                  label
+                  small
+                  >Ctrl</v-chip
+                >
+                <v-chip
+                  variant="outlined"
+                  label
+                  small
+                  class="ml-2"
+                  >/</v-chip
+                >
+              </div>
+            </div>
+          </v-col>
+        </v-row>
+      </v-card-text>
     </v-card>
   </v-dialog>
 </template>
@@ -45,7 +165,7 @@ function open() {
   show.value = true
 }
 
-defineExpose({ open })
+defineExpose({
+  open,
+})
 </script>
-
-<style scoped></style>
