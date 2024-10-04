@@ -45,8 +45,8 @@
           v-model.number="line.estimatedChildOccupancyRate"
           density="compact"
           hide-details
-          @keydown.enter="goToLowerField('estimatesFields', lineIndex)"
-          @keydown.shift.enter="goToHigherField('estimatesFields', lineIndex)"
+          @keydown.enter="focusOnNextInColumn('estimates', lineIndex)"
+          @keydown.shift.enter="focusOnPreviousInColumn('estimates', lineIndex)"
           @change="changeLineAndPropagate(line, lineIndex)"
         ></v-text-field>
       </td>
@@ -61,8 +61,8 @@
           v-model.number="line.actualChildOccupancyRate"
           density="compact"
           hide-details
-          @keydown.enter="goToLowerField('actualsFields', lineIndex)"
-          @keydown.shift.enter="goToHigherField('actualsFields', lineIndex)"
+          @keydown.enter="focusOnNextInColumn('actuals', lineIndex)"
+          @keydown.shift.enter="focusOnPreviousInColumn('actuals', lineIndex)"
           @change="changeLineAndPropagate(line, lineIndex)"
         ></v-text-field>
       </td>
@@ -116,11 +116,13 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from "vue"
+import { reactive, Ref, ref } from "vue"
 import { isNil } from "lodash"
 
 import { formatMoney } from "@/utils"
 import { FundingLineValue } from "@/api/funding-submission-line-jsons-api"
+
+export type ColumnNames = "estimates" | "actuals"
 
 const props = defineProps<{
   lines: FundingLineValue[]
@@ -128,15 +130,17 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   lineChanged: [{ line: FundingLineValue; lineIndex: number }]
+  focusOnNextInColumn: [column: ColumnNames]
+  focusOnPreviousInColumn: [column: ColumnNames]
 }>()
-
-type FieldsNames = "estimatesFields" | "actualsFields"
 
 const estimatesFields = ref<HTMLInputElement[]>([])
 const actualsFields = ref<HTMLInputElement[]>([])
-const fieldsMap = reactive({
-  estimatesFields,
-  actualsFields,
+const fieldsMap = reactive<{
+  [key in ColumnNames]: Ref<HTMLInputElement[]>
+}>({
+  estimates: estimatesFields,
+  actuals: actualsFields,
 })
 
 function refreshLineTotals(line: FundingLineValue) {
@@ -152,8 +156,8 @@ function changeLineAndPropagate(line: FundingLineValue, lineIndex: number) {
   emit("lineChanged", { line, lineIndex })
 }
 
-function goToLowerField(fieldsName: FieldsNames, lineIndex: number) {
-  const fields = fieldsMap[fieldsName]
+function focusOnNextInColumn(columnName: ColumnNames, lineIndex: number) {
+  const fields = fieldsMap[columnName]
 
   if (lineIndex < props.lines.length - 1) {
     const nextIndex = lineIndex + 1
@@ -161,11 +165,13 @@ function goToLowerField(fieldsName: FieldsNames, lineIndex: number) {
     if (isNil(nextField)) return
 
     nextField.focus()
+  } else {
+    emit("focusOnNextInColumn", columnName)
   }
 }
 
-function goToHigherField(fieldsName: FieldsNames, lineIndex: number) {
-  const fields = fieldsMap[fieldsName]
+function focusOnPreviousInColumn(columnName: ColumnNames, lineIndex: number) {
+  const fields = fieldsMap[columnName]
 
   if (lineIndex > 0) {
     const previousIndex = lineIndex - 1
@@ -173,11 +179,31 @@ function goToHigherField(fieldsName: FieldsNames, lineIndex: number) {
     if (isNil(previousField)) return
 
     previousField.focus()
+  } else {
+    emit("focusOnPreviousInColumn", columnName)
   }
+}
+
+function focusOnFirstInColumn(columnName: ColumnNames) {
+  const fields = fieldsMap[columnName]
+  const field = fields[0]
+  if (isNil(field)) return
+
+  field.focus()
+}
+
+function focusOnLastInColumn(columnName: ColumnNames) {
+  const fields = fieldsMap[columnName]
+  const field = fields[fields.length - 1]
+  if (isNil(field)) return
+
+  field.focus()
 }
 
 defineExpose({
   refreshLineTotals,
+  focusOnFirstInColumn,
+  focusOnLastInColumn,
 })
 </script>
 

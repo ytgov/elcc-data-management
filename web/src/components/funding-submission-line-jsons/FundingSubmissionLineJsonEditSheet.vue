@@ -34,6 +34,8 @@
       <SectionTable
         ref="sectionTables"
         :lines="lines"
+        @focus-on-next-in-column="goToNextSection(sectionIndex, $event)"
+        @focus-on-previous-in-column="goToPreviousSection(sectionIndex, $event)"
         @line-changed="propagateUpdatesAsNeeded(sectionIndex, $event)"
       />
     </div>
@@ -51,7 +53,9 @@ import fundingSubmissionLineJsonsApi, {
 import { useNotificationStore } from "@/store/NotificationStore"
 import useFundingSubmissionLineJson from "@/use/use-funding-submission-line-json"
 
-import SectionTable from "@/modules/centre/components/centre-dashboard-worksheets-tab-monthly-worksheet-tab/SectionTable.vue"
+import SectionTable, {
+  ColumnNames,
+} from "@/modules/centre/components/centre-dashboard-worksheets-tab-monthly-worksheet-tab/SectionTable.vue"
 
 const FIRST_FISCAL_MONTH_NAME = "April"
 const notificationStore = useNotificationStore()
@@ -138,6 +142,26 @@ function propagateUpdatesAsNeeded(
     section2Line.estimatedChildOccupancyRate = line.estimatedChildOccupancyRate
     section2Line.actualChildOccupancyRate = line.actualChildOccupancyRate
     sectionTables.value[2].refreshLineTotals(section2Line)
+  }
+}
+
+function goToNextSection(sectionIndex: number, columnName: ColumnNames) {
+  if (sectionIndex < sections.value.length - 1) {
+    const nextIndex = sectionIndex + 1
+    const nextSection = sectionTables.value[nextIndex]
+    if (isNil(nextSection)) return
+
+    nextSection.focusOnFirstInColumn(columnName)
+  }
+}
+
+function goToPreviousSection(sectionIndex: number, columnName: ColumnNames) {
+  if (sectionIndex > 0) {
+    const previousIndex = sectionIndex - 1
+    const previousSection = sectionTables.value[previousIndex]
+    if (isNil(previousSection)) return
+
+    previousSection.focusOnLastInColumn(columnName)
   }
 }
 </script>
