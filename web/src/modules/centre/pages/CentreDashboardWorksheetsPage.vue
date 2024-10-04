@@ -15,7 +15,7 @@
           v-for="{ id, month } in fiscalPeriods"
           :key="id"
           :to="{
-            name: 'CentreDashboardWorksheetsMonthlyWorksheetPage',
+            name: 'child-care-centres/fiscal-years/worksheets/MonthlyWorksheetPage',
             params: {
               centreId,
               fiscalYearSlug,
@@ -67,7 +67,7 @@ watchEffect(async () => {
   }
 
   await router.push({
-    name: "CentreDashboardWorksheetsMonthlyWorksheetPage",
+    name: "child-care-centres/fiscal-years/worksheets/MonthlyWorksheetPage",
     params: {
       centreId: props.centreId,
       fiscalYearSlug: props.fiscalYearSlug,

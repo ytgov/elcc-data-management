@@ -84,10 +84,10 @@ const routes: RouteRecordRaw[] = [
             children: [
               {
                 path: ":month",
-                name: "CentreDashboardWorksheetsMonthlyWorksheetPage",
+                name: "child-care-centres/fiscal-years/worksheets/MonthlyWorksheetPage",
                 component: () =>
                   import(
-                    "@/modules/centre/pages/CentreDashboardWorksheetsMonthlyWorksheetPage.vue"
+                    "@/pages/child-care-centres/fiscal-years/worksheets/MonthlyWorksheetPage.vue"
                   ),
                 props: (route) => ({
                   centreId: parseInt(route.params.centreId as string),
