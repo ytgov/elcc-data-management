@@ -185,6 +185,7 @@ function focusOnNextInColumn(columnName: ColumnNames, lineIndex: number) {
     if (isNil(nextField)) return
 
     nextField.focus()
+    nextField.select()
   } else {
     emit("focusOnNextInColumn", columnName)
   }
@@ -199,6 +200,7 @@ function focusOnPreviousInColumn(columnName: ColumnNames, lineIndex: number) {
     if (isNil(previousField)) return
 
     previousField.focus()
+    previousField.select()
   } else {
     emit("focusOnPreviousInColumn", columnName)
   }
@@ -222,6 +224,7 @@ function focusOnFirstInColumn(columnName: ColumnNames) {
   if (isNil(field)) return
 
   field.focus()
+  field.select()
 }
 
 function focusOnLastInColumn(columnName: ColumnNames) {
@@ -230,6 +233,7 @@ function focusOnLastInColumn(columnName: ColumnNames) {
   if (isNil(field)) return
 
   field.focus()
+  field.select()
 }
 
 defineExpose({
