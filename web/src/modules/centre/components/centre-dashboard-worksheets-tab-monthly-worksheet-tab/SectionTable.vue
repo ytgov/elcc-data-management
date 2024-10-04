@@ -45,6 +45,7 @@
           density="compact"
           hide-details
           @keydown.enter="goToLowerEstimatesField(lineIndex)"
+          @keydown.shift.enter="goToHigherEstimatesField(lineIndex)"
           @change="changeLineAndPropagate(line, lineIndex)"
         ></v-text-field>
       </td>
@@ -60,6 +61,7 @@
           density="compact"
           hide-details
           @keydown.enter="goToLowerActualsField(lineIndex)"
+          @keydown.shift.enter="goToHigherActualsField(lineIndex)"
           @change="changeLineAndPropagate(line, lineIndex)"
         ></v-text-field>
       </td>
@@ -154,6 +156,14 @@ function goToLowerActualsField(lineIndex: number) {
   goToLowerField(actualsFields.value, lineIndex)
 }
 
+function goToHigherEstimatesField(lineIndex: number) {
+  goToHigherField(estimatesFields.value, lineIndex)
+}
+
+function goToHigherActualsField(lineIndex: number) {
+  goToHigherField(actualsFields.value, lineIndex)
+}
+
 function goToLowerField(fields: HTMLInputElement[], lineIndex: number) {
   if (lineIndex < props.lines.length - 1) {
     const nextIndex = lineIndex + 1
@@ -161,6 +171,16 @@ function goToLowerField(fields: HTMLInputElement[], lineIndex: number) {
     if (isNil(nextField)) return
 
     nextField.focus()
+  }
+}
+
+function goToHigherField(fields: HTMLInputElement[], lineIndex: number) {
+  if (lineIndex > 0) {
+    const previousIndex = lineIndex - 1
+    const previousField = fields[previousIndex]
+    if (isNil(previousField)) return
+
+    previousField.focus()
   }
 }
 
