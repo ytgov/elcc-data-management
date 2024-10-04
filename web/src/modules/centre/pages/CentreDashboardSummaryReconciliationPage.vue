@@ -116,14 +116,15 @@ import { DateTime, Interval } from "luxon"
 import { ref, computed, watch } from "vue"
 
 import { formatMoney, centsToDollars, dollarsToCents } from "@/utils/format-money"
+import DateTimeUtils from "@/utils/date-time-utils"
 
 import employeeBenefitsApi, { EmployeeBenefit } from "@/api/employee-benefits-api"
 import employeeWageTiersApi from "@/api/employee-wage-tiers-api"
 import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"
 import wageEnhancementsApi, { EI_CPP_WCB_RATE } from "@/api/wage-enhancements-api"
 
-import useFundingSubmissionLineJsonsStore from "@/store/funding-submission-line-jsons"
 import usePaymentsStore from "@/store/payments"
+import useFundingSubmissionLineJsons from "@/use/use-funding-submission-line-jsons"
 
 type Adjustment = {
   fiscalPeriodId: number
@@ -145,7 +146,19 @@ const props = defineProps({
 const isLoading = ref(false)
 const paymentsStore = usePaymentsStore()
 const payments = computed(() => paymentsStore.items)
-const fundingSubmissionLineJsonsStore = useFundingSubmissionLineJsonsStore()
+
+const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
+const fundingSubmissionLineJsonsQuery = computed(() => ({
+  where: {
+    centreId: props.centreId,
+    fiscalYear: fiscalYear.value,
+  },
+}))
+const { fetch: fetchFundingSubmisionLineJsons, linesForMonth: fundingSubmissionLinesForMonth } =
+  useFundingSubmissionLineJsons(fundingSubmissionLineJsonsQuery, {
+    skipWatchIf: () => true,
+  })
+
 const fiscalPeriods = ref<FiscalPeriod[]>([])
 const fiscalPeriodsById = computed(() => keyBy(fiscalPeriods.value, "id"))
 const fiscalPeriodsByMonth = computed(() => keyBy(fiscalPeriods.value, "month"))
@@ -163,10 +176,10 @@ const expensesByFiscalPeriodId = computed(() => keyBy(expenses.value, "fiscalPer
 const employeesByFiscalPeriodId = computed(() => keyBy(employees.value, "fiscalPeriodId"))
 const paymentAdujstments = computed<Adjustment[]>(() => {
   return fiscalPeriods.value.map((fiscalPeriod) => {
-    const fiscalPeriodInterval = Interval.fromDateTimes(
-      fiscalPeriod.dateStart,
-      fiscalPeriod.dateEnd
-    )
+    const { dateStart, dateEnd } = fiscalPeriod
+    const dateStartUTC = DateTimeUtils.fromISO(dateStart).toUTC()
+    const dateEndUTC = DateTimeUtils.fromISO(dateEnd).toUTC()
+    const fiscalPeriodInterval = Interval.fromDateTimes(dateStartUTC, dateEndUTC)
     // TODO: update data model so payments have a fiscal period id
     const paymentsForPeriod = payments.value.filter((payment) => {
       const paidOn = DateTime.fromFormat(payment.paidOn, "yyyy-MM-dd")
@@ -247,12 +260,7 @@ watch<[number, string], true>(
     fiscalPeriods.value = await fetchFiscalPeriods(newFiscalYearSlug)
     const fiscalPeriodIds = fiscalPeriods.value.map((fiscalPeriod) => fiscalPeriod.id)
     await fetchEmployeeBenefits(newCentreId, fiscalPeriodIds)
-    await fundingSubmissionLineJsonsStore.fetch({
-      where: {
-        centreId: newCentreId,
-        fiscalYear: newFiscalYear,
-      },
-    })
+    await fetchFundingSubmisionLineJsons()
     expenses.value = await buildExpenseValues(fiscalPeriods.value)
     employees.value = await buildEmployeeValues(fiscalPeriods.value)
 
@@ -295,8 +303,7 @@ async function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjust
     }
     const { month } = fiscalPeriod
     const monthAsDateName = upperFirst(month)
-
-    const linesForMonth = fundingSubmissionLineJsonsStore.linesForMonth(monthAsDateName)
+    const linesForMonth = fundingSubmissionLinesForMonth(monthAsDateName)
 
     if (!isNil(linesForMonth)) {
       const actualSectionsTotal = sumBy(linesForMonth, "actualComputedTotal")
@@ -323,8 +330,6 @@ async function buildEmployeeValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjus
       includesEstimates: false,
     }
     const { month } = fiscalPeriod
-    const monthAsDateName = upperFirst(month)
-
     const linesForMonth = employeeBenefits.value.find((b) => b.fiscalPeriodId == fiscalPeriod.id)
 
     if (!isNil(linesForMonth)) {

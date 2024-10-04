@@ -1,6 +1,7 @@
 import { DateTime } from "luxon"
 
 import type { SeedMigration } from "@/db/umzug"
+import { FiscalPeriodMonths } from "@/models/fiscal-period"
 
 export const up: SeedMigration = async ({ context: { FiscalPeriod } }) => {
   const today = DateTime.now()
@@ -15,7 +16,7 @@ export const up: SeedMigration = async ({ context: { FiscalPeriod } }) => {
     for (let i = 0; i < 12; i++) {
       const dateStart = date.startOf("month")
       const dateEnd = date.endOf("month").set({ millisecond: 0 })
-      const dateName = dateStart.toFormat("MMMM").toLowerCase()
+      const dateName = dateStart.toFormat("MMMM").toLowerCase() as FiscalPeriodMonths
 
       const fiscalYear = `${year}-${(year + 1).toString().slice(-2)}`
 

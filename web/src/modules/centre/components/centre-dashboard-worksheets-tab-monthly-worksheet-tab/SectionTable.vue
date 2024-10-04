@@ -33,14 +33,10 @@
       class="monospace"
     >
       <td>{{ line.lineName }}</td>
-      <td>
-        <v-text-field
-          :value="formatMoney(line.monthlyAmount)"
-          density="compact"
-          hide-details
-          readonly
-          style="background-color: #eee"
-        ></v-text-field>
+      <td class="read-only-td-that-matches-v-text-input">
+        <span class="pl-4">
+          {{ formatMoney(line.monthlyAmount) }}
+        </span>
       </td>
       <td>
         <v-text-field
@@ -50,14 +46,10 @@
           @change="changeLineAndPropagate(line, lineIndex)"
         ></v-text-field>
       </td>
-      <td>
-        <v-text-field
-          :value="formatMoney(line.estimatedComputedTotal)"
-          density="compact"
-          hide-details
-          readonly
-          style="background-color: #eee"
-        ></v-text-field>
+      <td class="read-only-td-that-matches-v-text-input">
+        <span class="pl-4">
+          {{ formatMoney(line.estimatedComputedTotal) }}
+        </span>
       </td>
       <td>
         <v-text-field
@@ -68,76 +60,56 @@
         ></v-text-field>
       </td>
 
-      <td>
-        <v-text-field
-          :value="formatMoney(line.actualComputedTotal)"
-          density="compact"
-          hide-details
-          readonly
-          style="background-color: #eee"
-        ></v-text-field>
+      <td class="read-only-td-that-matches-v-text-input">
+        <span class="pl-4">
+          {{ formatMoney(line.actualComputedTotal) }}
+        </span>
       </td>
     </tr>
     <tr class="monospace total">
       <td>SECTION TOTAL</td>
       <td></td>
-      <td>
-        <v-text-field
-          :value="
+      <td class="read-only-td-that-matches-v-text-input py-2">
+        <span class="pl-4">
+          {{
             lines.reduce(
               (a: number, v: any) => a + parseFloat(v.estimatedChildOccupancyRate || 0),
               0
             )
-          "
-          density="compact"
-          hide-details
-          readonly
-          style="background-color: #eee"
-        ></v-text-field>
+          }}
+        </span>
       </td>
-      <td>
-        <v-text-field
-          :value="
+      <td class="read-only-td-that-matches-v-text-input">
+        <span class="pl-4">
+          {{
             formatMoney(
               lines.reduce((a: number, v: any) => a + parseFloat(v.estimatedComputedTotal || 0), 0)
             )
-          "
-          density="compact"
-          hide-details
-          readonly
-          style="background-color: #eee"
-        ></v-text-field>
+          }}
+        </span>
       </td>
-      <td>
-        <v-text-field
-          :value="
+      <td class="read-only-td-that-matches-v-text-input">
+        <span class="pl-4">
+          {{
             lines.reduce((a: number, v: any) => a + parseFloat(v.actualChildOccupancyRate || 0), 0)
-          "
-          density="compact"
-          hide-details
-          readonly
-          style="background-color: #eee"
-        ></v-text-field>
+          }}
+        </span>
       </td>
-      <td>
-        <v-text-field
-          :value="
+      <td class="read-only-td-that-matches-v-text-input">
+        <span class="pl-4">
+          {{
             formatMoney(
               lines.reduce((a: number, v: any) => a + parseFloat(v.actualComputedTotal || 0), 0)
             )
-          "
-          density="compact"
-          hide-details
-          readonly
-          style="background-color: #eee"
-        ></v-text-field>
+          }}
+        </span>
       </td>
     </tr>
   </table>
 </template>
 
 <script lang="ts" setup>
-import { type FundingLineValue } from "@/store/funding-submission-line-jsons"
+import { FundingLineValue } from "@/api/funding-submission-line-jsons-api"
 import { formatMoney } from "@/utils"
 
 defineProps<{
@@ -167,6 +139,11 @@ defineExpose({
 </script>
 
 <style scoped>
+.read-only-td-that-matches-v-text-input {
+  background-color: #eee;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.38);
+}
+
 .monospace .v-text-field .v-field input.v-field__input {
   font-family: "Courier Prime", monospace !important;
 }

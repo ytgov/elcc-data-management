@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require_relative './jira_api'
+require_relative "./jira_api"
 
 class DevHelper
   # Support dashes in command names
@@ -8,11 +8,12 @@ class DevHelper
     "ts-node" => :ts_node,
     "branch-from" => :branch_from,
     "description-from" => :description_from,
+    "check-types" => :check_types,
   }
   METHOD_TO_COMMAND = COMMAND_TO_METHOD.invert
 
-  REPLACE_PROCESS = 'replace_process'
-  WAIT_FOR_PROCESS = 'wait_for_process'
+  REPLACE_PROCESS = "replace_process"
+  WAIT_FOR_PROCESS = "wait_for_process"
 
   # External Interface
   def self.call(*args)
@@ -64,17 +65,18 @@ class DevHelper
   end
 
   # Custom helpers
+
+  def check_types(*args, **kwargs)
+    run(*%w[api npm run check-types], *args, **kwargs)
+  end
+
   def sh(*args, **kwargs)
-    run(
-      *%w[api sh],
-      *args,
-      **kwargs
-    )
+    run(*%w[api sh], *args, **kwargs)
   end
 
   def debug
-    api_container_id = container_id('api')
-    puts 'Waiting for breakpoint to trigger...'
+    api_container_id = container_id("api")
+    puts "Waiting for breakpoint to trigger..."
     puts "'ctrl-c' to exit."
     command = "docker attach --detach-keys ctrl-c #{api_container_id}"
     puts "Running: #{command}"
@@ -112,7 +114,7 @@ class DevHelper
     if RUBY_PLATFORM =~ /linux/
       run(*%w[api npm run migrate], *args, execution_mode: WAIT_FOR_PROCESS, **kwargs)
 
-      file_or_directory = 'api/src/db/migrations'
+      file_or_directory = "api/src/db/migrations"
       exit(0) unless take_over_needed?(file_or_directory)
 
       ownit file_or_directory
@@ -125,7 +127,7 @@ class DevHelper
     if RUBY_PLATFORM =~ /linux/
       run(*%w[api npm run seed], *args, execution_mode: WAIT_FOR_PROCESS, **kwargs)
 
-      file_or_directory = 'api/src/db/seeds'
+      file_or_directory = "api/src/db/seeds"
       exit(0) unless take_over_needed?(file_or_directory)
 
       ownit file_or_directory
@@ -136,17 +138,13 @@ class DevHelper
 
   # -I enable quoted identifiers, e.g. "table"."column"
   def sqlcmd(*args, **kwargs) # rubocop:disable Metrics/MethodLength
-    environment_hoist = ENV.slice(*%w[
-      DB_NAME
-      DB_USER
-      DB_HOST
-      DB_PORT
-    ]).map { |key, value|
-      "export #{key}=\"#{value}\""
-    }.join("\n  ")
+    environment_hoist =
+      ENV
+        .slice(*%w[DB_NAME DB_USER DB_HOST DB_PORT])
+        .map { |key, value| "export #{key}=\"#{value}\"" }
+        .join("\n  ")
 
-    compose(
-      <<~BASH,
+    compose(<<~BASH, **kwargs)
         exec db sh -c '
           #{environment_hoist}
           /opt/mssql-tools18/bin/sqlcmd \
@@ -158,8 +156,6 @@ class DevHelper
             -I #{args.join(" ")}
           '
       BASH
-      **kwargs
-    )
   end
 
   def db(*args, **kwargs)
@@ -203,11 +199,10 @@ class DevHelper
   end
 
   def bash_completions
-    completions = public_methods(false).reject { |word|
-      %i[call].include?(word)
-    }.map { |word|
-      METHOD_TO_COMMAND.fetch(word, word)
-    }
+    completions =
+      public_methods(false)
+        .reject { |word| %i[call].include?(word) }
+        .map { |word| METHOD_TO_COMMAND.fetch(word, word) }
     puts completions
   end
 
@@ -222,8 +217,8 @@ class DevHelper
   end
 
   def compose_command(*args, **kwargs)
-    environment = kwargs.fetch(:environment, 'development')
-    "cd #{project_root} && docker compose -f docker-compose.#{environment}.yaml #{args.join(' ')}"
+    environment = kwargs.fetch(:environment, "development")
+    "cd #{project_root} && docker compose -f docker-compose.#{environment}.yaml #{args.join(" ")}"
   end
 
   def project_root
@@ -231,18 +226,23 @@ class DevHelper
   end
 
   def take_over_needed?(file_or_directory)
-    files_owned_by_others = system("find #{file_or_directory} -not -user #{user_id} -print -quit | grep -q .")
+    files_owned_by_others =
+      system("find #{file_or_directory} -not -user #{user_id} -print -quit | grep -q .")
     files_owned_by_others
   end
 
   def user_id
-    raise NotImplementedError, "Not implement for platform #{RUBY_PLATFORM}" unless RUBY_PLATFORM =~ /linux/
+    unless RUBY_PLATFORM =~ /linux/
+      raise NotImplementedError, "Not implement for platform #{RUBY_PLATFORM}"
+    end
 
     `id -u`.strip
   end
 
   def group_id
-    raise NotImplementedError, "Not implement for platform #{RUBY_PLATFORM}" unless RUBY_PLATFORM =~ /linux/
+    unless RUBY_PLATFORM =~ /linux/
+      raise NotImplementedError, "Not implement for platform #{RUBY_PLATFORM}"
+    end
 
     `id -g`.strip
   end
