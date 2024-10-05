@@ -1,93 +1,109 @@
 import { isNil } from "lodash"
-import { WhereOptions } from "sequelize"
-
-import BaseController from "./base-controller"
 
 import { FundingSubmissionLineJson } from "@/models"
 import { FundingSubmissionLineJsonSerializer } from "@/serializers"
+import BaseController from "@/controllers/base-controller"
 
-export class FundingSubmissionLineJsonsController extends BaseController {
+export class FundingSubmissionLineJsonsController extends BaseController<FundingSubmissionLineJson> {
   async index() {
-    const where = this.query.where as WhereOptions<FundingSubmissionLineJson>
-    return FundingSubmissionLineJson.findAll({
-      where,
-      order: ["dateStart"],
-    })
-      .then((fundingSubmissionLineJsons) => {
-        const serializedfundingSubmissionLineJsons = FundingSubmissionLineJsonSerializer.asTable(
-          fundingSubmissionLineJsons
-        )
-        return this.response.json({
-          fundingSubmissionLineJsons: serializedfundingSubmissionLineJsons,
-        })
+    try {
+      const where = this.buildWhere()
+      const scopes = this.buildFilterScopes()
+      const scopedFundingSubmissionLineJsons = FundingSubmissionLineJson.scope(scopes)
+
+      const totalCount = await scopedFundingSubmissionLineJsons.count({ where })
+      const fundingSubmissionLineJsons = await scopedFundingSubmissionLineJsons.findAll({
+        where,
+        order: ["dateStart"],
       })
-      .catch((error) => {
-        return this.response
-          .status(400)
-          .json({ message: `Invalid query for fundingSubmissionLineJsons: ${error}` })
+      const serializedfundingSubmissionLineJsons = FundingSubmissionLineJsonSerializer.asTable(
+        fundingSubmissionLineJsons
+      )
+      return this.response.json({
+        fundingSubmissionLineJsons: serializedfundingSubmissionLineJsons,
+        totalCount,
       })
+    } catch (error) {
+      return this.response.status(400).json({
+        message: `Invalid query for fundingSubmissionLineJsons: ${error}`,
+      })
+    }
   }
 
   async show() {
-    const fundingSubmissionLineJson = await this.loadFundingSubmissionLineJson()
-    if (isNil(fundingSubmissionLineJson))
-      return this.response.status(404).json({ message: "FundingSubmissionLineJson not found." })
+    try {
+      const fundingSubmissionLineJson = await this.loadFundingSubmissionLineJson()
+      if (isNil(fundingSubmissionLineJson)) {
+        return this.response.status(404).json({
+          message: "FundingSubmissionLineJson not found.",
+        })
+      }
 
-    const serializedfundingSubmissionLineJson =
-      FundingSubmissionLineJsonSerializer.asDetailed(fundingSubmissionLineJson)
-    return this.response.json({
-      fundingSubmissionLineJson: serializedfundingSubmissionLineJson,
-    })
+      const serializedfundingSubmissionLineJson =
+        FundingSubmissionLineJsonSerializer.asDetailed(fundingSubmissionLineJson)
+      return this.response.json({
+        fundingSubmissionLineJson: serializedfundingSubmissionLineJson,
+      })
+    } catch (error) {
+      return this.response.status(400).json({
+        message: `Error fetching fundingSubmissionLineJson: ${error}`,
+      })
+    }
   }
 
   async create() {
-    return FundingSubmissionLineJson.create(this.request.body)
-      .then((fundingSubmissionLineJson) => {
-        return this.response.status(201).json({ fundingSubmissionLineJson })
+    try {
+      const fundingSubmissionLineJson = await FundingSubmissionLineJson.create(this.request.body)
+      const serializedfundingSubmissionLineJson =
+        FundingSubmissionLineJsonSerializer.asDetailed(fundingSubmissionLineJson)
+      return this.response.status(201).json({
+        fundingSubmissionLineJson: serializedfundingSubmissionLineJson,
       })
-      .catch((error) => {
-        return this.response
-          .status(422)
-          .json({ message: `FundingSubmissionLineJson creation failed: ${error}` })
+    } catch (error) {
+      return this.response.status(422).json({
+        message: `FundingSubmissionLineJson creation failed: ${error}`,
       })
+    }
   }
 
   async update() {
-    const fundingSubmissionLineJson = await this.loadFundingSubmissionLineJson()
-    if (isNil(fundingSubmissionLineJson))
-      return this.response.status(404).json({ message: "FundingSubmissionLineJson not found." })
-
-    return fundingSubmissionLineJson
-      .update(this.request.body)
-      .then((fundingSubmissionLineJson) => {
-        const serializedfundingSubmissionLineJson =
-          FundingSubmissionLineJsonSerializer.asDetailed(fundingSubmissionLineJson)
-        return this.response.json({
-          fundingSubmissionLineJson: serializedfundingSubmissionLineJson,
+    try {
+      const fundingSubmissionLineJson = await this.loadFundingSubmissionLineJson()
+      if (isNil(fundingSubmissionLineJson)) {
+        return this.response.status(404).json({
+          message: "FundingSubmissionLineJson not found.",
         })
+      }
+
+      await fundingSubmissionLineJson.update(this.request.body)
+      const serializedfundingSubmissionLineJson =
+        FundingSubmissionLineJsonSerializer.asDetailed(fundingSubmissionLineJson)
+      return this.response.json({
+        fundingSubmissionLineJson: serializedfundingSubmissionLineJson,
       })
-      .catch((error) => {
-        return this.response
-          .status(422)
-          .json({ message: `FundingSubmissionLineJson update failed: ${error}` })
+    } catch (error) {
+      return this.response.status(422).json({
+        message: `FundingSubmissionLineJson update failed: ${error}`,
       })
+    }
   }
 
   async destroy() {
-    const fundingSubmissionLineJson = await this.loadFundingSubmissionLineJson()
-    if (isNil(fundingSubmissionLineJson))
-      return this.response.status(404).json({ message: "FundingSubmissionLineJson not found." })
+    try {
+      const fundingSubmissionLineJson = await this.loadFundingSubmissionLineJson()
+      if (isNil(fundingSubmissionLineJson)) {
+        return this.response.status(404).json({
+          message: "FundingSubmissionLineJson not found.",
+        })
+      }
 
-    return fundingSubmissionLineJson
-      .destroy()
-      .then(() => {
-        return this.response.status(204).end()
+      await fundingSubmissionLineJson.destroy()
+      return this.response.status(204).end()
+    } catch (error) {
+      return this.response.status(422).json({
+        message: `FundingSubmissionLineJson deletion failed: ${error}`,
       })
-      .catch((error) => {
-        return this.response
-          .status(422)
-          .json({ message: `FundingSubmissionLineJson deletion failed: ${error}` })
-      })
+    }
   }
 
   private loadFundingSubmissionLineJson(): Promise<FundingSubmissionLineJson | null> {

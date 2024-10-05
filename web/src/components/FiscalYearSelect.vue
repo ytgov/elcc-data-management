@@ -9,10 +9,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue"
+import { computed } from "vue"
 import { uniqBy } from "lodash"
 
-import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"
+import useFiscalPeriods, { FiscalPeriod } from "@/use/use-fiscal-periods"
 
 defineProps({
   modelValue: String,
@@ -20,23 +20,15 @@ defineProps({
 
 const emit = defineEmits(["update:modelValue"])
 
-const fiscalYears = ref<string[]>([])
-const isLoading = ref(true)
+const { fiscalPeriods, isLoading } = useFiscalPeriods()
+// TODO: add a special scope or endpoint to support loading just the fiscal years
+const fiscalYears = computed(() =>
+  uniqBy(fiscalPeriods.value, "fiscalYear").map(
+    (fiscalPeriod: FiscalPeriod) => fiscalPeriod.fiscalYear
+  )
+)
 
 function updateModelValue(value: string) {
   emit("update:modelValue", value)
 }
-
-async function fetchFiscalPeriods() {
-  isLoading.value = true
-  const { fiscalPeriods: newFiscalPeriods } = await fiscalPeriodsApi.list()
-  fiscalYears.value = uniqBy(newFiscalPeriods, "fiscalYear").map(
-    (fiscalPeriod: FiscalPeriod) => fiscalPeriod.fiscalYear
-  )
-  isLoading.value = false
-}
-
-onMounted(async () => {
-  await fetchFiscalPeriods()
-})
 </script>

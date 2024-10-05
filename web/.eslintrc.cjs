@@ -1,5 +1,5 @@
 // https://github.com/typescript-eslint/typescript-eslint/issues/251
-export default {
+module.exports = {
   root: true,
   env: {
     browser: true,
@@ -23,5 +23,13 @@ export default {
     sourceType: "module",
   },
   plugins: ["vue", "@typescript-eslint"],
-  rules: {},
+  rules: {
+    // Override/add rules' settings here
+    "vue/valid-v-slot": [
+      "error",
+      {
+        allowModifiers: true,
+      },
+    ],
+  },
 }

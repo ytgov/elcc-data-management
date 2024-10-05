@@ -8,13 +8,31 @@ import {
 
 import sequelize from "@/db/db-client"
 
+/** Keep in sync with web/src/api/fiscal-periods-api.ts */
+export enum FiscalPeriodMonths {
+  APRIL = "april",
+  MAY = "may",
+  JUNE = "june",
+  JULY = "july",
+  AUGUST = "august",
+  SEPTEMBER = "september",
+  OCTOBER = "october",
+  NOVEMBER = "november",
+  DECEMBER = "december",
+  JANUARY = "january",
+  FEBRUARY = "february",
+  MARCH = "march",
+}
+
 export class FiscalPeriod extends Model<
   InferAttributes<FiscalPeriod>,
   InferCreationAttributes<FiscalPeriod>
 > {
+  static readonly Months = FiscalPeriodMonths
+
   declare id: CreationOptional<number>
   declare fiscalYear: string
-  declare month: string
+  declare month: FiscalPeriodMonths
   declare dateStart: Date
   declare dateEnd: Date
   declare createdAt: CreationOptional<Date>
@@ -36,6 +54,12 @@ FiscalPeriod.init(
     month: {
       type: DataTypes.STRING(10),
       allowNull: false,
+      validate: {
+        isIn: {
+          args: [Object.values(FiscalPeriodMonths)],
+          msg: `Month must be one of: ${Object.values(FiscalPeriodMonths).join(", ")}`,
+        },
+      },
     },
     dateStart: {
       type: DataTypes.DATE,

@@ -1,21 +1,70 @@
 import { NextFunction, Request, Response } from "express"
+import { Attributes, Model, ScopeOptions, WhereOptions } from "sequelize"
+import { isEmpty } from "lodash"
 
+import { AuthorizedRequest } from "@/middleware/authz.middleware"
 import User from "@/models/user"
 
 export type Actions = "index" | "show" | "new" | "edit" | "create" | "update" | "destroy"
+// See api/node_modules/sequelize/types/model.d.ts -> Model -> scope
+export type BaseScopeOptions = string | ScopeOptions
 
-// See https://guides.rubyonrails.org/routing.html#crud-verbs-and-actions
-export class BaseController {
-  protected request: Request
+// Keep in sync with web/src/api/base-api.ts
+const MAX_PER_PAGE = 1000
+const MAX_PER_PAGE_EQUIVALENT = -1
+const DEFAULT_PER_PAGE = 10
+
+/**
+ * See https://guides.rubyonrails.org/routing.html#crud-verbs-and-actions
+ *
+ * Usage:
+ * ```ts
+ * router
+ *   .route("/api/users")
+ *   .get(UsersController.index)
+ *   .post(UsersController.create)
+ * route
+ *   .route("/api/users/:userId")
+ *   .get(UsersController.show)
+ *   .patch(UsersController.update)
+ *   .delete(UsersController.destroy)
+ * ```
+ * or
+ * ```ts
+ * router.get("/api/users", UsersController.index)
+ * // etc
+ * ```
+ *
+ * ```ts
+ * router.route("/api/users").get(UsersController.index)
+ * ```
+ * maps `/api/users` to `UsersController#index` method.
+ */
+export class BaseController<TModel extends Model = never> {
+  protected request: AuthorizedRequest
   protected response: Response
   protected next: NextFunction
 
   constructor(req: Request, res: Response, next: NextFunction) {
-    this.request = req
+    // Assumes authorization has occured first in
+    // api/src/middlewares/jwt-middleware.ts and api/src/middlewares/authorization-middleware.ts
+    // At some future point it would make sense to do all that logic as
+    // controller actions
+    this.request = req as AuthorizedRequest
     this.response = res
     this.next = next
   }
 
+  /**
+   * Usage:
+   * ```ts
+   * router.route("/api/users").get(UsersController.index)
+   * ```
+   * or
+   * ```ts
+   * router.get("/api/users", UsersController.index)
+   * ```
+   */
   static get index() {
     return async (req: Request, res: Response, next: NextFunction) => {
       const controllerInstance = new this(req, res, next)
@@ -23,8 +72,16 @@ export class BaseController {
     }
   }
 
-  // Usage app.post("/api/users", UsersController.create)
-  // maps /api/users to UsersController#create()
+  /**
+   * Usage:
+   * ```ts
+   * router.route("/api/users").post(UsersController.create)
+   * ```
+   * or
+   * ```ts
+   * router.post("/api/users", UsersController.create)
+   * ```
+   */
   static get create() {
     return async (req: Request, res: Response, next: NextFunction) => {
       const controllerInstance = new this(req, res, next)
@@ -32,6 +89,16 @@ export class BaseController {
     }
   }
 
+  /**
+   * Usage:
+   * ```ts
+   * router.route("/api/users/:userId").get(UsersController.show)
+   * ```
+   * or
+   * ```ts
+   * router.get("/api/users/:userId", UsersController.show)
+   * ```
+   */
   static get show() {
     return async (req: Request, res: Response, next: NextFunction) => {
       const controllerInstance = new this(req, res, next)
@@ -80,7 +147,7 @@ export class BaseController {
   // Child controllers that are on an non-authorizable route should override this method
   // and return undefined
   get currentUser(): User {
-    return this.request.user as User
+    return this.request.user
   }
 
   get params() {
@@ -93,8 +160,8 @@ export class BaseController {
 
   get pagination() {
     const page = parseInt(this.query.page?.toString() || "") || 1
-    const perPage = parseInt(this.query.perPage?.toString() || "") || 10
-    const limit = perPage === -1 ? 1000 : Math.max(1, Math.min(perPage, 1000))
+    const perPage = parseInt(this.query.perPage?.toString() || "") || DEFAULT_PER_PAGE
+    const limit = this.determineLimit(perPage)
     const offset = (page - 1) * limit
     return {
       page,
@@ -102,6 +169,42 @@ export class BaseController {
       limit,
       offset,
     }
+  }
+
+  buildWhere<TModelOverride extends Model = TModel>(
+    overridableOptions: WhereOptions<Attributes<TModelOverride>> = {},
+    nonOverridableOptions: WhereOptions<Attributes<TModelOverride>> = {}
+  ): WhereOptions<Attributes<TModelOverride>> {
+    // TODO: consider if we should add parsing of Sequelize [Op.is] and [Op.not] here
+    // or in the api/src/utils/enhanced-qs-decoder.ts function
+    const queryWhere = this.query.where as WhereOptions<Attributes<TModelOverride>>
+    return {
+      ...overridableOptions,
+      ...queryWhere,
+      ...nonOverridableOptions,
+    } as WhereOptions<Attributes<TModelOverride>>
+  }
+
+  buildFilterScopes<FilterOptions extends Record<string, unknown>>(
+    initialScopes: BaseScopeOptions[] = []
+  ): BaseScopeOptions[] {
+    const filters = this.query.filters as FilterOptions
+    const scopes = initialScopes
+    if (!isEmpty(filters)) {
+      Object.entries(filters).forEach(([key, value]) => {
+        scopes.push({ method: [key, value] })
+      })
+    }
+
+    return scopes
+  }
+
+  private determineLimit(perPage: number) {
+    if (perPage === MAX_PER_PAGE_EQUIVALENT) {
+      return MAX_PER_PAGE
+    }
+
+    return Math.max(1, Math.min(perPage, MAX_PER_PAGE))
   }
 }
 

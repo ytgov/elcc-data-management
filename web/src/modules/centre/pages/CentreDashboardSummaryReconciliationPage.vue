@@ -25,44 +25,38 @@
         ) in adjustmentRows"
         :key="`adjustment-${adjustmentIndex}`"
       >
-        <tr :class="rowClasses(adjustmentIndex)">
+        <tr>
           <td class="text-left font-weight-bold">{{ label }}</td>
           <td class="text-right">
             {{ formatMoney(centsToDollars(payment.amountInCents)) }}
           </td>
-          <td class="text-right">
-            <v-tooltip
-              v-if="expense.includesEstimates"
-              bottom
-            >
-              <template #activator="{ props }">
-                <span v-bind="props">
-                  {{ formatMoney(centsToDollars(expense.amountInCents)) }}
-                  <sup class="asterisk-icon">
-                    <v-icon size="small">mdi-asterisk-circle-outline</v-icon>
-                  </sup>
-                </span>
-              </template>
-              <span class="text-white">This expense includes estimated values.</span>
-            </v-tooltip>
-            <span v-else>{{ formatMoney(centsToDollars(expense.amountInCents)) }}</span>
+          <td class="relative text-right">
+            {{ formatMoney(centsToDollars(expense.amountInCents)) }}
+            <template v-if="expense.includesEstimates">
+              <sup class="offset-asterisk-icon">
+                <v-icon size="small">mdi-asterisk-circle-outline</v-icon>
+              </sup>
+              <v-tooltip
+                location="bottom"
+                activator="parent"
+              >
+                <span class="text-white">This expense includes estimated values.</span>
+              </v-tooltip>
+            </template>
           </td>
-          <td class="text-right">
-            <v-tooltip
-              v-if="employee.includesEstimates"
-              bottom
-            >
-              <template #activator="{ props }">
-                <span v-bind="props">
-                  {{ formatMoney(centsToDollars(employee.amountInCents)) }}
-                  <sup class="asterisk-icon">
-                    <v-icon size="small">mdi-asterisk-circle-outline</v-icon>
-                  </sup>
-                </span>
-              </template>
-              <span class="text-white">This amount includes estimated values.</span>
-            </v-tooltip>
-            <span v-else>{{ formatMoney(centsToDollars(employee.amountInCents)) }}</span>
+          <td class="text-right relative">
+            {{ formatMoney(centsToDollars(employee.amountInCents)) }}
+            <template v-if="employee.includesEstimates">
+              <sup class="offset-asterisk-icon">
+                <v-icon size="small">mdi-asterisk-circle-outline</v-icon>
+              </sup>
+              <v-tooltip
+                location="bottom"
+                activator="parent"
+              >
+                <span class="text-white">This amount includes estimated values.</span>
+              </v-tooltip>
+            </template>
           </td>
 
           <td class="text-right">
@@ -122,14 +116,15 @@ import { DateTime, Interval } from "luxon"
 import { ref, computed, watch } from "vue"
 
 import { formatMoney, centsToDollars, dollarsToCents } from "@/utils/format-money"
+import DateTimeUtils from "@/utils/date-time-utils"
 
 import employeeBenefitsApi, { EmployeeBenefit } from "@/api/employee-benefits-api"
 import employeeWageTiersApi from "@/api/employee-wage-tiers-api"
 import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"
 import wageEnhancementsApi, { EI_CPP_WCB_RATE } from "@/api/wage-enhancements-api"
 
-import useFundingSubmissionLineJsonsStore from "@/store/funding-submission-line-jsons"
 import usePaymentsStore from "@/store/payments"
+import useFundingSubmissionLineJsons from "@/use/use-funding-submission-line-jsons"
 
 type Adjustment = {
   fiscalPeriodId: number
@@ -151,7 +146,19 @@ const props = defineProps({
 const isLoading = ref(false)
 const paymentsStore = usePaymentsStore()
 const payments = computed(() => paymentsStore.items)
-const fundingSubmissionLineJsonsStore = useFundingSubmissionLineJsonsStore()
+
+const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
+const fundingSubmissionLineJsonsQuery = computed(() => ({
+  where: {
+    centreId: props.centreId,
+    fiscalYear: fiscalYear.value,
+  },
+}))
+const { fetch: fetchFundingSubmisionLineJsons, linesForMonth: fundingSubmissionLinesForMonth } =
+  useFundingSubmissionLineJsons(fundingSubmissionLineJsonsQuery, {
+    skipWatchIf: () => true,
+  })
+
 const fiscalPeriods = ref<FiscalPeriod[]>([])
 const fiscalPeriodsById = computed(() => keyBy(fiscalPeriods.value, "id"))
 const fiscalPeriodsByMonth = computed(() => keyBy(fiscalPeriods.value, "month"))
@@ -169,10 +176,10 @@ const expensesByFiscalPeriodId = computed(() => keyBy(expenses.value, "fiscalPer
 const employeesByFiscalPeriodId = computed(() => keyBy(employees.value, "fiscalPeriodId"))
 const paymentAdujstments = computed<Adjustment[]>(() => {
   return fiscalPeriods.value.map((fiscalPeriod) => {
-    const fiscalPeriodInterval = Interval.fromDateTimes(
-      fiscalPeriod.dateStart,
-      fiscalPeriod.dateEnd
-    )
+    const { dateStart, dateEnd } = fiscalPeriod
+    const dateStartUTC = DateTimeUtils.fromISO(dateStart).toUTC()
+    const dateEndUTC = DateTimeUtils.fromISO(dateEnd).toUTC()
+    const fiscalPeriodInterval = Interval.fromDateTimes(dateStartUTC, dateEndUTC)
     // TODO: update data model so payments have a fiscal period id
     const paymentsForPeriod = payments.value.filter((payment) => {
       const paidOn = DateTime.fromFormat(payment.paidOn, "yyyy-MM-dd")
@@ -253,12 +260,7 @@ watch<[number, string], true>(
     fiscalPeriods.value = await fetchFiscalPeriods(newFiscalYearSlug)
     const fiscalPeriodIds = fiscalPeriods.value.map((fiscalPeriod) => fiscalPeriod.id)
     await fetchEmployeeBenefits(newCentreId, fiscalPeriodIds)
-    await fundingSubmissionLineJsonsStore.fetch({
-      where: {
-        centreId: newCentreId,
-        fiscalYear: newFiscalYear,
-      },
-    })
+    await fetchFundingSubmisionLineJsons()
     expenses.value = await buildExpenseValues(fiscalPeriods.value)
     employees.value = await buildEmployeeValues(fiscalPeriods.value)
 
@@ -301,8 +303,7 @@ async function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjust
     }
     const { month } = fiscalPeriod
     const monthAsDateName = upperFirst(month)
-
-    const linesForMonth = fundingSubmissionLineJsonsStore.linesForMonth(monthAsDateName)
+    const linesForMonth = fundingSubmissionLinesForMonth(monthAsDateName)
 
     if (!isNil(linesForMonth)) {
       const actualSectionsTotal = sumBy(linesForMonth, "actualComputedTotal")
@@ -314,9 +315,6 @@ async function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjust
       expense.includesEstimates ||= includesEstimates
       expense.amountInCents += dollarsToCents(sectionsTotal)
     }
-
-    injectEmployeeBenefitMonthlyCost(expense, month)
-    await lazyInjectWageEnhancementMonthlyCost(expense, month)
 
     return expense
   })
@@ -332,8 +330,6 @@ async function buildEmployeeValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjus
       includesEstimates: false,
     }
     const { month } = fiscalPeriod
-    const monthAsDateName = upperFirst(month)
-
     const linesForMonth = employeeBenefits.value.find((b) => b.fiscalPeriodId == fiscalPeriod.id)
 
     if (!isNil(linesForMonth)) {
@@ -352,8 +348,8 @@ async function buildEmployeeValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjus
       }
     }
 
-    //injectEmployeeBenefitMonthlyCost(employee, month)
-    //await lazyInjectWageEnhancementMonthlyCost(employee, month)
+    injectEmployeeBenefitMonthlyCost(employee, month)
+    await lazyInjectWageEnhancementMonthlyCost(employee, month)
 
     return employee
   })
@@ -440,28 +436,21 @@ async function lazyInjectWageEnhancementMonthlyCost(expense: Adjustment, month: 
   expense.includesEstimates ||= includesEstimates
   expense.amountInCents += dollarsToCents(totalInDollars)
 }
-
-function rowClasses(index: number): string[] {
-  const classes = []
-  if (index % 2 === 0) {
-    classes.push("bg-grey-lighten-3")
-  } else {
-    classes.push("bg-gray-darken-1")
-  }
-
-  return classes
-}
 </script>
 
 <style scoped>
-.adjustment-cell {
+.relative {
   position: relative;
 }
 
-.asterisk-icon {
+.offset-asterisk-icon {
   position: absolute;
   top: 0.75rem;
   right: 1rem;
   transform: translate(100%, 0%); /* Position the asterisk outside the content */
+}
+
+::v-deep(tbody tr:nth-of-type(even)) {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 </style>

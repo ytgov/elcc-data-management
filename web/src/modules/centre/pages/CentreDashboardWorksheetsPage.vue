@@ -1,22 +1,9 @@
 <template>
   <div
-    v-if="isLoading && isEmpty(fundingSubmissionLineJsons)"
+    v-if="isLoading || isEmpty(fiscalPeriods)"
     class="d-flex justify-center mt-10"
   >
     <v-progress-circular indeterminate />
-  </div>
-  <div
-    v-else-if="!isLoading && isEmpty(fundingSubmissionLineJsons)"
-    class="ma-5"
-  >
-    <p>There are currently no worksheets for {{ fiscalYear }}.</p>
-    <v-btn
-      color="primary"
-      size="small"
-      class="mt-3"
-      @click="initializeWorksheetsForFiscalYear"
-      >Add worksheets for {{ fiscalYear }}</v-btn
-    >
   </div>
   <div v-else>
     <v-toolbar
@@ -25,160 +12,66 @@
     >
       <v-tabs>
         <v-tab
-          v-for="{ id, dateName } in fundingSubmissionLineJsons"
+          v-for="{ id, month } in fiscalPeriods"
           :key="id"
           :to="{
-            name: 'CentreDashboardWorksheetsMonthlyWorksheetPage',
+            name: 'child-care-centres/worksheets/MonthlyWorksheetPage',
             params: {
               centreId,
               fiscalYearSlug,
-              month: dateName.toLowerCase(),
+              month,
             },
           }"
         >
-          {{ dateName }}
+          {{ month }}
         </v-tab>
       </v-tabs>
     </v-toolbar>
-    <router-view
-      v-if="!isEmpty(selectedFundingSubmissionLineJson)"
-      v-slot="{ Component }"
-    >
-      <!--
-        TODO: push funding-submission-line-json-id down to the CentreDashboardWorksheetsMonthlyWorksheetPage level
-        and make a child component of CentreDashboardWorksheetsMonthlyWorksheetPage that renders with _only_ the id.
-      -->
-      <component
-        :is="Component"
-        :funding-submission-line-json-id="selectedFundingSubmissionLineJson.id"
-      />
-    </router-view>
+
+    <router-view v-if="!isEmpty(defaultMonth)"></router-view>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { isEmpty, isEqual, keyBy, upperFirst } from "lodash"
-import { computed, ref, watch, watchEffect } from "vue"
-import { useRouter, useRoute } from "vue-router"
+import { isEmpty } from "lodash"
+import { watchEffect, computed } from "vue"
+import { useRoute, useRouter } from "vue-router"
 
-import centresApi from "@/api/centres-api"
+import useFiscalPeriods from "@/use/use-fiscal-periods"
 
-import { useNotificationStore } from "@/store/NotificationStore"
-import useFundingSubmissionLineJsonsStore, {
-  FundingSubmissionLineJson,
-} from "@/store/funding-submission-line-jsons"
-
-const notificationStore = useNotificationStore()
-const fundingSubmissionLineJsonsStore = useFundingSubmissionLineJsonsStore()
-const router = useRouter()
 const route = useRoute()
+const router = useRouter()
 
-const props = defineProps({
-  centreId: {
-    type: Number,
-    required: true,
+const props = defineProps<{
+  centreId: number
+  fiscalYearSlug: string
+}>()
+
+const fiscalPeriodsQuery = computed(() => ({
+  where: {
+    fiscalYear: props.fiscalYearSlug,
   },
-  fiscalYearSlug: {
-    type: String,
-    required: true,
-  },
-  month: {
-    type: String,
-    default: "",
-  },
-})
+}))
+const { fiscalPeriods, isLoading } = useFiscalPeriods(fiscalPeriodsQuery)
 
-const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
+const firstPeriod = computed(() => fiscalPeriods.value[0])
+const defaultMonth = computed(() => firstPeriod.value?.month)
 
-const fundingSubmissionLineJsons = ref<FundingSubmissionLineJson[]>()
-const fundingSubmissionLineJsonsByMonth = computed(() =>
-  keyBy(fundingSubmissionLineJsons.value, "dateName")
-)
-const selectedFundingSubmissionLineJson = computed(() => {
-  if (fundingSubmissionLineJsons.value === undefined || isEmpty(fundingSubmissionLineJsons.value)) {
-    return
-  }
-
-  const dateName = upperFirst(route.params.month as string)
-  if (isEmpty(dateName)) {
-    return fundingSubmissionLineJsons.value[0]
-  }
-
-  return fundingSubmissionLineJsonsByMonth.value[dateName]
-})
-const isLoading = ref(true)
-
-async function fetchFundingSubmissionLineJsons(centreId: number, fiscalYear: string) {
-  isLoading.value = true
-  try {
-    fundingSubmissionLineJsons.value = await fundingSubmissionLineJsonsStore.fetch({
-      where: {
-        centreId,
-        fiscalYear,
-      },
-    })
-  } catch (error) {
-    notificationStore.notify({
-      text: "Failed to load worksheets",
-      variant: "error",
-    })
-  } finally {
-    isLoading.value = false
-  }
-}
-
-watch<[number, string], true>(
-  () => [props.centreId, fiscalYear.value],
-  async (newValues, oldValues) => {
-    if (isEqual(newValues, oldValues)) {
-      return
-    }
-
-    const [newCentreId, newFiscalYear] = newValues
-    // TODO: remove once fiscal year is a prop
-    if (isEmpty(newFiscalYear)) {
-      return
-    }
-
-    await fetchFundingSubmissionLineJsons(newCentreId, newFiscalYear)
-  },
-  {
-    immediate: true,
-  }
-)
-
-async function initializeWorksheetsForFiscalYear() {
-  isLoading.value = true
-  try {
-    fundingSubmissionLineJsons.value = await centresApi.fiscalYear.create(
-      props.centreId,
-      fiscalYear.value
-    )
-    notificationStore.notify({
-      text: "Fiscal year added",
-      variant: "success",
-    })
-  } finally {
-    isLoading.value = false
-  }
-}
-
-watchEffect(() => {
+watchEffect(async () => {
   if (route.name !== "CentreDashboardWorksheetsPage") {
     return
   }
 
-  if (fundingSubmissionLineJsons.value === undefined || isEmpty(fundingSubmissionLineJsons.value)) {
+  if (isEmpty(defaultMonth.value)) {
     return
   }
 
-  const firstFundingSubmissionLineJson = fundingSubmissionLineJsons.value[0]
-  router.push({
-    name: "CentreDashboardWorksheetsMonthlyWorksheetPage",
+  await router.push({
+    name: "child-care-centres/worksheets/MonthlyWorksheetPage",
     params: {
       centreId: props.centreId,
       fiscalYearSlug: props.fiscalYearSlug,
-      month: firstFundingSubmissionLineJson.dateName.toLowerCase(),
+      month: defaultMonth.value,
     },
   })
 })

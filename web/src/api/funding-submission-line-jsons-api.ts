@@ -16,52 +16,75 @@ export type FundingSubmissionLineJson = {
   centreId: number
   fiscalYear: string
   dateName: string
-  dateStart: Date
-  dateEnd: Date
+  dateStart: string
+  dateEnd: string
+  values: string
+  createdAt: string
+  updatedAt: string
+
+  // Virtual Attributes
   lines: FundingLineValue[]
-  createdAt: Date
-  updatedAt: Date
 }
 
-export type Params = {
-  where?: {
-    centreId?: number
-    fiscalYear?: string
-    dateName?: string
-  }
-  page?: number
-  perPage?: number
-  otherParams?: any
+export type FundingSubmissionLineJsonAsIndex = Omit<FundingSubmissionLineJson, "values">
+export type FundingSubmissionLineJsonAsDetailed = Omit<FundingSubmissionLineJson, "values">
+
+export type FundingSubmissionLineJsonWhereOptions = {
+  centreId?: number
+  fiscalYear?: string
+  dateName?: string
+  dateStart?: string
+  dateEnd?: string
+}
+
+export type FundingSubmissionLineJsonFiltersOptions = {
+  // add model scope signatures as needed
 }
 
 export const fundingSubmissionLineJsonsApi = {
-  list(params: Params = {}): Promise<{
-    fundingSubmissionLineJsons: FundingSubmissionLineJson[]
+  async list(
+    params: {
+      where?: FundingSubmissionLineJsonWhereOptions
+      filters?: FundingSubmissionLineJsonFiltersOptions
+      page?: number
+      perPage?: number
+    } = {}
+  ): Promise<{
+    fundingSubmissionLineJsons: FundingSubmissionLineJsonAsIndex[]
+    totalCount: number
   }> {
-    return http.get("/api/funding-submission-line-jsons", { params }).then(({ data }) => data)
+    const { data } = await http.get("/api/funding-submission-line-jsons", { params })
+    return data
   },
-  get(fundingSubmissionLineJsonId: number) {
-    return http
-      .get(`/api/funding-submission-line-jsons/${fundingSubmissionLineJsonId}`)
-      .then(({ data }) => data)
+  async get(fundingSubmissionLineJsonId: number): Promise<{
+    fundingSubmissionLineJson: FundingSubmissionLineJsonAsDetailed
+  }> {
+    const { data } = await http.get(
+      `/api/funding-submission-line-jsons/${fundingSubmissionLineJsonId}`
+    )
+    return data
   },
-  create(
+  async create(
     attributes: Partial<FundingSubmissionLineJson>
-  ): Promise<{ fundingSubmissionLineJson: FundingSubmissionLineJson }> {
-    return http.post("/api/funding-submission-line-jsons", attributes).then(({ data }) => data)
+  ): Promise<{ fundingSubmissionLineJson: FundingSubmissionLineJsonAsDetailed }> {
+    const { data } = await http.post("/api/funding-submission-line-jsons", attributes)
+    return data
   },
-  update(
+  async update(
     fundingSubmissionLineJsonId: number,
-    attributes: any
-  ): Promise<{ fundingSubmissionLineJson: FundingSubmissionLineJson }> {
-    return http
-      .patch(`/api/funding-submission-line-jsons/${fundingSubmissionLineJsonId}`, attributes)
-      .then(({ data }) => data)
+    attributes: Partial<FundingSubmissionLineJson>
+  ): Promise<{ fundingSubmissionLineJson: FundingSubmissionLineJsonAsDetailed }> {
+    const { data } = await http.patch(
+      `/api/funding-submission-line-jsons/${fundingSubmissionLineJsonId}`,
+      attributes
+    )
+    return data
   },
-  delete(fundingSubmissionLineJsonId: number): Promise<void> {
-    return http
-      .delete(`/api/funding-submission-line-jsons/${fundingSubmissionLineJsonId}`)
-      .then(({ data }) => data)
+  async delete(fundingSubmissionLineJsonId: number): Promise<void> {
+    const { data } = await http.delete(
+      `/api/funding-submission-line-jsons/${fundingSubmissionLineJsonId}`
+    )
+    return data
   },
 
   // Nested endpoints
