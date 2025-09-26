@@ -29,7 +29,7 @@
       style="width: 200px"
       variant="outlined"
       density="compact"
-      @update:modelValue="updateFiscalYearAndRedirect"
+      @update:model-value="updateFiscalYearAndRedirect"
     />
   </div>
   <h1 class="mb-4">{{ selectedCentre?.name }}</h1>
@@ -42,7 +42,7 @@
       cols="12"
       md="4"
     >
-      <CentreDetailsCard :centreId="selectedCentre.id" />
+      <CentreDetailsCard :centre-id="selectedCentre.id" />
       <v-card
         elevation="3"
         color="#0097a966"
@@ -102,7 +102,7 @@
 <script setup lang="ts">
 import { isNil, isEmpty } from "lodash"
 import { useRoute, useRouter } from "vue-router"
-import { computed, onMounted, onUnmounted, ref } from "vue"
+import { computed, onMounted, onUnmounted } from "vue"
 import { storeToRefs } from "pinia"
 
 import getCurrentFiscalYearSlug from "@/utils/get-current-fiscal-year-slug"
@@ -162,7 +162,11 @@ const breadcrumbs = computed(() => {
   return [
     { to: "/dashboard", title: "Home" },
     { to: "/child-care-centres", title: "Child Care Centres" },
-    { title: selectedCentre.value?.name || "loading ..." },
+    {
+      title:
+        selectedCentre.value?.name ||
+        "loadhttps://wrap.service.yukon.ca/api/workflows?where%5BcategoryId%5D=72&where%5Bstatus%5D=open&perPage=1ing ...",
+    },
   ]
 })
 </script>
