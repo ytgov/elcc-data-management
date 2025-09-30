@@ -1,10 +1,10 @@
 # Stage 0 - base node customizations
-FROM node:22.20.0-alpine3.22 as base-node
+FROM node:22.20.0-alpine3.22 AS base-node
 
 RUN npm install -g npm@10.2.5
 
 # Stage 1 - api build - requires development environment because typescript
-FROM base-node as api-build-stage
+FROM base-node AS api-build-stage
 
 ENV NODE_ENV=development
 
@@ -22,7 +22,7 @@ RUN npm run build
 COPY ./api/src/db/data/*.json ./dist/db/data/
 
 # State 2 - web build - requires development environment because typescript
-FROM base-node as web-build-stage
+FROM base-node AS web-build-stage
 
 ENV NODE_ENV=development
 
