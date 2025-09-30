@@ -36,7 +36,7 @@ export type FundingSubmissionLineJsonWhereOptions = WhereOptions<
 >
 
 export type FundingSubmissionLineJsonFiltersOptions = FiltersOptions<{
-  // add model scope signatures as needed
+  withChildOccupancyRate: string
 }>
 
 export type FundingSubmissionLineJsonQueryOptions = QueryOptions<

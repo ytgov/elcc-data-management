@@ -11,18 +11,23 @@
       }"
     ></div>
   </div>
-  <div v-else>
-    <VueApexCharts
-      height="300"
-      type="pie"
-      :options="options"
-      :series="enrollmentChartData"
-    ></VueApexCharts>
-  </div>
+  <VueApexCharts
+    v-else-if="hasActualChildOccupancyRates"
+    height="300"
+    type="pie"
+    :options="options"
+    :series="actualChildOccupancyRates"
+  />
+  <v-empty-state
+    v-else
+    text="No enrollment data available"
+  />
 </template>
 
 <script setup lang="ts">
 import { computed, getCurrentInstance, onMounted, ref } from "vue"
+import { isNil } from "lodash"
+
 import VueApexCharts from "vue3-apexcharts"
 
 import useFundingSubmissionLineJsons, {
@@ -33,9 +38,14 @@ const props = defineProps<{
   centreId: number
 }>()
 
+const SECTION_NAME = "Child Care Spaces"
+
 const fundingSubmissionLineJsonsQuery = computed<FundingSubmissionLineJsonQueryOptions>(() => ({
   where: {
     centreId: props.centreId,
+  },
+  filters: {
+    withChildOccupancyRate: SECTION_NAME,
   },
   order: [["dateStart", "DESC"]],
   perPage: 1,
@@ -44,34 +54,35 @@ const { fundingSubmissionLineJsons, isLoading } = useFundingSubmissionLineJsons(
   fundingSubmissionLineJsonsQuery
 )
 
-const LABELS = [
-  "Infants",
-  "Toddlers",
-  "Preschool",
-  "Kindergarten (PT)",
-  "Kindergarten (FT)",
-  "School Age (PT)",
-  "School Age (FT)",
-]
-const SECTION_NAME = "Child Care Spaces"
+const latestFundingLineValuesForSection = computed(() => {
+  const latestFundingSubmissionLineJson = fundingSubmissionLineJsons.value[0]
+  if (isNil(latestFundingSubmissionLineJson)) return []
 
-const enrollmentChartData = computed(() => {
-  return (
-    fundingSubmissionLineJsons.value[0]?.lines
-      .filter((line) => line.sectionName === SECTION_NAME && LABELS.includes(line.lineName))
-      .map(() => 1) ?? []
-    // TODO: figure out how to handle "0"
-    // .map((line) => line.actualChildOccupancyRate ?? line.estimatedChildOccupancyRate ?? 0) ?? []
-  )
+  const { lines } = latestFundingSubmissionLineJson
+
+  return lines.filter((line) => line.sectionName === SECTION_NAME)
 })
+
+const lineNames = computed(() =>
+  latestFundingLineValuesForSection.value.map((line) => line.lineName)
+)
+const options = computed(() => ({
+  stroke: {
+    show: false,
+  },
+  colors: ["#0094A9", "#002EB7", "#FFAE00", "#FF7A00", "#04DDFB", "#A65000", "#1851FC"],
+  labels: lineNames.value,
+}))
+
+const actualChildOccupancyRates = computed(() => {
+  return latestFundingLineValuesForSection.value.map((line) => line.actualChildOccupancyRate)
+})
+
+const hasActualChildOccupancyRates = computed(() =>
+  actualChildOccupancyRates.value.some((value) => value > 0)
+)
 
 const skeletonHeight = ref(100)
-
-const options = ref({
-  stroke: { show: false },
-  colors: ["#0094A9", "#002EB7", "#FFAE00", "#FF7A00", "#04DDFB", "#A65000", "#1851FC"],
-  labels: LABELS,
-})
 
 onMounted(async () => {
   const instance = getCurrentInstance()
