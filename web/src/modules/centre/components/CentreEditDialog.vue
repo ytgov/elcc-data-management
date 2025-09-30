@@ -189,7 +189,7 @@ import { cloneDeep } from "lodash"
 import { computed, nextTick, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
-import { VForm } from "vuetify/lib/components/index.mjs"
+import { type VForm } from "vuetify/components"
 
 import { required } from "@/utils/validators"
 import centresApi from "@/api/centres-api"

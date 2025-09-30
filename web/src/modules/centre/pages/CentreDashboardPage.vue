@@ -29,20 +29,17 @@
       style="width: 200px"
       variant="outlined"
       density="compact"
-      @update:modelValue="updateFiscalYearAndRedirect"
+      @update:model-value="updateFiscalYearAndRedirect"
     />
   </div>
   <h1 class="mb-4">{{ selectedCentre?.name }}</h1>
 
-  <v-row
-    v-if="selectedCentre && selectedCentre.id"
-    style="clear: both"
-  >
+  <v-row style="clear: both">
     <v-col
       cols="12"
       md="4"
     >
-      <CentreDetailsCard :centreId="selectedCentre.id" />
+      <CentreDetailsCard :centre-id="centreIdAsNumber" />
       <v-card
         elevation="3"
         color="#0097a966"
@@ -50,7 +47,7 @@
         <v-card-title style="background-color: #0097a968">Latest Enrollment</v-card-title>
         <v-divider></v-divider>
         <v-card-text class="pt-3">
-          <EnrollmentChart :centre-id="centreId.toString()" />
+          <EnrollmentChart :centre-id="centreIdAsNumber" />
         </v-card-text>
       </v-card>
     </v-col>
@@ -102,18 +99,19 @@
 <script setup lang="ts">
 import { isNil, isEmpty } from "lodash"
 import { useRoute, useRouter } from "vue-router"
-import { computed, onMounted, onUnmounted, ref } from "vue"
+import { computed, onMounted, onUnmounted } from "vue"
 import { storeToRefs } from "pinia"
 
 import getCurrentFiscalYearSlug from "@/utils/get-current-fiscal-year-slug"
 import { useCentreStore } from "@/modules/centre/store"
 
+import FiscalYearSelect from "@/components/FiscalYearSelect.vue"
 import EnrollmentChart from "@/modules/centre/components/EnrollmentChart.vue"
 import CentreDetailsCard from "@/modules/centre/components/CentreDetailsCard.vue"
 
 const props = defineProps({
   centreId: {
-    type: Number,
+    type: String,
     required: true,
   },
   fiscalYearSlug: {
@@ -121,6 +119,8 @@ const props = defineProps({
     default: "",
   },
 })
+
+const centreIdAsNumber = computed(() => parseInt(props.centreId))
 
 const store = useCentreStore()
 const route = useRoute()
@@ -148,9 +148,9 @@ onMounted(async () => {
     updateFiscalYearAndRedirect(currentFiscalYearSlug)
   }
 
-  const centre = await store.selectCentreById(props.centreId)
+  const centre = await store.selectCentreById(centreIdAsNumber.value)
   if (isNil(centre)) {
-    throw new Error(`Could not load centre from id=${props.centreId}`)
+    throw new Error(`Could not load centre from id=${centreIdAsNumber.value}`)
   }
 })
 
@@ -162,7 +162,9 @@ const breadcrumbs = computed(() => {
   return [
     { to: "/dashboard", title: "Home" },
     { to: "/child-care-centres", title: "Child Care Centres" },
-    { title: selectedCentre.value?.name || "loading ..." },
+    {
+      title: selectedCentre.value?.name || "loading ...",
+    },
   ]
 })
 </script>

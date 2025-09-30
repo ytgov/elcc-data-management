@@ -2,7 +2,7 @@ import qs from "qs"
 import axios from "axios"
 
 import { API_BASE_URL } from "@/config"
-import { AuthHelper as auth0 } from "@/plugins/auth"
+import auth0 from "@/plugins/auth0-plugin"
 
 export const httpClient = axios.create({
   baseURL: API_BASE_URL,

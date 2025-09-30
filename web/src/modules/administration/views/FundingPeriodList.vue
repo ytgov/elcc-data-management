@@ -23,7 +23,7 @@
 
   <h1>Funding Periods</h1>
 
-  <base-card
+  <BaseCard
     show-header="t"
     heading=""
   >
@@ -54,17 +54,23 @@
       return-object
       @click:row="rowClick"
     ></v-data-table>
-  </base-card>
+  </BaseCard>
 
   <funding-period-editor></funding-period-editor>
 </template>
 <script lang="ts">
 import { mapActions, mapState } from "pinia"
-import { useFundingPeriodStore } from "../store/FundingPeriod"
-import FundingPeriodEditor from "../components/FundingPeriodEditor.vue"
+
+import { useFundingPeriodStore } from "@/modules/administration/store/FundingPeriod"
+
+import BaseCard from "@/components/BaseCard.vue"
+import FundingPeriodEditor from "@/modules/administration/components/FundingPeriodEditor.vue"
 
 export default {
-  components: { FundingPeriodEditor },
+  components: {
+    BaseCard,
+    FundingPeriodEditor,
+  },
   data: () => ({
     headers: [
       { title: "Fiscal Year", value: "fiscalYear" },

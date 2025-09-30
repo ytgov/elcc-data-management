@@ -5,7 +5,6 @@
       color="#0097a966"
     ></v-progress-linear>
     <div
-      id="chartSkeleton"
       class="skeleton"
       :style="{
         'min-height': `${skeletonHeight}px`,
@@ -22,57 +21,49 @@
   </div>
 </template>
 
-<script lang="ts">
-import { mapActions, mapState } from "pinia"
+<script setup lang="ts">
+import { getCurrentInstance, onMounted, ref } from "vue"
+import { storeToRefs } from "pinia"
 import VueApexCharts from "vue3-apexcharts"
-import { useCentreStore } from "../store"
 
-export default {
-  name: "EnrollmentChart",
-  components: { VueApexCharts },
-  props: {
-    centreId: {
-      type: String,
-      required: true,
-    },
-  },
-  data() {
-    return {
-      skeletonHeight: 100,
-      options: {
-        stroke: { show: false },
-        colors: ["#0094A9", "#002EB7", "#FFAE00", "#FF7A00", "#04DDFB", "#A65000", "#1851FC"],
-        labels: [
-          "Infant",
-          "Toddler",
-          "Preschool",
-          "Kindergarten PT",
-          "Kindergarten FT",
-          "School Age PT",
-          "School Age FT",
-        ],
-      },
-    }
-  },
-  async mounted() {
-    this.skeletonHeight = this.$el.offsetWidth / 2
-    await this.loadEnrollmentData(parseInt((this.centreId as string) || "0"))
-  },
-  unmounted() {},
-  computed: {
-    ...mapState(useCentreStore, [
-      "selectedCentre",
-      "enrollmentChartLoading",
-      "enrollmentChartData",
-    ]),
-  },
-  methods: {
-    ...mapActions(useCentreStore, ["loadEnrollmentData"]),
-  },
-}
+import { useCentreStore } from "@/modules/centre/store"
+
+const props = defineProps<{
+  centreId: number
+}>()
+
+const skeletonHeight = ref(100)
+
+const options = ref({
+  stroke: { show: false },
+  colors: ["#0094A9", "#002EB7", "#FFAE00", "#FF7A00", "#04DDFB", "#A65000", "#1851FC"],
+  labels: [
+    "Infant",
+    "Toddler",
+    "Preschool",
+    "Kindergarten PT",
+    "Kindergarten FT",
+    "School Age PT",
+    "School Age FT",
+  ],
+})
+
+const store = useCentreStore()
+
+const { enrollmentChartLoading, enrollmentChartData } = storeToRefs(store)
+
+onMounted(async () => {
+  const instance = getCurrentInstance()
+  if (instance) {
+    const el = instance.proxy?.$el
+    skeletonHeight.value = el.offsetWidth / 2
+  }
+
+  await store.loadEnrollmentData(props.centreId)
+})
 </script>
 
-<style>
+<style scoped>
 @keyframes skeleton-pulse {
   0% {
     background-color: #ffffff00;

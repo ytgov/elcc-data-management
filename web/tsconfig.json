@@ -14,8 +14,7 @@
     "skipLibCheck": true,
     "noEmit": true,
     "paths": {
-      "@/*": ["./src/*", "./dist/*"],
-      "@models": ["../api/src/data/models"]
+      "@/*": ["./src/*", "./dist/*"]
     }
   },
   "include": [
