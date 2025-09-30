@@ -44,8 +44,8 @@
         </v-icon>
       </h4>
 
-      <SectionTable
-        ref="sectionTables"
+      <FundingSubmissionLineJsonSectionTable
+        ref="fundingSubmissionLineJsonSectionTables"
         :lines="lines"
         @focus-beyond-last-in-column="goToNextSection(sectionIndex, $event)"
         @focus-beyond-first-in-column="goToPreviousSection(sectionIndex, $event)"
@@ -68,7 +68,7 @@ import { useNotificationStore } from "@/store/NotificationStore"
 import useFundingSubmissionLineJson from "@/use/use-funding-submission-line-json"
 
 import KeyboardShortcutsModal from "@/components/common/KeyboardShortcutsModal.vue"
-import SectionTable, {
+import FundingSubmissionLineJsonSectionTable, {
   type ColumnNames,
 } from "@/components/funding-submission-line-jsons/FundingSubmissionLineJsonSectionTable.vue"
 
@@ -106,7 +106,9 @@ const sections = computed<{ sectionName: string; lines: FundingLineValue[] }[]>(
     return { sectionName, lines }
   })
 })
-const sectionTables = ref<InstanceType<typeof SectionTable>[]>([])
+const fundingSubmissionLineJsonSectionTables = ref<
+  InstanceType<typeof FundingSubmissionLineJsonSectionTable>[]
+>([])
 const notificationStore = useNotificationStore()
 
 async function saveFundingSubmissionLineJson() {
@@ -151,19 +153,19 @@ function propagateUpdatesAsNeeded(
     section1Line.estimatedChildOccupancyRate = line.estimatedChildOccupancyRate
     section1Line.actualChildOccupancyRate = line.actualChildOccupancyRate
 
-    sectionTables.value[1].refreshLineTotals(section1Line)
+    fundingSubmissionLineJsonSectionTables.value[1].refreshLineTotals(section1Line)
 
     const section2Line = sections.value[2].lines[lineIndex]
     section2Line.estimatedChildOccupancyRate = line.estimatedChildOccupancyRate
     section2Line.actualChildOccupancyRate = line.actualChildOccupancyRate
-    sectionTables.value[2].refreshLineTotals(section2Line)
+    fundingSubmissionLineJsonSectionTables.value[2].refreshLineTotals(section2Line)
   }
 }
 
 function goToNextSection(sectionIndex: number, columnName: ColumnNames) {
   if (sectionIndex < sections.value.length - 1) {
     const nextIndex = sectionIndex + 1
-    const nextSection = sectionTables.value[nextIndex]
+    const nextSection = fundingSubmissionLineJsonSectionTables.value[nextIndex]
     if (isNil(nextSection)) return
 
     nextSection.focusOnFirstInColumn(columnName)
@@ -173,7 +175,7 @@ function goToNextSection(sectionIndex: number, columnName: ColumnNames) {
 function goToPreviousSection(sectionIndex: number, columnName: ColumnNames) {
   if (sectionIndex > 0) {
     const previousIndex = sectionIndex - 1
-    const previousSection = sectionTables.value[previousIndex]
+    const previousSection = fundingSubmissionLineJsonSectionTables.value[previousIndex]
     if (isNil(previousSection)) return
 
     previousSection.focusOnLastInColumn(columnName)
