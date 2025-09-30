@@ -1,16 +1,8 @@
 <template>
-  <div v-if="isLoading">
-    <v-progress-linear
-      indeterminate
-      color="#0097a966"
-    ></v-progress-linear>
-    <div
-      class="skeleton"
-      :style="{
-        'min-height': `${skeletonHeight}px`,
-      }"
-    ></div>
-  </div>
+  <v-skeleton-loader
+    v-if="isLoading"
+    type="image"
+  />
   <VueApexCharts
     v-else-if="hasActualChildOccupancyRates"
     height="300"
@@ -25,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, onMounted, ref } from "vue"
+import { computed } from "vue"
 import { isNil } from "lodash"
 
 import VueApexCharts from "vue3-apexcharts"
@@ -81,34 +73,4 @@ const actualChildOccupancyRates = computed(() => {
 const hasActualChildOccupancyRates = computed(() =>
   actualChildOccupancyRates.value.some((value) => value > 0)
 )
-
-const skeletonHeight = ref(100)
-
-onMounted(async () => {
-  const instance = getCurrentInstance()
-  if (instance) {
-    const el = instance.proxy?.$el
-    skeletonHeight.value = el.offsetWidth / 2
-  }
-})
 </script>
-
-<style scoped>
-@keyframes skeleton-pulse {
-  0% {
-    background-color: #ffffff00;
-  }
-  50% {
-    background-color: #ffffff44;
-  }
-  110% {
-    background-color: #ffffff00;
-  }
-}
-
-.skeleton {
-  animation: skeleton-pulse 3s infinite;
-  border: 1px #ffffff44 solid;
-  padding: 15px;
-}
-</style>
