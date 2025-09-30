@@ -34,15 +34,12 @@
   </div>
   <h1 class="mb-4">{{ selectedCentre?.name }}</h1>
 
-  <v-row
-    v-if="selectedCentre && selectedCentre.id"
-    style="clear: both"
-  >
+  <v-row style="clear: both">
     <v-col
       cols="12"
       md="4"
     >
-      <CentreDetailsCard :centre-id="selectedCentre.id" />
+      <CentreDetailsCard :centre-id="centreIdAsNumber" />
       <v-card
         elevation="3"
         color="#0097a966"
@@ -50,7 +47,7 @@
         <v-card-title style="background-color: #0097a968">Latest Enrollment</v-card-title>
         <v-divider></v-divider>
         <v-card-text class="pt-3">
-          <EnrollmentChart :centre-id="centreId.toString()" />
+          <EnrollmentChart :centre-id="centreIdAsNumber" />
         </v-card-text>
       </v-card>
     </v-col>
@@ -113,7 +110,7 @@ import CentreDetailsCard from "@/modules/centre/components/CentreDetailsCard.vue
 
 const props = defineProps({
   centreId: {
-    type: Number,
+    type: String,
     required: true,
   },
   fiscalYearSlug: {
@@ -121,6 +118,8 @@ const props = defineProps({
     default: "",
   },
 })
+
+const centreIdAsNumber = computed(() => parseInt(props.centreId))
 
 const store = useCentreStore()
 const route = useRoute()
@@ -148,9 +147,9 @@ onMounted(async () => {
     updateFiscalYearAndRedirect(currentFiscalYearSlug)
   }
 
-  const centre = await store.selectCentreById(props.centreId)
+  const centre = await store.selectCentreById(centreIdAsNumber.value)
   if (isNil(centre)) {
-    throw new Error(`Could not load centre from id=${props.centreId}`)
+    throw new Error(`Could not load centre from id=${centreIdAsNumber.value}`)
   }
 })
 

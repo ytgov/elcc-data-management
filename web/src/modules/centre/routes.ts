@@ -17,10 +17,7 @@ const routes: RouteRecordRaw[] = [
         path: ":centreId/:fiscalYearSlug?",
         component: () => import("@/modules/centre/pages/CentreDashboardPage.vue"),
         beforeEnter: authGuard,
-        props: (route) => ({
-          centreId: parseInt(route.params.centreId as string),
-          fiscalYearSlug: route.params.fiscalYearSlug,
-        }),
+        props: true,
         children: [
           {
             path: "",
