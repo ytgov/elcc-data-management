@@ -23,6 +23,7 @@ services:
       RELEASE_TAG: ${RELEASE_TAG:-development}
       GIT_COMMIT_HASH: ${GIT_COMMIT_HASH:-not-set}
     tty: true # allows attaching debugger, equivalent of docker exec -t
+    init: true
     # stdin_open: true # equivalent of docker exec -i
     ports:
       - "3000:3000"
