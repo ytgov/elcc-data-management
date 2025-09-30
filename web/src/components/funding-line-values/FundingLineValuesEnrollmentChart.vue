@@ -1,5 +1,5 @@
 <template>
-  <div v-if="enrollmentChartLoading">
+  <div v-if="isLoading">
     <v-progress-linear
       indeterminate
       color="#0097a966"
@@ -22,35 +22,56 @@
 </template>
 
 <script setup lang="ts">
-import { getCurrentInstance, onMounted, ref } from "vue"
-import { storeToRefs } from "pinia"
+import { computed, getCurrentInstance, onMounted, ref } from "vue"
 import VueApexCharts from "vue3-apexcharts"
 
-import { useCentreStore } from "@/modules/centre/store"
+import useFundingSubmissionLineJsons, {
+  type FundingSubmissionLineJsonQueryOptions,
+} from "@/use/use-funding-submission-line-jsons"
 
 const props = defineProps<{
   centreId: number
 }>()
+
+const fundingSubmissionLineJsonsQuery = computed<FundingSubmissionLineJsonQueryOptions>(() => ({
+  where: {
+    centreId: props.centreId,
+  },
+  order: [["dateStart", "DESC"]],
+  perPage: 1,
+}))
+const { fundingSubmissionLineJsons, isLoading } = useFundingSubmissionLineJsons(
+  fundingSubmissionLineJsonsQuery
+)
+
+const LABELS = [
+  "Infants",
+  "Toddlers",
+  "Preschool",
+  "Kindergarten (PT)",
+  "Kindergarten (FT)",
+  "School Age (PT)",
+  "School Age (FT)",
+]
+const SECTION_NAME = "Child Care Spaces"
+
+const enrollmentChartData = computed(() => {
+  return (
+    fundingSubmissionLineJsons.value[0]?.lines
+      .filter((line) => line.sectionName === SECTION_NAME && LABELS.includes(line.lineName))
+      .map(() => 1) ?? []
+    // TODO: figure out how to handle "0"
+    // .map((line) => line.actualChildOccupancyRate ?? line.estimatedChildOccupancyRate ?? 0) ?? []
+  )
+})
 
 const skeletonHeight = ref(100)
 
 const options = ref({
   stroke: { show: false },
   colors: ["#0094A9", "#002EB7", "#FFAE00", "#FF7A00", "#04DDFB", "#A65000", "#1851FC"],
-  labels: [
-    "Infant",
-    "Toddler",
-    "Preschool",
-    "Kindergarten PT",
-    "Kindergarten FT",
-    "School Age PT",
-    "School Age FT",
-  ],
+  labels: LABELS,
 })
-
-const store = useCentreStore()
-
-const { enrollmentChartLoading, enrollmentChartData } = storeToRefs(store)
 
 onMounted(async () => {
   const instance = getCurrentInstance()
@@ -58,8 +79,6 @@ onMounted(async () => {
     const el = instance.proxy?.$el
     skeletonHeight.value = el.offsetWidth / 2
   }
-
-  await store.loadEnrollmentData(props.centreId)
 })
 </script>
 
