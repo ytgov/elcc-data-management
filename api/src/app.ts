@@ -2,18 +2,21 @@ import express, { type Request, type Response } from "express"
 import cors from "cors"
 import path from "path"
 import helmet from "helmet"
+
 import { GIT_COMMIT_HASH, RELEASE_TAG, VUE_APP_FRONTEND_URL } from "@/config"
+import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 import {
   apiRouter,
   userRouter,
   centreRouter,
   fundingPeriodRouter,
   submissionLineRouter,
-} from "./routes"
-import { migrationRouter } from "./routes/migration-router"
-import { checkJwt, autheticateAndLoadUser } from "./middleware/authz.middleware"
+} from "@/routes"
+import { migrationRouter } from "@/routes/migration-router"
+import enhancedQsDecoder from "@/utils/enhanced-qs-decoder"
 
 export const app = express()
+app.set("query parser", enhancedQsDecoder)
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 app.use(
