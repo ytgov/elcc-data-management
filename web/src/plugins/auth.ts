@@ -1,7 +1,6 @@
 import { createAuth0 } from "@auth0/auth0-vue"
 
-import { domain, client_id, audience } from "../../auth-config.json"
-import { environment } from "@/config"
+import { ENVIRONMENT, AUTH0_DOMAIN, AUTH0_AUDIENCE, AUTH0_CLIENT_ID } from "@/config"
 
 // The "@auth0/auth0-vue" library composables to load and manage
 // authentication information.  In components this information is available
@@ -12,13 +11,13 @@ import { environment } from "@/config"
 // work around this issue.
 
 export const AuthHelper = createAuth0({
-  domain,
-  clientId: client_id,
+  domain: AUTH0_DOMAIN,
+  clientId: AUTH0_CLIENT_ID,
   authorizationParams: {
-    audience,
+    audience: AUTH0_AUDIENCE,
     redirect_uri: window.location.origin,
   },
   // Uncomment the following line to use the config from .env file
   // redirect_uri: REDIRECT_URI,
-  cacheLocation: environment === "development" ? "localstorage" : "memory",
+  cacheLocation: ENVIRONMENT === "development" ? "localstorage" : "memory",
 })

@@ -1,4 +1,13 @@
-export const environment = import.meta.env.MODE
+// TODO: replace this with pattern used in https://github.com/icefoganalytics/wrap/blob/22fa9f3837fc421199d72cdcc8944d3e3bfc4c01/web/src/config.ts
+import {
+  client_id as AUTH0_CLIENT_ID,
+  audience as AUTH0_AUDIENCE,
+  domain as AUTH0_DOMAIN,
+} from "../auth-config.json"
+
+export { AUTH0_DOMAIN, AUTH0_AUDIENCE, AUTH0_CLIENT_ID }
+
+export const ENVIRONMENT = import.meta.env.MODE
 
 // Generally we use window.location.origin for the redirect_uri but if
 // you may want to use a different URL for the redirect_uri. Make sure you
@@ -12,3 +21,9 @@ export const applicationName = "Vue 3 Template"
 export const applicationIcon = "mdi-leaf"
 export const hasSidebar = true
 export const hasSidebarClosable = false
+
+export const DEVELOPMENT_CONFIG = {
+  client_id: "mS8zklFSgatWX3v1OCQgVpEq5MixCm4k",
+  audience: "testing",
+  domain: "https://dev-0tc6bn14.eu.auth0.com",
+}
