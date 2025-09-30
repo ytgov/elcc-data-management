@@ -47,7 +47,10 @@
         <v-card-title style="background-color: #0097a968">Latest Enrollment</v-card-title>
         <v-divider></v-divider>
         <v-card-text class="pt-3">
-          <FundingLineValuesEnrollmentChart :centre-id="centreIdAsNumber" />
+          <FundingLineValuesEnrollmentChart
+            ref="fundingLineValuesEnrollmentChartRef"
+            :centre-id="centreIdAsNumber"
+          />
         </v-card-text>
       </v-card>
     </v-col>
@@ -98,7 +101,12 @@
 
           <v-divider></v-divider>
 
-          <router-view></router-view>
+          <router-view v-slot="{ Component }">
+            <component
+              :is="Component"
+              @update:funding-submission-line-json="refreshFundingLineValuesEnrollmentChart"
+            />
+          </router-view>
         </template>
       </v-card>
     </v-col>
@@ -108,7 +116,7 @@
 <script setup lang="ts">
 import { isNil, isEmpty } from "lodash"
 import { useRoute, useRouter } from "vue-router"
-import { computed, onMounted, onUnmounted } from "vue"
+import { computed, onMounted, onUnmounted, useTemplateRef } from "vue"
 import { storeToRefs } from "pinia"
 
 import getCurrentFiscalYearSlug from "@/utils/get-current-fiscal-year-slug"
@@ -166,6 +174,12 @@ onMounted(async () => {
 onUnmounted(() => {
   store.unselectCentre()
 })
+
+const fundingLineValuesEnrollmentChartRef = useTemplateRef("fundingLineValuesEnrollmentChartRef")
+
+function refreshFundingLineValuesEnrollmentChart() {
+  fundingLineValuesEnrollmentChartRef.value?.refresh()
+}
 
 const breadcrumbs = computed(() => {
   return [

@@ -42,7 +42,7 @@ const fundingSubmissionLineJsonsQuery = computed<FundingSubmissionLineJsonQueryO
   order: [["dateStart", "DESC"]],
   perPage: 1,
 }))
-const { fundingSubmissionLineJsons, isLoading } = useFundingSubmissionLineJsons(
+const { fundingSubmissionLineJsons, isLoading, refresh } = useFundingSubmissionLineJsons(
   fundingSubmissionLineJsonsQuery
 )
 
@@ -77,4 +77,8 @@ const actualChildOccupancyRates = computed(() => {
 const hasActualChildOccupancyRates = computed(() =>
   actualChildOccupancyRates.value.some((value) => value > 0)
 )
+
+defineExpose({
+  refresh
+})
 </script>

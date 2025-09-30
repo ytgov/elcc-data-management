@@ -78,6 +78,10 @@ const props = defineProps<{
   fundingSubmissionLineJsonId: number
 }>()
 
+const emit = defineEmits<{
+  "update:fundingSubmissionLineJson": [fundingSubmissionLineJsonId: number]
+}>()
+
 const { fundingSubmissionLineJsonId } = toRefs(props)
 const { fundingSubmissionLineJson, isLoading } = useFundingSubmissionLineJson(
   fundingSubmissionLineJsonId
@@ -116,6 +120,7 @@ async function saveFundingSubmissionLineJson() {
   try {
     const lines = sections.value.flatMap((section) => section.lines)
     await fundingSubmissionLineJsonsApi.update(fundingSubmissionLineJsonId.value, { lines })
+    emit("update:fundingSubmissionLineJson", fundingSubmissionLineJsonId.value)
   } catch (error) {
     console.error(error)
     notificationStore.notify({
