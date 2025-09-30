@@ -64,6 +64,10 @@ const options = computed(() => ({
   },
   colors: ["#0094A9", "#002EB7", "#FFAE00", "#FF7A00", "#04DDFB", "#A65000", "#1851FC"],
   labels: lineNames.value,
+  tooltip: {
+    theme: "light",
+    fillSeriesColor: false,
+  },
 }))
 
 const actualChildOccupancyRates = computed(() => {
