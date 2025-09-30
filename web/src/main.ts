@@ -11,10 +11,7 @@ import App from "./App.vue"
 
 const pinia = createPinia()
 const app = createApp(App)
-app
-  .use(pinia)
-  .use(router)
-  .use(AuthHelper as any)
+app.use(pinia).use(router).use(AuthHelper)
 
 app.config.globalProperties.$auth = AuthHelper
 
