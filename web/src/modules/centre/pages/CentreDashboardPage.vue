@@ -163,9 +163,7 @@ const breadcrumbs = computed(() => {
     { to: "/dashboard", title: "Home" },
     { to: "/child-care-centres", title: "Child Care Centres" },
     {
-      title:
-        selectedCentre.value?.name ||
-        "loadhttps://wrap.service.yukon.ca/api/workflows?where%5BcategoryId%5D=72&where%5Bstatus%5D=open&perPage=1ing ...",
+      title: selectedCentre.value?.name || "loading ...",
     },
   ]
 })
