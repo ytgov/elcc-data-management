@@ -5,111 +5,123 @@
     cellspacing="0"
     border="0px"
   >
-    <tr class="text-left">
-      <td style="width: 180px"></td>
-      <td
-        class="pl-4"
-        style="width: 120px"
+    <thead>
+      <tr class="text-left">
+        <td style="width: 180px"></td>
+        <td
+          class="pl-4"
+          style="width: 120px"
+        >
+          Per child
+        </td>
+        <td
+          class="pl-4"
+          style="width: 120px"
+        >
+          Est
+        </td>
+        <td class="pl-4">Est Total</td>
+        <td
+          class="pl-4"
+          style="width: 120px"
+        >
+          Act
+        </td>
+        <td class="pl-4">Act Total</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        v-for="(line, lineIndex) in lines"
+        :key="`${line.lineName}-${lineIndex}`"
+        class="monospace"
       >
-        Per child
-      </td>
-      <td
-        class="pl-4"
-        style="width: 120px"
-      >
-        Est
-      </td>
-      <td class="pl-4">Est Total</td>
-      <td
-        class="pl-4"
-        style="width: 120px"
-      >
-        Act
-      </td>
-      <td class="pl-4">Act Total</td>
-    </tr>
-    <tr
-      v-for="(line, lineIndex) in lines"
-      :key="`${line.lineName}-${lineIndex}`"
-      class="monospace"
-    >
-      <td>{{ line.lineName }}</td>
-      <td class="read-only-td-that-matches-v-text-input">
-        <span class="pl-4">
-          {{ formatMoney(line.monthlyAmount) }}
-        </span>
-      </td>
-      <td>
-        <v-text-field
-          ref="estimatesFields"
-          v-model.number="line.estimatedChildOccupancyRate"
-          density="compact"
-          hide-details
-          @keydown="changeFocusInColumn($event, 'estimates', lineIndex)"
-          @change="changeLineAndPropagate(line, lineIndex)"
-        ></v-text-field>
-      </td>
-      <td class="read-only-td-that-matches-v-text-input">
-        <span class="pl-4">
-          {{ formatMoney(line.estimatedComputedTotal) }}
-        </span>
-      </td>
-      <td>
-        <v-text-field
-          ref="actualsFields"
-          v-model.number="line.actualChildOccupancyRate"
-          density="compact"
-          hide-details
-          @keydown="changeFocusInColumn($event, 'actuals', lineIndex)"
-          @change="changeLineAndPropagate(line, lineIndex)"
-        ></v-text-field>
-      </td>
+        <td>{{ line.lineName }}</td>
+        <td class="read-only-td-that-matches-v-text-input">
+          <span class="pl-4">
+            {{ formatMoney(line.monthlyAmount) }}
+          </span>
+        </td>
+        <td>
+          <v-text-field
+            ref="estimatesFields"
+            v-model.number="line.estimatedChildOccupancyRate"
+            density="compact"
+            hide-details
+            @keydown="changeFocusInColumn($event, 'estimates', lineIndex)"
+            @change="changeLineAndPropagate(line, lineIndex)"
+          ></v-text-field>
+        </td>
+        <td class="read-only-td-that-matches-v-text-input">
+          <span class="pl-4">
+            {{ formatMoney(line.estimatedComputedTotal) }}
+          </span>
+        </td>
+        <td>
+          <v-text-field
+            ref="actualsFields"
+            v-model.number="line.actualChildOccupancyRate"
+            density="compact"
+            hide-details
+            @keydown="changeFocusInColumn($event, 'actuals', lineIndex)"
+            @change="changeLineAndPropagate(line, lineIndex)"
+          ></v-text-field>
+        </td>
 
-      <td class="read-only-td-that-matches-v-text-input">
-        <span class="pl-4">
-          {{ formatMoney(line.actualComputedTotal) }}
-        </span>
-      </td>
-    </tr>
-    <tr class="monospace total">
-      <td>SECTION TOTAL</td>
-      <td></td>
-      <td class="read-only-td-that-matches-v-text-input py-2">
-        <span class="pl-4">
-          {{
-            lines.reduce(
-              (a: number, v: any) => a + parseFloat(v.estimatedChildOccupancyRate || 0),
-              0
-            )
-          }}
-        </span>
-      </td>
-      <td class="read-only-td-that-matches-v-text-input">
-        <span class="pl-4">
-          {{
-            formatMoney(
-              lines.reduce((a: number, v: any) => a + parseFloat(v.estimatedComputedTotal || 0), 0)
-            )
-          }}
-        </span>
-      </td>
-      <td class="read-only-td-that-matches-v-text-input">
-        <span class="pl-4">
-          {{
-            lines.reduce((a: number, v: any) => a + parseFloat(v.actualChildOccupancyRate || 0), 0)
-          }}
-        </span>
-      </td>
-      <td class="read-only-td-that-matches-v-text-input">
-        <span class="pl-4">
-          {{
-            formatMoney(
-              lines.reduce((a: number, v: any) => a + parseFloat(v.actualComputedTotal || 0), 0)
-            )
-          }}
-        </span>
-      </td>
-    </tr>
+        <td class="read-only-td-that-matches-v-text-input">
+          <span class="pl-4">
+            {{ formatMoney(line.actualComputedTotal) }}
+          </span>
+        </td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr class="monospace total">
+        <td>SECTION TOTAL</td>
+        <td></td>
+        <td class="read-only-td-that-matches-v-text-input py-2">
+          <span class="pl-4">
+            {{
+              lines.reduce(
+                (a: number, v: any) => a + parseFloat(v.estimatedChildOccupancyRate || 0),
+                0
+              )
+            }}
+          </span>
+        </td>
+        <td class="read-only-td-that-matches-v-text-input">
+          <span class="pl-4">
+            {{
+              formatMoney(
+                lines.reduce(
+                  (a: number, v: any) => a + parseFloat(v.estimatedComputedTotal || 0),
+                  0
+                )
+              )
+            }}
+          </span>
+        </td>
+        <td class="read-only-td-that-matches-v-text-input">
+          <span class="pl-4">
+            {{
+              lines.reduce(
+                (a: number, v: any) => a + parseFloat(v.actualChildOccupancyRate || 0),
+                0
+              )
+            }}
+          </span>
+        </td>
+        <td class="read-only-td-that-matches-v-text-input">
+          <span class="pl-4">
+            {{
+              formatMoney(
+                lines.reduce((a: number, v: any) => a + parseFloat(v.actualComputedTotal || 0), 0)
+              )
+            }}
+          </span>
+        </td>
+      </tr>
+    </tfoot>
   </table>
 </template>
 
