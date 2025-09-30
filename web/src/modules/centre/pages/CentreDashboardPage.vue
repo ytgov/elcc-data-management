@@ -47,7 +47,7 @@
         <v-card-title style="background-color: #0097a968">Latest Enrollment</v-card-title>
         <v-divider></v-divider>
         <v-card-text class="pt-3">
-          <EnrollmentChart :centre-id="centreIdAsNumber" />
+          <FundingLineValuesEnrollmentChart :centre-id="centreIdAsNumber" />
         </v-card-text>
       </v-card>
     </v-col>
@@ -106,7 +106,7 @@ import getCurrentFiscalYearSlug from "@/utils/get-current-fiscal-year-slug"
 import { useCentreStore } from "@/modules/centre/store"
 
 import FiscalYearSelect from "@/components/FiscalYearSelect.vue"
-import EnrollmentChart from "@/modules/centre/components/EnrollmentChart.vue"
+import FundingLineValuesEnrollmentChart from "@/components/funding-line-values/FundingLineValuesEnrollmentChart.vue"
 import CentreDetailsCard from "@/modules/centre/components/CentreDetailsCard.vue"
 
 const props = defineProps({
