@@ -182,7 +182,7 @@ export default {
     ...mapActions(useSubmissionLinesStore, { initLines: "initialize" }),
 
     logoutClick() {
-      this.$auth.logout({ logoutParams: { returnTo: window.location.origin } })
+      this.$auth0.logout({ logoutParams: { returnTo: window.location.origin } })
     },
     fetchVersion() {
       http

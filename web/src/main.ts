@@ -1,28 +1,15 @@
 import { createApp } from "vue"
 import { createPinia } from "pinia"
-import { router } from "./routes"
-import { AuthHelper } from "@/plugins/auth"
 
-// Plugins
-import { registerPlugins } from "./plugins"
-import { type Auth0Plugin } from "@auth0/auth0-vue"
+import { AuthHelper as authPlugin } from "@/plugins/auth"
+import vuetifyPlugin from "@/plugins/vuetify"
 
-import App from "./App.vue"
+import { router } from "@/routes"
+
+import App from "@/App.vue"
 
 const pinia = createPinia()
 const app = createApp(App)
-app.use(pinia).use(router).use(AuthHelper)
-
-app.config.globalProperties.$auth = AuthHelper
-
-declare module "@vue/runtime-core" {
-  interface ComponentCustomProperties {
-    $auth: Auth0Plugin
-  }
-}
-
-export {} // Important! See note.
-
-registerPlugins(app)
+app.use(pinia).use(router).use(authPlugin).use(vuetifyPlugin)
 
 app.mount("#app")
