@@ -20,7 +20,7 @@
     "luxon": "^3.4.4",
     "moment": "^2.29.4",
     "pinia": "^2.0.32",
-    "qs": "^6.11.2",
+    "qs": "^6.14.0",
     "vue": "^3.5.21",
     "vue-currency-input": "^3.0.5",
     "vue-router": "^4.2.5",
@@ -30,7 +30,7 @@
   "devDependencies": {
     "@types/lodash": "^4.14.191",
     "@types/luxon": "^3.3.7",
-    "@types/qs": "^6.9.10",
+    "@types/qs": "^6.14.0",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
     "@vitejs/plugin-vue": "^5.2.4",
