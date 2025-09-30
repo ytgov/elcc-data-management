@@ -96,7 +96,7 @@
         </v-menu>
       </div>
       <div v-else>
-        <login-button />
+        <LoginButton />
       </div>
     </template>
   </v-app-bar>
@@ -140,11 +140,15 @@ import { useNotificationStore } from "@/store/NotificationStore"
 import { useCentreStore } from "@/modules/centre/store"
 import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 
+import LoginButton from "@/components/LoginButton.vue"
+
 const UNSET_RELEASE_TAG = "2024.01.10.0"
 
 export default {
   name: "Default",
-
+  components: {
+    LoginButton,
+  },
   data() {
     return {
       isAuthenticated: this.$auth0.isAuthenticated,

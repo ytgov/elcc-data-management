@@ -23,7 +23,7 @@
 
   <h1>Submission Format</h1>
 
-  <base-card
+  <BaseCard
     show-header="t"
     heading=""
   >
@@ -66,7 +66,7 @@
       class="row-clickable"
       @click:row="rowClick"
     ></v-data-table>
-  </base-card>
+  </BaseCard>
 
   <SubmissionLineEditor />
 
@@ -74,12 +74,19 @@
 </template>
 <script lang="ts">
 import { mapActions, mapState } from "pinia"
-import { useSubmissionLinesStore } from "../store"
-import SubmissionLineEditor from "../components/SubmissionLineEditor.vue"
-import FundingFiscalEditor from "../components/FundingFiscalEditor.vue"
+
+import { useSubmissionLinesStore } from "@/modules/submission-lines/store/index"
+
+import BaseCard from "@/components/BaseCard.vue"
+import SubmissionLineEditor from "@/modules/submission-lines/components/SubmissionLineEditor.vue"
+import FundingFiscalEditor from "@/modules/submission-lines/components/FundingFiscalEditor.vue"
 
 export default {
-  components: { SubmissionLineEditor, FundingFiscalEditor },
+  components: {
+    BaseCard,
+    FundingFiscalEditor,
+    SubmissionLineEditor,
+  },
   data: () => ({
     headers: [
       { title: "Section", value: "sectionName" },

@@ -9,6 +9,6 @@ useApiStore()
 <template>
   <v-app>
     <router-view />
-    <notifications />
+    <Notifications />
   </v-app>
 </template>

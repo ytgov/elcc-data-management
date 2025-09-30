@@ -23,7 +23,7 @@
 
   <h1>Users</h1>
 
-  <base-card
+  <BaseCard
     show-header="t"
     heading=""
   >
@@ -62,17 +62,23 @@
         <div v-else>{{ item.roles.length }}</div>
       </template>
     </v-data-table>
-  </base-card>
+  </BaseCard>
 
   <user-editor></user-editor>
 </template>
 <script lang="ts">
 import { mapActions, mapState } from "pinia"
-import { useUserAdminStore } from "../store"
-import UserEditor from "../components/UserEditor.vue"
+
+import { useUserAdminStore } from "@/modules/users/store/index"
+
+import BaseCard from "@/components/BaseCard.vue"
+import UserEditor from "@/modules/users/components/UserEditor.vue"
 
 export default {
-  components: { UserEditor },
+  components: {
+    BaseCard,
+    UserEditor,
+  },
   data: () => ({
     headers: [
       { title: "Name", key: "displayName" },

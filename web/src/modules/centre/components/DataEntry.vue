@@ -52,11 +52,14 @@
 </template>
 <script lang="ts">
 import moment from "moment" // TODO: deprecated; replace with luxon
-// import { CareCentre } from "@models";
+
+import BaseCard from "@/components/BaseCard.vue"
 
 export default {
-  name: "Dashboard",
-  components: {},
+  name: "DataEntry",
+  components: {
+    BaseCard,
+  },
   data: () => ({
     total: 0,
     search: "",

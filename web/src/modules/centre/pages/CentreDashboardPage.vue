@@ -105,6 +105,7 @@ import { storeToRefs } from "pinia"
 import getCurrentFiscalYearSlug from "@/utils/get-current-fiscal-year-slug"
 import { useCentreStore } from "@/modules/centre/store"
 
+import FiscalYearSelect from "@/components/FiscalYearSelect.vue"
 import EnrollmentChart from "@/modules/centre/components/EnrollmentChart.vue"
 import CentreDetailsCard from "@/modules/centre/components/CentreDetailsCard.vue"
 
