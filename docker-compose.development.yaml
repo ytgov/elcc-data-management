@@ -6,6 +6,7 @@ x-default-environment: &default-environment
   DB_NAME: elcc_development
   DB_PASS: &default-db-password DevPwd99!
   DB_PORT: &default-db-port 1433
+  DB_TRUST_SERVER_CERTIFICATE: "true"
   DB_HEALTH_CHECK_INTERVAL_SECONDS: 5
   DB_HEALTH_CHECK_TIMEOUT_SECONDS: 10
   DB_HEALTH_CHECK_RETRIES: 3
