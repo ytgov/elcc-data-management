@@ -21,9 +21,3 @@ export const applicationName = "Vue 3 Template"
 export const applicationIcon = "mdi-leaf"
 export const hasSidebar = true
 export const hasSidebarClosable = false
-
-export const DEVELOPMENT_CONFIG = {
-  client_id: "mS8zklFSgatWX3v1OCQgVpEq5MixCm4k",
-  audience: "testing",
-  domain: "https://dev-0tc6bn14.eu.auth0.com",
-}
