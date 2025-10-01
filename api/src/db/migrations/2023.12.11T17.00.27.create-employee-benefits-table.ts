@@ -15,7 +15,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "centres", // use real table name here
+        table: "centres", // use real table name here
         key: "id",
       },
     },
@@ -23,7 +23,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "fiscal_periods", // use real table name here
+        table: "fiscal_periods", // use real table name here
         key: "id",
       },
     },

@@ -8,7 +8,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
       type: DataTypes.STRING(200),
       allowNull: false,
       references: {
-        model: "users",
+        table: "users",
         key: "email",
       },
     },

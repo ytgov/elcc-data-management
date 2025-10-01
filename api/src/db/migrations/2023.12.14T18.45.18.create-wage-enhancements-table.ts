@@ -15,7 +15,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "centres",
+        table: "centres",
         key: "id",
       },
     },
@@ -23,7 +23,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "employee_wage_tiers",
+        table: "employee_wage_tiers",
         key: "id",
       },
     },

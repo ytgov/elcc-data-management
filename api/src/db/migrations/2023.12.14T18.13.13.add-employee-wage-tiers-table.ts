@@ -15,7 +15,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "fiscal_periods",
+        table: "fiscal_periods",
         key: "id",
       },
     },
