@@ -19,6 +19,7 @@ import {
 
 import BaseModel from "@/models/base-model"
 import CentreFundingPeriod from "@/models/centre-funding-period"
+import EmployeeBenefit from "@/models/employee-benefit"
 // import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
 
 // Keep in sync with web/src/api/centres-api.ts
@@ -138,6 +139,14 @@ export class Centre extends BaseModel<InferAttributes<Centre>, InferCreationAttr
   declare updatedAt: CreationOptional<Date>
 
   // Associations
+  @HasMany(() => EmployeeBenefit, {
+    foreignKey: "centreId",
+    inverse: {
+      as: "centre",
+    },
+  })
+  declare employeeBenefits?: NonAttribute<EmployeeBenefit[]>
+
   @HasMany(() => CentreFundingPeriod, {
     foreignKey: "centreId",
     inverse: {

@@ -1,139 +1,109 @@
 import {
-  Association,
-  BelongsToCreateAssociationMixin,
-  BelongsToGetAssociationMixin,
-  BelongsToSetAssociationMixin,
-  CreationOptional,
   DataTypes,
-  ForeignKey,
-  InferAttributes,
-  InferCreationAttributes,
   Model,
-  NonAttribute,
-} from "sequelize"
+  sql,
+  type CreationOptional,
+  type InferAttributes,
+  type InferCreationAttributes,
+  type NonAttribute,
+} from "@sequelize/core"
+import {
+  Attribute,
+  AutoIncrement,
+  BelongsTo,
+  Default,
+  NotNull,
+  PrimaryKey,
+  Table,
+} from "@sequelize/core/decorators-legacy"
 
-import sequelize from "@/db/db-client"
-import Centre from "./centre"
-import FiscalPeriod from "./fiscal-period"
+import { EmployeeBenefitsCenterIdFiscalPeriodIdUniqueIndex } from "@/models/indexes"
 
+import Centre from "@/models/centre"
+// import FiscalPeriod from "@/models/fiscal-period"
+
+@Table({
+  paranoid: false,
+})
 export class EmployeeBenefit extends Model<
   InferAttributes<EmployeeBenefit>,
   InferCreationAttributes<EmployeeBenefit>
 > {
+  @Attribute(DataTypes.INTEGER)
+  @PrimaryKey
+  @AutoIncrement
   declare id: CreationOptional<number>
-  declare centreId: ForeignKey<Centre["id"]>
-  declare fiscalPeriodId: ForeignKey<FiscalPeriod["id"]>
+
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  @EmployeeBenefitsCenterIdFiscalPeriodIdUniqueIndex
+  declare centreId: number
+
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  @EmployeeBenefitsCenterIdFiscalPeriodIdUniqueIndex
+  declare fiscalPeriodId: number
+
+  @Attribute(DataTypes.DECIMAL(10, 2))
+  @NotNull
   declare grossPayrollMonthlyActual: number
+
+  @Attribute(DataTypes.DECIMAL(10, 2))
+  @NotNull
   declare grossPayrollMonthlyEstimated: number
+
+  @Attribute(DataTypes.DECIMAL(5, 2))
+  @NotNull
   declare costCapPercentage: number
+
+  @Attribute(DataTypes.DECIMAL(10, 2))
+  @NotNull
   declare employeeCostActual: number
+
+  @Attribute(DataTypes.DECIMAL(10, 2))
+  @NotNull
   declare employeeCostEstimated: number
+
+  @Attribute(DataTypes.DECIMAL(10, 2))
+  @NotNull
   declare employerCostActual: number
+
+  @Attribute(DataTypes.DECIMAL(10, 2))
+  @NotNull
   declare employerCostEstimated: number
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare createdAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
 
-  // https://sequelize.org/docs/v6/other-topics/typescript/#usage
-  // https://sequelize.org/docs/v6/core-concepts/assocs/#special-methodsmixins-added-to-instances
-  // https://sequelize.org/api/v7/types/_sequelize_core.index.belongstocreateassociationmixin
-  declare getCentre: BelongsToGetAssociationMixin<Centre>
-  declare setCentre: BelongsToSetAssociationMixin<Centre, Centre["id"]>
-  declare createCentre: BelongsToCreateAssociationMixin<Centre>
-
-  declare getFiscalPeriod: BelongsToGetAssociationMixin<FiscalPeriod>
-  declare setFiscalPeriod: BelongsToSetAssociationMixin<FiscalPeriod, FiscalPeriod["id"]>
-  declare createFiscalPeriod: BelongsToCreateAssociationMixin<FiscalPeriod>
-
+  // Associations
+  @BelongsTo(() => Centre, {
+    foreignKey: "centreId",
+    inverse: {
+      as: "employeeBenefits",
+      type: "hasMany",
+    },
+  })
   declare centre?: NonAttribute<Centre>
-  declare fiscalPeriod?: NonAttribute<FiscalPeriod>
 
-  declare static associations: {
-    centre: Association<EmployeeBenefit, Centre>
-    fiscalPeriod: Association<EmployeeBenefit, FiscalPeriod>
-  }
+  // @BelongsTo(() => FiscalPeriod, {
+  //   foreignKey: "fiscalPeriodId",
+  //   inverse: {
+  //     as: "employeeBenefits",
+  //     type: "hasMany",
+  //   },
+  // })
+  // declare fiscalPeriod?: NonAttribute<FiscalPeriod>
 
-  static establishAssociations() {
-    this.belongsTo(Centre, {
-      foreignKey: "centreId",
-    })
-    this.belongsTo(FiscalPeriod, {
-      foreignKey: "fiscalPeriodId",
-    })
+  static establishScopes() {
+    // add as needed
   }
 }
-
-EmployeeBenefit.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-      allowNull: false,
-    },
-    centreId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: "centres", // use real table name here
-        key: "id",
-      },
-    },
-    fiscalPeriodId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: "fiscal_periods", // use real table name here
-        key: "id",
-      },
-    },
-    grossPayrollMonthlyActual: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-    },
-    grossPayrollMonthlyEstimated: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-    },
-    costCapPercentage: {
-      type: DataTypes.DECIMAL(5, 2),
-      allowNull: false,
-    },
-    employeeCostActual: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-    },
-    employeeCostEstimated: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-    },
-    employerCostActual: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-    },
-    employerCostEstimated: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    sequelize,
-    indexes: [
-      {
-        unique: true,
-        fields: ["centre_id", "fiscal_period_id"], // not sure if these need to be snake_case?
-      },
-    ],
-  }
-)
 
 export default EmployeeBenefit
