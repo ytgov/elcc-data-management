@@ -1,4 +1,4 @@
-import { Attributes, CreationOptional, FindOptions, Model, ModelStatic, Op } from "sequelize"
+import { Attributes, FindOptions, Model, ModelStatic } from "@sequelize/core"
 
 // See /home/marlen/code/icefoganalytics/elcc-data-management/api/node_modules/sequelize/types/model.d.ts -> Model
 export abstract class BaseModel<
@@ -7,58 +7,70 @@ export abstract class BaseModel<
   // eslint-disable-next-line @typescript-eslint/ban-types
   TCreationAttributes extends {} = TModelAttributes,
 > extends Model<TModelAttributes, TCreationAttributes> {
-  declare id: CreationOptional<number>
-
-  // See /home/marlen/code/icefoganalytics/elcc-data-management/api/node_modules/sequelize/types/model.d.ts -> findAll
+  // See api/node_modules/@sequelize/core/lib/model.d.ts -> findAll
   // Taken from https://api.rubyonrails.org/v7.1.0/classes/ActiveRecord/Batches.html#method-i-find_each
   // Enforces sort by id, overwriting any supplied order
   public static async findEach<M extends BaseModel>(
     this: ModelStatic<M>,
     processFunction: (record: M) => Promise<void>
   ): Promise<void>
-  public static async findEach<M extends BaseModel>(
+  public static async findEach<M extends BaseModel, R = Attributes<M>>(
     this: ModelStatic<M>,
-    options: FindOptions<Attributes<M>> & { batchSize?: number },
-    processFunction: (record: M) => Promise<void>
+    options: Omit<FindOptions<Attributes<M>>, "raw"> & {
+      raw: true
+      batchSize?: number
+    },
+    processFunction: (record: R) => Promise<void>
   ): Promise<void>
   public static async findEach<M extends BaseModel>(
     this: ModelStatic<M>,
+    options: FindOptions<Attributes<M>> & {
+      batchSize?: number
+    },
+    processFunction: (record: M) => Promise<void>
+  ): Promise<void>
+  public static async findEach<M extends BaseModel, R = Attributes<M>>(
+    this: ModelStatic<M>,
     optionsOrFunction:
       | ((record: M) => Promise<void>)
+      | (Omit<FindOptions<Attributes<M>>, "raw"> & { raw: true; batchSize?: number })
       | (FindOptions<Attributes<M>> & { batchSize?: number }),
-    maybeFunction?: (record: M) => Promise<void>
+    maybeFunction?: (record: R | M) => Promise<void>
   ): Promise<void> {
-    let options: FindOptions<Attributes<M>> & { batchSize?: number }
+    let options:
+      | (FindOptions<Attributes<M>> & { batchSize?: number })
+      | (Omit<FindOptions<Attributes<M>>, "raw"> & { raw: true; batchSize?: number })
+
+    // TODO: fix types so that process function is M when not raw
+    // and R when raw. Raw is usable, just incorrectly typed.
     let processFunction: (record: M) => Promise<void>
 
     if (typeof optionsOrFunction === "function") {
       options = {}
       processFunction = optionsOrFunction
+    } else if (maybeFunction === undefined) {
+      throw new Error("findEach requires a processFunction")
     } else {
       options = optionsOrFunction
-      processFunction = maybeFunction!
+      processFunction = maybeFunction
     }
 
     const batchSize = options.batchSize ?? 1000
-    let lastId = 0
+    let offset: number = 0
     let continueProcessing = true
 
     while (continueProcessing) {
-      const whereClause = {
-        ...options.where,
-        id: { [Op.gt]: lastId },
-      }
       const records = await this.findAll({
         ...options,
-        where: whereClause,
+        offset,
         limit: batchSize,
-        order: [["id", "ASC"]],
       })
 
       for (const record of records) {
         await processFunction(record)
-        lastId = record.id
       }
+
+      offset += records.length
 
       if (records.length < batchSize) {
         continueProcessing = false
