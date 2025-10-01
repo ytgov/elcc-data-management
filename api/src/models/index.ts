@@ -1,3 +1,5 @@
+export { type FundingLineValue } from "@/models/funding-line-value"
+
 import db from "@/db/db-client"
 
 import Centre from "@/models/centre"
@@ -12,7 +14,7 @@ import Log from "@/models/log"
 import Payment from "@/models/payment"
 import User from "@/models/user"
 import UserRole from "@/models/user-role"
-import { WageEnhancement } from "@/models/wage-enhancement"
+import WageEnhancement from "@/models/wage-enhancement"
 
 db.addModels([
   Centre,
@@ -27,9 +29,9 @@ db.addModels([
   Payment,
   User,
   UserRole,
+  WageEnhancement,
 ])
 
-// Order matters here, though may be somewhat flexible
 Centre.establishScopes()
 CentreFundingPeriod.establishScopes()
 EmployeeBenefit.establishScopes()
@@ -42,10 +44,8 @@ Log.establishScopes()
 Payment.establishScopes()
 User.establishScopes()
 UserRole.establishScopes()
-WageEnhancement.establishAssociations()
+WageEnhancement.establishScopes()
 
-// Alphabetically - order does not matter
-export { type FundingLineValue } from "@/models/funding-line-value"
 export {
   Centre,
   CentreFundingPeriod,

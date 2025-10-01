@@ -11,7 +11,7 @@ import {
   AutoIncrement,
   BelongsTo,
   Default,
-  // HasMany,
+  HasMany,
   NotNull,
   PrimaryKey,
   Table,
@@ -21,7 +21,7 @@ import { EmployeeWageTiersFiscalPeriodIdTierLevelUniqueIndex } from "@/models/in
 
 import BaseModel from "@/models/base-model"
 import FiscalPeriod from "@/models/fiscal-period"
-// import WageEnhancement from "@/models/wage-enhancement"
+import WageEnhancement from "@/models/wage-enhancement"
 
 @Table({
   paranoid: false,
@@ -73,13 +73,13 @@ export class EmployeeWageTier extends BaseModel<
   })
   declare fiscalPeriod?: NonAttribute<FiscalPeriod>
 
-  // @HasMany(() => WageEnhancement, {
-  //   foreignKey: "employeeWageTierId",
-  //   inverse: {
-  //     as: "employeeWageTier",
-  //   },
-  // })
-  // declare wageEnhancements?: NonAttribute<WageEnhancement[]>
+  @HasMany(() => WageEnhancement, {
+    foreignKey: "employeeWageTierId",
+    inverse: {
+      as: "employeeWageTier",
+    },
+  })
+  declare wageEnhancements?: NonAttribute<WageEnhancement[]>
 
   static establishScopes() {
     // add as needed
