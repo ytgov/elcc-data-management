@@ -13,7 +13,7 @@
     "initializers": "ts-node -r tsconfig-paths/register --files src/initializers/index.ts",
     "test": "vitest",
     "lint": "eslint . --ext .js,.ts --ignore-path ../.gitignore",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc -p tests/tsconfig.json --noEmit"
   },
   "author": "Michael Johnson",
   "license": "ISC",
