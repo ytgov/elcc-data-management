@@ -3,28 +3,29 @@ import db from "@/db/db-client"
 import Centre from "@/models/centre"
 import CentreFundingPeriod from "@/models/centre-funding-period"
 import EmployeeBenefit from "@/models/employee-benefit"
+import EmployeeWageTier from "@/models/employee-wage-tier"
 import { FundingSubmissionLineJson } from "@/models/funding-submission-line-json"
 import { User } from "@/models/user"
 import { UserRole } from "@/models/user-role"
 import { Payment } from "@/models/payment"
-import { EmployeeWageTier } from "@/models/employee-wage-tier"
 import { WageEnhancement } from "@/models/wage-enhancement"
 
 db.addModels([
   Centre,
   CentreFundingPeriod,
   EmployeeBenefit,
+  EmployeeWageTier,
 ])
 
 // Order matters here, though may be somewhat flexible
 Centre.establishScopes()
 CentreFundingPeriod.establishScopes()
 EmployeeBenefit.establishScopes()
+EmployeeWageTier.establishScopes()
 FundingSubmissionLineJson.establishAssociations()
 User.establishAssociations()
 UserRole.establishAssociations()
 Payment.establishAssociations()
-EmployeeWageTier.establishAssociations()
 WageEnhancement.establishAssociations()
 
 // Alphabetically - order does not matter
