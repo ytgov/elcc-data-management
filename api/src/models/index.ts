@@ -8,6 +8,7 @@ import FiscalPeriod from "@/models/fiscal-period"
 import FundingPeriod from "@/models/funding-period"
 import FundingSubmissionLine from "@/models/funding-submission-line"
 import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
+import Log from "@/models/log"
 import { User } from "@/models/user"
 import { UserRole } from "@/models/user-role"
 import { Payment } from "@/models/payment"
@@ -22,6 +23,7 @@ db.addModels([
   FundingPeriod,
   FundingSubmissionLine,
   FundingSubmissionLineJson,
+  Log,
 ])
 
 // Order matters here, though may be somewhat flexible
@@ -33,6 +35,7 @@ FiscalPeriod.establishScopes()
 FundingPeriod.establishScopes()
 FundingSubmissionLine.establishScopes()
 FundingSubmissionLineJson.establishScopes()
+Log.establishScopes()
 User.establishAssociations()
 UserRole.establishAssociations()
 Payment.establishAssociations()
@@ -40,7 +43,6 @@ WageEnhancement.establishAssociations()
 
 // Alphabetically - order does not matter
 export { type FundingLineValue } from "@/models/funding-line-value"
-export { Log } from "@/models/log"
 export {
   Centre,
   CentreFundingPeriod,
@@ -50,6 +52,7 @@ export {
   FundingPeriod,
   FundingSubmissionLine,
   FundingSubmissionLineJson,
+  Log,
   Payment,
   User,
   UserRole,
