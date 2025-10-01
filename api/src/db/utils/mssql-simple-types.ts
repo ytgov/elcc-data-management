@@ -1,4 +1,4 @@
-import { Sequelize } from "sequelize"
+import { Sequelize, sql } from "@sequelize/core"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const sequelizeVersion = (Sequelize as any).version
@@ -17,6 +17,6 @@ function DATETIME2(length?: number): string {
 }
 
 export const MssqlSimpleTypes = {
-  NOW: Sequelize.literal("GETDATE()"),
+  NOW: sql.fn("GETDATE"),
   DATETIME2,
 }
