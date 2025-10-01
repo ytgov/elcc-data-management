@@ -1,20 +1,24 @@
 import {
-  Association,
-  BelongsToCreateAssociationMixin,
-  BelongsToGetAssociationMixin,
-  BelongsToSetAssociationMixin,
-  CreationOptional,
   DataTypes,
-  ForeignKey,
-  InferAttributes,
-  InferCreationAttributes,
   Model,
-  NonAttribute,
-} from "sequelize"
+  sql,
+  type CreationOptional,
+  type InferAttributes,
+  type InferCreationAttributes,
+  // type NonAttribute,
+} from "@sequelize/core"
+import {
+  Attribute,
+  AutoIncrement,
+  // BelongsTo,
+  Default,
+  NotNull,
+  PrimaryKey,
+  Table,
+  ValidateAttribute,
+} from "@sequelize/core/decorators-legacy"
 
-import sequelize from "@/db/db-client"
-
-import User from "@/models/user"
+// import User from "@/models/user"
 
 export enum RoleTypes {
   EDITOR = "Editor",
@@ -24,68 +28,54 @@ export enum RoleTypes {
   SYSTEM_ADMINISTRATOR = "System Administrator",
 }
 
+@Table({
+  paranoid: false,
+})
 export class UserRole extends Model<InferAttributes<UserRole>, InferCreationAttributes<UserRole>> {
+  static readonly Types = RoleTypes
+
+  @Attribute(DataTypes.INTEGER)
+  @PrimaryKey
+  @AutoIncrement
   declare id: CreationOptional<number>
-  declare userId: ForeignKey<User["id"]>
+
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  declare userId: number
+
+  @Attribute(DataTypes.STRING(255))
+  @NotNull
+  @ValidateAttribute({
+    isIn: {
+      args: [Object.values(RoleTypes)],
+      msg: `Role must be one of: ${Object.values(RoleTypes).join(", ")}`,
+    },
+  })
   declare role: string
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare createdAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
 
-  // https://sequelize.org/docs/v6/other-topics/typescript/#usage
-  // https://sequelize.org/docs/v6/core-concepts/assocs/#special-methodsmixins-added-to-instances
-  // https://sequelize.org/api/v7/types/_sequelize_core.index.belongstocreateassociationmixin
-  declare getUser: BelongsToGetAssociationMixin<User>
-  declare setUser: BelongsToSetAssociationMixin<User, User["id"]>
-  declare createUser: BelongsToCreateAssociationMixin<User>
+  // Associations
+  // @BelongsTo(() => User, {
+  //   foreignKey: "userId",
+  //   inverse: {
+  //     as: "userRoles",
+  //     type: "hasMany",
+  //   },
+  // })
+  // declare user?: NonAttribute<User>
 
-  declare user?: NonAttribute<User>
-
-  declare static associations: {
-    user: Association<UserRole, User>
-  }
-
-  static establishAssociations() {
-    this.belongsTo(User)
+  static establishScopes() {
+    // add as needed
   }
 }
-
-UserRole.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      allowNull: false,
-      autoIncrement: true,
-    },
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: "users",
-        key: "id",
-      },
-    },
-    role: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-      validate: {
-        isIn: [Object.values(RoleTypes)],
-      },
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    sequelize,
-  }
-)
 
 export default UserRole

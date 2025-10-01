@@ -10,8 +10,8 @@ import FundingSubmissionLine from "@/models/funding-submission-line"
 import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
 import Log from "@/models/log"
 import Payment from "@/models/payment"
+import UserRole from "@/models/user-role"
 import { User } from "@/models/user"
-import { UserRole } from "@/models/user-role"
 import { WageEnhancement } from "@/models/wage-enhancement"
 
 db.addModels([
@@ -25,6 +25,7 @@ db.addModels([
   FundingSubmissionLineJson,
   Log,
   Payment,
+  UserRole,
 ])
 
 // Order matters here, though may be somewhat flexible
@@ -38,8 +39,8 @@ FundingSubmissionLine.establishScopes()
 FundingSubmissionLineJson.establishScopes()
 Log.establishScopes()
 Payment.establishScopes()
+UserRole.establishScopes()
 User.establishAssociations()
-UserRole.establishAssociations()
 WageEnhancement.establishAssociations()
 
 // Alphabetically - order does not matter
