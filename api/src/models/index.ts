@@ -6,7 +6,7 @@ import EmployeeBenefit from "@/models/employee-benefit"
 import EmployeeWageTier from "@/models/employee-wage-tier"
 import FiscalPeriod from "@/models/fiscal-period"
 import FundingPeriod from "@/models/funding-period"
-import { FundingSubmissionLineJson } from "@/models/funding-submission-line-json"
+import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
 import { User } from "@/models/user"
 import { UserRole } from "@/models/user-role"
 import { Payment } from "@/models/payment"
@@ -19,6 +19,7 @@ db.addModels([
   EmployeeWageTier,
   FiscalPeriod,
   FundingPeriod,
+  FundingSubmissionLineJson,
 ])
 
 // Order matters here, though may be somewhat flexible
@@ -28,7 +29,7 @@ EmployeeBenefit.establishScopes()
 EmployeeWageTier.establishScopes()
 FiscalPeriod.establishScopes()
 FundingPeriod.establishScopes()
-FundingSubmissionLineJson.establishAssociations()
+FundingSubmissionLineJson.establishScopes()
 User.establishAssociations()
 UserRole.establishAssociations()
 Payment.establishAssociations()

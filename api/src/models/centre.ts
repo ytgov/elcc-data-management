@@ -20,7 +20,7 @@ import {
 import BaseModel from "@/models/base-model"
 import CentreFundingPeriod from "@/models/centre-funding-period"
 import EmployeeBenefit from "@/models/employee-benefit"
-// import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
+import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
 
 // Keep in sync with web/src/api/centres-api.ts
 export enum CentreRegions {
@@ -155,13 +155,13 @@ export class Centre extends BaseModel<InferAttributes<Centre>, InferCreationAttr
   })
   declare fundingPeriods?: NonAttribute<CentreFundingPeriod[]>
 
-  // @HasMany(() => FundingSubmissionLineJson, {
-  //   foreignKey: "centreId",
-  //   inverse: {
-  //     as: "centre",
-  //   },
-  // })
-  // declare fundingSubmissionLineJsons?: NonAttribute<FundingSubmissionLineJson[]>
+  @HasMany(() => FundingSubmissionLineJson, {
+    foreignKey: "centreId",
+    inverse: {
+      as: "centre",
+    },
+  })
+  declare fundingSubmissionLineJsons?: NonAttribute<FundingSubmissionLineJson[]>
 
   static establishScopes() {
     // add as needed
