@@ -1,4 +1,7 @@
-import { BaseConstraintOptions, QueryInterface, QueryInterfaceOptions } from "sequelize"
+import { BaseConstraintQueryOptions, RemoveConstraintQueryOptions } from "@sequelize/core"
+import { MsSqlQueryInterface } from "@sequelize/mssql"
+
+// TODO: investigate if we even still need this with Sequelize 7.
 
 // TODO: implement a parallel interface to addConstraint
 // UNIQUE
@@ -100,25 +103,28 @@ function findNonForeignKeyConstraintQuery(
   `
 }
 
-export interface RemoveUniqueConstraintOptions extends BaseConstraintOptions {
-  type: "unique"
+export interface RemoveUniqueConstraintOptions extends BaseConstraintQueryOptions {
+  type: "UNIQUE"
+  fields: [string]
 }
 
-export interface RemoveDefaultConstraintOptions extends BaseConstraintOptions {
-  type: "default"
+export interface RemoveDefaultConstraintOptions extends BaseConstraintQueryOptions {
+  type: "DEFAULT"
 }
 
-export interface RemoveCheckConstraintOptions extends BaseConstraintOptions {
-  type: "check"
+export interface RemoveCheckConstraintOptions extends BaseConstraintQueryOptions {
+  type: "CHECK"
   // where?: WhereOptions<any>;
 }
 
-export interface RemovePrimaryKeyConstraintOptions extends BaseConstraintOptions {
-  type: "primary key"
+export interface RemovePrimaryKeyConstraintOptions extends BaseConstraintQueryOptions {
+  type: "PRIMARY KEY"
+  fields: [string]
 }
 
-export interface RemoveForeignKeyConstraintOptions extends BaseConstraintOptions {
-  type: "foreign key"
+export interface RemoveForeignKeyConstraintOptions extends BaseConstraintQueryOptions {
+  type: "FOREIGN KEY"
+  fields: [string]
   // references?: {
   //   table: TableName;
   //   field: string;
@@ -137,20 +143,20 @@ export type RemoveConstraintOptions =
 // FYI: this is a very minimal implementation, if you want more options,
 // you'll need to add them.
 export async function removeConstraint(
-  queryInterface: QueryInterface,
+  queryInterface: MsSqlQueryInterface,
   tableName: string,
-  options: RemoveConstraintOptions & QueryInterfaceOptions
+  options: RemoveConstraintOptions & RemoveConstraintQueryOptions
 ) {
   let query
-  if (options.type === "foreign key") {
+  if (options.type === "FOREIGN KEY") {
     query = findForeignKeyConstraintQuery(tableName, options.fields[0])
-  } else if (options.type === "primary key") {
+  } else if (options.type === "PRIMARY KEY") {
     query = findNonForeignKeyConstraintQuery(
       tableName,
       options.fields[0],
       MSSQL_CONSTRAINT_TYPES.PRIMARY_KEY
     )
-  } else if (options.type === "unique") {
+  } else if (options.type === "UNIQUE") {
     query = findNonForeignKeyConstraintQuery(
       tableName,
       options.fields[0],
