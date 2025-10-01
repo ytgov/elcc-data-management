@@ -3,6 +3,7 @@ import { faker } from "@faker-js/faker"
 import { DateTime } from "luxon"
 
 import { FiscalPeriod } from "@/models"
+import { FiscalPeriodMonths } from "@/models/fiscal-period"
 import { formatAsFiscalYear } from "@/factories/helpers"
 
 export const fiscalPeriodFactory = Factory.define<FiscalPeriod>(({ sequence, onCreate }) => {
@@ -12,7 +13,7 @@ export const fiscalPeriodFactory = Factory.define<FiscalPeriod>(({ sequence, onC
   const month = faker.number.int({ min: 1, max: 12 })
   const dateStart = DateTime.local(year, month, 1).startOf("month")
   const dateEnd = dateStart.endOf("month")
-  const monthName = dateStart.toFormat("MMMM")
+  const monthName = dateStart.toFormat("MMMM").toLowerCase() as FiscalPeriodMonths
 
   const APRIL = 4 // Luxon uses 1-indexed months
   const fiscalYearStartYear = month >= APRIL ? year : year - 1

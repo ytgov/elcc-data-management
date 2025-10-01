@@ -1,4 +1,4 @@
-import { WageEnhancement } from "@/models"
+import { FiscalPeriod, WageEnhancement } from "@/models"
 import { ReplicateEstimatesService } from "@/services/wage-enhancements"
 import {
   centreFactory,
@@ -15,19 +15,19 @@ describe("api/src/services/wage-enhancements/replicate-estimates-service.ts", ()
         const centre = await centreFactory.create()
         const fiscalPeriod1 = await fiscalPeriodFactory.create({
           fiscalYear: "2024-25",
-          month: "April",
+          month: FiscalPeriod.Months.APRIL,
           dateStart: new Date("2024-04-01T00:00:00Z"),
           dateEnd: new Date("2024-04-30T23:59:59Z"),
         })
         await fiscalPeriodFactory.create({
           fiscalYear: "2024-25",
-          month: "May",
+          month: FiscalPeriod.Months.MAY,
           dateStart: new Date("2024-05-01T00:00:00Z"),
           dateEnd: new Date("2024-05-31T23:59:59Z"),
         })
         await fiscalPeriodFactory.create({
           fiscalYear: "2024-25",
-          month: "June",
+          month: FiscalPeriod.Months.JUNE,
           dateStart: new Date("2024-06-01T00:00:00Z"),
           dateEnd: new Date("2024-06-30T23:59:59Z"),
         })
@@ -120,13 +120,13 @@ describe("api/src/services/wage-enhancements/replicate-estimates-service.ts", ()
         const centre = await centreFactory.create()
         const fiscalPeriod1 = await fiscalPeriodFactory.create({
           fiscalYear: "2024-25",
-          month: "April",
+          month: FiscalPeriod.Months.APRIL,
           dateStart: new Date("2024-04-01T00:00:00Z"),
           dateEnd: new Date("2024-04-30T23:59:59Z"),
         })
         const fiscalPeriod2 = await fiscalPeriodFactory.create({
           fiscalYear: "2024-25",
-          month: "May",
+          month: FiscalPeriod.Months.MAY,
           dateStart: new Date("2024-05-01T00:00:00Z"),
           dateEnd: new Date("2024-05-31T23:59:59Z"),
         })
