@@ -5,12 +5,12 @@ import {
   type CreationOptional,
   type InferAttributes,
   type InferCreationAttributes,
-  // type NonAttribute,
+  type NonAttribute,
 } from "@sequelize/core"
 import {
   Attribute,
   AutoIncrement,
-  // BelongsTo,
+  BelongsTo,
   Default,
   NotNull,
   PrimaryKey,
@@ -18,7 +18,7 @@ import {
   ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
 
-// import User from "@/models/user"
+import User from "@/models/user"
 
 export enum RoleTypes {
   EDITOR = "Editor",
@@ -64,14 +64,14 @@ export class UserRole extends Model<InferAttributes<UserRole>, InferCreationAttr
   declare updatedAt: CreationOptional<Date>
 
   // Associations
-  // @BelongsTo(() => User, {
-  //   foreignKey: "userId",
-  //   inverse: {
-  //     as: "userRoles",
-  //     type: "hasMany",
-  //   },
-  // })
-  // declare user?: NonAttribute<User>
+  @BelongsTo(() => User, {
+    foreignKey: "userId",
+    inverse: {
+      as: "roles",
+      type: "hasMany",
+    },
+  })
+  declare user?: NonAttribute<User>
 
   static establishScopes() {
     // add as needed
