@@ -1,12 +1,26 @@
 import {
-  CreationOptional,
   DataTypes,
-  InferAttributes,
-  InferCreationAttributes,
   Model,
-} from "sequelize"
+  sql,
+  type CreationOptional,
+  type InferAttributes,
+  type InferCreationAttributes,
+  type NonAttribute,
+} from "@sequelize/core"
+import {
+  Attribute,
+  AutoIncrement,
+  Default,
+  HasMany,
+  NotNull,
+  PrimaryKey,
+  Table,
+  ValidateAttribute,
+} from "@sequelize/core/decorators-legacy"
 
-import sequelize from "@/db/db-client"
+import { FiscalPeriodsFiscalYearMonthUniqueIndex } from "@/models/indexes"
+import EmployeeBenefit from "@/models/employee-benefit"
+import EmployeeWageTier from "@/models/employee-wage-tier"
 
 /** Keep in sync with web/src/api/fiscal-periods-api.ts */
 export enum FiscalPeriodMonths {
@@ -24,71 +38,74 @@ export enum FiscalPeriodMonths {
   MARCH = "march",
 }
 
+@Table({
+  paranoid: false,
+})
 export class FiscalPeriod extends Model<
   InferAttributes<FiscalPeriod>,
   InferCreationAttributes<FiscalPeriod>
 > {
   static readonly Months = FiscalPeriodMonths
 
+  @Attribute(DataTypes.INTEGER)
+  @PrimaryKey
+  @AutoIncrement
   declare id: CreationOptional<number>
-  declare fiscalYear: string
-  declare month: FiscalPeriodMonths
-  declare dateStart: Date
-  declare dateEnd: Date
-  declare createdAt: CreationOptional<Date>
-  declare updatedAt: CreationOptional<Date>
-}
 
-FiscalPeriod.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-      allowNull: false,
+  @Attribute(DataTypes.STRING(10))
+  @NotNull
+  @FiscalPeriodsFiscalYearMonthUniqueIndex
+  declare fiscalYear: string
+
+  @Attribute(DataTypes.STRING(10))
+  @NotNull
+  @FiscalPeriodsFiscalYearMonthUniqueIndex
+  @ValidateAttribute({
+    isIn: {
+      args: [Object.values(FiscalPeriodMonths)],
+      msg: `Month must be one of: ${Object.values(FiscalPeriodMonths).join(", ")}`,
     },
-    fiscalYear: {
-      type: DataTypes.STRING(10),
-      allowNull: false,
+  })
+  declare month: FiscalPeriodMonths
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  declare dateStart: Date
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  declare dateEnd: Date
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
+  declare createdAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
+  declare updatedAt: CreationOptional<Date>
+
+  // Associations
+  @HasMany(() => EmployeeBenefit, {
+    foreignKey: "fiscalPeriodId",
+    inverse: {
+      as: "employeeBenefits",
     },
-    month: {
-      type: DataTypes.STRING(10),
-      allowNull: false,
-      validate: {
-        isIn: {
-          args: [Object.values(FiscalPeriodMonths)],
-          msg: `Month must be one of: ${Object.values(FiscalPeriodMonths).join(", ")}`,
-        },
-      },
+  })
+  declare employeeBenefits?: NonAttribute<EmployeeBenefit[]>
+
+  @HasMany(() => EmployeeWageTier, {
+    foreignKey: "fiscalPeriodId",
+    inverse: {
+      as: "employeeWageTiers",
     },
-    dateStart: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    dateEnd: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    sequelize,
-    indexes: [
-      {
-        unique: true,
-        fields: ["fiscal_year", "month"], // not sure if these need to be snake_case?
-      },
-    ],
+  })
+  declare employeeWageTiers?: NonAttribute<EmployeeWageTier[]>
+
+  static establishScopes() {
+    // add as needed
   }
-)
+}
 
 export default FiscalPeriod

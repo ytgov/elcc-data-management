@@ -20,7 +20,7 @@ import {
 import { EmployeeBenefitsCenterIdFiscalPeriodIdUniqueIndex } from "@/models/indexes"
 
 import Centre from "@/models/centre"
-// import FiscalPeriod from "@/models/fiscal-period"
+import FiscalPeriod from "@/models/fiscal-period"
 
 @Table({
   paranoid: false,
@@ -92,14 +92,14 @@ export class EmployeeBenefit extends Model<
   })
   declare centre?: NonAttribute<Centre>
 
-  // @BelongsTo(() => FiscalPeriod, {
-  //   foreignKey: "fiscalPeriodId",
-  //   inverse: {
-  //     as: "employeeBenefits",
-  //     type: "hasMany",
-  //   },
-  // })
-  // declare fiscalPeriod?: NonAttribute<FiscalPeriod>
+  @BelongsTo(() => FiscalPeriod, {
+    foreignKey: "fiscalPeriodId",
+    inverse: {
+      as: "employeeBenefits",
+      type: "hasMany",
+    },
+  })
+  declare fiscalPeriod?: NonAttribute<FiscalPeriod>
 
   static establishScopes() {
     // add as needed
