@@ -9,6 +9,7 @@ import {
   InferAttributes,
   InferCreationAttributes,
   NonAttribute,
+  Op,
 } from "sequelize"
 
 import sequelize from "@/db/db-client"
@@ -113,6 +114,46 @@ FundingSubmissionLineJson.init(
   },
   {
     sequelize,
+    scopes: {
+      withChildOccupancyRate(sectionName: string) {
+        const withChildOccupancyRateQuery = /* sql */ `
+          (
+            SELECT
+              funding_submission_line_jsons.id
+            FROM
+              funding_submission_line_jsons
+              CROSS APPLY OPENJSON (funding_submission_line_jsons.[values]) AS json_array_element
+            WHERE
+              JSON_VALUE(json_array_element.value, '$.sectionName') = :sectionName
+            GROUP BY
+              funding_submission_line_jsons.id,
+              JSON_VALUE(json_array_element.value, '$.sectionName')
+            HAVING
+              SUM(
+                COALESCE(
+                  TRY_CAST(
+                    JSON_VALUE(
+                      json_array_element.value,
+                      '$.actualChildOccupancyRate'
+                    ) AS int
+                  ),
+                  0
+                )
+              ) > 0
+          )
+        `
+        return {
+          where: {
+            id: {
+              [Op.in]: sequelize.literal(withChildOccupancyRateQuery),
+            },
+          },
+          replacements: {
+            sectionName,
+          },
+        }
+      },
+    },
   }
 )
 

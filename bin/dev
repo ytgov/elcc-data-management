@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require_relative "./jira_api"
-require_relative "./pull-request-editor"
+require_relative "./pull_request_editor"
 
 class DevHelper
   # Support dashes in command names

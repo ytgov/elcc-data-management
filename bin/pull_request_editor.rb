@@ -7,25 +7,27 @@ require "open3"
 # Example usage:
 #   - PullRequestEditor.edit_pull_request_description('https://github.com/icefoganalytics/travel-authorization/pull/218')
 class PullRequestEditor
+  EDITOR = ENV.fetch("EDITOR", "windsurf")
+
   # Edits the pull request description using GitHub CLI and VS Code
   def self.edit_pull_request_description(pull_request_url)
-    if ENV["GITHUB_TOKEN"].nil?
-      puts "\nPlease set the GITHUB_TOKEN environment variable."
-      exit(1)
-    end
-
     repo, pull_request_number = extract_repo_and_pull_request_number(pull_request_url)
 
     pull_request_body = fetch_pull_request_body(repo, pull_request_number)
 
-    tmp_dir = File.join(Dir.home, "tmp")
+    app_root = File.expand_path(File.join(File.dirname(__FILE__), ".."))
+    tmp_dir = File.join(app_root, "tmp")
     Dir.mkdir(tmp_dir) unless Dir.exist?(tmp_dir)
 
     Tempfile.create(["pull_request_description_#{pull_request_number}", ".md"], tmp_dir) do |file|
       file.write(pull_request_body)
       file.flush
 
-      system("code --wait #{file.path}")
+      open_in_editor_command = "#{EDITOR} --wait #{file.path}"
+      system(open_in_editor_command)
+      unless $?.success?
+        raise "Failed to open in editor: '#{open_in_editor_command}' (exit code: #{$?.exitstatus})"
+      end
 
       updated_pull_request_body = File.read(file.path)
 

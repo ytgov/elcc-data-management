@@ -47,7 +47,10 @@
         <v-card-title style="background-color: #0097a968">Latest Enrollment</v-card-title>
         <v-divider></v-divider>
         <v-card-text class="pt-3">
-          <EnrollmentChart :centre-id="centreIdAsNumber" />
+          <FundingLineValuesEnrollmentChart
+            ref="fundingLineValuesEnrollmentChartRef"
+            :centre-id="centreIdAsNumber"
+          />
         </v-card-text>
       </v-card>
     </v-col>
@@ -64,7 +67,10 @@
             <v-tab
               :to="{
                 name: 'CentreDashboardSummaryPage',
-                params: { centreId, fiscalYearSlug },
+                params: {
+                  centreId,
+                  fiscalYearSlug,
+                },
               }"
             >
               Summary
@@ -72,7 +78,10 @@
             <v-tab
               :to="{
                 name: 'CentreDashboardWorksheetsPage',
-                params: { centreId, fiscalYearSlug },
+                params: {
+                  centreId,
+                  fiscalYearSlug,
+                },
               }"
             >
               Worksheets
@@ -80,7 +89,10 @@
             <v-tab
               :to="{
                 name: 'CentreDashboardEmployeesPage',
-                params: { centreId, fiscalYearSlug },
+                params: {
+                  centreId,
+                  fiscalYearSlug,
+                },
               }"
             >
               Employees
@@ -89,7 +101,12 @@
 
           <v-divider></v-divider>
 
-          <router-view></router-view>
+          <router-view v-slot="{ Component }">
+            <component
+              :is="Component"
+              @update:funding-submission-line-json="refreshFundingLineValuesEnrollmentChart"
+            />
+          </router-view>
         </template>
       </v-card>
     </v-col>
@@ -99,26 +116,29 @@
 <script setup lang="ts">
 import { isNil, isEmpty } from "lodash"
 import { useRoute, useRouter } from "vue-router"
-import { computed, onMounted, onUnmounted } from "vue"
+import { computed, onMounted, onUnmounted, useTemplateRef } from "vue"
 import { storeToRefs } from "pinia"
 
 import getCurrentFiscalYearSlug from "@/utils/get-current-fiscal-year-slug"
+import { type FiscalPeriodMonths } from "@/api/fiscal-periods-api"
 import { useCentreStore } from "@/modules/centre/store"
 
 import FiscalYearSelect from "@/components/FiscalYearSelect.vue"
-import EnrollmentChart from "@/modules/centre/components/EnrollmentChart.vue"
+import FundingLineValuesEnrollmentChart from "@/components/funding-line-values/FundingLineValuesEnrollmentChart.vue"
 import CentreDetailsCard from "@/modules/centre/components/CentreDetailsCard.vue"
 
-const props = defineProps({
-  centreId: {
-    type: String,
-    required: true,
-  },
-  fiscalYearSlug: {
-    type: String,
-    default: "",
-  },
-})
+const props = withDefaults(
+  defineProps<{
+    centreId: string
+    fiscalYearSlug?: string
+    // TODO: figure out how to make this unnecessary at this route level?
+    month?: FiscalPeriodMonths
+  }>(),
+  {
+    fiscalYearSlug: "",
+    month: undefined,
+  }
+)
 
 const centreIdAsNumber = computed(() => parseInt(props.centreId))
 
@@ -134,10 +154,7 @@ const fiscalYear = computed(() => {
 function updateFiscalYearAndRedirect(value: string) {
   router.push({
     name: route.name || "CentreDashboardPage",
-    params: {
-      ...route.params,
-      fiscalYearSlug: value.replace("/", "-"),
-    },
+    params: { ...route.params, fiscalYearSlug: value.replace("/", "-") },
     query: route.query,
   })
 }
@@ -158,13 +175,17 @@ onUnmounted(() => {
   store.unselectCentre()
 })
 
+const fundingLineValuesEnrollmentChartRef = useTemplateRef("fundingLineValuesEnrollmentChartRef")
+
+function refreshFundingLineValuesEnrollmentChart() {
+  fundingLineValuesEnrollmentChartRef.value?.refresh()
+}
+
 const breadcrumbs = computed(() => {
   return [
     { to: "/dashboard", title: "Home" },
     { to: "/child-care-centres", title: "Child Care Centres" },
-    {
-      title: selectedCentre.value?.name || "loading ...",
-    },
+    { title: selectedCentre.value?.name || "loading ..." },
   ]
 })
 </script>

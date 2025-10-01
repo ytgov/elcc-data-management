@@ -1,4 +1,5 @@
 import http from "@/api/http-client"
+import { type FiltersOptions, type QueryOptions, type WhereOptions } from "@/api/base-api"
 
 export type FundingLineValue = {
   submissionLineId: number
@@ -29,27 +30,22 @@ export type FundingSubmissionLineJson = {
 export type FundingSubmissionLineJsonAsIndex = Omit<FundingSubmissionLineJson, "values">
 export type FundingSubmissionLineJsonAsDetailed = Omit<FundingSubmissionLineJson, "values">
 
-export type FundingSubmissionLineJsonWhereOptions = {
-  centreId?: number
-  fiscalYear?: string
-  dateName?: string
-  dateStart?: string
-  dateEnd?: string
-}
+export type FundingSubmissionLineJsonWhereOptions = WhereOptions<
+  FundingSubmissionLineJson,
+  "centreId" | "fiscalYear" | "dateName" | "dateStart" | "dateEnd"
+>
 
-export type FundingSubmissionLineJsonFiltersOptions = {
-  // add model scope signatures as needed
-}
+export type FundingSubmissionLineJsonFiltersOptions = FiltersOptions<{
+  withChildOccupancyRate: string
+}>
+
+export type FundingSubmissionLineJsonQueryOptions = QueryOptions<
+  FundingSubmissionLineJsonWhereOptions,
+  FundingSubmissionLineJsonFiltersOptions
+>
 
 export const fundingSubmissionLineJsonsApi = {
-  async list(
-    params: {
-      where?: FundingSubmissionLineJsonWhereOptions
-      filters?: FundingSubmissionLineJsonFiltersOptions
-      page?: number
-      perPage?: number
-    } = {}
-  ): Promise<{
+  async list(params: FundingSubmissionLineJsonQueryOptions = {}): Promise<{
     fundingSubmissionLineJsons: FundingSubmissionLineJsonAsIndex[]
     totalCount: number
   }> {
