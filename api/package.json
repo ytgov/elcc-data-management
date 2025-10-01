@@ -13,11 +13,13 @@
     "initializers": "ts-node -r tsconfig-paths/register --files src/initializers/index.ts",
     "test": "vitest",
     "lint": "eslint . --ext .js,.ts --ignore-path ../.gitignore",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc -p tests/tsconfig.json --noEmit"
   },
   "author": "Michael Johnson",
   "license": "ISC",
   "dependencies": {
+    "@sequelize/core": "^7.0.0-alpha.46",
+    "@sequelize/mssql": "^7.0.0-alpha.46",
     "@types/qs": "^6.14.0",
     "axios": "^0.27.2",
     "cls-hooked": "^4.2.2",
@@ -26,14 +28,12 @@
     "express": "^4.18.1",
     "express-jwt": "^6.1.2",
     "express-validator": "^6.14.2",
-    "helmet": "^6.0.0",
+    "helmet": "^7.2.0",
     "jwks-rsa": "^3.0.0",
     "lodash": "^4.17.21",
     "luxon": "^3.4.4",
     "moment": "^2.29.4",
     "qs": "^6.14.0",
-    "sequelize": "^6.35.1",
-    "tedious": "^16.6.1",
     "umzug": "^3.3.1"
   },
   "devDependencies": {
@@ -56,8 +56,8 @@
     "ts-node-dev": "^2.0.0",
     "tsc-alias": "^1.8.7",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^4.8.3",
+    "typescript": "^5.4.5",
     "vite-tsconfig-paths": "^4.3.2",
-    "vitest": "^1.6.0"
+    "vitest": "^3.2.4"
   }
 }

@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require "rdoc"
+
 require_relative "./jira_api"
 require_relative "./pull_request_editor"
 
@@ -103,12 +105,14 @@ class DevHelper
   end
 
   def test_api(*args, **kwargs)
+    reformat_project_relative_path_filter_for_vitest!(args, "api/")
     run(*%w[test_api npm run test], *args, **kwargs)
   end
 
   alias test test_api
 
   def test_web(*args, **kwargs)
+    reformat_project_relative_path_filter_for_vitest!(args, "web/")
     run(*%w[test_web npm run test], *args, **kwargs)
   end
 
@@ -217,6 +221,45 @@ class DevHelper
     puts completions
   end
 
+  ##
+  # Generate help documentation.
+  def help(*args, **kwargs)
+    rdoc = RDoc::RDoc.new
+    rdoc_arguements = %w[--dry-run --quiet] + [__FILE__]
+    rdoc.document(rdoc_arguements)
+    rdoc_data_for_class = rdoc.store.classes_hash["DevHelper"]
+
+    puts <<~HELP.chomp
+      Development Helper.
+
+      Usage:
+        dev <command> [args]
+
+      Available commands:
+    HELP
+
+    all_public_methods = public_methods(false).sort
+    all_public_methods.delete(:call)
+    longest_command_length = all_public_methods.map(&:length).max
+
+    all_public_methods.each do |method_name|
+      method_doc = rdoc_data_for_class.find_method_named(method_name.to_s)
+      command = METHOD_TO_COMMAND.fetch(method_name, method_name)
+      comment = method_doc.comment
+
+      print "  #{command}"
+      unless comment.empty?
+        first_line_of_comment = comment.to_s.lines[0].strip
+        pad = "-" * (longest_command_length - command.length + 1)
+        print " #{pad} #{first_line_of_comment}"
+      end
+      print "\n"
+    end
+
+    command = compose_command("<args>")
+    puts "\nFallback for unknown commands is to run `#{command}`."
+  end
+
   private
 
   def container_id(container_name, *args, **kwargs)
@@ -256,6 +299,23 @@ class DevHelper
     end
 
     `id -g`.strip
+  end
+
+  def reformat_project_relative_path_filter_for_vitest!(args, prefix)
+    if args.length.positive? && args[0].start_with?(prefix)
+      src_path_prefix = "#{prefix}src/"
+      test_path_regex = Regexp.escape(prefix)
+      src_path_regex = Regexp.escape(src_path_prefix)
+
+      if args[0].start_with?(src_path_prefix)
+        args[0] = args[0].gsub(/^#{src_path_regex}/, "tests/").gsub(/\.ts$/, ".test.ts")
+        # TODO: handle other file types
+      else
+        args[0] = args[0].gsub(/^#{test_path_regex}/, "")
+      end
+
+      puts "Reformatted path filter from project relative to service relative for vitest."
+    end
   end
 end
 

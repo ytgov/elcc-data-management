@@ -1,4 +1,4 @@
-import { Op } from "sequelize"
+import { Op } from "@sequelize/core"
 
 import { FundingSubmissionLineJson } from "@/models"
 import BaseService from "@/services/base-service"

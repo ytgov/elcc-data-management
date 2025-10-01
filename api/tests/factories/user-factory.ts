@@ -5,21 +5,30 @@ import { User } from "@/models"
 import { UserStatus } from "@/models/user"
 
 export const userFactory = Factory.define<User>(({ sequence, onCreate }) => {
-  onCreate((user) => user.save())
+  onCreate(async (user) => {
+    try {
+      await user.save()
+      return user
+    } catch (error) {
+      console.error(error)
+      throw new Error(
+        `Could not create User with attributes: ${JSON.stringify(user.dataValues, null, 2)}`
+      )
+    }
+  })
+
+  const email = `${faker.internet.email()}-${sequence}`
+  const sub = faker.string.uuid()
+  const firstName = faker.person.firstName()
+  const lastName = faker.person.lastName()
+  const status = faker.helpers.objectValue(UserStatus)
 
   return User.build({
-    email: `${faker.internet.email()}-${sequence}`,
-    sub: faker.string.uuid(),
-    firstName: faker.person.firstName(),
-    lastName: faker.person.lastName(),
-    status: faker.helpers.objectValue(UserStatus),
-    isAdmin: faker.datatype.boolean(0.2),
-    ynetId: faker.helpers.arrayElement([`YNET-${faker.number.int({ min: 1, max: 1000 })}`, null]),
-    directoryId: faker.helpers.arrayElement([
-      `Directory-${faker.number.int({ min: 1, max: 1000 })}`,
-      null,
-    ]),
-    createdAt: faker.date.past(),
+    email,
+    sub,
+    firstName,
+    lastName,
+    status,
   })
 })
 

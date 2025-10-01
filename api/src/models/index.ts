@@ -1,38 +1,61 @@
+export { type FundingLineValue } from "@/models/funding-line-value"
+
 import db from "@/db/db-client"
 
-import { Centre } from "@/models/centre"
-import { CentreFundingPeriod } from "@/models/centre-funding-period"
-import { FundingSubmissionLineJson } from "@/models/funding-submission-line-json"
-import { User } from "@/models/user"
-import { UserRole } from "@/models/user-role"
-import { Payment } from "@/models/payment"
-import { EmployeeBenefit } from "@/models/employee-benefit"
-import { EmployeeWageTier } from "@/models/employee-wage-tier"
-import { WageEnhancement } from "@/models/wage-enhancement"
+import Centre from "@/models/centre"
+import CentreFundingPeriod from "@/models/centre-funding-period"
+import EmployeeBenefit from "@/models/employee-benefit"
+import EmployeeWageTier from "@/models/employee-wage-tier"
+import FiscalPeriod from "@/models/fiscal-period"
+import FundingPeriod from "@/models/funding-period"
+import FundingSubmissionLine from "@/models/funding-submission-line"
+import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
+import Log from "@/models/log"
+import Payment from "@/models/payment"
+import User from "@/models/user"
+import UserRole from "@/models/user-role"
+import WageEnhancement from "@/models/wage-enhancement"
 
-// Order matters here, though may be somewhat flexible
-Centre.establishAssociations()
-CentreFundingPeriod.establishAssociations()
-FundingSubmissionLineJson.establishAssociations()
-User.establishAssociations()
-UserRole.establishAssociations()
-Payment.establishAssociations()
-EmployeeBenefit.establishAssociations()
-EmployeeWageTier.establishAssociations()
-WageEnhancement.establishAssociations()
+db.addModels([
+  Centre,
+  CentreFundingPeriod,
+  EmployeeBenefit,
+  EmployeeWageTier,
+  FiscalPeriod,
+  FundingPeriod,
+  FundingSubmissionLine,
+  FundingSubmissionLineJson,
+  Log,
+  Payment,
+  User,
+  UserRole,
+  WageEnhancement,
+])
 
-// Alphabetically - order does not matter
-export { FiscalPeriod } from "@/models/fiscal-period"
-export { type FundingLineValue } from "@/models/funding-line-value"
-export { FundingPeriod } from "@/models/funding-period"
-export { FundingSubmissionLine } from "@/models/funding-submission-line"
-export { Log } from "@/models/log"
+Centre.establishScopes()
+CentreFundingPeriod.establishScopes()
+EmployeeBenefit.establishScopes()
+EmployeeWageTier.establishScopes()
+FiscalPeriod.establishScopes()
+FundingPeriod.establishScopes()
+FundingSubmissionLine.establishScopes()
+FundingSubmissionLineJson.establishScopes()
+Log.establishScopes()
+Payment.establishScopes()
+User.establishScopes()
+UserRole.establishScopes()
+WageEnhancement.establishScopes()
+
 export {
   Centre,
   CentreFundingPeriod,
   EmployeeBenefit,
   EmployeeWageTier,
+  FiscalPeriod,
+  FundingPeriod,
+  FundingSubmissionLine,
   FundingSubmissionLineJson,
+  Log,
   Payment,
   User,
   UserRole,

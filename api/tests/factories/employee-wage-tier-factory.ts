@@ -1,7 +1,9 @@
-import { DeepPartial, Factory } from "fishery"
+import { Factory } from "fishery"
 import { faker } from "@faker-js/faker"
 
 import { EmployeeWageTier } from "@/models"
+import { nestedSaveAndAssociateIfNew } from "@/factories/helpers"
+import fiscalPeriodFactory from "@/factories/fiscal-period-factory"
 
 export const TIER_LABEL_EXAMPLES = Object.freeze([
   {
@@ -35,30 +37,39 @@ export const TIER_LABEL_EXAMPLES = Object.freeze([
 ])
 
 export const employeeWageTierFactory = Factory.define<EmployeeWageTier>(
-  ({ sequence, params, onCreate }) => {
-    onCreate((employeeWageTier) => employeeWageTier.save())
+  ({ associations, params, onCreate }) => {
+    onCreate(async (employeeWageTier) => {
+      try {
+        await nestedSaveAndAssociateIfNew(employeeWageTier)
+        return employeeWageTier
+      } catch (error) {
+        console.error(error)
+        throw new Error(
+          `Could not create EmployeeWageTier with attributes: ${JSON.stringify(employeeWageTier.dataValues, null, 2)}`
+        )
+      }
+    })
 
-    assertParamsHasFiscalPeriodId(params)
+    const fiscalPeriod =
+      associations.fiscalPeriod ??
+      fiscalPeriodFactory.build({
+        id: params.fiscalPeriodId,
+      })
 
     const tierLevel = faker.number.int({ min: 0, max: TIER_LABEL_EXAMPLES.length - 1 })
     const { tierLabel, wageRatePerHour } = TIER_LABEL_EXAMPLES[tierLevel]
 
-    return EmployeeWageTier.build({
-      id: sequence,
-      fiscalPeriodId: params.fiscalPeriodId,
+    const employeeWageTier = EmployeeWageTier.build({
+      fiscalPeriodId: fiscalPeriod.id,
       tierLevel,
       tierLabel,
       wageRatePerHour,
     })
+
+    employeeWageTier.fiscalPeriod = fiscalPeriod
+
+    return employeeWageTier
   }
 )
-
-function assertParamsHasFiscalPeriodId(
-  params: DeepPartial<EmployeeWageTier>
-): asserts params is DeepPartial<EmployeeWageTier> & { fiscalPeriodId: number } {
-  if (typeof params.fiscalPeriodId !== "number") {
-    throw new Error("fiscalPeriodId is must be a number")
-  }
-}
 
 export default employeeWageTierFactory

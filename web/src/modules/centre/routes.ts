@@ -48,16 +48,6 @@ const routes: RouteRecordRaw[] = [
                 }),
               },
               {
-                path: "worksheets",
-                name: "CentreDashboardSummaryWorksheetsPage",
-                component: () =>
-                  import("@/modules/centre/pages/CentreDashboardSummaryWorksheetsPage.vue"),
-                props: (route) => ({
-                  centreId: parseInt(route.params.centreId as string),
-                  fiscalYearSlug: route.params.fiscalYearSlug,
-                }),
-              },
-              {
                 path: "payments",
                 name: "CentreDashboardSummaryPaymentsPage",
                 component: () =>

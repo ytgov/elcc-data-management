@@ -1,4 +1,4 @@
-import { Model } from "sequelize"
+import { Model } from "@sequelize/core"
 
 export default class BaseSerializer<T extends Model> {
   protected record: T

@@ -1,75 +1,70 @@
 import {
-  CreationOptional,
   DataTypes,
-  InferAttributes,
-  InferCreationAttributes,
   Model,
-} from "sequelize"
+  sql,
+  type CreationOptional,
+  type InferAttributes,
+  type InferCreationAttributes,
+} from "@sequelize/core"
+import {
+  Attribute,
+  AutoIncrement,
+  Default,
+  NotNull,
+  PrimaryKey,
+  Table,
+} from "@sequelize/core/decorators-legacy"
 
-import sequelize from "@/db/db-client"
-
+/** @deprecated - use FundingSubmissionLineJson model instead. */
+@Table({
+  paranoid: false,
+})
 export class FundingSubmissionLine extends Model<
   InferAttributes<FundingSubmissionLine>,
   InferCreationAttributes<FundingSubmissionLine>
 > {
+  @Attribute(DataTypes.INTEGER)
+  @PrimaryKey
+  @AutoIncrement
   declare id: CreationOptional<number>
+
+  @Attribute(DataTypes.STRING(10))
+  @NotNull
   declare fiscalYear: string
+
+  @Attribute(DataTypes.STRING(200))
+  @NotNull
   declare sectionName: string
+
+  @Attribute(DataTypes.STRING(200))
+  @NotNull
   declare lineName: string
+
+  @Attribute(DataTypes.INTEGER)
   declare fromAge: number | null
+
+  @Attribute(DataTypes.INTEGER)
   declare toAge: number | null
+
+  // TODO: migrate column to DataTypes.DECIMAL(19, 4), see https://github.com/icefoganalytics/elcc-data-management/issues/33
+  @Attribute(DataTypes.FLOAT)
+  @NotNull
   declare monthlyAmount: number
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare createdAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
+
+  static establishScopes() {
+    // add as needed
+  }
 }
 
-FundingSubmissionLine.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      allowNull: false,
-      autoIncrement: true,
-    },
-    fiscalYear: {
-      type: DataTypes.STRING(10),
-      allowNull: false,
-    },
-    sectionName: {
-      type: DataTypes.STRING(200),
-      allowNull: false,
-    },
-    lineName: {
-      type: DataTypes.STRING(200),
-      allowNull: false,
-    },
-    fromAge: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    toAge: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    // TODO: migrate column to integer cents, see https://github.com/icefoganalytics/elcc-data-management/issues/33
-    monthlyAmount: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    sequelize,
-  }
-)
-
+/** @deprecated - use FundingSubmissionLineJson model instead. */
 export default FundingSubmissionLine

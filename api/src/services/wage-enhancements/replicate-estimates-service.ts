@@ -1,4 +1,4 @@
-import { Op } from "sequelize"
+import { Op } from "@sequelize/core"
 import { isNil, isUndefined } from "lodash"
 
 import db, { EmployeeWageTier, FiscalPeriod, WageEnhancement } from "@/models"

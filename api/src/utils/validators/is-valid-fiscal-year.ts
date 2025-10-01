@@ -17,3 +17,5 @@ export function isValidFiscalYear(value: string) {
     throw new Error("fiscalYear must be in the format YYYY/YY.")
   }
 }
+
+export default isValidFiscalYear

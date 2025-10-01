@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize"
+import { Transaction } from "@sequelize/core"
 
 import { Centre } from "@/models"
 import { LogOperationTypes } from "@/models/log"

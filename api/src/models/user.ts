@@ -1,24 +1,23 @@
 import {
-  Model,
   DataTypes,
-  InferAttributes,
-  InferCreationAttributes,
-  CreationOptional,
-  NonAttribute,
-  Association,
-  HasManyGetAssociationsMixin,
-  HasManyAddAssociationMixin,
-  HasManyAddAssociationsMixin,
-  HasManyCountAssociationsMixin,
-  HasManyCreateAssociationMixin,
-  HasManyHasAssociationMixin,
-  HasManyHasAssociationsMixin,
-  HasManyRemoveAssociationMixin,
-  HasManyRemoveAssociationsMixin,
-  HasManySetAssociationsMixin,
-} from "sequelize"
-
-import sequelize from "@/db/db-client"
+  Model,
+  sql,
+  type CreationOptional,
+  type InferAttributes,
+  type InferCreationAttributes,
+  type NonAttribute,
+} from "@sequelize/core"
+import {
+  Attribute,
+  AutoIncrement,
+  Default,
+  HasMany,
+  NotNull,
+  PrimaryKey,
+  Table,
+  Unique,
+  ValidateAttribute,
+} from "@sequelize/core/decorators-legacy"
 
 import UserRole from "@/models/user-role"
 
@@ -27,105 +26,77 @@ export enum UserStatus {
   INACTIVE = "Inactive",
 }
 
+@Table({
+  paranoid: false,
+})
 export class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
+  static readonly Status = UserStatus
+
+  @Attribute(DataTypes.INTEGER)
+  @PrimaryKey
+  @AutoIncrement
   declare id: CreationOptional<number>
+
+  @Attribute(DataTypes.STRING(200))
+  @NotNull
+  @Unique
   declare email: string
+
+  @Attribute(DataTypes.STRING(200))
+  @NotNull
   declare sub: string
+
+  @Attribute(DataTypes.STRING(100))
+  @NotNull
   declare firstName: string
+
+  @Attribute(DataTypes.STRING(100))
+  @NotNull
   declare lastName: string
+
+  @Attribute(DataTypes.STRING(50))
+  @NotNull
+  @ValidateAttribute({
+    isIn: {
+      args: [Object.values(UserStatus)],
+      msg: `Status must be one of: ${Object.values(UserStatus).join(", ")}`,
+    },
+  })
   declare status: UserStatus
+
+  @Attribute(DataTypes.BOOLEAN)
+  @NotNull
+  @Default(false)
   declare isAdmin: CreationOptional<boolean>
+
+  @Attribute(DataTypes.STRING(50))
   declare ynetId: string | null
+
+  @Attribute(DataTypes.STRING(50))
   declare directoryId: string | null
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare createdAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
 
-  // https://sequelize.org/docs/v6/other-topics/typescript/#usage
-  // https://sequelize.org/docs/v6/core-concepts/assocs/#foohasmanybar
-  // https://sequelize.org/api/v7/types/_sequelize_core.index.hasmanyaddassociationmixin
-  declare getRoles: HasManyGetAssociationsMixin<UserRole>
-  declare setRoles: HasManySetAssociationsMixin<UserRole, UserRole["userId"]>
-  declare hasRole: HasManyHasAssociationMixin<UserRole, UserRole["userId"]>
-  declare hasRoles: HasManyHasAssociationsMixin<UserRole, UserRole["userId"]>
-  declare addRole: HasManyAddAssociationMixin<UserRole, UserRole["userId"]>
-  declare addRoles: HasManyAddAssociationsMixin<UserRole, UserRole["userId"]>
-  declare removeRole: HasManyRemoveAssociationMixin<UserRole, UserRole["userId"]>
-  declare removeRoles: HasManyRemoveAssociationsMixin<UserRole, UserRole["userId"]>
-  declare countRoles: HasManyCountAssociationsMixin
-  declare createRole: HasManyCreateAssociationMixin<UserRole>
+  // Associations
+  @HasMany(() => UserRole, {
+    foreignKey: "userId",
+    inverse: {
+      as: "user",
+    },
+  })
+  declare roles?: NonAttribute<UserRole[]>
 
-  declare roles?: NonAttribute<UserRole[]> // where user roles assocation gets loaded into
-
-  declare static associations: {
-    roles: Association<User, UserRole>
-  }
-
-  static establishAssociations() {
-    this.hasMany(UserRole, {
-      sourceKey: "id",
-      foreignKey: "userId",
-      as: "roles",
-    })
+  static establishScopes() {
+    // add as needed
   }
 }
-
-User.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      allowNull: false,
-      autoIncrement: true,
-    },
-    email: {
-      type: DataTypes.STRING(200),
-      primaryKey: true,
-      autoIncrement: false,
-      allowNull: false,
-    },
-    sub: {
-      type: DataTypes.STRING(200),
-      allowNull: false,
-    },
-    firstName: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    lastName: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    status: {
-      type: DataTypes.STRING(50),
-      allowNull: false,
-    },
-    isAdmin: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
-    ynetId: {
-      type: DataTypes.STRING(50),
-      allowNull: true,
-    },
-    directoryId: {
-      type: DataTypes.STRING(50),
-      allowNull: true,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    sequelize,
-  }
-)
 
 export default User

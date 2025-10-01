@@ -1,4 +1,4 @@
-import { DataTypes } from "sequelize"
+import { DataTypes } from "@sequelize/core"
 
 import type { Migration } from "@/db/umzug"
 import { MssqlSimpleTypes } from "@/db/utils/mssql-simple-types"
@@ -15,7 +15,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "centres",
+        table: "centres",
         key: "id",
       },
     },
