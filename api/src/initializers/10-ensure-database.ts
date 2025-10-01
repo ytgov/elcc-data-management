@@ -1,4 +1,4 @@
-import { QueryTypes, Sequelize } from "sequelize"
+import { QueryTypes, Sequelize } from "@sequelize/core"
 import { merge } from "lodash"
 
 import { DB_NAME } from "@/config"

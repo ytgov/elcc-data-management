@@ -1,4 +1,4 @@
-import { Model, ModelStatic, Transaction } from "sequelize"
+import { Model, ModelStatic, Transaction } from "@sequelize/core"
 
 import { Log, User } from "@/models"
 import { LogOperationTypes } from "@/models/log"

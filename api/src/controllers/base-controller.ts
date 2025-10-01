@@ -5,7 +5,7 @@ import {
   type Order,
   type ScopeOptions,
   type WhereOptions,
-} from "sequelize"
+} from "@sequelize/core"
 import { dropRight, isEmpty, isNil, uniqBy } from "lodash"
 
 import { AuthorizedRequest } from "@/middleware/authz.middleware"

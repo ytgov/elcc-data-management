@@ -1,4 +1,4 @@
-import { DataTypes } from "sequelize"
+import { DataTypes } from "@sequelize/core"
 
 import type { Migration } from "@/db/umzug"
 import { MssqlSimpleTypes } from "@/db/utils/mssql-simple-types"

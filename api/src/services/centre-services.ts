@@ -1,4 +1,4 @@
-import { CreationAttributes } from "sequelize"
+import { CreationAttributes } from "@sequelize/core"
 
 import db from "@/db/db-client"
 import { Centre, User } from "@/models"

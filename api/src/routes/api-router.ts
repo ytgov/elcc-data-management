@@ -1,4 +1,4 @@
-import { DatabaseError } from "sequelize"
+import { DatabaseError } from "@sequelize/core"
 import {
   Router,
   type ErrorRequestHandler,

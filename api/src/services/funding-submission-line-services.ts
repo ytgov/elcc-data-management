@@ -1,4 +1,4 @@
-import { CreationAttributes, Op } from "sequelize"
+import { CreationAttributes, Op } from "@sequelize/core"
 import { merge, omit } from "lodash"
 
 import { FundingSubmissionLine } from "@/models"
