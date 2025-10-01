@@ -3,6 +3,4 @@ export function formatAsFiscalYear(startYear: number, { separator = "/" } = {}) 
   return [startYear, endYear].join(separator)
 }
 
-export default {
-  formatAsFiscalYear,
-}
+export default formatAsFiscalYear
