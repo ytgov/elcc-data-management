@@ -1,6 +1,6 @@
 import db from "@/db/db-client"
 
-import { Centre } from "@/models/centre"
+import Centre from "@/models/centre"
 import CentreFundingPeriod from "@/models/centre-funding-period"
 import { FundingSubmissionLineJson } from "@/models/funding-submission-line-json"
 import { User } from "@/models/user"
@@ -11,11 +11,12 @@ import { EmployeeWageTier } from "@/models/employee-wage-tier"
 import { WageEnhancement } from "@/models/wage-enhancement"
 
 db.addModels([
+  Centre,
   CentreFundingPeriod,
 ])
 
 // Order matters here, though may be somewhat flexible
-Centre.establishAssociations()
+Centre.establishScopes()
 CentreFundingPeriod.establishScopes()
 FundingSubmissionLineJson.establishAssociations()
 User.establishAssociations()
