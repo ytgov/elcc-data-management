@@ -25,7 +25,7 @@ describe("api/src/models/funding-submission-line-json.ts", () => {
           values: "[NotValidJson]",
         })
         expect(() => fundingSubmissionLineJson.lines).toThrow(
-          "Unexpected token N in JSON at position 1"
+          "Unexpected token 'N', \"[NotValidJson]\" is not valid JSON"
         )
       })
     })
