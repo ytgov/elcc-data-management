@@ -4,7 +4,7 @@ import { createPinia } from "pinia"
 import auth0Plugin from "@/plugins/auth0-plugin"
 import vuetifyPlugin from "@/plugins/vuetify-plugin"
 
-import router from "@/routes"
+import router from "@/router"
 
 import App from "@/App.vue"
 

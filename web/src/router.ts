@@ -1,7 +1,7 @@
 import { authGuard } from "@auth0/auth0-vue"
 import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router"
 
-import adminstrationRoutes from "@/administration/administration-routes"
+import adminstrationRoutes from "@/routes/administration-routes"
 
 const routes: RouteRecordRaw[] = [
   {
