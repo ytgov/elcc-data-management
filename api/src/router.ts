@@ -20,6 +20,7 @@ import {
 
 import {
   CentresController,
+  CurrentUserController,
   EmployeeBenefitsController,
   EmployeeWageTiersController,
   FiscalPeriodsController,
@@ -49,6 +50,8 @@ router.use("/api/submission-line", submissionLineRouter)
 
 // TODO: move all routing logic to this file, and move all route actions into controllers
 router.use("/api", checkJwt, autheticateAndLoadUser)
+
+router.route("/api/current-user").get(CurrentUserController.show)
 
 router.route("/api/centres").post(CentresController.create)
 router.route("/api/centres/:centreId").patch(CentresController.update)
