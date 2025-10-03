@@ -6,17 +6,31 @@
     height="70"
     style="left: 0; border-bottom: 3px #f3b228 solid"
   >
-    <img
-      src="/yukon.svg"
-      style="margin: -10px 85px 0 14px"
-      height="44"
-    />
-    <!-- <v-img class="ml-0m pl-0" src="src/assets/yukon.svg" height="44" /> -->
-    <v-app-bar-title
-      class="pt-0 font-weight-bold"
-      style="margin-left: -20px"
-      >{{ title }}</v-app-bar-title
+    <router-link
+      :to="{
+        name: 'DashboardPage',
+      }"
+      style="line-height: 0"
     >
+      <img
+        src="/yukon.svg"
+        style="margin: -10px 85px 0 14px"
+        height="44"
+      />
+    </router-link>
+    <!-- <v-img class="ml-0m pl-0" src="src/assets/yukon.svg" height="44" /> -->
+    <router-link
+      :to="{
+        name: 'DashboardPage',
+      }"
+      style="line-height: 0"
+    >
+      <v-app-bar-title
+        class="pt-0 font-weight-bold"
+        style="margin-left: -20px"
+        >{{ title }}</v-app-bar-title
+      >
+    </router-link>
 
     <template #append>
       <v-btn
