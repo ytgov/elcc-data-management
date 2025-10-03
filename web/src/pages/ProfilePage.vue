@@ -4,7 +4,7 @@
     <v-row>
       <v-col cols="6">
         <v-text-field
-          v-model="user.firstName"
+          v-model="currentUser.firstName"
           label="First name"
           readonly
           hide-details
@@ -15,7 +15,7 @@
       </v-col>
       <v-col cols="6">
         <v-text-field
-          v-model="user.lastName"
+          v-model="currentUser.lastName"
           label="Last name"
           readonly
           hide-details
@@ -27,7 +27,7 @@
 
       <v-col cols="6">
         <v-text-field
-          v-model="user.email"
+          v-model="currentUser.email"
           label="Email"
           readonly
           hide-details
@@ -38,7 +38,7 @@
       </v-col>
       <v-col cols="6">
         <v-text-field
-          v-model="user.roles"
+          v-model="roles"
           label="Roles"
           readonly
           variant="outlined"
@@ -52,18 +52,12 @@
   </div>
 </template>
 
-<script lang="ts">
-import { useUserStore } from "@/store/UserStore"
-import { mapState } from "pinia"
-export default {
-  name: "Profile",
-  setup() {},
-  data() {
-    return {}
-  },
-  computed: {
-    ...mapState(useUserStore, ["user"]),
-  },
-  methods: {},
-}
+<script setup lang="ts">
+import { computed } from "vue"
+
+import useCurrentUser from "@/use/use-current-user"
+
+const { currentUser } = useCurrentUser<true>()
+
+const roles = computed(() => currentUser.value.roles.map(({ role }) => role).join(", "))
 </script>

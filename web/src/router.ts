@@ -1,28 +1,47 @@
 import { authGuard } from "@auth0/auth0-vue"
-import { RouteRecordRaw } from "vue-router"
+import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router"
+
+import adminstrationRoutes from "@/routes/administration-routes"
 
 const routes: RouteRecordRaw[] = [
   {
-    path: "/child-care-centres",
-    component: () => import("@/layouts/Default.vue"),
+    path: "/",
+    component: () => import("@/layouts/DefaultLayout.vue"),
     children: [
       {
         path: "",
-        component: () => import("./views/CentreList.vue"),
-        beforeEnter: authGuard,
+        redirect: {
+          name: "DashboardPage",
+        },
+      },
+      {
+        path: "dashboard",
+        name: "DashboardPage",
+        component: () => import("@/pages/DashboardPage.vue"),
+      },
+      {
+        path: "profile",
+        name: "ProfilePage",
+        component: () => import("@/pages/ProfilePage.vue"),
+      },
+
+      {
+        path: "child-care-centres",
+        component: () => import("@/modules/centre/views/CentreList.vue"),
       },
       {
         // TODO: replace centerId with a slug using https://github.com/simov/slugify on center name
         // also add the appropriate slug column to the centre table and model
-        path: ":centreId/:fiscalYearSlug?",
+        path: "child-care-centres/:centreId/:fiscalYearSlug?",
         component: () => import("@/modules/centre/pages/CentreDashboardPage.vue"),
-        beforeEnter: authGuard,
         props: true,
         children: [
           {
             path: "",
             name: "CentreDashboardPage",
-            redirect: { name: "CentreDashboardSummaryPage" },
+            redirect: {
+              name: "CentreDashboardSummaryPage",
+            },
           },
           {
             path: "summary",
@@ -35,7 +54,9 @@ const routes: RouteRecordRaw[] = [
               {
                 path: "",
                 name: "CentreDashboardSummaryPage",
-                redirect: { name: "CentreDashboardSummaryReconciliationPage" },
+                redirect: {
+                  name: "CentreDashboardSummaryReconciliationPage",
+                },
               },
               {
                 path: "reconciliation",
@@ -108,6 +129,44 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+  ...adminstrationRoutes,
+  {
+    path: "/sign-in",
+    name: "SignInPage",
+    component: () => import("@/pages/SignInPage.vue"),
+    meta: {
+      requiresAuth: false,
+    },
+  },
+  {
+    name: "StatusPage",
+    path: "/status",
+    component: () => import("@/pages/StatusPage.vue"),
+    meta: {
+      requiresAuth: false,
+    },
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    component: () => import("@/views/NotFound.vue"),
+    meta: {
+      requiresAuth: false,
+    },
+  },
 ]
 
-export default routes
+export const router = createRouter({
+  history: createWebHistory(),
+  routes,
+})
+
+router.beforeEach(async (to) => {
+  if (to.meta.requiresAuth === false) return true
+
+  const isAuthenticated = await authGuard(to)
+  if (!isAuthenticated) return false
+
+  return true
+})
+
+export default router

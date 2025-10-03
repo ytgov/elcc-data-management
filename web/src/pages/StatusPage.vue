@@ -1,7 +1,12 @@
 <template>
   <v-app>
     <v-container>
-      <router-link :to="{ name: 'Dashboard' }">Dashboard</router-link>
+      <router-link
+        :to="{
+          name: 'DashboardPage',
+        }"
+        >Dashboard</router-link
+      >
 
       <v-row class="mt-5">
         <v-col cols="12">

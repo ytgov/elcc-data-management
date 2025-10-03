@@ -9,15 +9,9 @@ import "@/assets/yk-style.css"
 
 // ComposablesF
 import { createVuetify } from "vuetify"
-import * as components from "vuetify/components"
-import * as labsComponents from "vuetify/labs/components"
 
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
-  components: {
-    ...components,
-    ...labsComponents,
-  },
   theme: {
     themes: {
       light: {
@@ -26,6 +20,7 @@ export default createVuetify({
           secondary: "#fff",
           anchor: "#00818f",
           yg_moss: "#7A9A01",
+          "yg-moss": "#7A9A01",
           yg_blue: "#0097a9",
           "yg-blue": "#0097a9",
           yg_zinc: "#24405A",

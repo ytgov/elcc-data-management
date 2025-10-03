@@ -85,6 +85,11 @@ export class User extends Model<InferAttributes<User>, InferCreationAttributes<U
   @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
 
+  // Magic Attributes
+  get displayName(): NonAttribute<string> {
+    return [this.firstName, this.lastName].filter(Boolean).join(" ")
+  }
+
   // Associations
   @HasMany(() => UserRole, {
     foreignKey: "userId",

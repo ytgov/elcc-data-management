@@ -29,7 +29,7 @@
         <v-card-title>Users</v-card-title>
         <v-card-text>
           <div style="font-size: 30px">
-            {{ userCount }}
+            {{ usersTotalCount }}
           </div>
         </v-card-text>
       </v-card>
@@ -53,23 +53,28 @@
   </v-row>
 </template>
 
-<script lang="ts">
-import { useUserAdminStore } from "@/modules/users/store"
-import { mapState } from "pinia"
+<script setup lang="ts">
+import { computed } from "vue"
 
-export default {
-  data: () => ({}),
-  computed: {
-    ...mapState(useUserAdminStore, ["userCount"]),
+import useUsers from "@/use/use-users"
 
-    breadcrumbs() {
-      return [
-        {
-          title: "Administration",
-          to: "/administration",
-        },
-      ]
+const usersQuery = computed(() => ({
+  perPage: 1,
+}))
+const { totalCount: usersTotalCount } = useUsers(usersQuery)
+
+const breadcrumbs = [
+  {
+    title: "Home",
+    to: {
+      name: "DashboardPage",
     },
   },
-}
+  {
+    title: "Administration",
+    to: {
+      name: "AdministrationPage",
+    },
+  },
+]
 </script>
