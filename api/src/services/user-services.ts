@@ -4,6 +4,7 @@ import db from "@/db/db-client"
 
 import { User, UserRole } from "@/models"
 
+/** @deprecated - Prefer newer Users.UpdateService pattern */
 export class UserServices {
   static async update(
     user: User,

@@ -9,6 +9,7 @@ import { User } from "@/models"
 import { UserServices } from "@/services/user-services"
 import { UserSerializer } from "@/serializers"
 
+/** @deprecated - prefer newer controller backed routing such as CurrentUserController or UsersController */
 export const userRouter = express.Router()
 
 userRouter.use(checkJwt)
