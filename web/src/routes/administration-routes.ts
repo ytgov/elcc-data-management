@@ -1,25 +1,24 @@
 const routes = [
   {
     path: "/",
-    component: async () => await import("@/layouts/DefaultLayout.vue"),
+    component: () => import("@/layouts/DefaultLayout.vue"),
     children: [
       {
         path: "administration",
         name: "AdministrationPage",
-        component: async () => await import("@/pages/AdministrationPage.vue"),
+        component: () => import("@/pages/AdministrationPage.vue"),
       },
       {
         path: "administration/users",
-        component: async () => await import("@/modules/users/views/UserList.vue"),
+        component: () => import("@/modules/users/views/UserList.vue"),
       },
       {
         path: "administration/funding-periods",
-        component: async () => await import("@/modules/administration/views/FundingPeriodList.vue"),
+        component: () => import("@/modules/administration/views/FundingPeriodList.vue"),
       },
       {
         path: "administration/submission-lines",
-        component: async () =>
-          await import("@/modules/submission-lines/views/SubmissionLinesList.vue"),
+        component: () => import("@/modules/submission-lines/views/SubmissionLinesList.vue"),
       },
     ],
   },

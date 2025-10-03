@@ -6,7 +6,7 @@ import adminstrationRoutes from "@/routes/administration-routes"
 const routes: RouteRecordRaw[] = [
   {
     path: "/",
-    component: async () => await import("@/layouts/DefaultLayout.vue"),
+    component: () => import("@/layouts/DefaultLayout.vue"),
     children: [
       {
         path: "",
@@ -17,12 +17,12 @@ const routes: RouteRecordRaw[] = [
       {
         path: "dashboard",
         name: "DashboardPage",
-        component: async () => await import("@/pages/DashboardPage.vue"),
+        component: () => import("@/pages/DashboardPage.vue"),
       },
       {
         path: "profile",
         name: "ProfilePage",
-        component: async () => await import("@/pages/ProfilePage.vue"),
+        component: () => import("@/pages/ProfilePage.vue"),
       },
 
       {
