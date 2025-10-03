@@ -18,6 +18,7 @@ export class UsersController extends BaseController<User> {
       const totalCount = await scopedUsers.count({ where })
       const users = await scopedUsers.findAll({
         where,
+        include: ["roles"],
         order,
         limit: this.pagination.limit,
         offset: this.pagination.offset,
