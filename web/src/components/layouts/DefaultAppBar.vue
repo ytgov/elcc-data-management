@@ -97,7 +97,9 @@
 
           <v-list-item
             v-if="isAdmin"
-            to="/administration"
+            :to="{
+              name: 'AdministrationPage',
+            }"
           >
             <template #prepend>
               <v-icon>mdi-cogs</v-icon>

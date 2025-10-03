@@ -5,7 +5,8 @@ const routes = [
     children: [
       {
         path: "administration",
-        component: async () => await import("@/modules/administration/views/Administration.vue"),
+        name: "AdministrationPage",
+        component: async () => await import("@/pages/AdministrationPage.vue"),
       },
       {
         path: "administration/users",
