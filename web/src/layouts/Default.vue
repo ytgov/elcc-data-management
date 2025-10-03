@@ -86,7 +86,7 @@
               </template>
               <v-list-item-title>{{ releaseTag }}</v-list-item-title>
             </v-list-item>
-            <v-list-item @click="logoutClick">
+            <v-list-item @click="signOut">
               <template #prepend>
                 <v-icon>mdi-exit-run</v-icon>
               </template>
@@ -131,9 +131,11 @@
 
 <script lang="ts">
 import { mapState, mapActions, mapWritableState } from "pinia"
+import { useAuth0 } from "@auth0/auth0-vue"
 
 import http from "@/api/http-client"
 
+import useCurrentUser from "@/use/use-current-user"
 import { useUserStore } from "@/store/UserStore"
 import { useNotificationStore } from "@/store/NotificationStore"
 
@@ -148,6 +150,16 @@ export default {
   name: "Default",
   components: {
     LoginButton,
+  },
+  setup() {
+    const { logout } = useAuth0()
+    const { currentUser, reset: resetCurrentUser } = useCurrentUser<true>()
+
+    return {
+      logout,
+      currentUser,
+      resetCurrentUser,
+    }
   },
   data() {
     return {
@@ -165,7 +177,7 @@ export default {
       return "ELCC Data Management"
     },
     username() {
-      return this.authUser.name
+      return this.authUser?.name
     },
   },
 
@@ -181,8 +193,18 @@ export default {
     ...mapActions(useCentreStore, { initCentres: "initialize" }),
     ...mapActions(useSubmissionLinesStore, { initLines: "initialize" }),
 
-    logoutClick() {
-      this.$auth0.logout({ logoutParams: { returnTo: window.location.origin } })
+    signOut() {
+      this.resetCurrentUser()
+
+      // TODO: add support for redirect to /sign-in
+      // const returnTo = encodeURI(window.location.origin + "/sign-in")
+      const returnTo = window.location.origin
+
+      return this.logout({
+        logoutParams: {
+          returnTo,
+        },
+      })
     },
     fetchVersion() {
       http
