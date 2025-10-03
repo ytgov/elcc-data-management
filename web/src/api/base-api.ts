@@ -17,7 +17,15 @@ export type WhereOptions<Model, Attributes extends keyof Model> = {
   [K in Attributes]?: Model[K] | Model[K][]
 }
 
-export type FiltersOptions<Options> = Partial<Options>
+type NoOptions = Record<never, never>
+
+/**
+ * @example
+ * export type AssessmentMeasureValidationFiltersOptions = FiltersOptions<{
+ *   someScope: someArgumentType
+ * }>
+*/
+export type FiltersOptions<Options = NoOptions> = Partial<Options>
 
 export type QueryOptions<WhereOptions, FiltersOptions> = Partial<{
   where: WhereOptions

@@ -20,6 +20,7 @@ import {
 
 import User from "@/models/user"
 
+// Keep in sync with web/src/api/user-roles-api.ts
 // TODO: normalize to snake_case
 export enum RoleTypes {
   EDITOR = "Editor",
