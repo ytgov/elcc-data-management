@@ -65,8 +65,16 @@ const { totalCount: usersTotalCount } = useUsers(usersQuery)
 
 const breadcrumbs = [
   {
+    title: "Home",
+    to: {
+      name: "DashboardPage",
+    },
+  },
+  {
     title: "Administration",
-    to: "/administration",
+    to: {
+      name: "AdministrationPage",
+    },
   },
 ]
 </script>
