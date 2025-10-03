@@ -5,7 +5,7 @@
         indeterminate
         size="64"
         class="mb-5"
-        color="secondary"
+        color="yg-moss"
       />
       <h1 class="text-center">{{ message }}</h1>
     </div>
