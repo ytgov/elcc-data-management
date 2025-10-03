@@ -3,3 +3,7 @@ export { FundingSubmissionLineJsonSerializer } from "@/serializers/funding-submi
 export { FundingSubmissionLineSerializer } from "@/serializers/funding-submission-line-serializer"
 export { UserSerializer } from "@/serializers/user-serializer"
 export { WageEnhancementSerializer } from "@/serializers/wage-enhancement-serializer"
+
+// Bundled exports
+export * as UserRoles from "./user-roles"
+export * as Users from "./users"

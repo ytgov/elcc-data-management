@@ -26,6 +26,7 @@ import {
   FundingSubmissionLineJsons,
   FundingSubmissionLineJsonsController,
   PaymentsController,
+  UsersController,
   WageEnhancements,
   WageEnhancementsController,
 } from "@/controllers"
@@ -85,6 +86,13 @@ router
   .get(PaymentsController.show)
   .patch(PaymentsController.update)
   .delete(PaymentsController.destroy)
+
+router.route("/api/users").get(UsersController.index).post(UsersController.create)
+router
+  .route("/api/users/:userId")
+  .get(UsersController.show)
+  .patch(UsersController.update)
+  .delete(UsersController.destroy)
 
 router
   .route("/api/wage-enhancements")
