@@ -21,7 +21,8 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: "profile",
-        component: async () => await import("@/modules/home/views/Profile.vue"),
+        name: "ProfilePage",
+        component: async () => await import("@/pages/ProfilePage.vue"),
       },
 
       {

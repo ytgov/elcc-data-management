@@ -74,7 +74,11 @@
         </template>
 
         <v-list density="compact">
-          <v-list-item to="/profile">
+          <v-list-item
+            :to="{
+              name: 'ProfilePage',
+            }"
+          >
             <template #prepend>
               <v-icon>mdi-account</v-icon>
             </template>
@@ -93,7 +97,11 @@
             >
           </v-list-item>
           <v-divider />
-          <v-list-item :to="{ name: 'StatusPage' }">
+          <v-list-item
+            :to="{
+              name: 'StatusPage',
+            }"
+          >
             <template #prepend>
               <v-icon>mdi-clock</v-icon>
             </template>
