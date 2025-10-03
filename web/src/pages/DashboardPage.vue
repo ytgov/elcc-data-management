@@ -102,11 +102,11 @@
 
 <script lang="ts">
 import { useCentreStore } from "@/modules/centre/store"
-import { mapGetters, mapState } from "pinia"
+import { mapState } from "pinia"
 import VueApexCharts from "vue3-apexcharts"
 
 export default {
-  name: "Dashboard",
+  name: "DashboardPage",
   components: { VueApexCharts },
   data: () => ({
     breadcrumbs: [{ title: "Home", disabled: false }],

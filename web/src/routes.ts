@@ -11,13 +11,13 @@ const routes: RouteRecordRaw[] = [
       {
         path: "",
         redirect: {
-          name: "Dashboard",
+          name: "DashboardPage",
         },
       },
       {
         path: "dashboard",
-        name: "Dashboard",
-        component: async () => await import("@/modules/home/views/Dashboard.vue"),
+        name: "DashboardPage",
+        component: async () => await import("@/pages/DashboardPage.vue"),
       },
       {
         path: "profile",
