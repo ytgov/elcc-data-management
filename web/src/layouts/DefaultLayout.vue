@@ -147,7 +147,7 @@ import LoginButton from "@/components/LoginButton.vue"
 const UNSET_RELEASE_TAG = "2024.01.10.0"
 
 export default {
-  name: "Default",
+  name: "DefaultLayout",
   components: {
     LoginButton,
   },

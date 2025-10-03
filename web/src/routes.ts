@@ -6,7 +6,7 @@ import adminstrationRoutes from "@/administration/administration-routes"
 const routes: RouteRecordRaw[] = [
   {
     path: "/",
-    component: async () => await import("@/layouts/Default.vue"),
+    component: async () => await import("@/layouts/DefaultLayout.vue"),
     children: [
       {
         path: "",

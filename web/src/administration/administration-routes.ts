@@ -1,7 +1,7 @@
 const routes = [
   {
     path: "/",
-    component: async () => await import("@/layouts/Default.vue"),
+    component: async () => await import("@/layouts/DefaultLayout.vue"),
     children: [
       {
         path: "administration",
