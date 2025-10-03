@@ -20,6 +20,7 @@ import {
 
 import User from "@/models/user"
 
+// TODO: normalize to snake_case
 export enum RoleTypes {
   EDITOR = "Editor",
   USER = "User",
@@ -51,7 +52,7 @@ export class UserRole extends Model<InferAttributes<UserRole>, InferCreationAttr
       msg: `Role must be one of: ${Object.values(RoleTypes).join(", ")}`,
     },
   })
-  declare role: string
+  declare role: RoleTypes
 
   @Attribute(DataTypes.DATE)
   @NotNull

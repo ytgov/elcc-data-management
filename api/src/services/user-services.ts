@@ -3,12 +3,13 @@ import { isNil } from "lodash"
 import db from "@/db/db-client"
 
 import { User, UserRole } from "@/models"
+import { RoleTypes } from "@/models/user-role"
 
 /** @deprecated - Prefer newer Users.UpdateService pattern */
 export class UserServices {
   static async update(
     user: User,
-    newAttributes: { roles?: string[] } & Partial<User>
+    newAttributes: { roles?: RoleTypes[] } & Partial<User>
   ): Promise<User> {
     const { roles, ...newAttributesWithoutRoles } = newAttributes
 
