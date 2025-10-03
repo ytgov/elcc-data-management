@@ -132,7 +132,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/sign-in",
     name: "SignInPage",
-    component: async () => await import("@/modules/authentication/views/SignIn.vue"),
+    component: () => import("@/pages/SignInPage.vue"),
     meta: {
       requiresAuth: false,
     },
@@ -147,7 +147,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: "/:pathMatch(.*)*",
-    component: async () => await import("@/views/NotFound.vue"),
+    component: () => import("@/views/NotFound.vue"),
     meta: {
       requiresAuth: false,
     },

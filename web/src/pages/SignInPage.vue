@@ -67,7 +67,12 @@
                   click the button below.
                 </h6>
 
-                <LoginButton />
+                <v-btn
+                  dark
+                  color="primary"
+                  @click="loginWithRedirect"
+                  >Sign In</v-btn
+                >
               </div>
             </v-col>
           </v-row>
@@ -77,18 +82,20 @@
   </v-container>
 </template>
 
-<script lang="ts">
-import LoginButton from "@/components/LoginButton.vue"
+<script setup lang="ts">
+import { onMounted } from "vue"
+import { useAuth0 } from "@auth0/auth0-vue"
 
-export default {
-  name: "SignIn",
-  components: { LoginButton },
-  data: () => ({
-    applicationTitle: "ELCC Data Management",
-    applicationSubtitle: "Department of Education",
-  }),
-  mounted() {
-    if (this.$auth0.isAuthenticated.value) this.$router.push("/dashboard")
-  },
-}
+import useCurrentUser from "@/use/use-current-user"
+
+const applicationTitle = "ELCC Data Management"
+const applicationSubtitle = "Department of Education"
+
+const { reset: resetCurrentUser } = useCurrentUser()
+
+const { loginWithRedirect } = useAuth0()
+
+onMounted(() => {
+  resetCurrentUser()
+})
 </script>
