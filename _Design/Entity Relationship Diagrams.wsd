@@ -188,6 +188,7 @@ entity "payments" {
   * id : int [PK]
   --
   * centre_id : int [FK]
+  * fiscal_period_id : int [FK]
   --
   * fiscal_year : nvarchar(10)
   * paid_on : date
@@ -252,6 +253,7 @@ employee_wage_tiers::id }o--|| wage_enhancements::employee_wage_tier_id
 fiscal_periods::id }o--|| centre_funding_periods::fiscal_period_id
 fiscal_periods::id }o--|| employee_benefits::fiscal_period_id
 fiscal_periods::id }o--|| employee_wage_tiers::fiscal_period_id
+fiscal_periods::id }o--|| payments::fiscal_period_id
 funding_submission_line_jsons::values }o--|| FundingLineValue
 funding_submission_lines::id }o--|| FundingLineValue::submission_line_id
 funding_submission_lines::id }o--|| funding_submission_line_values::submission_line_id
