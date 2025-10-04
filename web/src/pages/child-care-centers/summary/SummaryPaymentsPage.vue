@@ -107,7 +107,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { computed, ref, type Ref, watch } from "vue"
 import { DateTime, Interval } from "luxon"
 import { first, isEmpty, isNil, last } from "lodash"
@@ -127,17 +127,12 @@ import { centsToDollars, dollarsToCents } from "@/utils/format-money"
 
 import CurrencyInput from "@/components/CurrencyInput.vue"
 
-const props = defineProps({
-  centreId: {
-    type: Number,
-    required: true,
-  },
-  fiscalYearSlug: {
-    type: String,
-    required: true,
-  },
-})
+const props = defineProps<{
+  centreId: string
+  fiscalYearSlug: string
+}>()
 
+const centreIdAsNumber = computed(() => parseInt(props.centreId))
 const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
 const fiscalPeriodsQuery = computed(() => ({
   where: {
@@ -183,7 +178,7 @@ const fiscalYearInterval = computed(() => {
 })
 
 watch<[number, string], true>(
-  () => [props.centreId, props.fiscalYearSlug],
+  () => [centreIdAsNumber.value, props.fiscalYearSlug],
   ([newCenterId, newFiscalYearSlug], _oldValues) => {
     const newFiscalYear = newFiscalYearSlug.replace("-", "/")
     paymentsStore.fetch({
@@ -215,7 +210,7 @@ function addRow() {
   const name = paymentNames.value[allPayments.value.length]
   const paidOn = fiscalYear.value.split("/")[0] + "-"
   nonPersistedPayments.value.push({
-    centreId: props.centreId,
+    centreId: centreIdAsNumber.value,
     fiscalYear: fiscalYear.value,
     name: name,
     amountInCents: 0,

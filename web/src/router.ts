@@ -66,13 +66,10 @@ const routes: RouteRecordRaw[] = [
               },
               {
                 path: "payments",
-                name: "CentreDashboardSummaryPaymentsPage",
+                name: "child-care-centers/summary/SummaryPaymentsPage",
                 component: () =>
-                  import("@/modules/centre/pages/CentreDashboardSummaryPaymentsPage.vue"),
-                props: (route) => ({
-                  centreId: parseInt(route.params.centreId as string),
-                  fiscalYearSlug: route.params.fiscalYearSlug,
-                }),
+                  import("@/pages/child-care-centers/summary/SummaryPaymentsPage.vue"),
+                props: true,
               },
             ],
           },

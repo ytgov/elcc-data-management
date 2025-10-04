@@ -17,7 +17,7 @@
       </v-tab>
       <v-tab
         :to="{
-          name: 'CentreDashboardSummaryPaymentsPage',
+          name: 'child-care-centers/summary/SummaryPaymentsPage',
           params: {
             centreId,
             fiscalYearSlug,
