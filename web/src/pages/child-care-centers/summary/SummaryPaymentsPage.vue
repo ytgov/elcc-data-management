@@ -251,6 +251,7 @@ async function deletePayment(payment: Payment) {
   isLoadingPaymentMap.value.set(payment.id, true)
   try {
     await paymentsApi.delete(payment.id)
+    await refreshPayments()
   } catch (error) {
     console.error(`Failed to delete payment: ${error}`, { error })
     throw error
