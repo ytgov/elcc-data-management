@@ -5,96 +5,132 @@
         <th class="text-left font-weight-bold">Payment Name</th>
         <th class="text-left font-weight-bold">Payment Amount</th>
         <th class="text-left font-weight-bold">Payment Date</th>
-        <th></th>
+        <th class="text-center font-weight-bold">Actions</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-if="isLoading">
+      <tr v-if="isLoading && isEmpty(payments)">
         <td
           colspan="4"
-          class="text-center py-12"
+          class="text-center"
         >
-          <v-progress-circular
-            :size="70"
-            :width="7"
-            indeterminate
-          ></v-progress-circular>
+          <v-skeleton-loader type="table-row@6" />
         </td>
       </tr>
-      <template v-else>
-        <tr
-          v-for="(payment, index) in allPayments"
-          :key="index"
-          :class="index % 2 === 0 ? 'bg-grey-lighten-3' : 'bg-gray-darken-1'"
-        >
-          <td>
-            <v-text-field
-              v-model="payment.name"
-              aria-label="Payment Name"
-              color="primary"
-              density="compact"
-              variant="underlined"
-              hide-details
-            ></v-text-field>
-          </td>
-          <td>
-            <CurrencyInput
-              :model-value="centsToDollars(payment.amountInCents)"
-              aria-label="Payment Amount"
-              color="primary"
-              density="compact"
-              variant="underlined"
-              hide-details
-              @update:model-value="(newValue: string) => updatePaymentAmount(payment, newValue)"
-            />
-          </td>
-          <td>
-            <v-text-field
-              v-model="payment.paidOn"
-              :rules="[dateRule, containedInFiscalYear]"
-              aria-label="Paid On"
-              color="primary"
-              density="compact"
-              hide-details="auto"
-              variant="underlined"
-            ></v-text-field>
-          </td>
-          <td class="text-center">
-            <template v-if="isPersistedPayment(payment)">
-              <v-btn
-                color="success"
-                size="small"
-                @click="updatePayment(payment)"
-              >
-                Update
-              </v-btn>
-              <v-btn
-                class="ml-2"
-                color="error"
-                size="small"
-                @click="deletePayment(payment)"
-              >
-                Delete
-              </v-btn>
-            </template>
-            <v-btn
-              v-else
-              color="success"
-              size="small"
-              @click="savePayment(payment)"
-              >Save</v-btn
-            >
-          </td>
-        </tr>
-        <tr v-if="isEmpty(allPayments)">
-          <td
-            colspan="4"
-            class="text-center"
+      <tr
+        v-for="(payment, index) in payments"
+        :key="index"
+        :class="index % 2 === 0 ? 'bg-grey-lighten-3' : 'bg-gray-darken-1'"
+      >
+        <td>
+          <v-text-field
+            v-model="payment.name"
+            aria-label="Payment Name"
+            color="primary"
+            density="compact"
+            variant="underlined"
+            hide-details
+          ></v-text-field>
+        </td>
+        <td>
+          <CurrencyInput
+            :model-value="centsToDollars(payment.amountInCents)"
+            aria-label="Payment Amount"
+            color="primary"
+            density="compact"
+            variant="underlined"
+            hide-details
+            @update:model-value="(newValue: string) => updatePaymentAmount(payment, newValue)"
+          />
+        </td>
+        <td>
+          <v-text-field
+            v-model="payment.paidOn"
+            :rules="[dateRule, containedInFiscalYear]"
+            aria-label="Paid On"
+            color="primary"
+            density="compact"
+            hide-details="auto"
+            variant="underlined"
+          ></v-text-field>
+        </td>
+        <td class="text-center">
+          <v-btn
+            color="success"
+            size="small"
+            :loading="isLoadingPaymentMap.get(payment.id)"
+            @click="savePayment(payment)"
           >
-            No payments found
-          </td>
-        </tr>
-      </template>
+            Update
+          </v-btn>
+          <v-btn
+            class="ml-2"
+            color="error"
+            size="small"
+            :loading="isLoadingPaymentMap.get(payment.id)"
+            @click="deletePayment(payment)"
+          >
+            Delete
+          </v-btn>
+        </td>
+      </tr>
+      <tr
+        v-for="(paymentAttributes, index) in paymentsAttributes"
+        :key="index"
+        :class="index % 2 === 0 ? 'bg-grey-lighten-3' : 'bg-gray-darken-1'"
+      >
+        <td>
+          <v-text-field
+            v-model="paymentAttributes.name"
+            aria-label="Payment Name"
+            color="primary"
+            density="compact"
+            variant="underlined"
+            hide-details
+          ></v-text-field>
+        </td>
+        <td>
+          <CurrencyInput
+            :model-value="centsToDollars(paymentAttributes.amountInCents)"
+            aria-label="Payment Amount"
+            color="primary"
+            density="compact"
+            variant="underlined"
+            hide-details
+            @update:model-value="
+              (newValue: string) => updatePaymentAmount(paymentAttributes, newValue)
+            "
+          />
+        </td>
+        <td>
+          <v-text-field
+            v-model="paymentAttributes.paidOn"
+            :rules="[dateRule, containedInFiscalYear]"
+            aria-label="Paid On"
+            color="primary"
+            density="compact"
+            hide-details="auto"
+            variant="underlined"
+          ></v-text-field>
+        </td>
+        <td class="text-center">
+          <v-btn
+            color="success"
+            size="small"
+            :loading="isLoadingPaymentsAttributesMap.get(index)"
+            @click="createPayment(paymentAttributes, index)"
+            >Save</v-btn
+          >
+        </td>
+      </tr>
+      <tr v-if="isEmpty(payments)">
+        <td
+          colspan="4"
+          class="text-center"
+        >
+          No payments found
+        </td>
+      </tr>
     </tbody>
   </v-table>
 
@@ -108,22 +144,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, type Ref, watch } from "vue"
+import { computed, ref, watchEffect } from "vue"
 import { DateTime, Interval } from "luxon"
 import { first, isEmpty, isNil, last } from "lodash"
-import { storeToRefs } from "pinia"
 
 import DateTimeUtils from "@/utils/date-time-utils"
-import useFiscalPeriods from "@/use/use-fiscal-periods"
-import {
-  usePaymentsStore,
-  isPersistedPayment,
-  type Payment,
-  type NonPersistedPayment,
-} from "@/store/payments"
-
 import { dateRule } from "@/utils/validators"
 import { centsToDollars, dollarsToCents } from "@/utils/format-money"
+
+import { MAX_PER_PAGE } from "@/api/base-api"
+import paymentsApi, { type Payment } from "@/api/payments-api"
+import useFiscalPeriods from "@/use/use-fiscal-periods"
+import usePayments from "@/use/use-payments"
 
 import CurrencyInput from "@/components/CurrencyInput.vue"
 
@@ -134,23 +166,23 @@ const props = defineProps<{
 
 const centreIdAsNumber = computed(() => parseInt(props.centreId))
 const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
+
+const paymentsQuery = computed(() => ({
+  where: {
+    centreId: centreIdAsNumber.value,
+    fiscalYear: fiscalYear.value,
+  },
+  // TODO: Remove this when the payments display is using pagination.
+  perPage: MAX_PER_PAGE,
+}))
+const { payments, isLoading, refresh: refreshPayments } = usePayments(paymentsQuery)
+
 const fiscalPeriodsQuery = computed(() => ({
   where: {
     fiscalYear: props.fiscalYearSlug,
   },
 }))
 const { fiscalPeriods } = useFiscalPeriods(fiscalPeriodsQuery)
-
-const paymentsStore = usePaymentsStore()
-
-const { isLoading } = storeToRefs(paymentsStore)
-const persistedPayments = computed(() => paymentsStore.items)
-const nonPersistedPayments: Ref<NonPersistedPayment[]> = ref([])
-
-const allPayments: Ref<(Payment | NonPersistedPayment)[]> = computed(() => [
-  ...persistedPayments.value,
-  ...nonPersistedPayments.value,
-])
 
 const paymentNames = ref([
   "First Advance",
@@ -177,27 +209,13 @@ const fiscalYearInterval = computed(() => {
   return Interval.fromDateTimes(fiscalYearStartUTC, fiscalYearEndUTC)
 })
 
-watch<[number, string], true>(
-  () => [centreIdAsNumber.value, props.fiscalYearSlug],
-  ([newCenterId, newFiscalYearSlug], _oldValues) => {
-    const newFiscalYear = newFiscalYearSlug.replace("-", "/")
-    paymentsStore.fetch({
-      where: {
-        centreId: newCenterId,
-        fiscalYear: newFiscalYear,
-      },
-    })
-  },
-  { immediate: true }
-)
-
 function containedInFiscalYear(value: string) {
   const date = DateTime.fromFormat(value, "yyyy-MM-dd")
 
   return fiscalYearInterval.value?.contains(date) || "Date must be within the fiscal year"
 }
 
-function updatePaymentAmount(payment: Payment | NonPersistedPayment, newValue: string) {
+function updatePaymentAmount(payment: Payment | Partial<Payment>, newValue: string) {
   if (["-", "", null].includes(newValue)) {
     payment.amountInCents = 0
   } else {
@@ -206,10 +224,47 @@ function updatePaymentAmount(payment: Payment | NonPersistedPayment, newValue: s
   }
 }
 
+const isLoadingPaymentMap = ref(new Map<number, boolean>())
+
+watchEffect(() => {
+  isLoadingPaymentMap.value = payments.value.reduce((map, payment) => {
+    map.set(payment.id, false)
+    return map
+  }, new Map<number, boolean>())
+})
+
+async function savePayment(payment: Payment) {
+  isLoadingPaymentMap.value.set(payment.id, true)
+  try {
+    await paymentsApi.update(payment.id, payment)
+    await refreshPayments()
+  } catch (error) {
+    console.error(`Failed to save payment: ${error}`, { error })
+    throw error
+  } finally {
+    isLoadingPaymentMap.value.set(payment.id, false)
+  }
+}
+
+async function deletePayment(payment: Payment) {
+  isLoadingPaymentMap.value.set(payment.id, true)
+  try {
+    await paymentsApi.delete(payment.id)
+  } catch (error) {
+    console.error(`Failed to delete payment: ${error}`, { error })
+    throw error
+  } finally {
+    isLoadingPaymentMap.value.set(payment.id, false)
+  }
+}
+
+const paymentsAttributes = ref<Partial<Payment>[]>([])
+
 function addRow() {
-  const name = paymentNames.value[allPayments.value.length]
+  const index = payments.value.length + paymentsAttributes.value.length
+  const name = paymentNames.value[index]
   const paidOn = fiscalYear.value.split("/")[0] + "-"
-  nonPersistedPayments.value.push({
+  paymentsAttributes.value.push({
     centreId: centreIdAsNumber.value,
     fiscalYear: fiscalYear.value,
     name: name,
@@ -218,20 +273,26 @@ function addRow() {
   })
 }
 
-async function savePayment(payment: NonPersistedPayment) {
-  await paymentsStore.save(payment)
-  deleteNonPersistedPayment(payment)
-}
+const isLoadingPaymentsAttributesMap = ref(new Map<number, boolean>())
 
-function deleteNonPersistedPayment(payment: NonPersistedPayment) {
-  nonPersistedPayments.value = nonPersistedPayments.value.filter((p) => p !== payment)
-}
+watchEffect(() => {
+  isLoadingPaymentsAttributesMap.value = paymentsAttributes.value.reduce((map, _payment, index) => {
+    map.set(index, false)
+    return map
+  }, new Map<number, boolean>())
+})
 
-function updatePayment(payment: Payment) {
-  return paymentsStore.update(payment.id, payment)
-}
-
-function deletePayment(payment: Payment) {
-  return paymentsStore.destroy(payment.id)
+async function createPayment(payment: Partial<Payment>, index: number) {
+  isLoadingPaymentsAttributesMap.value.set(index, true)
+  try {
+    await paymentsApi.create(payment)
+    await refreshPayments()
+  } catch (error) {
+    console.error(`Failed to create payment: ${error}`, { error })
+    throw error
+  } finally {
+    isLoadingPaymentsAttributesMap.value.set(index, false)
+    paymentsAttributes.value.splice(index, 1)
+  }
 }
 </script>
