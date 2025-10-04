@@ -89,12 +89,10 @@
 </template>
 
 <script setup lang="ts">
-import { compact, isEmpty, isNil, keyBy, mapValues, sumBy, upperFirst } from "lodash"
-import { DateTime, Interval } from "luxon"
+import { compact, groupBy, isEmpty, isNil, keyBy, mapValues, sumBy, upperFirst } from "lodash"
 import { ref, computed, watch } from "vue"
 
 import { formatMoney, centsToDollars, dollarsToCents } from "@/utils/format-money"
-import DateTimeUtils from "@/utils/date-time-utils"
 
 import employeeBenefitsApi, { EmployeeBenefit } from "@/api/employee-benefits-api"
 import employeeWageTiersApi from "@/api/employee-wage-tiers-api"
@@ -156,17 +154,10 @@ const employees = ref<Adjustment[]>([])
 const expensesByFiscalPeriodId = computed(() => keyBy(expenses.value, "fiscalPeriodId"))
 const employeesByFiscalPeriodId = computed(() => keyBy(employees.value, "fiscalPeriodId"))
 const paymentAdujstments = computed<Adjustment[]>(() => {
-  return fiscalPeriods.value.map((fiscalPeriod) => {
-    const { dateStart, dateEnd } = fiscalPeriod
-    const dateStartUTC = DateTimeUtils.fromISO(dateStart).toUTC()
-    const dateEndUTC = DateTimeUtils.fromISO(dateEnd).toUTC()
-    const fiscalPeriodInterval = Interval.fromDateTimes(dateStartUTC, dateEndUTC)
-    // TODO: update data model so payments have a fiscal period id
-    const paymentsForPeriod = payments.value.filter((payment) => {
-      const paidOn = DateTime.fromFormat(payment.paidOn, "yyyy-MM-dd")
-      return fiscalPeriodInterval.contains(paidOn)
-    })
+  const paymentsByFiscalPeriodId = groupBy(payments.value, "fiscalPeriodId")
 
+  return fiscalPeriods.value.map((fiscalPeriod) => {
+    const paymentsForPeriod = paymentsByFiscalPeriodId[fiscalPeriod.id] || []
     const amountInCents = sumBy(paymentsForPeriod, "amountInCents")
 
     return {
