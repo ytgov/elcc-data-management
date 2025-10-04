@@ -23,6 +23,7 @@ export default createVuetify({
           "yg-moss": "#7A9A01",
           yg_blue: "#0097a9",
           "yg-blue": "#0097a9",
+          "yg-blue-light": "#0097a966",
           yg_zinc: "#24405A",
           yg_twilight: "#512A44",
           yg_lichen: "#DC4405",

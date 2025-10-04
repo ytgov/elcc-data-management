@@ -1,6 +1,6 @@
 <template>
   <v-toolbar
-    color="#0097a966"
+    color="yg-blue-light"
     density="compact"
   >
     <v-tabs>

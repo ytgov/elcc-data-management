@@ -42,7 +42,7 @@
       <CentreDetailsCard :centre-id="centreIdAsNumber" />
       <v-card
         elevation="3"
-        color="#0097a966"
+        color="yg-blue-light"
       >
         <v-card-title style="background-color: #0097a968">Latest Enrollment</v-card-title>
         <v-divider></v-divider>
