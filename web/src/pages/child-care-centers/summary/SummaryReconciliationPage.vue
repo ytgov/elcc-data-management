@@ -101,8 +101,8 @@ import employeeWageTiersApi from "@/api/employee-wage-tiers-api"
 import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"
 import wageEnhancementsApi, { EI_CPP_WCB_RATE } from "@/api/wage-enhancements-api"
 
-import usePaymentsStore from "@/store/payments"
 import useFundingSubmissionLineJsons from "@/use/use-funding-submission-line-jsons"
+import usePayments from "@/use/use-payments"
 
 type Adjustment = {
   fiscalPeriodId: number
@@ -115,12 +115,20 @@ const props = defineProps<{
 }>()
 
 const centerIdAsNumber = computed(() => parseInt(props.centreId))
+const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
 
 const isLoading = ref(false)
-const paymentsStore = usePaymentsStore()
-const payments = computed(() => paymentsStore.items)
 
-const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
+const paymentsQuery = computed(() => ({
+  where: {
+    centreId: centerIdAsNumber.value,
+    fiscalYear: fiscalYear.value,
+  },
+}))
+const { payments, fetch: fetchPayments } = usePayments(paymentsQuery, {
+  skipWatchIf: () => true,
+})
+
 const fundingSubmissionLineJsonsQuery = computed(() => ({
   where: {
     centreId: centerIdAsNumber.value,
@@ -221,14 +229,7 @@ watch<[number, string], true>(
   async ([newCentreId, newFiscalYearSlug], _oldValues) => {
     isLoading.value = true
 
-    const newFiscalYear = newFiscalYearSlug.replace("-", "/")
-
-    await paymentsStore.fetch({
-      where: {
-        centreId: newCentreId,
-        fiscalYear: newFiscalYear,
-      },
-    })
+    await fetchPayments()
     fiscalPeriods.value = await fetchFiscalPeriods(newFiscalYearSlug)
     const fiscalPeriodIds = fiscalPeriods.value.map((fiscalPeriod) => fiscalPeriod.id)
     await fetchEmployeeBenefits(newCentreId, fiscalPeriodIds)
