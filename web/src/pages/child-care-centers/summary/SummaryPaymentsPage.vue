@@ -181,6 +181,7 @@ const fiscalPeriodsQuery = computed(() => ({
   where: {
     fiscalYear: props.fiscalYearSlug,
   },
+  perPage: MAX_PER_PAGE,
 }))
 const { fiscalPeriods } = useFiscalPeriods(fiscalPeriodsQuery)
 
