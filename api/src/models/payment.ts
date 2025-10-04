@@ -21,6 +21,7 @@ import {
 import { isValidFiscalYear } from "@/utils/validators"
 
 import Centre from "@/models/centre"
+import FiscalPeriod from "@/models/fiscal-period"
 
 @Table({
   paranoid: false,
@@ -34,6 +35,10 @@ export class Payment extends Model<InferAttributes<Payment>, InferCreationAttrib
   @Attribute(DataTypes.INTEGER)
   @NotNull
   declare centreId: number
+
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  declare fiscalPeriodId: number
 
   @Attribute(DataTypes.STRING(10))
   @NotNull
@@ -73,6 +78,15 @@ export class Payment extends Model<InferAttributes<Payment>, InferCreationAttrib
     },
   })
   declare centre?: NonAttribute<Centre>
+
+  @BelongsTo(() => FiscalPeriod, {
+    foreignKey: "fiscalPeriodId",
+    inverse: {
+      as: "payments",
+      type: "hasMany",
+    },
+  })
+  declare fiscalPeriod?: NonAttribute<FiscalPeriod>
 
   static establishScopes() {
     // add as needed

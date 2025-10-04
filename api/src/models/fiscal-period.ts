@@ -21,6 +21,7 @@ import {
 import { FiscalPeriodsFiscalYearMonthUniqueIndex } from "@/models/indexes"
 import EmployeeBenefit from "@/models/employee-benefit"
 import EmployeeWageTier from "@/models/employee-wage-tier"
+import Payment from "@/models/payment"
 
 /** Keep in sync with web/src/api/fiscal-periods-api.ts */
 export enum FiscalPeriodMonths {
@@ -102,6 +103,14 @@ export class FiscalPeriod extends Model<
     },
   })
   declare employeeWageTiers?: NonAttribute<EmployeeWageTier[]>
+
+  @HasMany(() => Payment, {
+    foreignKey: "fiscalPeriodId",
+    inverse: {
+      as: "payments",
+    },
+  })
+  declare payments?: NonAttribute<Payment[]>
 
   static establishScopes() {
     // add as needed
