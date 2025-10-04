@@ -30,33 +30,11 @@
           <td class="text-right">
             {{ formatMoney(centsToDollars(payment.amountInCents)) }}
           </td>
-          <td class="relative text-right">
+          <td class="text-right">
             {{ formatMoney(centsToDollars(expense.amountInCents)) }}
-            <template v-if="expense.includesEstimates">
-              <sup class="offset-asterisk-icon">
-                <v-icon size="small">mdi-asterisk-circle-outline</v-icon>
-              </sup>
-              <v-tooltip
-                location="bottom"
-                activator="parent"
-              >
-                <span class="text-white">This expense includes estimated values.</span>
-              </v-tooltip>
-            </template>
           </td>
-          <td class="text-right relative">
+          <td class="text-right">
             {{ formatMoney(centsToDollars(employee.amountInCents)) }}
-            <template v-if="employee.includesEstimates">
-              <sup class="offset-asterisk-icon">
-                <v-icon size="small">mdi-asterisk-circle-outline</v-icon>
-              </sup>
-              <v-tooltip
-                location="bottom"
-                activator="parent"
-              >
-                <span class="text-white">This amount includes estimated values.</span>
-              </v-tooltip>
-            </template>
           </td>
 
           <td class="text-right">
@@ -129,7 +107,6 @@ import useFundingSubmissionLineJsons from "@/use/use-funding-submission-line-jso
 type Adjustment = {
   fiscalPeriodId: number
   amountInCents: number
-  includesEstimates: boolean
 }
 
 const props = defineProps<{
@@ -187,7 +164,6 @@ const paymentAdujstments = computed<Adjustment[]>(() => {
     return {
       fiscalPeriodId: fiscalPeriod.id,
       amountInCents,
-      includesEstimates: false,
     }
   })
 })
@@ -295,7 +271,6 @@ async function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjust
     const expense: Adjustment = {
       fiscalPeriodId: fiscalPeriod.id,
       amountInCents: 0,
-      includesEstimates: false,
     }
     const { month } = fiscalPeriod
     const monthAsDateName = upperFirst(month)
@@ -303,13 +278,8 @@ async function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjust
 
     if (!isNil(linesForMonth)) {
       const actualSectionsTotal = sumBy(linesForMonth, "actualComputedTotal")
-      const estimatedSectionsTotal = sumBy(linesForMonth, "estimatedComputedTotal")
 
-      const includesEstimates = estimatedSectionsTotal > 0 && actualSectionsTotal === 0
-      const sectionsTotal = includesEstimates ? estimatedSectionsTotal : actualSectionsTotal
-
-      expense.includesEstimates ||= includesEstimates
-      expense.amountInCents += dollarsToCents(sectionsTotal)
+      expense.amountInCents += dollarsToCents(actualSectionsTotal)
     }
 
     return expense
@@ -323,7 +293,6 @@ async function buildEmployeeValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjus
     const employee: Adjustment = {
       fiscalPeriodId: fiscalPeriod.id,
       amountInCents: 0,
-      includesEstimates: false,
     }
     const { month } = fiscalPeriod
     const linesForMonth = employeeBenefits.value.find((b) => b.fiscalPeriodId == fiscalPeriod.id)
@@ -334,13 +303,8 @@ async function buildEmployeeValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjus
           linesForMonth.grossPayrollMonthlyActual * linesForMonth.costCapPercentage
         let actEmployerAmount = linesForMonth.employerCostActual
         employee.amountInCents = dollarsToCents(Math.min(actGrossAmount, actEmployerAmount))
-        employee.includesEstimates = false
       } else {
-        let estGrossAmount =
-          linesForMonth.grossPayrollMonthlyEstimated * linesForMonth.costCapPercentage
-        let estEmployerAmount = linesForMonth.employerCostEstimated
-        employee.amountInCents = dollarsToCents(Math.min(estGrossAmount, estEmployerAmount))
-        employee.includesEstimates = true
+        employee.amountInCents = 0
       }
     }
 
@@ -353,38 +317,19 @@ async function buildEmployeeValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjus
   return Promise.all(employeePromises)
 }
 
-/*
-  This function injects the estimated paid amount, until the actual paid amount is available.
-*/
 function injectEmployeeBenefitMonthlyCost(expense: Adjustment, month: string): void {
   const employeeBenefitForMonth = employeeBenefitsByMonth.value[month]
   if (isNil(employeeBenefitForMonth)) return
 
-  const {
-    employerCostEstimated,
-    employerCostActual,
-    grossPayrollMonthlyEstimated,
-    grossPayrollMonthlyActual,
-    costCapPercentage,
-  } = employeeBenefitForMonth
-  const estimatedPaidAmount = Math.min(
-    employerCostEstimated,
-    grossPayrollMonthlyEstimated * costCapPercentage
-  )
+  const { employerCostActual, grossPayrollMonthlyActual, costCapPercentage } =
+    employeeBenefitForMonth
   const actualPaidAmount = Math.min(
     employerCostActual,
     grossPayrollMonthlyActual * costCapPercentage
   )
-  const includesEstimates = estimatedPaidAmount > 0 && actualPaidAmount === 0
-  const paidAmountInDollars = includesEstimates ? estimatedPaidAmount : actualPaidAmount
-
-  expense.includesEstimates ||= includesEstimates
-  expense.amountInCents += dollarsToCents(paidAmountInDollars)
+  expense.amountInCents += dollarsToCents(actualPaidAmount)
 }
 
-/*
-  This function injects the estimated total amount, until the actual total amount is available.
-*/
 async function lazyInjectWageEnhancementMonthlyCost(expense: Adjustment, month: string) {
   const fiscalPeriod = fiscalPeriodsByMonth.value[month]
   const { employeeWageTiers } = await employeeWageTiersApi.list({
@@ -405,14 +350,6 @@ async function lazyInjectWageEnhancementMonthlyCost(expense: Adjustment, month: 
     keyBy(employeeWageTiers, "id"),
     "wageRatePerHour"
   )
-  const wageEnhancementsEstimatedSubtotal = wageEnhancements.reduce(
-    (total, { hoursEstimated, employeeWageTierId }) => {
-      const wageRatePerHour = wageRatePerHoursByEmployeeWageTierId[employeeWageTierId]
-
-      return total + hoursEstimated * wageRatePerHour
-    },
-    0
-  )
   const wageEnhancementsActualSubtotal = wageEnhancements.reduce(
     (total, { hoursActual, employeeWageTierId }) => {
       const wageRatePerHour = wageRatePerHoursByEmployeeWageTierId[employeeWageTierId]
@@ -421,31 +358,13 @@ async function lazyInjectWageEnhancementMonthlyCost(expense: Adjustment, month: 
     },
     0
   )
-  const wageEnhancementsEstimatedTotal = wageEnhancementsEstimatedSubtotal * (1 + EI_CPP_WCB_RATE)
   const wageEnhancementsActualTotal = wageEnhancementsActualSubtotal * (1 + EI_CPP_WCB_RATE)
 
-  const includesEstimates = wageEnhancementsEstimatedTotal > 0 && wageEnhancementsActualTotal === 0
-  const totalInDollars = includesEstimates
-    ? wageEnhancementsEstimatedTotal
-    : wageEnhancementsActualTotal
-
-  expense.includesEstimates ||= includesEstimates
-  expense.amountInCents += dollarsToCents(totalInDollars)
+  expense.amountInCents += dollarsToCents(wageEnhancementsActualTotal)
 }
 </script>
 
 <style scoped>
-.relative {
-  position: relative;
-}
-
-.offset-asterisk-icon {
-  position: absolute;
-  top: 0.75rem;
-  right: 1rem;
-  transform: translate(100%, 0%); /* Position the asterisk outside the content */
-}
-
 ::v-deep(tbody tr:nth-of-type(even)) {
   background-color: rgba(0, 0, 0, 0.05);
 }
