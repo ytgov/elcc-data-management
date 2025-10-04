@@ -1,5 +1,6 @@
 import { authGuard } from "@auth0/auth0-vue"
 import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router"
+import { pick } from "lodash"
 
 import adminstrationRoutes from "@/routes/administration-routes"
 
@@ -33,40 +34,35 @@ const routes: RouteRecordRaw[] = [
         // TODO: replace centerId with a slug using https://github.com/simov/slugify on center name
         // also add the appropriate slug column to the centre table and model
         path: "child-care-centres/:centreId/:fiscalYearSlug?",
-        component: () => import("@/modules/centre/pages/CentreDashboardPage.vue"),
-        props: true,
+        component: () => import("@/layouts/child-care-centers/ChildCareCenterLayout.vue"),
+        props: (route) => pick(route.params, ["centreId", "fiscalYearSlug"]),
         children: [
           {
             path: "",
-            name: "CentreDashboardPage",
+            name: "child-care-centers/ChildCareCenterRedirect",
             redirect: {
-              name: "CentreDashboardSummaryPage",
+              name: "child-care-centers/ChildCareCenterSummaryRedirect",
             },
           },
           {
             path: "summary",
-            component: () => import("@/modules/centre/pages/CentreDashboardSummaryPage.vue"),
-            props: (route) => ({
-              centreId: parseInt(route.params.centreId as string),
-              fiscalYearSlug: route.params.fiscalYearSlug,
-            }),
+            component: () =>
+              import("@/layouts/child-care-centers/ChildCareCenterSummaryLayout.vue"),
+            props: true,
             children: [
               {
                 path: "",
-                name: "CentreDashboardSummaryPage",
+                name: "child-care-centers/ChildCareCenterSummaryRedirect",
                 redirect: {
-                  name: "CentreDashboardSummaryReconciliationPage",
+                  name: "child-care-centers/summary/SummaryReconciliationPage",
                 },
               },
               {
                 path: "reconciliation",
-                name: "CentreDashboardSummaryReconciliationPage",
+                name: "child-care-centers/summary/SummaryReconciliationPage",
                 component: () =>
-                  import("@/modules/centre/pages/CentreDashboardSummaryReconciliationPage.vue"),
-                props: (route) => ({
-                  centreId: parseInt(route.params.centreId as string),
-                  fiscalYearSlug: route.params.fiscalYearSlug,
-                }),
+                  import("@/pages/child-care-centers/summary/SummaryReconciliationPage.vue"),
+                props: true,
               },
               {
                 path: "payments",

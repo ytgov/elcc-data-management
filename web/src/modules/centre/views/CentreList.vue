@@ -147,7 +147,12 @@
               class="mt-5 float-right"
               size="small"
               color="primary"
-              :to="{ name: 'CentreDashboardPage', params: { centreId: selectedItem.id } }"
+              :to="{
+                name: 'child-care-centers/ChildCareCenterRedirect',
+                params: {
+                  centreId: selectedItem.id,
+                },
+              }"
               >View Details</v-btn
             >
             <div style="clear: both"></div>
@@ -202,7 +207,7 @@ function tableRowClick(centre: Centre) {
 
 function goToCentre(centreId: string | number) {
   router.push({
-    name: "CentreDashboardPage",
+    name: "child-care-centers/ChildCareCenterRedirect",
     params: { centreId },
   })
 }

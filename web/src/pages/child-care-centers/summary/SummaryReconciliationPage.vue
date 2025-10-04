@@ -132,16 +132,12 @@ type Adjustment = {
   includesEstimates: boolean
 }
 
-const props = defineProps({
-  centreId: {
-    type: Number,
-    required: true,
-  },
-  fiscalYearSlug: {
-    type: String,
-    required: true,
-  },
-})
+const props = defineProps<{
+  centreId: string
+  fiscalYearSlug: string
+}>()
+
+const centerIdAsNumber = computed(() => parseInt(props.centreId))
 
 const isLoading = ref(false)
 const paymentsStore = usePaymentsStore()
@@ -150,7 +146,7 @@ const payments = computed(() => paymentsStore.items)
 const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
 const fundingSubmissionLineJsonsQuery = computed(() => ({
   where: {
-    centreId: props.centreId,
+    centreId: centerIdAsNumber.value,
     fiscalYear: fiscalYear.value,
   },
 }))
@@ -245,7 +241,7 @@ const adjustmentsTotal = computed(
 )
 
 watch<[number, string], true>(
-  () => [props.centreId, props.fiscalYearSlug],
+  () => [centerIdAsNumber.value, props.fiscalYearSlug],
   async ([newCentreId, newFiscalYearSlug], _oldValues) => {
     isLoading.value = true
 
@@ -399,7 +395,7 @@ async function lazyInjectWageEnhancementMonthlyCost(expense: Adjustment, month: 
   const employeeWageTierIds = employeeWageTiers.map((employeeWageTier) => employeeWageTier.id)
   const { wageEnhancements } = await wageEnhancementsApi.list({
     where: {
-      centreId: props.centreId,
+      centreId: centerIdAsNumber.value,
       employeeWageTierId: employeeWageTierIds,
     },
   })

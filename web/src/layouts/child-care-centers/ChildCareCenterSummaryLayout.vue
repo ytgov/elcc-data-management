@@ -6,7 +6,7 @@
     <v-tabs>
       <v-tab
         :to="{
-          name: 'CentreDashboardSummaryReconciliationPage',
+          name: 'child-care-centers/summary/SummaryReconciliationPage',
           params: {
             centreId,
             fiscalYearSlug,
@@ -32,15 +32,9 @@
   <router-view></router-view>
 </template>
 
-<script lang="ts" setup>
-defineProps({
-  centreId: {
-    type: Number,
-    required: true,
-  },
-  fiscalYearSlug: {
-    type: String,
-    required: true,
-  },
-})
+<script setup lang="ts">
+defineProps<{
+  centreId: string
+  fiscalYearSlug: string
+}>()
 </script>
