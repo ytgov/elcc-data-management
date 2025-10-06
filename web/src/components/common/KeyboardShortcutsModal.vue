@@ -155,13 +155,10 @@
 <script lang="ts" setup>
 import { useRouteQuery } from "@vueuse/router"
 
-// @ts-expect-error - boolean default works just fine.
-const show = useRouteQuery<string, boolean>("showKeyboardShortcuts", false, {
-  transform: (value) => {
-    if (value === "true") return true
+import { booleanTransformer } from "@/utils/use-route-query-transformers"
 
-    return false
-  },
+const show = useRouteQuery<string, boolean>("showKeyboardShortcuts", "false", {
+  transform: booleanTransformer,
 })
 
 function close() {
