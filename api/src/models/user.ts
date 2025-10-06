@@ -1,6 +1,5 @@
 import {
   DataTypes,
-  Model,
   sql,
   type CreationOptional,
   type InferAttributes,
@@ -19,6 +18,7 @@ import {
   ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
 
+import BaseModel from "@/models/base-model"
 import UserRole from "@/models/user-role"
 
 export enum UserStatus {
@@ -29,7 +29,7 @@ export enum UserStatus {
 @Table({
   paranoid: false,
 })
-export class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
+export class User extends BaseModel<InferAttributes<User>, InferCreationAttributes<User>> {
   static readonly Status = UserStatus
 
   @Attribute(DataTypes.INTEGER)
@@ -100,7 +100,7 @@ export class User extends Model<InferAttributes<User>, InferCreationAttributes<U
   declare roles?: NonAttribute<UserRole[]>
 
   static establishScopes() {
-    // add as needed
+    this.addSearchScope(["firstName", "lastName", "email"])
   }
 }
 

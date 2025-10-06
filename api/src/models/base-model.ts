@@ -1,4 +1,12 @@
-import { Attributes, FindOptions, Model, ModelStatic } from "@sequelize/core"
+import {
+  Model,
+  type AttributeNames,
+  type Attributes,
+  type FindOptions,
+  type ModelStatic,
+} from "@sequelize/core"
+
+import searchFieldsByTermsFactory from "@/utils/search-fields-by-terms-factory"
 
 // See /home/marlen/code/icefoganalytics/elcc-data-management/api/node_modules/sequelize/types/model.d.ts -> Model
 export abstract class BaseModel<
@@ -7,6 +15,11 @@ export abstract class BaseModel<
   // eslint-disable-next-line @typescript-eslint/ban-types
   TCreationAttributes extends {} = TModelAttributes,
 > extends Model<TModelAttributes, TCreationAttributes> {
+  static addSearchScope<M extends BaseModel>(this: ModelStatic<M>, fields: AttributeNames<M>[]) {
+    const searchScopeFunction = searchFieldsByTermsFactory<M>(fields)
+    this.addScope("search", searchScopeFunction)
+  }
+
   // See api/node_modules/@sequelize/core/lib/model.d.ts -> findAll
   // Taken from https://api.rubyonrails.org/v7.1.0/classes/ActiveRecord/Batches.html#method-i-find_each
   // Enforces sort by id, overwriting any supplied order

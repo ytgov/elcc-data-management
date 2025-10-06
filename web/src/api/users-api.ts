@@ -35,7 +35,9 @@ export type UserWhereOptions = WhereOptions<
   "id" | "email" | "firstName" | "lastName" | "status" | "isAdmin"
 >
 
-export type UserFiltersOptions = FiltersOptions
+export type UserFiltersOptions = FiltersOptions<{
+  search: string | string[]
+}>
 
 export type UserQueryOptions = QueryOptions<UserWhereOptions, UserFiltersOptions>
 
