@@ -18,6 +18,8 @@ export type FundingPeriod = {
   updatedAt: string
 }
 
+export type FundingPeriodPolicy = Policy
+
 export type FundingPeriodAsShow = FundingPeriod
 
 export type FundingPeriodAsIndex = FundingPeriod
@@ -27,7 +29,9 @@ export type FundingPeriodWhereOptions = WhereOptions<
   "id" | "fiscalYear" | "fromDate" | "toDate" | "title" | "isFiscalYear" | "isSchoolMonth"
 >
 
-export type FundingPeriodFiltersOptions = FiltersOptions
+export type FundingPeriodFiltersOptions = FiltersOptions<{
+  search: string | string[]
+}>
 
 export type FundingPeriodQueryOptions = QueryOptions<
   FundingPeriodWhereOptions,
@@ -46,13 +50,14 @@ export const fundingPeriodsApi = {
   },
   async get(fundingPeriodId: number): Promise<{
     fundingPeriod: FundingPeriodAsShow
-    policy: Policy
+    policy: FundingPeriodPolicy
   }> {
     const { data } = await http.get(`/api/funding-periods/${fundingPeriodId}`)
     return data
   },
   async create(attributes: Partial<FundingPeriod>): Promise<{
     fundingPeriod: FundingPeriodAsShow
+    policy: FundingPeriodPolicy
   }> {
     const { data } = await http.post("/api/funding-periods", attributes)
     return data
@@ -62,6 +67,7 @@ export const fundingPeriodsApi = {
     attributes: Partial<FundingPeriod>
   ): Promise<{
     fundingPeriod: FundingPeriodAsShow
+    policy: FundingPeriodPolicy
   }> {
     const { data } = await http.patch(`/api/funding-periods/${fundingPeriodId}`, attributes)
     return data

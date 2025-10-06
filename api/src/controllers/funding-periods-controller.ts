@@ -81,6 +81,7 @@ export class FundingPeriodsController extends BaseController<FundingPeriod> {
       const serializedFundingPeriod = ShowSerializer.perform(fundingPeriod)
       return this.response.status(201).json({
         fundingPeriod: serializedFundingPeriod,
+        policy,
       })
     } catch (error) {
       logger.error(`Error creating funding period: ${error}`, { error })
@@ -111,6 +112,7 @@ export class FundingPeriodsController extends BaseController<FundingPeriod> {
       const serializedFundingPeriod = ShowSerializer.perform(updatedFundingPeriod)
       return this.response.json({
         fundingPeriod: serializedFundingPeriod,
+        policy,
       })
     } catch (error) {
       logger.error(`Error updating funding period: ${error}`, { error })

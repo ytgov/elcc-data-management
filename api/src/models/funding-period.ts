@@ -1,6 +1,5 @@
 import {
   DataTypes,
-  Model,
   sql,
   type CreationOptional,
   type InferAttributes,
@@ -15,10 +14,12 @@ import {
   Table,
 } from "@sequelize/core/decorators-legacy"
 
+import BaseModel from "@/models/base-model"
+
 @Table({
   paranoid: false,
 })
-export class FundingPeriod extends Model<
+export class FundingPeriod extends BaseModel<
   InferAttributes<FundingPeriod>,
   InferCreationAttributes<FundingPeriod>
 > {
@@ -64,7 +65,7 @@ export class FundingPeriod extends Model<
   declare updatedAt: CreationOptional<Date>
 
   static establishScopes() {
-    // add as needed
+    this.addSearchScope(["fiscalYear", "title", "fromDate", "toDate"])
   }
 }
 
