@@ -69,7 +69,7 @@
 <script lang="ts">
 import { mapActions, mapState } from "pinia"
 
-import { useUserAdminStore } from "@/modules/users/store/index"
+import { useUserAdminStore, type User } from "@/modules/users/store/index"
 
 import BaseCard from "@/components/BaseCard.vue"
 import UserEditor from "@/modules/users/components/UserEditor.vue"
@@ -117,8 +117,8 @@ export default {
     async loadItems() {
       await this.getAllUsers()
     },
-    rowClick(event: Event, thing: any) {
-      this.selectUser(thing.item)
+    rowClick(_event: Event, row: { item: User }) {
+      this.selectUser(row.item)
     },
   },
 }

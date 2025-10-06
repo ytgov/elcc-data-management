@@ -10,7 +10,8 @@ const routes = [
       },
       {
         path: "administration/users",
-        component: () => import("@/modules/users/views/UserList.vue"),
+        name: "administration/UsersPage",
+        component: () => import("@/pages/administration/AdminstrationUsersPage.vue"),
       },
       {
         path: "administration/funding-periods",

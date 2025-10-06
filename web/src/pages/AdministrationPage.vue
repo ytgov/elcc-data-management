@@ -25,7 +25,11 @@
 
   <v-row>
     <v-col>
-      <v-card to="/administration/users">
+      <v-card
+        :to="{
+          name: 'administration/UsersPage',
+        }"
+      >
         <v-card-title>Users</v-card-title>
         <v-card-text>
           <span class="text-h4">{{ usersTotalCount }}</span>
