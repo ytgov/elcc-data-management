@@ -225,7 +225,7 @@ watch<[number, string], true>(
     const fiscalPeriodIds = fiscalPeriods.value.map((fiscalPeriod) => fiscalPeriod.id)
     await fetchEmployeeBenefits(newCentreId, fiscalPeriodIds)
     await fetchFundingSubmisionLineJsons()
-    expenses.value = await buildExpenseValues(fiscalPeriods.value)
+    expenses.value = buildExpenseValues(fiscalPeriods.value)
     employees.value = await buildEmployeeValues(fiscalPeriods.value)
 
     isLoading.value = false
@@ -258,8 +258,8 @@ async function fetchEmployeeBenefits(centreId: number, fiscalPeriodsIds: number[
   }))
 }
 
-async function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjustment[]> {
-  const expensePromises = fiscalPeriods.map(async (fiscalPeriod) => {
+function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Adjustment[] {
+  const expenseValues = fiscalPeriods.map((fiscalPeriod) => {
     const expense: Adjustment = {
       fiscalPeriodId: fiscalPeriod.id,
       amountInCents: 0,
@@ -277,7 +277,7 @@ async function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjust
     return expense
   })
 
-  return Promise.all(expensePromises)
+  return expenseValues
 }
 
 async function buildEmployeeValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjustment[]> {
