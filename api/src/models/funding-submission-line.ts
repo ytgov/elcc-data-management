@@ -15,7 +15,6 @@ import {
   Table,
 } from "@sequelize/core/decorators-legacy"
 
-/** @deprecated - use FundingSubmissionLineJson model instead. */
 @Table({
   paranoid: false,
 })
@@ -66,5 +65,4 @@ export class FundingSubmissionLine extends Model<
   }
 }
 
-/** @deprecated - use FundingSubmissionLineJson model instead. */
 export default FundingSubmissionLine
