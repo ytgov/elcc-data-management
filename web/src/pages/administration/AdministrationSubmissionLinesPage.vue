@@ -1,8 +1,5 @@
 <template>
-  <BaseCard
-    show-header="t"
-    heading=""
-  >
+  <BaseCard show-header>
     <template #left>
       <v-select
         v-model="fiscalYear"
