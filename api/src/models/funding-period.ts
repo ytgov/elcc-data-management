@@ -46,12 +46,12 @@ export class FundingPeriod extends Model<
   @Attribute(DataTypes.BOOLEAN)
   @NotNull
   @Default(false)
-  declare isFiscalYear: boolean
+  declare isFiscalYear: CreationOptional<boolean>
 
   @Attribute(DataTypes.BOOLEAN)
   @NotNull
   @Default(true)
-  declare isSchoolMonth: boolean
+  declare isSchoolMonth: CreationOptional<boolean>
 
   @Attribute(DataTypes.DATE)
   @NotNull

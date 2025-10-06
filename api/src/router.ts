@@ -24,6 +24,7 @@ import {
   EmployeeBenefitsController,
   EmployeeWageTiersController,
   FiscalPeriodsController,
+  FundingPeriodsController,
   FundingSubmissionLineJsons,
   FundingSubmissionLineJsonsController,
   PaymentsController,
@@ -69,6 +70,16 @@ router
 router.route("/api/employee-wage-tiers").get(EmployeeWageTiersController.index)
 
 router.route("/api/fiscal-periods").get(FiscalPeriodsController.index)
+
+router
+  .route("/api/funding-periods")
+  .get(FundingPeriodsController.index)
+  .post(FundingPeriodsController.create)
+router
+  .route("/api/funding-periods/:fundingPeriodId")
+  .get(FundingPeriodsController.show)
+  .patch(FundingPeriodsController.update)
+  .delete(FundingPeriodsController.destroy)
 
 router
   .route("/api/funding-submission-line-jsons")
