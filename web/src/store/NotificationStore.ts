@@ -1,5 +1,8 @@
 import { defineStore } from "pinia"
 
+/**
+ * @deprecated - prefer web/src/use/use-snack.ts
+ */
 export const useNotificationStore = defineStore("notifications", {
   state: () => ({
     message: {

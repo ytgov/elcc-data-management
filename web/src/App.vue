@@ -18,6 +18,7 @@
       message="Initializing app ..."
     />
     <Notifications />
+    <AppSnackbar />
   </v-app>
 </template>
 
@@ -30,6 +31,7 @@ import useCurrentUser from "@/use/use-current-user"
 import { useApiStore } from "@/store/ApiStore"
 
 import PageLoader from "@/components/common/PageLoader.vue"
+import AppSnackbar from "@/components/layouts/AppSnackbar.vue"
 import Notifications from "@/components/Notifications.vue"
 
 useApiStore()

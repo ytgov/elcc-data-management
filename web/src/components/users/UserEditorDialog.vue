@@ -95,6 +95,7 @@ import { useRouteQuery } from "@vueuse/router"
 
 import { integerTransformer } from "@/utils/use-route-query-transformers"
 
+import useSnack from "@/use/use-snack"
 import useUser from "@/use/use-user"
 
 const userId = useRouteQuery<string | null, number | null>("showUserEditor", null, {
@@ -115,14 +116,15 @@ function close() {
 }
 
 const isSaving = ref(false)
+const snack = useSnack()
 
 async function saveNotifyAndClose() {
   try {
     await save()
-    // TODO: notify on success
+    snack.success("User saved!")
     close()
-  } catch (_error) {
-    // TODO: notify on failure
+  } catch (error) {
+    snack.error(`Failed to save user: ${error}`)
   } finally {
     isSaving.value = false
   }

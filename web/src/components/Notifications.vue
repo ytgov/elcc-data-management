@@ -17,6 +17,9 @@
 import { useNotificationStore } from "../store/NotificationStore"
 import { mapWritableState } from "pinia"
 
+/**
+ * @deprecated This component is deprecated and will be removed in a future version.
+ */
 export default {
   name: "Notifications",
   setup() {
