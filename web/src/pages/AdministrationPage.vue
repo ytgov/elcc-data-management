@@ -1,28 +1,4 @@
 <template>
-  <v-breadcrumbs
-    :items="breadcrumbs"
-    bg-color="#7A9A01"
-    style="margin: -13px -16px 10px -16px"
-    class="pl-4 mb-4"
-    color="white"
-    active-color="#fff"
-  >
-    <template #prepend>
-      <v-icon
-        color="white"
-        icon="mdi-home"
-      ></v-icon>
-    </template>
-    <template #divider>
-      <v-icon
-        color="white"
-        icon="mdi-chevron-right"
-      ></v-icon>
-    </template>
-  </v-breadcrumbs>
-
-  <h1>Administration</h1>
-
   <v-row>
     <v-col>
       <v-card
@@ -66,6 +42,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
 
+import useBreadcrumbs from "@/use/use-breadcrumbs"
 import useFundingPeriods from "@/use/use-funding-periods"
 import useFundingSubmissionLines from "@/use/use-funding-submission-lines"
 import useUsers from "@/use/use-users"
@@ -87,18 +64,12 @@ const { totalCount: fundingSubmissionLinesTotalCount } = useFundingSubmissionLin
   fundingSubmissionLinesQuery
 )
 
-const breadcrumbs = [
-  {
-    title: "Home",
-    to: {
-      name: "DashboardPage",
-    },
-  },
+useBreadcrumbs("Administration", [
   {
     title: "Administration",
     to: {
       name: "AdministrationPage",
     },
   },
-]
+])
 </script>

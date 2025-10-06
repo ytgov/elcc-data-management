@@ -1,28 +1,4 @@
 <template>
-  <v-breadcrumbs
-    :items="breadcrumbs"
-    bg-color="#7A9A01"
-    style="margin: -13px -16px 10px -16px"
-    class="pl-4 mb-4"
-    color="white"
-    active-color="#fff"
-  >
-    <template #prepend>
-      <v-icon
-        color="white"
-        icon="mdi-home"
-      ></v-icon>
-    </template>
-    <template #divider>
-      <v-icon
-        color="white"
-        icon="mdi-chevron-right"
-      ></v-icon>
-    </template>
-  </v-breadcrumbs>
-
-  <h1>Submission Lines</h1>
-
   <BaseCard
     show-header="t"
     heading=""
@@ -75,7 +51,11 @@
 <script lang="ts">
 import { mapActions, mapState } from "pinia"
 
-import { useSubmissionLinesStore } from "@/modules/submission-lines/store/index"
+import {
+  useSubmissionLinesStore,
+  type FundingSubmissionLine,
+} from "@/modules/submission-lines/store/index"
+import useBreadcrumbs from "@/use/use-breadcrumbs"
 
 import BaseCard from "@/components/BaseCard.vue"
 import SubmissionLineEditor from "@/modules/submission-lines/components/SubmissionLineEditor.vue"
@@ -86,6 +66,22 @@ export default {
     BaseCard,
     FundingFiscalEditor,
     SubmissionLineEditor,
+  },
+  setup() {
+    useBreadcrumbs("Submission Lines", [
+      {
+        title: "Administration",
+        to: {
+          name: "AdministrationPage",
+        },
+      },
+      {
+        title: "Submission Lines",
+        to: {
+          name: "administration/AdministrationSubmissionLinesPage",
+        },
+      },
+    ])
   },
   data: () => ({
     headers: [
@@ -130,8 +126,8 @@ export default {
     async loadItems() {
       await this.getAllSubmissionLines()
     },
-    rowClick(event: Event, thing: any) {
-      this.selectLine(thing.item)
+    rowClick(_event: Event, row: { item: FundingSubmissionLine }) {
+      this.selectLine(row.item)
     },
   },
 }

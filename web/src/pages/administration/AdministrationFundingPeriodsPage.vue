@@ -1,28 +1,4 @@
 <template>
-  <v-breadcrumbs
-    :items="breadcrumbs"
-    bg-color="#7A9A01"
-    style="margin: -13px -16px 10px -16px"
-    class="pl-4 mb-4"
-    color="white"
-    active-color="#fff"
-  >
-    <template #prepend>
-      <v-icon
-        color="white"
-        icon="mdi-home"
-      ></v-icon>
-    </template>
-    <template #divider>
-      <v-icon
-        color="white"
-        icon="mdi-chevron-right"
-      ></v-icon>
-    </template>
-  </v-breadcrumbs>
-
-  <h1>Funding Periods</h1>
-
   <BaseCard
     show-header="t"
     heading=""
@@ -65,6 +41,7 @@ import {
   useFundingPeriodStore,
   type FundingPeriod,
 } from "@/modules/administration/store/FundingPeriod"
+import useBreadcrumbs from "@/use/use-breadcrumbs"
 
 import BaseCard from "@/components/BaseCard.vue"
 import FundingPeriodEditor from "@/modules/administration/components/FundingPeriodEditor.vue"
@@ -73,6 +50,22 @@ export default {
   components: {
     BaseCard,
     FundingPeriodEditor,
+  },
+  setup() {
+    useBreadcrumbs("Funding Periods", [
+      {
+        title: "Administration",
+        to: {
+          name: "AdministrationPage",
+        },
+      },
+      {
+        title: "Funding Periods",
+        to: {
+          name: "administration/FundingPeriodsPage",
+        },
+      },
+    ])
   },
   data: () => ({
     headers: [

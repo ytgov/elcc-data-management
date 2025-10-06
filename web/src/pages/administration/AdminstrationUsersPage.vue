@@ -1,28 +1,4 @@
 <template>
-  <v-breadcrumbs
-    :items="breadcrumbs"
-    bg-color="#7A9A01"
-    style="margin: -13px -16px 10px -16px"
-    class="pl-4 mb-4"
-    color="white"
-    active-color="#fff"
-  >
-    <template #prepend>
-      <v-icon
-        color="white"
-        icon="mdi-home"
-      ></v-icon>
-    </template>
-    <template #divider>
-      <v-icon
-        color="white"
-        icon="mdi-chevron-right"
-      ></v-icon>
-    </template>
-  </v-breadcrumbs>
-
-  <h1>Users</h1>
-
   <BaseCard
     show-header="t"
     heading=""
@@ -70,6 +46,7 @@
 import { mapActions, mapState } from "pinia"
 
 import { useUserAdminStore, type User } from "@/modules/users/store/index"
+import useBreadcrumbs from "@/use/use-breadcrumbs"
 
 import BaseCard from "@/components/BaseCard.vue"
 import UserEditor from "@/modules/users/components/UserEditor.vue"
@@ -78,6 +55,22 @@ export default {
   components: {
     BaseCard,
     UserEditor,
+  },
+  setup() {
+    useBreadcrumbs("Users", [
+      {
+        title: "Administration",
+        to: {
+          name: "AdministrationPage",
+        },
+      },
+      {
+        title: "Users",
+        to: {
+          name: "administration/UsersPage",
+        },
+      },
+    ])
   },
   data: () => ({
     headers: [
