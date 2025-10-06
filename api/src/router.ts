@@ -27,6 +27,7 @@ import {
   FundingPeriodsController,
   FundingSubmissionLineJsons,
   FundingSubmissionLineJsonsController,
+  FundingSubmissionLinesController,
   PaymentsController,
   UsersController,
   WageEnhancements,
@@ -93,6 +94,16 @@ router
 router
   .route("/api/funding-submission-line-jsons/:fundingSubmissionLineJsonId/replicate-estimates")
   .post(FundingSubmissionLineJsons.ReplicateEstimatesController.create)
+
+router
+  .route("/api/funding-submission-lines")
+  .get(FundingSubmissionLinesController.index)
+  .post(FundingSubmissionLinesController.create)
+router
+  .route("/api/funding-submission-lines/:fundingSubmissionLineId")
+  .get(FundingSubmissionLinesController.show)
+  .patch(FundingSubmissionLinesController.update)
+  .delete(FundingSubmissionLinesController.destroy)
 
 router.route("/api/payments").get(PaymentsController.index).post(PaymentsController.create)
 router
