@@ -237,8 +237,14 @@ watchEffect(() => {
 async function savePayment(payment: Payment) {
   isLoadingPaymentMap.value.set(payment.id, true)
   try {
-    await paymentsApi.update(payment.id, payment)
-    await refreshPayments()
+    const { payment: updatedPayment } = await paymentsApi.update(payment.id, payment)
+    const paymentIndex = payments.value.findIndex((payment) => payment.id === updatedPayment.id)
+    if (paymentIndex === -1) {
+      console.error(`Payment with id ${payment.id} not found in local array`)
+      return
+    }
+
+    payments.value.splice(paymentIndex, 1, updatedPayment)
   } catch (error) {
     console.error(`Failed to save payment: ${error}`, { error })
     throw error
@@ -289,12 +295,12 @@ async function createPayment(payment: Partial<Payment>, index: number) {
   try {
     await paymentsApi.create(payment)
     await refreshPayments()
+    paymentsAttributes.value.splice(index, 1)
   } catch (error) {
     console.error(`Failed to create payment: ${error}`, { error })
     throw error
   } finally {
     isLoadingPaymentsAttributesMap.value.set(index, false)
-    paymentsAttributes.value.splice(index, 1)
   }
 }
 </script>
