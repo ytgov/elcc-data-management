@@ -21,7 +21,7 @@
     </template>
   </v-breadcrumbs>
 
-  <h1>Submission Format</h1>
+  <h1>Submission Lines</h1>
 
   <BaseCard
     show-header="t"
@@ -112,7 +112,7 @@ export default {
           to: "/administration",
         },
         {
-          title: "Submission Format",
+          title: "Submission Lines",
         },
       ]
     },

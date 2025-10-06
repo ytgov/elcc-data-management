@@ -18,7 +18,8 @@ const routes = [
       },
       {
         path: "administration/submission-lines",
-        component: () => import("@/modules/submission-lines/views/SubmissionLinesList.vue"),
+        name: "administration/AdministrationSubmissionLinesPage",
+        component: () => import("@/pages/administration/AdministrationSubmissionLinesPage.vue"),
       },
     ],
   },

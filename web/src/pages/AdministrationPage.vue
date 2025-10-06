@@ -41,7 +41,11 @@
       </v-card>
     </v-col>
     <v-col>
-      <v-card to="/administration/submission-lines">
+      <v-card
+        :to="{
+          name: 'administration/AdministrationSubmissionLinesPage',
+        }"
+      >
         <v-card-title>Submission Lines</v-card-title>
         <v-card-text>
           <span class="text-h4">{{ fundingSubmissionLinesTotalCount }}</span>
