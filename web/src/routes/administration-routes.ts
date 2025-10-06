@@ -15,7 +15,8 @@ const routes = [
       },
       {
         path: "administration/funding-periods",
-        component: () => import("@/modules/administration/views/FundingPeriodList.vue"),
+        name: "administration/FundingPeriodsPage",
+        component: () => import("@/pages/administration/AdministrationFundingPeriodsPage.vue"),
       },
       {
         path: "administration/submission-lines",

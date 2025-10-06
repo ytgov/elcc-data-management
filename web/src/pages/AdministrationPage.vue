@@ -37,7 +37,11 @@
       </v-card>
     </v-col>
     <v-col>
-      <v-card to="/administration/funding-periods">
+      <v-card
+        :to="{
+          name: 'administration/FundingPeriodsPage',
+        }"
+      >
         <v-card-title>Funding Periods</v-card-title>
         <v-card-text>
           <span class="text-h4">{{ fundingPeriodsTotalCount }}</span>

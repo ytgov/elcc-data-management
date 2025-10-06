@@ -61,7 +61,10 @@
 <script lang="ts">
 import { mapActions, mapState } from "pinia"
 
-import { useFundingPeriodStore } from "@/modules/administration/store/FundingPeriod"
+import {
+  useFundingPeriodStore,
+  type FundingPeriod,
+} from "@/modules/administration/store/FundingPeriod"
 
 import BaseCard from "@/components/BaseCard.vue"
 import FundingPeriodEditor from "@/modules/administration/components/FundingPeriodEditor.vue"
@@ -109,8 +112,8 @@ export default {
     async loadItems() {
       await this.getAllFundingPeriods()
     },
-    rowClick(event: Event, thing: any) {
-      this.selectPeriod(thing.item)
+    rowClick(_event: Event, row: { item: FundingPeriod }) {
+      this.selectPeriod(row.item)
     },
   },
 }
