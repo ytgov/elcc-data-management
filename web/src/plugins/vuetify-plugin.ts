@@ -28,6 +28,7 @@ export default createVuetify({
           yg_twilight: "#512A44",
           yg_lichen: "#DC4405",
           yg_sun: "#F2A900",
+          "yg-sun": "#F2A900",
         },
       },
       dark: {

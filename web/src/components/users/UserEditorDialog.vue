@@ -4,7 +4,7 @@
     persistent
     max-width="800"
   >
-    <v-card v-if="selectedUser">
+    <v-card v-if="!isNil(user)">
       <v-toolbar
         color="primary"
         variant="dark"
@@ -25,7 +25,7 @@
             md="6"
           >
             <v-text-field
-              v-model="selectedUser.displayName"
+              v-model="user.displayName"
               label="Name"
               readonly
               variant="outlined"
@@ -33,7 +33,7 @@
               append-inner-icon="mdi-lock"
             ></v-text-field>
             <v-text-field
-              v-model="selectedUser.email"
+              v-model="user.email"
               label="Email"
               readonly
               variant="outlined"
@@ -41,7 +41,7 @@
               append-inner-icon="mdi-lock"
             ></v-text-field>
             <v-select
-              v-model="selectedUser.status"
+              v-model="user.status"
               label="Status"
               :items="['Active', 'Inactive']"
               variant="outlined"
@@ -49,7 +49,7 @@
             ></v-select>
 
             <v-checkbox
-              v-model="selectedUser.isAdmin"
+              v-model="user.isAdmin"
               label="System Admin"
               variant="outlined"
               density="comfortable"
@@ -71,13 +71,15 @@
         <v-btn
           color="primary"
           variant="flat"
-          @click="saveUser()"
+          :loading="isSaving"
+          @click="saveNotifyAndClose"
           >Save</v-btn
         >
         <v-spacer></v-spacer>
         <v-btn
-          color="yg_sun"
+          color="yg-sun"
           variant="outlined"
+          :loading="isSaving"
           @click="close"
           >Close</v-btn
         >
@@ -86,24 +88,48 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import { mapActions, mapState } from "pinia"
-import { useUserAdminStore } from "../store"
+<script setup lang="ts">
+import { ref } from "vue"
+import { isNil } from "lodash"
+import { useRouteQuery } from "@vueuse/router"
 
-export default {
-  name: "UserEditor",
-  data: () => ({}),
-  computed: {
-    ...mapState(useUserAdminStore, ["selectedUser"]),
-    visible() {
-      return !!this.selectedUser
-    },
-  },
-  methods: {
-    ...mapActions(useUserAdminStore, ["unselectUser", "saveUser"]),
-    close() {
-      this.unselectUser()
-    },
-  },
+import { integerTransformer } from "@/utils/use-route-query-transformers"
+
+import useUser from "@/use/use-user"
+
+const userId = useRouteQuery<string | null, number | null>("showUserEditor", null, {
+  transform: integerTransformer,
+})
+const { user, save } = useUser(userId)
+
+const visible = ref(false)
+
+function open(newUserId: number) {
+  userId.value = newUserId
+  visible.value = true
 }
+
+function close() {
+  visible.value = false
+  userId.value = null
+}
+
+const isSaving = ref(false)
+
+async function saveNotifyAndClose() {
+  try {
+    await save()
+    // TODO: notify on success
+    close()
+  } catch (_error) {
+    // TODO: notify on failure
+  } finally {
+    isSaving.value = false
+  }
+}
+
+defineExpose({
+  open,
+  close,
+})
 </script>

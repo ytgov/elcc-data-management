@@ -22,6 +22,8 @@ export type User = {
   displayName: string
 }
 
+export type UserPolicy = Policy
+
 export type UserAsShow = User & {
   roles: UserRole[]
 }
@@ -55,13 +57,14 @@ export const usersApi = {
   },
   async get(userId: number): Promise<{
     user: UserAsShow
-    policy: Policy
+    policy: UserPolicy
   }> {
     const { data } = await http.get(`/api/users/${userId}`)
     return data
   },
   async create(attributes: Partial<User>): Promise<{
     user: UserAsShow
+    policy: UserPolicy
   }> {
     const { data } = await http.post("/api/users", attributes)
     return data
@@ -71,6 +74,7 @@ export const usersApi = {
     attributes: Partial<User>
   ): Promise<{
     user: UserAsShow
+    policy: UserPolicy
   }> {
     const { data } = await http.patch(`/api/users/${userId}`, attributes)
     return data

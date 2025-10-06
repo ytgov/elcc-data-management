@@ -18,16 +18,17 @@
       <v-btn
         color="primary"
         size="small"
+        @click="openUserCreationDialog"
         >New User</v-btn
       >
     </template>
 
-    <v-data-table
-      :search="search"
+    <v-data-table-server
       :headers="headers"
-      :items="items"
+      :items="users"
       :loading="isLoading"
-      @click:row="rowClick"
+      :items-length="totalCount"
+      @click:row="(_event: Event, row: UserTableRow) => openUserEditDialog(row.item.id)"
     >
       <template #item.permissions="{ item }">
         <v-chip
@@ -37,82 +38,74 @@
         >
         <div v-else>{{ item.roles.length }}</div>
       </template>
-    </v-data-table>
+    </v-data-table-server>
+
+    <UserEditor ref="userEditorRef" />
   </BaseCard>
-
-  <user-editor></user-editor>
 </template>
-<script lang="ts">
-import { mapActions, mapState } from "pinia"
 
-import { useUserAdminStore, type User } from "@/modules/users/store/index"
+<script setup lang="ts">
+import { ref, computed, useTemplateRef } from "vue"
+
 import useBreadcrumbs from "@/use/use-breadcrumbs"
+import useUsers, { type UserAsIndex, type UserFiltersOptions } from "@/use/use-users"
 
 import BaseCard from "@/components/BaseCard.vue"
-import UserEditor from "@/modules/users/components/UserEditor.vue"
+import UserEditor from "@/components/users/UserEditorDialog.vue"
 
-export default {
-  components: {
-    BaseCard,
-    UserEditor,
-  },
-  setup() {
-    useBreadcrumbs("Users", [
-      {
-        title: "Administration",
-        to: {
-          name: "AdministrationPage",
-        },
-      },
-      {
-        title: "Users",
-        to: {
-          name: "administration/UsersPage",
-        },
-      },
-    ])
-  },
-  data: () => ({
-    headers: [
-      { title: "Name", key: "displayName" },
-      { title: "Email", key: "email" },
-      { title: "Status", key: "status" },
-      { title: "Permisions", key: "permissions" },
-    ],
-    search: "",
-  }),
-  computed: {
-    ...mapState(useUserAdminStore, ["users", "isLoading"]),
-    items() {
-      return this.users
-    },
-    totalItems() {
-      return this.users.length
-    },
-    breadcrumbs() {
-      return [
-        {
-          title: "Administration",
-          to: "/administration",
-        },
-        {
-          title: "Users",
-        },
-      ]
-    },
-  },
-  beforeMount() {
-    this.loadItems()
-  },
-  methods: {
-    ...mapActions(useUserAdminStore, ["getAllUsers", "selectUser"]),
+const headers = ref([
+  { title: "Name", key: "displayName" },
+  { title: "Email", key: "email" },
+  { title: "Status", key: "status" },
+  { title: "Permisions", key: "permissions" },
+])
 
-    async loadItems() {
-      await this.getAllUsers()
-    },
-    rowClick(_event: Event, row: { item: User }) {
-      this.selectUser(row.item)
-    },
-  },
+const search = ref("")
+const page = ref(1)
+const perPage = ref(10)
+
+const usersFilters = computed(() => {
+  const filters: UserFiltersOptions = {}
+
+  if (search.value) {
+    filters.search = search.value
+  }
+
+  return filters
+})
+const usersQuery = computed(() => ({
+  filters: usersFilters.value,
+  page: page.value,
+  perPage: perPage.value,
+}))
+const { users, totalCount, isLoading } = useUsers(usersQuery)
+
+function openUserCreationDialog() {
+  alert("TODO: implement user creation")
 }
+
+type UserTableRow = {
+  item: UserAsIndex
+}
+
+const userEditorRef = useTemplateRef("userEditorRef")
+
+function openUserEditDialog(userId: number) {
+  userEditorRef.value?.open(userId)
+}
+
+useBreadcrumbs("Users", [
+  {
+    title: "Administration",
+    to: {
+      name: "AdministrationPage",
+    },
+  },
+  {
+    title: "Users",
+    to: {
+      name: "administration/UsersPage",
+    },
+  },
+])
 </script>
