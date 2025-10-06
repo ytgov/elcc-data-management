@@ -1,214 +1,247 @@
 @startuml Entity Relationship Diagrams
+top to bottom direction
+
+note as Disclaimer
+PlantUML URL: https://plantuml.com/ie-diagram
+This diagram may be out of date and should be verified against the current database schema.
+end note
 
 entity "centre_funding_periods" {
-  * id: int [PK]
+  * id : int [PK]
   --
-  * centre_id: int [FK]
-  * fiscal_period_id: int [FK]
-  * notes: nvarchar(MAX)
-  * created_at: datetime2
-  * updated_at: datetime2
+  * centre_id : int [FK]
+  * fiscal_period_id : int [FK]
+  --
+  notes : nvarchar(MAX)
+  --
+  * created_at : datetime2
+  * updated_at : datetime2
 }
 
 entity "centres" {
-  * id: int [PK]
+  * id : int [PK]
   --
-  * name: nvarchar(200)
-  * community: nvarchar(255)
-  * status: nvarchar(255)
-  * is_first_nation_program: bit
-  * region: nvarchar(100)
-  license: nvarchar(255)
-  hot_meal: bit
-  licensed_for: int
-  last_submission: date
-  license_holder_name: nvarchar(100)
-  contact_name: nvarchar(100)
-  physical_address: nvarchar(250)
-  mailing_address: nvarchar(250)
-  email: nvarchar(100)
-  alt_email: nvarchar(100)
-  phone_number: nvarchar(20)
-  alt_phone_number: nvarchar(20)
-  fax_number: nvarchar(20)
-  vendor_identifier: nvarchar(20)
-  inspector_name: nvarchar(100)
-  neighborhood: nvarchar(100)
-  * created_at: datetime2
-  * updated_at: datetime2
+  * name : nvarchar(200)
+  * status : nvarchar(255)
+  * region : nvarchar(100)
+  * community : nvarchar(255)
+  * is_first_nation_program : bit
+  --
+  alt_email : nvarchar(100)
+  alt_phone_number : nvarchar(20)
+  contact_name : nvarchar(100)
+  email : nvarchar(100)
+  fax_number : nvarchar(20)
+  hot_meal : bit
+  inspector_name : nvarchar(100)
+  last_submission : date
+  license : nvarchar(255)
+  license_holder_name : nvarchar(100)
+  licensed_for : int
+  mailing_address : nvarchar(250)
+  neighborhood : nvarchar(100)
+  phone_number : nvarchar(20)
+  physical_address : nvarchar(250)
+  vendor_identifier : nvarchar(20)
+  --
+  * created_at : datetime2
+  * updated_at : datetime2
 }
 
 entity "employee_benefits" {
-  * id: int [PK]
+  * id : int [PK]
   --
-  * centre_id: int [FK]
-  * fiscal_period_id: int [FK]
-  * gross_payroll_monthly_actual: decimal(10,2)
-  * gross_payroll_monthly_estimated: decimal(10,2)
-  * cost_cap_percentage: decimal(5,2)
-  * employee_cost_actual: decimal(10,2)
-  * employee_cost_estimated: decimal(10,2)
-  * employer_cost_actual: decimal(10,2)
-  * employer_cost_estimated: decimal(10,2)
-  * created_at: datetime2
-  * updated_at: datetime2
+  * centre_id : int [FK]
+  * fiscal_period_id : int [FK]
+  --
+  cost_cap_percentage : decimal(5,2)
+  employee_cost_actual : decimal(10,2)
+  employee_cost_estimated : decimal(10,2)
+  employer_cost_actual : decimal(10,2)
+  employer_cost_estimated : decimal(10,2)
+  gross_payroll_monthly_actual : decimal(10,2)
+  gross_payroll_monthly_estimated : decimal(10,2)
+  --
+  * created_at : datetime2
+  * updated_at : datetime2
 }
 
 entity "employee_wage_tiers" {
-  * id: int [PK]
+  * id : int [PK]
   --
-  * fiscal_period_id: int [FK]
-  * tier_level: int
-  * tier_label: nvarchar(50)
-  * wage_rate_per_hour: float
-  * created_at: datetime2
-  * updated_at: datetime2
+  * fiscal_period_id : int [FK]
+  --
+  * tier_label : nvarchar(50)
+  * tier_level : int
+  * wage_rate_per_hour : float
+  --
+  * created_at : datetime2
+  * updated_at : datetime2
 }
 
 entity "fiscal_periods" {
-  * id: int [PK]
+  * id : int [PK]
   --
-  * fiscal_year: nvarchar(10)
-  * month: nvarchar(10)
-  * date_start: datetime2(0)
-  * date_end: datetime2(0)
-  * created_at: datetime2
-  * updated_at: datetime2
+  * fiscal_year : nvarchar(10)
+  * [month] : nvarchar(10)
+  * date_start : datetime2(0)
+  * date_end : datetime2(0)
+  --
+  * created_at : datetime2(0)
+  * updated_at : datetime2(0)
 }
 
 entity "funding_periods" {
-  * id: int [PK]
+  * id : int [PK]
   --
-  * fiscal_year: nvarchar(10)
-  * from_date: datetime2(0)
-  * to_date: datetime2(0)
-  * title: nvarchar(100)
-  * is_fiscal_year: bit
-  * is_school_month: bit
-  * created_at: datetime2
-  * updated_at: datetime2
+  * title : nvarchar(100)
+  * fiscal_year : nvarchar(10)
+  * from_date : datetime2(0)
+  * to_date : datetime2(0)
+  * is_fiscal_year : bit
+  * is_school_month : bit
+  --
+  * created_at : datetime2
+  * updated_at : datetime2
 }
 
 entity "funding_submission_line_jsons" {
-  * id: int [PK]
+  * id : int [PK]
   --
-  * centre_id: int [FK]
-  * fiscal_year: nvarchar(10)
-  * date_name: nvarchar(100)
-  * date_start: datetime2(0)
-  * date_end: datetime2(0)
-  * values: nvarchar(MAX) - JSON array of FundingLineValues
-  * created_at: datetime2
-  * updated_at: datetime2
+  * centre_id : int [FK]
+  --
+  * fiscal_year : nvarchar(10)
+  * date_name : nvarchar(100)
+  * date_start : datetime2(0)
+  * date_end : datetime2(0)
+  * [values] : nvarchar(MAX)
+  --
+  * created_at : datetime2
+  * updated_at : datetime2
 }
 
 ' This is stored as json in the funding_submission_line_jsons::values column
 entity "FundingLineValue" {
   - no PK as not table in the database
   --
-  * submissionLineId: int [FK]
-  * sectionName: nvarchar(200)
-  * lineName: nvarchar(200)
-  * monthlyAmount: float
-  * estimatedChildOccupancyRate: float
-  * actualChildOccupancyRate: float
-  * estimatedComputedTotal: float
-  * actualComputedTotal: float
+  * submission_line_id : int [FK]
+  * section_name : nvarchar(200)
+  * line_name : nvarchar(200)
+  * monthly_amount : float
+  * actual_child_occupancy_rate : float
+  * actual_computed_total : float
+  * estimated_child_occupancy_rate : float
+  * estimated_computed_total : float
 }
 
 ' This table is not in use currently.
 entity "funding_submission_line_values" {
-  * id: int [PK]
+  * id : int [PK]
   --
-  * centre_id: int [FK]
-  * submission_line_id: int [FK]
-  * fiscal_year: nvarchar(10)
-  * section_name: nvarchar(200)
-  * line_name: nvarchar(200)
-  * monthly_amount: float
-  * date_name: nvarchar(100)
-  * date_start: datetime2(0)
-  * date_end: datetime2(0)
-  * child_count: float
-  * computed_total: float
-  * is_actual: bit
-  * created_at: datetime2
-  * updated_at: datetime2
+  * centre_id : int [FK]
+  * submission_line_id : int [FK]
+  --
+  * fiscal_year : nvarchar(10)
+  * section_name : nvarchar(200)
+  * line_name : nvarchar(200)
+  * monthly_amount : float
+  * date_name : nvarchar(100)
+  * date_start : datetime2(0)
+  * date_end : datetime2(0)
+  * child_count : float
+  * computed_total : float
+  * is_actual : bit
+  --
+  * created_at : datetime2
+  * updated_at : datetime2
 }
 
 entity "funding_submission_lines" {
-  * id: int [PK]
+  * id : int [PK]
   --
-  * fiscal_year: nvarchar(10)
-  * section_name: nvarchar(200)
-  * line_name: nvarchar(200)
-  * monthly_amount: float
-  from_age: int
-  to_age: int
-  * created_at: datetime2
-  * updated_at: datetime2
+  * fiscal_year : nvarchar(10)
+  * section_name : nvarchar(200)
+  * line_name : nvarchar(200)
+  * monthly_amount : float
+  --
+  from_age : int
+  to_age : int
+  --
+  * created_at : datetime2
+  * updated_at : datetime2
 }
 
-' This table is a sort of polymorphic table to store changes relating to some abitrary table.
+' This table is a sort of polymorphic table to store changes relating to some arbitrary table.
 entity "logs" {
-  * id: int [PK]
+  * id : int [PK]
   --
-  * table_name: nvarchar(200)
-  * operation: nvarchar(200)
-  * user_email: nvarchar(200)
-  * data: nvarchar(2000)
-  * created_at: datetime2
-  * updated_at: datetime2
+  * table_name : nvarchar(200)
+  * operation : nvarchar(200)
+  * user_email : nvarchar(200)
+  * data : nvarchar(2000)
+  --
+  * created_at : datetime2
+  * updated_at : datetime2
 }
 
 entity "payments" {
-  * id: int [PK]
+  * id : int [PK]
   --
-  * centre_id: int [FK]
-  * fiscal_year: nvarchar(10)
-  * paid_on: date
-  * amount_in_cents: int
-  * name: nvarchar(100)
-  * created_at: datetime2
-  * updated_at: datetime2
+  * centre_id : int [FK]
+  * fiscal_period_id : int [FK]
+  --
+  * fiscal_year : nvarchar(10)
+  * paid_on : date
+  * amount_in_cents : int
+  * name : nvarchar(100)
+  --
+  * created_at : datetime2
+  * updated_at : datetime2
 }
 
 entity "user_roles" {
-  * id: int [PK]
+  * id : int [PK]
   --
-  * user_id: int [FK]
-  * role: nvarchar(255)
-  * created_at: datetime2
-  * updated_at: datetime2
+  * user_id : int [FK]
+  --
+  * [role] : nvarchar(255)
+  --
+  * created_at : datetime2
+  * updated_at : datetime2
 }
 
 entity "users" {
-  * id: int [PK]
+  * id : int [PK]
   --
-  * email: nvarchar(200)
-  * sub: nvarchar(200) - refers to Auth0 Subject
-  * first_name: nvarchar(100)
-  * last_name: nvarchar(100)
-  * status: nvarchar(50)
-  * is_admin: bit
-  ynet_id: nvarchar(50)
-  directory_id: nvarchar(50)
-  * created_at: datetime2
-  * updated_at: datetime2
+  * email : nvarchar(200)
+  * [sub] : nvarchar(200)
+  * first_name : nvarchar(100)
+  * last_name : nvarchar(100)
+  * status : nvarchar(50)
+  * is_admin : bit
+  --
+  ynet_id : nvarchar(50)
+  directory_id : nvarchar(50)
+  --
+  * created_at : datetime2
+  * updated_at : datetime2
 }
 
 entity "wage_enhancements" {
-  * id: int [PK]
+  * id : int [PK]
   --
-  * centre_id: int [FK]
-  * employee_wage_tier_id: int [FK]
-  * employee_name: nvarchar(100)
-  * hours_estimated: float
-  * hours_actual: float
-  * created_at: datetime2
-  * updated_at: datetime2
+  * centre_id : int [FK]
+  * employee_wage_tier_id : int [FK]
+  --
+  * employee_name : nvarchar(100)
+  * hours_estimated : float
+  * hours_actual : float
+  --
+  * created_at : datetime2
+  * updated_at : datetime2
 }
 
+' Relationships
 centres::id }o--|| centre_funding_periods::centre_id
 centres::id }o--|| employee_benefits::centre_id
 centres::id }o--|| funding_submission_line_jsons::centre_id
@@ -220,8 +253,9 @@ employee_wage_tiers::id }o--|| wage_enhancements::employee_wage_tier_id
 fiscal_periods::id }o--|| centre_funding_periods::fiscal_period_id
 fiscal_periods::id }o--|| employee_benefits::fiscal_period_id
 fiscal_periods::id }o--|| employee_wage_tiers::fiscal_period_id
+fiscal_periods::id }o--|| payments::fiscal_period_id
 funding_submission_line_jsons::values }o--|| FundingLineValue
-funding_submission_lines::id }o--|| FundingLineValue::submissionLineId
+funding_submission_lines::id }o--|| FundingLineValue::submission_line_id
 funding_submission_lines::id }o--|| funding_submission_line_values::submission_line_id
 users::id }o--|| user_roles::user_id
 users::email }o--|| logs::user_email

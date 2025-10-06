@@ -46,7 +46,7 @@
     <v-col cols="4">
       <v-card
         elevation="3"
-        color="#0097a966"
+        color="yg-blue-light"
       >
         <v-card-text
           style="text-align: right"

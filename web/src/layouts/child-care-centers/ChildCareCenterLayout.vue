@@ -42,7 +42,7 @@
       <CentreDetailsCard :centre-id="centreIdAsNumber" />
       <v-card
         elevation="3"
-        color="#0097a966"
+        color="yg-blue-light"
       >
         <v-card-title style="background-color: #0097a968">Latest Enrollment</v-card-title>
         <v-divider></v-divider>
@@ -66,7 +66,7 @@
           <v-tabs grow>
             <v-tab
               :to="{
-                name: 'CentreDashboardSummaryPage',
+                name: 'child-care-centers/ChildCareCenterSummaryRedirect',
                 params: {
                   centreId,
                   fiscalYearSlug,
@@ -120,7 +120,6 @@ import { computed, onMounted, onUnmounted, useTemplateRef } from "vue"
 import { storeToRefs } from "pinia"
 
 import getCurrentFiscalYearSlug from "@/utils/get-current-fiscal-year-slug"
-import { type FiscalPeriodMonths } from "@/api/fiscal-periods-api"
 import { useCentreStore } from "@/modules/centre/store"
 
 import FiscalYearSelect from "@/components/FiscalYearSelect.vue"
@@ -131,12 +130,9 @@ const props = withDefaults(
   defineProps<{
     centreId: string
     fiscalYearSlug?: string
-    // TODO: figure out how to make this unnecessary at this route level?
-    month?: FiscalPeriodMonths
   }>(),
   {
     fiscalYearSlug: "",
-    month: undefined,
   }
 )
 
@@ -153,7 +149,7 @@ const fiscalYear = computed(() => {
 
 function updateFiscalYearAndRedirect(value: string) {
   router.push({
-    name: route.name || "CentreDashboardPage",
+    name: route.name || "child-care-centers/ChildCareCenterRedirect",
     params: { ...route.params, fiscalYearSlug: value.replace("/", "-") },
     query: route.query,
   })
