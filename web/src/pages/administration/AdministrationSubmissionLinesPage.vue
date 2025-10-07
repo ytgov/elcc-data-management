@@ -1,25 +1,34 @@
 <template>
   <BaseCard show-header>
     <template #left>
-      <v-select
-        v-model="fiscalYear"
-        :items="fiscalYears"
-        label="Fiscal year"
-        single-line
-        style="width: 100px"
-        hide-details
-        density="compact"
-      />
-
-      <v-text-field
-        v-model="search"
-        label="Search"
-        single-line
-        hide-details
-        append-inner-icon="mdi-magnify"
-        density="compact"
-        class="ml-2"
-      />
+      <v-row>
+        <v-col
+          cols="12"
+          md="6"
+        >
+          <FiscalPeriodFiscalYearSelect
+            v-model="fiscalYearSlug"
+            label="Fiscal year"
+            single-line
+            hide-details
+            density="compact"
+          />
+        </v-col>
+        <v-col
+          cols="12"
+          md="6"
+        >
+          <v-text-field
+            v-model="search"
+            label="Search"
+            single-line
+            hide-details
+            append-inner-icon="mdi-magnify"
+            density="compact"
+            class="ml-2"
+          />
+        </v-col>
+      </v-row>
     </template>
     <template #right>
       <v-btn
@@ -49,7 +58,8 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, useTemplateRef } from "vue"
-import { uniq } from "lodash"
+
+import getCurrentFiscalYearSlug from "@/utils/get-current-fiscal-year-slug"
 
 import useBreadcrumbs from "@/use/use-breadcrumbs"
 import useFundingSubmissionLines, {
@@ -60,6 +70,7 @@ import useFundingSubmissionLines, {
 
 import BaseCard from "@/components/BaseCard.vue"
 import FundingSubmissionLineEditorDialog from "@/components/funding-submission-lines/FundingSubmissionLineEditorDialog.vue"
+import FiscalPeriodFiscalYearSelect from "@/components/fiscal-periods/FiscalPeriodFiscalYearSelect.vue"
 
 const headers = ref([
   { title: "Section", key: "sectionName" },
@@ -71,7 +82,9 @@ const headers = ref([
 const search = ref("")
 const page = ref(1)
 const perPage = ref(10)
-const fiscalYear = ref<string | null>(null)
+const fiscalYearSlug = ref(getCurrentFiscalYearSlug())
+
+const fiscalYear = computed(() => fiscalYearSlug.value.replace("-", "/"))
 
 const fundingSubmissionLinesWhere = computed(() => {
   const where: FundingSubmissionLineWhereOptions = {}
@@ -103,12 +116,6 @@ const fundingSubmissionLinesQuery = computed(() => ({
 const { fundingSubmissionLines, totalCount, isLoading } = useFundingSubmissionLines(
   fundingSubmissionLinesQuery
 )
-
-const fiscalYears = computed(() => {
-  return uniq(fundingSubmissionLines.value.map((line) => line.fiscalYear))
-    .sort()
-    .reverse()
-})
 
 function openNewFiscalYearDialog() {
   alert("TODO: implement new fiscal year creation")
