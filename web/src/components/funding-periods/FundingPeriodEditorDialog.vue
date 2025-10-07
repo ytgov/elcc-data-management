@@ -21,6 +21,33 @@
       <v-card-text>
         <v-row>
           <v-col cols="12">
+            <DescriptionElement
+              label="Fiscal year"
+              :model-value="fundingPeriod.fiscalYear"
+            />
+          </v-col>
+          <v-col
+            cols="12"
+            md="6"
+          >
+            <DescriptionElement
+              label="Is fiscal year?"
+              :model-value="fundingPeriod.isFiscalYear ? 'Yes' : 'No'"
+            />
+          </v-col>
+          <v-col
+            cols="12"
+            md="6"
+          >
+            <DescriptionElement
+              label="Is school month?"
+              :model-value="fundingPeriod.isSchoolMonth ? 'Yes' : 'No'"
+            />
+          </v-col>
+
+          <v-divider class="my-4" />
+
+          <v-col cols="12">
             <v-text-field
               v-model="fundingPeriod.title"
               label="Title"
@@ -48,33 +75,6 @@
               label="To date"
               variant="outlined"
               density="comfortable"
-            />
-          </v-col>
-
-          <v-divider />
-
-          <v-col cols="12">
-            <DescriptionElement
-              label="Fiscal year"
-              :model-value="fundingPeriod.fiscalYear"
-            />
-          </v-col>
-          <v-col
-            cols="12"
-            md="6"
-          >
-            <DescriptionElement
-              label="Is fiscal year?"
-              :model-value="fundingPeriod.isFiscalYear ? 'Yes' : 'No'"
-            />
-          </v-col>
-          <v-col
-            cols="12"
-            md="6"
-          >
-            <DescriptionElement
-              label="Is school month?"
-              :model-value="fundingPeriod.isSchoolMonth ? 'Yes' : 'No'"
             />
           </v-col>
         </v-row>
@@ -137,6 +137,7 @@ const isSaving = ref(false)
 const snack = useSnack()
 
 async function saveNotifyAndClose() {
+  isSaving.value = true
   try {
     await save()
     snack.success("Funding period saved!")

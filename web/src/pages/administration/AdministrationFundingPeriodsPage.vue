@@ -20,41 +20,19 @@
       >
     </template>
 
-    <v-data-table-server
-      :headers="headers"
-      :items="fundingPeriods"
-      :loading="isLoading"
-      :items-length="totalCount"
-      @click:row="
-        (_event: Event, row: FundingPeriodTableRow) => openFundingPeriodEditDialog(row.item.id)
-      "
-    >
-    </v-data-table-server>
-    <FundingPeriodEditorDialog ref="fundingPeriodEditorRef" />
+    <FundingPeriodsDataTableServer :filters="fundingPeriodsFilters" />
   </BaseCard>
 </template>
 <script setup lang="ts">
-import { ref, computed, useTemplateRef } from "vue"
+import { ref, computed } from "vue"
 
 import useBreadcrumbs from "@/use/use-breadcrumbs"
-import useFundingPeriods, {
-  type FundingPeriodAsIndex,
-  type FundingPeriodFiltersOptions,
-} from "@/use/use-funding-periods"
+import { type FundingPeriodFiltersOptions } from "@/use/use-funding-periods"
 
 import BaseCard from "@/components/BaseCard.vue"
-import FundingPeriodEditorDialog from "@/components/funding-periods/FundingPeriodEditorDialog.vue"
-
-const headers = ref([
-  { title: "Fiscal Year", key: "fiscalYear" },
-  { title: "Title", key: "title" },
-  { title: "From Date", key: "fromDate" },
-  { title: "To Date", key: "toDate" },
-])
+import FundingPeriodsDataTableServer from "@/components/funding-periods/FundingPeriodsDataTableServer.vue"
 
 const search = ref("")
-const page = ref(1)
-const perPage = ref(10)
 
 const fundingPeriodsFilters = computed(() => {
   const filters: FundingPeriodFiltersOptions = {}
@@ -65,25 +43,9 @@ const fundingPeriodsFilters = computed(() => {
 
   return filters
 })
-const fundingPeriodsQuery = computed(() => ({
-  filters: fundingPeriodsFilters.value,
-  page: page.value,
-  perPage: perPage.value,
-}))
-const { fundingPeriods, totalCount, isLoading } = useFundingPeriods(fundingPeriodsQuery)
 
 function openFundingPeriodCreationDialog() {
   alert("TODO: implement funding period creation")
-}
-
-type FundingPeriodTableRow = {
-  item: FundingPeriodAsIndex
-}
-
-const fundingPeriodEditorRef = useTemplateRef("fundingPeriodEditorRef")
-
-function openFundingPeriodEditDialog(fundingPeriodId: number) {
-  fundingPeriodEditorRef.value?.open(fundingPeriodId)
 }
 
 useBreadcrumbs("Funding Periods", [

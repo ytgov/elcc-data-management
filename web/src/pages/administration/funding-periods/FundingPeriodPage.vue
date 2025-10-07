@@ -1,9 +1,9 @@
 <template>
-  <PageLoader v-if="isNil(fundingSubmissionLine)" />
+  <PageLoader v-if="isNil(fundingPeriod)" />
   <v-card v-else>
     <template #title>
       <h3 class="d-flex align-center text-h5">
-        Submission Line Details
+        Funding Period Details
         <v-spacer />
         <v-btn
           color="primary"
@@ -22,7 +22,7 @@
         >
           <DescriptionElement
             label="Fiscal Year"
-            :model-value="fundingSubmissionLine.fiscalYear"
+            :model-value="fundingPeriod.fiscalYear"
             vertical
           />
         </v-col>
@@ -31,8 +31,8 @@
           md="6"
         >
           <DescriptionElement
-            label="Section Name"
-            :model-value="fundingSubmissionLine.sectionName"
+            label="Title"
+            :model-value="fundingPeriod.title"
             vertical
           />
         </v-col>
@@ -41,8 +41,8 @@
           md="6"
         >
           <DescriptionElement
-            label="Line Name"
-            :model-value="fundingSubmissionLine.lineName"
+            label="From Date"
+            :model-value="fundingPeriod.fromDate"
             vertical
           />
         </v-col>
@@ -51,26 +51,35 @@
           md="6"
         >
           <DescriptionElement
-            label="Age Range"
+            label="To Date"
+            :model-value="fundingPeriod.toDate"
             vertical
-          >
-            {{ fundingSubmissionLine.fromAge }} - {{ fundingSubmissionLine.toAge }}
-          </DescriptionElement>
+          />
         </v-col>
         <v-col
           cols="12"
           md="6"
         >
           <DescriptionElement
-            label="Monthly Amount"
-            :model-value="fundingSubmissionLine.monthlyAmount"
+            label="Is Fiscal Year?"
+            :model-value="fundingPeriod.isFiscalYear ? 'Yes' : 'No'"
+            vertical
+          />
+        </v-col>
+        <v-col
+          cols="12"
+          md="6"
+        >
+          <DescriptionElement
+            label="Is School Month?"
+            :model-value="fundingPeriod.isSchoolMonth ? 'Yes' : 'No'"
             vertical
           />
         </v-col>
       </v-row>
     </template>
 
-    <FundingSubmissionLineEditorDialog ref="fundingSubmissionLineEditorRef" />
+    <FundingPeriodEditorDialog ref="fundingPeriodEditorRef" />
   </v-card>
 </template>
 
@@ -79,28 +88,28 @@ import { computed, useTemplateRef } from "vue"
 import { isNil } from "lodash"
 
 import useBreadcrumbs from "@/use/use-breadcrumbs"
-import useFundingSubmissionLine from "@/use/use-funding-submission-line"
+import useFundingPeriod from "@/use/use-funding-period"
 
 import DescriptionElement from "@/components/common/DescriptionElement.vue"
 import PageLoader from "@/components/common/PageLoader.vue"
-import FundingSubmissionLineEditorDialog from "@/components/funding-submission-lines/FundingSubmissionLineEditorDialog.vue"
+import FundingPeriodEditorDialog from "@/components/funding-periods/FundingPeriodEditorDialog.vue"
 
 const props = defineProps<{
-  fundingSubmissionLineId: string
+  fundingPeriodId: string
 }>()
 
-const fundingSubmissionLineIdAsNumber = computed(() => parseInt(props.fundingSubmissionLineId))
+const fundingPeriodIdAsNumber = computed(() => parseInt(props.fundingPeriodId))
 
-const { fundingSubmissionLine } = useFundingSubmissionLine(fundingSubmissionLineIdAsNumber)
+const { fundingPeriod } = useFundingPeriod(fundingPeriodIdAsNumber)
 
-const fundingSubmissionLineEditorRef = useTemplateRef("fundingSubmissionLineEditorRef")
+const fundingPeriodEditorRef = useTemplateRef("fundingPeriodEditorRef")
 
 function openEditDialog() {
-  fundingSubmissionLineEditorRef.value?.open(fundingSubmissionLineIdAsNumber.value)
+  fundingPeriodEditorRef.value?.open(fundingPeriodIdAsNumber.value)
 }
 
-const title = computed(() => fundingSubmissionLine.value?.lineName || "Submission Line")
-const lineName = computed(() => fundingSubmissionLine.value?.lineName || "Details")
+const title = computed(() => fundingPeriod.value?.title || "Funding Period")
+const fundingPeriodTitle = computed(() => fundingPeriod.value?.title || "Details")
 const breadcrumbs = computed(() => [
   {
     title: "Administration",
@@ -109,17 +118,17 @@ const breadcrumbs = computed(() => [
     },
   },
   {
-    title: "Submission Lines",
+    title: "Funding Periods",
     to: {
-      name: "administration/AdministrationSubmissionLinesPage",
+      name: "administration/FundingPeriodsPage",
     },
   },
   {
-    title: lineName.value,
+    title: fundingPeriodTitle.value,
     to: {
-      name: "administration/submission-lines/SubmissionLinePage",
+      name: "administration/funding-periods/FundingPeriodPage",
       params: {
-        fundingSubmissionLineId: props.fundingSubmissionLineId,
+        fundingPeriodId: props.fundingPeriodId,
       },
     },
   },

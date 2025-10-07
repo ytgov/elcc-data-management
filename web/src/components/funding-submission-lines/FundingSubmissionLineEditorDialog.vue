@@ -119,8 +119,8 @@ const isSaving = ref(false)
 const snack = useSnack()
 
 async function saveNotifyAndClose() {
+  isSaving.value = true
   try {
-    isSaving.value = true
     await save()
     snack.success("Submission line saved!")
     close()

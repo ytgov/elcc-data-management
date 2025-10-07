@@ -118,6 +118,9 @@ const breadcrumbs = computed(() => [
     title: displayName.value,
     to: {
       name: "administration/users/UserPage",
+      params: {
+        userId: props.userId,
+      },
     },
   },
 ])

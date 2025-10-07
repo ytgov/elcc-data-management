@@ -29,6 +29,12 @@ const routes = [
             component: () => import("@/pages/administration/AdministrationFundingPeriodsPage.vue"),
           },
           {
+            path: "administration/funding-periods/:fundingPeriodId",
+            name: "administration/funding-periods/FundingPeriodPage",
+            component: () => import("@/pages/administration/funding-periods/FundingPeriodPage.vue"),
+            props: true
+          },
+          {
             path: "administration/submission-lines",
             name: "administration/AdministrationSubmissionLinesPage",
             component: () => import("@/pages/administration/AdministrationSubmissionLinesPage.vue"),
