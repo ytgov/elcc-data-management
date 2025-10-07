@@ -6,6 +6,7 @@ import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 import { ReturnValidationErrors } from "@/middleware"
 import { FundingPeriod } from "@/models"
 
+/** @deprecated - prefer api/src/controllers/funding-periods-controller.ts */
 export const fundingPeriodRouter = express.Router()
 
 fundingPeriodRouter.use(checkJwt)

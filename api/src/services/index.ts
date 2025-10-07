@@ -5,6 +5,8 @@ export * from "@/services/log-services"
 export * from "@/services/user-services"
 
 // Bundled exports
+export * as FundingPeriods from "./funding-periods"
+export * as FundingSubmissionLines from "./funding-submission-lines"
 export * as Payments from "./payments"
 export * as Users from "./users"
 

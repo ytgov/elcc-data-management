@@ -2,8 +2,7 @@
   <h1 class="text-h5 mb-5">Child Care Centres</h1>
 
   <BaseCard
-    show-header="t"
-    heading=""
+    show-header
     class="pb-3"
   >
     <template #left>

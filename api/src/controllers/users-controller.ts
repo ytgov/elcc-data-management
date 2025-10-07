@@ -79,6 +79,7 @@ export class UsersController extends BaseController<User> {
       const serializedUser = ShowSerializer.perform(user)
       return this.response.status(201).json({
         user: serializedUser,
+        policy,
       })
     } catch (error) {
       logger.error(`Error creating user: ${error}`, { error })
@@ -109,6 +110,7 @@ export class UsersController extends BaseController<User> {
       const serializedUser = ShowSerializer.perform(updatedUser)
       return this.response.json({
         user: serializedUser,
+        policy,
       })
     } catch (error) {
       logger.error(`Error updating user: ${error}`, { error })

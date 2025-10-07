@@ -1,6 +1,5 @@
 import {
   DataTypes,
-  Model,
   sql,
   type CreationOptional,
   type InferAttributes,
@@ -15,11 +14,12 @@ import {
   Table,
 } from "@sequelize/core/decorators-legacy"
 
-/** @deprecated - use FundingSubmissionLineJson model instead. */
+import BaseModel from "@/models/base-model"
+
 @Table({
   paranoid: false,
 })
-export class FundingSubmissionLine extends Model<
+export class FundingSubmissionLine extends BaseModel<
   InferAttributes<FundingSubmissionLine>,
   InferCreationAttributes<FundingSubmissionLine>
 > {
@@ -62,9 +62,8 @@ export class FundingSubmissionLine extends Model<
   declare updatedAt: CreationOptional<Date>
 
   static establishScopes() {
-    // add as needed
+    this.addSearchScope(["fiscalYear", "sectionName", "lineName"])
   }
 }
 
-/** @deprecated - use FundingSubmissionLineJson model instead. */
 export default FundingSubmissionLine

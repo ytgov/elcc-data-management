@@ -1,52 +1,38 @@
 <template>
-  <v-breadcrumbs
-    :items="breadcrumbs"
-    bg-color="#7A9A01"
-    style="margin: -13px -16px 10px -16px"
-    class="pl-4 mb-4"
-    color="white"
-    active-color="#fff"
-  >
-    <template #prepend>
-      <v-icon
-        color="white"
-        icon="mdi-home"
-      ></v-icon>
-    </template>
-    <template #divider>
-      <v-icon
-        color="white"
-        icon="mdi-chevron-right"
-      ></v-icon>
-    </template>
-  </v-breadcrumbs>
-
-  <h1>Administration</h1>
-
   <v-row>
     <v-col>
-      <v-card to="/administration/users">
+      <v-card
+        :to="{
+          name: 'administration/UsersPage',
+        }"
+      >
         <v-card-title>Users</v-card-title>
         <v-card-text>
-          <div style="font-size: 30px">
-            {{ usersTotalCount }}
-          </div>
+          <span class="text-h4">{{ usersTotalCount }}</span>
         </v-card-text>
       </v-card>
     </v-col>
     <v-col>
-      <v-card to="/administration/funding-periods">
+      <v-card
+        :to="{
+          name: 'administration/FundingPeriodsPage',
+        }"
+      >
         <v-card-title>Funding Periods</v-card-title>
         <v-card-text>
-          <div style="font-size: 30px">23</div>
+          <span class="text-h4">{{ fundingPeriodsTotalCount }}</span>
         </v-card-text>
       </v-card>
     </v-col>
     <v-col>
-      <v-card to="/administration/submission-lines">
-        <v-card-title>Submission Format</v-card-title>
+      <v-card
+        :to="{
+          name: 'administration/AdministrationSubmissionLinesPage',
+        }"
+      >
+        <v-card-title>Submission Lines</v-card-title>
         <v-card-text>
-          <div style="font-size: 30px">23</div>
+          <span class="text-h4">{{ fundingSubmissionLinesTotalCount }}</span>
         </v-card-text>
       </v-card>
     </v-col>
@@ -56,6 +42,9 @@
 <script setup lang="ts">
 import { computed } from "vue"
 
+import useBreadcrumbs from "@/use/use-breadcrumbs"
+import useFundingPeriods from "@/use/use-funding-periods"
+import useFundingSubmissionLines from "@/use/use-funding-submission-lines"
 import useUsers from "@/use/use-users"
 
 const usersQuery = computed(() => ({
@@ -63,18 +52,24 @@ const usersQuery = computed(() => ({
 }))
 const { totalCount: usersTotalCount } = useUsers(usersQuery)
 
-const breadcrumbs = [
-  {
-    title: "Home",
-    to: {
-      name: "DashboardPage",
-    },
-  },
+const fundingPeriodsQuery = computed(() => ({
+  perPage: 1,
+}))
+const { totalCount: fundingPeriodsTotalCount } = useFundingPeriods(fundingPeriodsQuery)
+
+const fundingSubmissionLinesQuery = computed(() => ({
+  perPage: 1,
+}))
+const { totalCount: fundingSubmissionLinesTotalCount } = useFundingSubmissionLines(
+  fundingSubmissionLinesQuery
+)
+
+useBreadcrumbs("Administration", [
   {
     title: "Administration",
     to: {
       name: "AdministrationPage",
     },
   },
-]
+])
 </script>

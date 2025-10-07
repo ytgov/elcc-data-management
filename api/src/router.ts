@@ -24,8 +24,10 @@ import {
   EmployeeBenefitsController,
   EmployeeWageTiersController,
   FiscalPeriodsController,
+  FundingPeriodsController,
   FundingSubmissionLineJsons,
   FundingSubmissionLineJsonsController,
+  FundingSubmissionLinesController,
   PaymentsController,
   UsersController,
   WageEnhancements,
@@ -71,6 +73,16 @@ router.route("/api/employee-wage-tiers").get(EmployeeWageTiersController.index)
 router.route("/api/fiscal-periods").get(FiscalPeriodsController.index)
 
 router
+  .route("/api/funding-periods")
+  .get(FundingPeriodsController.index)
+  .post(FundingPeriodsController.create)
+router
+  .route("/api/funding-periods/:fundingPeriodId")
+  .get(FundingPeriodsController.show)
+  .patch(FundingPeriodsController.update)
+  .delete(FundingPeriodsController.destroy)
+
+router
   .route("/api/funding-submission-line-jsons")
   .get(FundingSubmissionLineJsonsController.index)
   .post(FundingSubmissionLineJsonsController.create)
@@ -82,6 +94,16 @@ router
 router
   .route("/api/funding-submission-line-jsons/:fundingSubmissionLineJsonId/replicate-estimates")
   .post(FundingSubmissionLineJsons.ReplicateEstimatesController.create)
+
+router
+  .route("/api/funding-submission-lines")
+  .get(FundingSubmissionLinesController.index)
+  .post(FundingSubmissionLinesController.create)
+router
+  .route("/api/funding-submission-lines/:fundingSubmissionLineId")
+  .get(FundingSubmissionLinesController.show)
+  .patch(FundingSubmissionLinesController.update)
+  .delete(FundingSubmissionLinesController.destroy)
 
 router.route("/api/payments").get(PaymentsController.index).post(PaymentsController.create)
 router

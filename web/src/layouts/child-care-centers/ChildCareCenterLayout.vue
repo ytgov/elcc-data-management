@@ -22,7 +22,7 @@
   </v-breadcrumbs>
 
   <div class="float-right">
-    <FiscalYearSelect
+    <FiscalPeriodFiscalYearSelect
       :model-value="fiscalYear"
       label="Fiscal year"
       class="float-right"
@@ -122,7 +122,7 @@ import { storeToRefs } from "pinia"
 import getCurrentFiscalYearSlug from "@/utils/get-current-fiscal-year-slug"
 import { useCentreStore } from "@/modules/centre/store"
 
-import FiscalYearSelect from "@/components/FiscalYearSelect.vue"
+import FiscalPeriodFiscalYearSelect from "@/components/fiscal-periods/FiscalPeriodFiscalYearSelect.vue"
 import FundingLineValuesEnrollmentChart from "@/components/funding-line-values/FundingLineValuesEnrollmentChart.vue"
 import CentreDetailsCard from "@/modules/centre/components/CentreDetailsCard.vue"
 
