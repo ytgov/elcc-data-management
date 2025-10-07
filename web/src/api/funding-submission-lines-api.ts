@@ -18,6 +18,8 @@ export type FundingSubmissionLine = {
   updatedAt: string
 }
 
+export type FundingSubmissionLinePolicy = Policy
+
 export type FundingSubmissionLineAsIndex = FundingSubmissionLine & {
   ageRange: string
   monthlyAmountDisplay: string
@@ -33,7 +35,9 @@ export type FundingSubmissionLineWhereOptions = WhereOptions<
   "id" | "fiscalYear" | "sectionName" | "lineName" | "fromAge" | "toAge"
 >
 
-export type FundingSubmissionLineFiltersOptions = FiltersOptions
+export type FundingSubmissionLineFiltersOptions = FiltersOptions<{
+  search: string | string[]
+}>
 
 export type FundingSubmissionLineQueryOptions = QueryOptions<
   FundingSubmissionLineWhereOptions,
@@ -52,13 +56,14 @@ export const fundingSubmissionLinesApi = {
   },
   async get(fundingSubmissionLineId: number): Promise<{
     fundingSubmissionLine: FundingSubmissionLineAsShow
-    policy: Policy
+    policy: FundingSubmissionLinePolicy
   }> {
     const { data } = await http.get(`/api/funding-submission-lines/${fundingSubmissionLineId}`)
     return data
   },
   async create(attributes: Partial<FundingSubmissionLine>): Promise<{
     fundingSubmissionLine: FundingSubmissionLineAsShow
+    policy: FundingSubmissionLinePolicy
   }> {
     const { data } = await http.post("/api/funding-submission-lines", attributes)
     return data
@@ -68,6 +73,7 @@ export const fundingSubmissionLinesApi = {
     attributes: Partial<FundingSubmissionLine>
   ): Promise<{
     fundingSubmissionLine: FundingSubmissionLineAsShow
+    policy: FundingSubmissionLinePolicy
   }> {
     const { data } = await http.patch(
       `/api/funding-submission-lines/${fundingSubmissionLineId}`,

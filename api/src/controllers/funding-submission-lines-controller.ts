@@ -85,6 +85,7 @@ export class FundingSubmissionLinesController extends BaseController<FundingSubm
       const serializedFundingSubmissionLine = ShowSerializer.perform(fundingSubmissionLine)
       return this.response.status(201).json({
         fundingSubmissionLine: serializedFundingSubmissionLine,
+        policy,
       })
     } catch (error) {
       logger.error(`Error creating funding submission line: ${error}`, { error })
@@ -118,6 +119,7 @@ export class FundingSubmissionLinesController extends BaseController<FundingSubm
       const serializedFundingSubmissionLine = ShowSerializer.perform(updatedFundingSubmissionLine)
       return this.response.json({
         fundingSubmissionLine: serializedFundingSubmissionLine,
+        policy,
       })
     } catch (error) {
       logger.error(`Error updating funding submission line: ${error}`, { error })

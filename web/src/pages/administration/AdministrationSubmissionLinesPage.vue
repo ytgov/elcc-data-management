@@ -8,7 +8,8 @@
         single-line
         style="width: 100px"
         hide-details
-      ></v-select>
+        density="compact"
+      />
 
       <v-text-field
         v-model="search"
@@ -16,116 +17,125 @@
         single-line
         hide-details
         append-inner-icon="mdi-magnify"
+        density="compact"
         class="ml-2"
-      ></v-text-field>
+      />
     </template>
     <template #right>
       <v-btn
         color="primary"
         variant="flat"
         size="small"
-        @click="startNewFiscal"
+        @click="openNewFiscalYearDialog"
         >New Fiscal Year</v-btn
       >
     </template>
 
-    <v-data-table
-      :search="search"
+    <v-data-table-server
       :headers="headers"
-      :items="items"
+      :items="fundingSubmissionLines"
       :loading="isLoading"
-      return-object
+      :items-length="totalCount"
       density="compact"
       class="row-clickable"
-      @click:row="rowClick"
-    ></v-data-table>
+      @click:row="
+        (_event: Event, row: FundingSubmissionLineTableRow) =>
+          openFundingSubmissionLineEditDialog(row.item.id)
+      "
+    >
+    </v-data-table-server>
+    <FundingSubmissionLineEditorDialog ref="fundingSubmissionLineEditorRef" />
   </BaseCard>
-
-  <SubmissionLineEditor />
-
-  <FundingFiscalEditor />
 </template>
-<script lang="ts">
-import { mapActions, mapState } from "pinia"
+<script setup lang="ts">
+import { ref, computed, useTemplateRef } from "vue"
+import { uniq } from "lodash"
 
-import {
-  useSubmissionLinesStore,
-  type FundingSubmissionLine,
-} from "@/modules/submission-lines/store/index"
 import useBreadcrumbs from "@/use/use-breadcrumbs"
+import useFundingSubmissionLines, {
+  type FundingSubmissionLineAsIndex,
+  type FundingSubmissionLineFiltersOptions,
+  type FundingSubmissionLineWhereOptions,
+} from "@/use/use-funding-submission-lines"
 
 import BaseCard from "@/components/BaseCard.vue"
-import SubmissionLineEditor from "@/modules/submission-lines/components/SubmissionLineEditor.vue"
-import FundingFiscalEditor from "@/modules/submission-lines/components/FundingFiscalEditor.vue"
+import FundingSubmissionLineEditorDialog from "@/components/funding-submission-lines/FundingSubmissionLineEditorDialog.vue"
 
-export default {
-  components: {
-    BaseCard,
-    FundingFiscalEditor,
-    SubmissionLineEditor,
-  },
-  setup() {
-    useBreadcrumbs("Submission Lines", [
-      {
-        title: "Administration",
-        to: {
-          name: "AdministrationPage",
-        },
-      },
-      {
-        title: "Submission Lines",
-        to: {
-          name: "administration/AdministrationSubmissionLinesPage",
-        },
-      },
-    ])
-  },
-  data: () => ({
-    headers: [
-      { title: "Section", value: "sectionName" },
-      { title: "Line", value: "lineName" },
-      { title: "Age Range", value: "ageRange" },
-      { title: "Monthly Amount", value: "monthlyAmountDisplay" },
-    ],
-    fiscalYear: "2022/23",
-    search: "",
-  }),
-  computed: {
-    ...mapState(useSubmissionLinesStore, ["lines", "isLoading", "fiscalYears"]),
-    items() {
-      return this.lines.filter((y) => y.fiscalYear == this.fiscalYear)
-    },
-    totalItems() {
-      return this.lines.length
-    },
-    breadcrumbs() {
-      return [
-        {
-          title: "Administration",
-          to: "/administration",
-        },
-        {
-          title: "Submission Lines",
-        },
-      ]
-    },
-  },
-  beforeMount() {
-    this.loadItems()
-  },
-  methods: {
-    ...mapActions(useSubmissionLinesStore, [
-      "getAllSubmissionLines",
-      "selectLine",
-      "startNewFiscal",
-    ]),
+const headers = ref([
+  { title: "Section", key: "sectionName" },
+  { title: "Line", key: "lineName" },
+  { title: "Age Range", key: "ageRange" },
+  { title: "Monthly Amount", key: "monthlyAmountDisplay" },
+])
 
-    async loadItems() {
-      await this.getAllSubmissionLines()
-    },
-    rowClick(_event: Event, row: { item: FundingSubmissionLine }) {
-      this.selectLine(row.item)
-    },
-  },
+const search = ref("")
+const page = ref(1)
+const perPage = ref(10)
+const fiscalYear = ref<string | null>(null)
+
+const fundingSubmissionLinesWhere = computed(() => {
+  const where: FundingSubmissionLineWhereOptions = {}
+
+  if (fiscalYear.value) {
+    where.fiscalYear = fiscalYear.value
+  }
+
+  return where
+})
+
+const fundingSubmissionLinesFilters = computed(() => {
+  const filters: FundingSubmissionLineFiltersOptions = {}
+
+  if (search.value) {
+    filters.search = search.value
+  }
+
+  return filters
+})
+
+const fundingSubmissionLinesQuery = computed(() => ({
+  where: fundingSubmissionLinesWhere.value,
+  filters: fundingSubmissionLinesFilters.value,
+  page: page.value,
+  perPage: perPage.value,
+}))
+
+const { fundingSubmissionLines, totalCount, isLoading } = useFundingSubmissionLines(
+  fundingSubmissionLinesQuery
+)
+
+const fiscalYears = computed(() => {
+  return uniq(fundingSubmissionLines.value.map((line) => line.fiscalYear))
+    .sort()
+    .reverse()
+})
+
+function openNewFiscalYearDialog() {
+  alert("TODO: implement new fiscal year creation")
 }
+
+type FundingSubmissionLineTableRow = {
+  item: FundingSubmissionLineAsIndex
+}
+
+const fundingSubmissionLineEditorRef = useTemplateRef("fundingSubmissionLineEditorRef")
+
+function openFundingSubmissionLineEditDialog(fundingSubmissionLineId: number) {
+  fundingSubmissionLineEditorRef.value?.open(fundingSubmissionLineId)
+}
+
+useBreadcrumbs("Submission Lines", [
+  {
+    title: "Administration",
+    to: {
+      name: "AdministrationPage",
+    },
+  },
+  {
+    title: "Submission Lines",
+    to: {
+      name: "administration/AdministrationSubmissionLinesPage",
+    },
+  },
+])
 </script>
