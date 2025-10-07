@@ -40,48 +40,28 @@
       >
     </template>
 
-    <v-data-table-server
-      :headers="headers"
-      :items="fundingSubmissionLines"
-      :loading="isLoading"
-      :items-length="totalCount"
-      density="compact"
-      class="row-clickable"
-      @click:row="
-        (_event: Event, row: FundingSubmissionLineTableRow) =>
-          openFundingSubmissionLineEditDialog(row.item.id)
-      "
-    >
-    </v-data-table-server>
-    <FundingSubmissionLineEditorDialog ref="fundingSubmissionLineEditorRef" />
+    <FundingSubmissionLinesDataTableServer
+      :where="fundingSubmissionLinesWhere"
+      :filters="fundingSubmissionLinesFilters"
+    />
   </BaseCard>
 </template>
 <script setup lang="ts">
-import { ref, computed, useTemplateRef } from "vue"
+import { ref, computed } from "vue"
 
 import getCurrentFiscalYearSlug from "@/utils/get-current-fiscal-year-slug"
 
 import useBreadcrumbs from "@/use/use-breadcrumbs"
-import useFundingSubmissionLines, {
-  type FundingSubmissionLineAsIndex,
+import {
   type FundingSubmissionLineFiltersOptions,
   type FundingSubmissionLineWhereOptions,
 } from "@/use/use-funding-submission-lines"
 
 import BaseCard from "@/components/BaseCard.vue"
-import FundingSubmissionLineEditorDialog from "@/components/funding-submission-lines/FundingSubmissionLineEditorDialog.vue"
 import FiscalPeriodFiscalYearSelect from "@/components/fiscal-periods/FiscalPeriodFiscalYearSelect.vue"
-
-const headers = ref([
-  { title: "Section", key: "sectionName" },
-  { title: "Line", key: "lineName" },
-  { title: "Age Range", key: "ageRange" },
-  { title: "Monthly Amount", key: "monthlyAmountDisplay" },
-])
+import FundingSubmissionLinesDataTableServer from "@/components/funding-submission-lines/FundingSubmissionLinesDataTableServer.vue"
 
 const search = ref("")
-const page = ref(1)
-const perPage = ref(10)
 const fiscalYearSlug = ref(getCurrentFiscalYearSlug())
 
 const fiscalYear = computed(() => fiscalYearSlug.value.replace("-", "/"))
@@ -106,29 +86,8 @@ const fundingSubmissionLinesFilters = computed(() => {
   return filters
 })
 
-const fundingSubmissionLinesQuery = computed(() => ({
-  where: fundingSubmissionLinesWhere.value,
-  filters: fundingSubmissionLinesFilters.value,
-  page: page.value,
-  perPage: perPage.value,
-}))
-
-const { fundingSubmissionLines, totalCount, isLoading } = useFundingSubmissionLines(
-  fundingSubmissionLinesQuery
-)
-
 function openNewFiscalYearDialog() {
   alert("TODO: implement new fiscal year creation")
-}
-
-type FundingSubmissionLineTableRow = {
-  item: FundingSubmissionLineAsIndex
-}
-
-const fundingSubmissionLineEditorRef = useTemplateRef("fundingSubmissionLineEditorRef")
-
-function openFundingSubmissionLineEditDialog(fundingSubmissionLineId: number) {
-  fundingSubmissionLineEditorRef.value?.open(fundingSubmissionLineId)
 }
 
 useBreadcrumbs("Submission Lines", [

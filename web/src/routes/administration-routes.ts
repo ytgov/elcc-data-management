@@ -27,6 +27,13 @@ const routes = [
             name: "administration/AdministrationSubmissionLinesPage",
             component: () => import("@/pages/administration/AdministrationSubmissionLinesPage.vue"),
           },
+          {
+            path: "administration/submission-lines/:fundingSubmissionLineId",
+            name: "administration/submission-lines/SubmissionLinePage",
+            component: () =>
+              import("@/pages/administration/submission-lines/SubmissionLinePage.vue"),
+            props: true,
+          },
         ],
       },
     ],

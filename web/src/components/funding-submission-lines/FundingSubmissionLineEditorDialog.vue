@@ -19,6 +19,15 @@
         >
       </v-toolbar>
       <v-card-text>
+        <DescriptionElement
+          label="Fiscal Period"
+          :model-value="fundingSubmissionLine.fiscalYear"
+          readonly
+          variant="outlined"
+          density="comfortable"
+        />
+        <v-divider class="my-4" />
+
         <v-text-field
           v-model="fundingSubmissionLine.sectionName"
           label="Section"
@@ -48,14 +57,6 @@
         <v-text-field
           v-model="fundingSubmissionLine.monthlyAmount"
           label="Monthly amount"
-          variant="outlined"
-          density="comfortable"
-        />
-        <v-divider />
-        <DescriptionElement
-          label="Fiscal Period"
-          :model-value="fundingSubmissionLine.fiscalYear"
-          readonly
           variant="outlined"
           density="comfortable"
         />

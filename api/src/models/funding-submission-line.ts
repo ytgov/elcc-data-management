@@ -62,7 +62,7 @@ export class FundingSubmissionLine extends BaseModel<
   declare updatedAt: CreationOptional<Date>
 
   static establishScopes() {
-    this.addSearchScope(["fiscalYear", "sectionName", "lineName", "fromAge", "toAge"])
+    this.addSearchScope(["fiscalYear", "sectionName", "lineName"])
   }
 }
 
