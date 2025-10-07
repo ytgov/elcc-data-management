@@ -2,10 +2,10 @@ import { isEmpty, isNil } from "lodash"
 import { computed, ComputedRef, Ref, toValue } from "vue"
 
 import { type ModelOrder } from "@/api/base-api"
-import { type SortItem } from "@/use/utils/use-vuetify-sort-by-to-safe-route-query"
+import { type SortItem } from "@/use/vuetify/use-vuetify-sort-by-to-safe-route-query"
 
 /**
- * Must not conflict with web/src/use/utils/use-vuetify-sort-by-to-safe-route-query.ts SEPARATOR
+ * Must not conflict with web/src/use/vuetify/use-vuetify-sort-by-to-safe-route-query.ts SEPARATOR
  */
 const SEPARATOR = "."
 
