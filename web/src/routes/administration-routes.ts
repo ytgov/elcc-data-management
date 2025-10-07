@@ -18,6 +18,12 @@ const routes = [
             component: () => import("@/pages/administration/AdminstrationUsersPage.vue"),
           },
           {
+            path: "administration/users/:userId",
+            name: "administration/users/UserPage",
+            component: () => import("@/pages/administration/users/UserPage.vue"),
+            props: true,
+          },
+          {
             path: "administration/funding-periods",
             name: "administration/FundingPeriodsPage",
             component: () => import("@/pages/administration/AdministrationFundingPeriodsPage.vue"),

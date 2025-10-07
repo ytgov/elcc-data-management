@@ -24,46 +24,52 @@
             cols="12"
             md="6"
           >
-            <v-text-field
-              v-model="user.displayName"
-              label="Name"
-              readonly
-              variant="outlined"
-              density="comfortable"
-              append-inner-icon="mdi-lock"
-            ></v-text-field>
-            <v-text-field
-              v-model="user.email"
+            <DescriptionElement
               label="Email"
+              :model-value="user.email"
+            />
+            <v-divider class="my-4" />
+
+            <v-text-field
+              v-model="user.firstName"
+              label="First name"
               readonly
               variant="outlined"
               density="comfortable"
-              append-inner-icon="mdi-lock"
-            ></v-text-field>
+            />
+            <v-text-field
+              v-model="user.lastName"
+              label="Last name"
+              variant="outlined"
+              density="comfortable"
+            />
+
             <v-select
               v-model="user.status"
               label="Status"
               :items="['Active', 'Inactive']"
               variant="outlined"
               density="comfortable"
-            ></v-select>
+            />
 
             <v-checkbox
               v-model="user.isAdmin"
               label="System Admin"
               variant="outlined"
               density="comfortable"
-            ></v-checkbox>
+            />
           </v-col>
-          <v-divider
-            vertical
-            thickness="1"
-          ></v-divider>
+
+          <v-divider vertical />
+
           <v-col
             cols="12"
             md="6"
           >
             <h3>Permissions</h3>
+            <p class="text-body-2 text-medium-emphasis">
+              Role and permission management coming soon...
+            </p>
           </v-col>
         </v-row>
       </v-card-text>
@@ -98,6 +104,8 @@ import { integerTransformer } from "@/utils/use-route-query-transformers"
 import useSnack from "@/use/use-snack"
 import useUser from "@/use/use-user"
 
+import DescriptionElement from "@/components/common/DescriptionElement.vue"
+
 const userId = useRouteQuery<string | null, number | null>("showUserEditor", null, {
   transform: integerTransformer,
 })
@@ -119,6 +127,7 @@ const isSaving = ref(false)
 const snack = useSnack()
 
 async function saveNotifyAndClose() {
+  isSaving.value = true
   try {
     await save()
     snack.success("User saved!")
