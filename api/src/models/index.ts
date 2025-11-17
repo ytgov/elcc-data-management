@@ -3,7 +3,6 @@ export { type FundingLineValue } from "@/models/funding-line-value"
 import db from "@/db/db-client"
 
 import Centre from "@/models/centre"
-import CentreFundingPeriod from "@/models/centre-funding-period"
 import EmployeeBenefit from "@/models/employee-benefit"
 import EmployeeWageTier from "@/models/employee-wage-tier"
 import FiscalPeriod from "@/models/fiscal-period"
@@ -18,7 +17,6 @@ import WageEnhancement from "@/models/wage-enhancement"
 
 db.addModels([
   Centre,
-  CentreFundingPeriod,
   EmployeeBenefit,
   EmployeeWageTier,
   FiscalPeriod,
@@ -33,7 +31,6 @@ db.addModels([
 ])
 
 Centre.establishScopes()
-CentreFundingPeriod.establishScopes()
 EmployeeBenefit.establishScopes()
 EmployeeWageTier.establishScopes()
 FiscalPeriod.establishScopes()
@@ -48,7 +45,6 @@ WageEnhancement.establishScopes()
 
 export {
   Centre,
-  CentreFundingPeriod,
   EmployeeBenefit,
   EmployeeWageTier,
   FiscalPeriod,
