@@ -8,7 +8,7 @@
     "clean": "rm -rf ./dist",
     "start": "ts-node-dev -r tsconfig-paths/register src/server.ts",
     "ts-node": "ts-node -r tsconfig-paths/register --logError",
-    "knex": "ts-node -r tsconfig-paths/register ./node_modules/.bin/knex --knexfile src/config.d/knexfile.ts",
+    "knex": "ts-node -r tsconfig-paths/register ./node_modules/.bin/knex --knexfile knexfile.ts",
     "migrate": "npm run knex -- migrate:latest",
     "migrate:make": "npm run knex -- migrate:make",
     "migrate:rollback": "npm run knex -- migrate:rollback",

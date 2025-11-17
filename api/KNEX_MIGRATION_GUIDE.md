@@ -249,11 +249,8 @@ export async function down(knex: Knex): Promise<void> {
 
 ## Running Migrations
 
-### Automatic (On Server Start)
-
-Migrations run automatically when the server starts via the `20-run-migrations.ts` initializer. This ensures the database schema is always up-to-date.
-
-### Manual Execution
+Migrations must be run manually before starting the application. This gives you explicit control
+over when schema changes are applied.
 
 ```bash
 # Run all pending migrations
@@ -265,6 +262,8 @@ npm run migrate:list
 # Rollback the last batch
 npm run migrate:rollback
 ```
+
+**Important:** Always run migrations before starting the server, especially in production environments.
 
 ## Creating Seeds
 
@@ -313,18 +312,14 @@ export async function seed(knex: Knex): Promise<void> {
 
 ## Running Seeds
 
-### Automatic (On Server Start in Development)
-
-Seeds run automatically in development environment via the `30-run-seeds.ts` initializer.
-
-### Manual Execution
+Seeds must be run manually when you want to populate the database with sample/test data.
 
 ```bash
 # Run all seed files
 npm run seed:run
 ```
 
-**Note**: Seeds are skipped in production environments for safety.
+**Note**: Seeds should only be run in development/test environments, never in production.
 
 ## Migration Strategy
 
