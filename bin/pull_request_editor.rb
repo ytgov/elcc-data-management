@@ -1,80 +1,87 @@
-require "tempfile"
 require "open3"
+require "fileutils"
 
 ##
-# Supports fetching and editing PR descriptions from a full GitHub PR URL using SSH and GitHub CLI.
+# Fetches and edits PR descriptions from a full GitHub PR URL using `gh api` (REST).
 #
-# Example usage:
-#   - PullRequestEditor.edit_pull_request_description('https://github.com/icefoganalytics/travel-authorization/pull/218')
+# Example:
+#   PullRequestEditor.edit_pull_request_description('https://github.com/icefoganalytics/wrap/pull/263')
 class PullRequestEditor
-  EDITOR = ENV.fetch("EDITOR", "windsurf")
+  EDITOR = ENV.fetch("EDITOR", ENV.fetch("VISUAL", "windsurf"))
 
-  # Edits the pull request description using GitHub CLI and VS Code
   def self.edit_pull_request_description(pull_request_url)
     repo, pull_request_number = extract_repo_and_pull_request_number(pull_request_url)
 
-    pull_request_body = fetch_pull_request_body(repo, pull_request_number)
+    pull_request_body = fetch_pull_request_body_via_rest(repo, pull_request_number)
 
     app_root = File.expand_path(File.join(File.dirname(__FILE__), ".."))
     tmp_dir = File.join(app_root, "tmp")
     Dir.mkdir(tmp_dir) unless Dir.exist?(tmp_dir)
 
-    Tempfile.create(["pull_request_description_#{pull_request_number}", ".md"], tmp_dir) do |file|
-      file.write(pull_request_body)
-      file.flush
+    file_path = File.join(tmp_dir, "pull_request_#{pull_request_number}.md")
+    File.write(file_path, pull_request_body.to_s)
+    puts "Editing: #{file_path}"
 
-      open_in_editor_command = "#{EDITOR} --wait #{file.path}"
-      system(open_in_editor_command)
-      unless $?.success?
-        raise "Failed to open in editor: '#{open_in_editor_command}' (exit code: #{$?.exitstatus})"
-      end
+    open_in_editor_command = %(#{EDITOR} --wait "#{file_path}")
+    system(open_in_editor_command)
+    unless $?.success?
+      raise "Failed to open in editor: '#{open_in_editor_command}' (exit code: #{$?.exitstatus})"
+    end
 
-      updated_pull_request_body = File.read(file.path)
+    updated_pull_request_body = File.read(file_path)
 
-      if updated_pull_request_body.strip != pull_request_body.strip
-        update_pull_request_body(repo, pull_request_number, file.path)
-      else
-        puts "No changes made to the PR description."
-      end
+    if updated_pull_request_body.strip != pull_request_body.to_s.strip
+      update_pull_request_body_via_rest(repo, pull_request_number, file_path)
+      FileUtils.rm(file_path)
+    else
+      puts "No changes made to the PR description."
+      FileUtils.rm(file_path)
     end
   end
 
   private
 
-  # Extracts the repository name and PR number from a full GitHub PR URL
+  # Extract "owner/repo" and PR number from a full URL.
   def self.extract_repo_and_pull_request_number(pull_request_url)
-    match_data = pull_request_url.match(%r{github.com/([^/]+)/([^/]+)/pull/(\d+)})
+    match_data = pull_request_url.match(%r{\Ahttps?://github\.com/([^/]+)/([^/]+)/pull/(\d+)}i)
+    unless match_data
+      raise ArgumentError, "Unsupported PR URL format: #{pull_request_url}"
+    end
+
     repo = "#{match_data[1]}/#{match_data[2]}"
     pull_request_number = match_data[3]
     [repo, pull_request_number]
   end
 
-  # Fetches the PR body using the GitHub CLI
-  def self.fetch_pull_request_body(repo, pull_request_number)
-    command = "gh pr view #{pull_request_number} --repo #{repo} --json body --jq .body"
+  # Uses REST via `gh api` to fetch the PR body (avoids GraphQL projectCards pitfalls).
+  def self.fetch_pull_request_body_via_rest(repo, pull_request_number)
+    command = %(gh api "repos/#{repo}/pulls/#{pull_request_number}" --jq .body)
     puts "running: #{command}"
     stdout, stderr, status = Open3.capture3(command)
 
     if status.success?
-      stdout.strip
+      stdout
     else
-      puts "Error fetching PR description: #{stderr}"
-      exit(1)
+      abort_with_cli_error("Error fetching PR description", stderr)
     end
   end
 
-  # Updates the PR body using the GitHub CLI
-  def self.update_pull_request_body(repo, pull_request_number, new_body_file_path)
-    command =
-      "gh pr edit #{pull_request_number} --repo #{repo} --body-file \"#{new_body_file_path}\""
+  # Uses REST via `gh api` to PATCH the PR body from a file.
+  # `-F body=@file.md` tells gh to read the field value from the file and JSON-encode it.
+  def self.update_pull_request_body_via_rest(repo, pull_request_number, new_body_file_path)
+    command = %(gh api -X PATCH "repos/#{repo}/pulls/#{pull_request_number}" -F body=@#{new_body_file_path})
     puts "running: #{command}"
     stdout, stderr, status = Open3.capture3(command)
 
     if status.success?
-      puts "stdout: #{stdout}"
       puts "PR description updated successfully."
     else
-      puts "Error updating PR description: #{stderr}"
+      raise "Error updating PR description: #{stderr}"
     end
+  end
+
+  def self.abort_with_cli_error(prefix, stderr)
+    warn "#{prefix}: #{stderr}"
+    exit(1)
   end
 end

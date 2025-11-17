@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require "shellwords"
 require "rdoc"
 
 require_relative "./jira_api"
@@ -13,6 +14,7 @@ class DevHelper
     "description-from" => :description_from,
     "check-types" => :check_types,
     "edit-pr" => :edit_pr,
+    "sqlcmd-query" => :sqlcmd_query,
   }
   METHOD_TO_COMMAND = COMMAND_TO_METHOD.invert
 
@@ -104,12 +106,21 @@ class DevHelper
     run(*%w[api npm run ts-node], *args, **kwargs)
   end
 
+  def test(*args, **kwargs)
+    service = args[0]
+    if service == "api"
+      test_api(*args.drop(1), **kwargs)
+    elsif service == "web"
+      test_web(*args.drop(1), **kwargs)
+    else
+      test_api(*args, **kwargs)
+    end
+  end
+
   def test_api(*args, **kwargs)
     reformat_project_relative_path_filter_for_vitest!(args, "api/")
     run(*%w[test_api npm run test], *args, **kwargs)
   end
-
-  alias test test_api
 
   def test_web(*args, **kwargs)
     reformat_project_relative_path_filter_for_vitest!(args, "web/")
@@ -117,6 +128,17 @@ class DevHelper
   end
 
   def migrate(*args, **kwargs)
+    action = args[0]
+    if action == "up"
+      migrate_api(*%w[up -- --step=1], *args.drop(1), **kwargs)
+    elsif action == "down"
+      migrate_api(*%w[down -- --step=1], *args.drop(1), **kwargs)
+    else
+      migrate_api(*args, **kwargs)
+    end
+  end
+
+  def migrate_api(*args, **kwargs)
     if RUBY_PLATFORM =~ /linux/
       run(*%w[api npm run migrate], *args, execution_mode: WAIT_FOR_PROCESS, **kwargs)
 
@@ -143,25 +165,36 @@ class DevHelper
   end
 
   # -I enable quoted identifiers, e.g. "table"."column"
-  def sqlcmd(*args, **kwargs) # rubocop:disable Metrics/MethodLength
-    environment_hoist =
+  def sqlcmd(*args, **kwargs)
+    environment_variable_export_commands =
       ENV
         .slice(*%w[DB_NAME DB_USER DB_HOST DB_PORT])
         .map { |key, value| "export #{key}=\"#{value}\"" }
         .join("\n  ")
 
+    tty_argument = ""
+    tty_argument = "-T" if kwargs.fetch(:enable_tty, false)
+
     compose(<<~BASH, **kwargs)
-        exec db sh -c '
-          #{environment_hoist}
-          /opt/mssql-tools18/bin/sqlcmd \
-            -U "$DB_USER" \
-            -P "$DB_PASS" \
-            -H "$DB_HOST" \
-            -d "$DB_NAME" \
-            -C \
-            -I #{args.join(" ")}
-          '
-      BASH
+      exec #{tty_argument} db sh -c '
+        #{environment_variable_export_commands}
+        /opt/mssql-tools18/bin/sqlcmd \
+          -U "$DB_USER" \
+          -P "$DB_PASS" \
+          -H "$DB_HOST" \
+          -d "$DB_NAME" \
+          -C \
+          -I #{args.join(" ")}
+        '
+    BASH
+  end
+
+  def sqlcmd_query(query, *args, **kwargs)
+    if query.nil? || query.strip.empty?
+      raise ArgumentError, "Query cannot be nil or empty"
+    end
+
+    sqlcmd(args, enable_tty: true, pipe_input: query, **kwargs)
   end
 
   def db(*args, **kwargs)
@@ -271,8 +304,15 @@ class DevHelper
   end
 
   def compose_command(*args, **kwargs)
-    environment = kwargs.fetch(:environment, "development")
-    "cd #{project_root} && docker compose -f docker-compose.#{environment}.yaml #{args.join(" ")}"
+    environment = kwargs.delete(:environment) { "development" }
+    pipe_input = kwargs.delete(:pipe_input)
+
+    if pipe_input
+      shell_safe_pipe_input = Shellwords.escape(pipe_input)
+      "cd #{project_root} && printf '%s\n' #{shell_safe_pipe_input} | docker compose -f docker-compose.#{environment}.yaml #{args.join(' ')}"
+    else
+      "cd #{project_root} && docker compose -f docker-compose.#{environment}.yaml #{args.join(' ')}"
+    end
   end
 
   def project_root
