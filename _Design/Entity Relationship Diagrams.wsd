@@ -6,18 +6,6 @@ PlantUML URL: https://plantuml.com/ie-diagram
 This diagram may be out of date and should be verified against the current database schema.
 end note
 
-entity "centre_funding_periods" {
-  * id : int [PK]
-  --
-  * centre_id : int [FK]
-  * fiscal_period_id : int [FK]
-  --
-  notes : nvarchar(MAX)
-  --
-  * created_at : datetime2
-  * updated_at : datetime2
-}
-
 entity "centres" {
   * id : int [PK]
   --
@@ -242,7 +230,6 @@ entity "wage_enhancements" {
 }
 
 ' Relationships
-centres::id }o--|| centre_funding_periods::centre_id
 centres::id }o--|| employee_benefits::centre_id
 centres::id }o--|| funding_submission_line_jsons::centre_id
 centres::id }o--|| funding_submission_line_values::centre_id
@@ -250,7 +237,6 @@ centres::id }o--|| payments::centre_id
 centres::id }o--|| wage_enhancements::centre_id
 centres }o--o| logs::table_name
 employee_wage_tiers::id }o--|| wage_enhancements::employee_wage_tier_id
-fiscal_periods::id }o--|| centre_funding_periods::fiscal_period_id
 fiscal_periods::id }o--|| employee_benefits::fiscal_period_id
 fiscal_periods::id }o--|| employee_wage_tiers::fiscal_period_id
 fiscal_periods::id }o--|| payments::fiscal_period_id
