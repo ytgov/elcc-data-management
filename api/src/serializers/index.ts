@@ -6,6 +6,7 @@ export { WageEnhancementSerializer } from "@/serializers/wage-enhancement-serial
 
 // Bundled exports
 export * as CurrentUser from "./current-user"
+export * as EmployeeBenefits from "./employee-benefits"
 export * as FundingPeriods from "./funding-periods"
 export * as FundingSubmissionLines from "./funding-submission-lines"
 export * as Payments from "./payments"

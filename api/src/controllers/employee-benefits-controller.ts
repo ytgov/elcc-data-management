@@ -1,92 +1,159 @@
 import { isNil } from "lodash"
-import { WhereOptions } from "@sequelize/core"
 
-import BaseController from "./base-controller"
-
+import logger from "@/utils/logger"
 import { EmployeeBenefit } from "@/models"
-import { EmployeeBenefitSerializer } from "@/serializers"
+import { EmployeeBenefitPolicy } from "@/policies"
+import { CreateService, UpdateService } from "@/services/employee-benefits"
+import { IndexSerializer, ShowSerializer } from "@/serializers/employee-benefits"
+import BaseController from "@/controllers/base-controller"
 
-export class EmployeeBenefitsController extends BaseController {
+export class EmployeeBenefitsController extends BaseController<EmployeeBenefit> {
   async index() {
-    const where = this.query.where as WhereOptions<EmployeeBenefit>
-    return EmployeeBenefit.findAll({
-      where,
-    })
-      .then((employeeBenefits) => {
-        const serializedEmployeeBenefits = EmployeeBenefitSerializer.asTable(employeeBenefits)
-        return this.response.json({
-          employeeBenefits: serializedEmployeeBenefits,
-        })
+    try {
+      const where = this.buildWhere()
+      const scopes = this.buildFilterScopes()
+      const order = this.buildOrder()
+      const scopedEmployeeBenefits = EmployeeBenefitPolicy.applyScope(scopes, this.currentUser)
+
+      const totalCount = await scopedEmployeeBenefits.count({ where })
+      const employeeBenefits = await scopedEmployeeBenefits.findAll({
+        where,
+        order,
+        limit: this.pagination.limit,
+        offset: this.pagination.offset,
       })
-      .catch((error) => {
-        return this.response
-          .status(400)
-          .json({ message: `Invalid query for employee benefits: ${error}` })
+      const serializedEmployeeBenefits = IndexSerializer.perform(employeeBenefits)
+      return this.response.json({
+        employeeBenefits: serializedEmployeeBenefits,
+        totalCount,
       })
+    } catch (error) {
+      logger.error(`Error fetching employee benefits: ${error}`, { error })
+      return this.response.status(400).json({
+        message: `Error fetching employee benefits: ${error}`,
+      })
+    }
   }
 
   async show() {
-    const employeeBenefit = await this.loadEmployeeBenefit()
-    if (isNil(employeeBenefit))
-      return this.response.status(404).json({ message: "employee benefit not found." })
+    try {
+      const employeeBenefit = await this.loadEmployeeBenefit()
+      if (isNil(employeeBenefit)) {
+        return this.response.status(404).json({
+          message: "Employee benefit not found",
+        })
+      }
 
-    const serializedemployeeBenefit = EmployeeBenefitSerializer.asDetailed(employeeBenefit)
-    return this.response.json({
-      employeeBenefit: serializedemployeeBenefit,
-    })
+      const policy = this.buildPolicy(employeeBenefit)
+      if (!policy.show()) {
+        return this.response.status(403).json({
+          message: "You are not authorized to view this employee benefit",
+        })
+      }
+
+      const serializedEmployeeBenefit = ShowSerializer.perform(employeeBenefit)
+      return this.response.json({
+        employeeBenefit: serializedEmployeeBenefit,
+        policy,
+      })
+    } catch (error) {
+      logger.error(`Error fetching employee benefit: ${error}`, { error })
+      return this.response.status(400).json({
+        message: `Error fetching employee benefit: ${error}`,
+      })
+    }
   }
 
   async create() {
-    return EmployeeBenefit.create(this.request.body)
-      .then((employeeBenefit) => {
-        return this.response.status(201).json({ employeeBenefit })
+    try {
+      const policy = this.buildPolicy()
+      if (!policy.create()) {
+        return this.response.status(403).json({
+          message: "You are not authorized to create employee benefits",
+        })
+      }
+
+      const permittedAttributes = policy.permitAttributesForCreate(this.request.body)
+      const employeeBenefit = await CreateService.perform(permittedAttributes)
+      const serializedEmployeeBenefit = ShowSerializer.perform(employeeBenefit)
+      return this.response.status(201).json({
+        employeeBenefit: serializedEmployeeBenefit,
+        policy,
       })
-      .catch((error) => {
-        return this.response
-          .status(422)
-          .json({ message: `employee benefit creation failed: ${error}` })
+    } catch (error) {
+      logger.error(`Error creating employee benefit: ${error}`, { error })
+      return this.response.status(422).json({
+        message: `Error creating employee benefit: ${error}`,
       })
+    }
   }
 
   async update() {
-    const employeeBenefit = await this.loadEmployeeBenefit()
-    if (isNil(employeeBenefit))
-      return this.response.status(404).json({ message: "employee benefit not found." })
-
-    return employeeBenefit
-      .update(this.request.body)
-      .then((employeeBenefit) => {
-        const serializedemployeeBenefit = EmployeeBenefitSerializer.asDetailed(employeeBenefit)
-        return this.response.json({
-          employeeBenefit: serializedemployeeBenefit,
+    try {
+      const employeeBenefit = await this.loadEmployeeBenefit()
+      if (isNil(employeeBenefit)) {
+        return this.response.status(404).json({
+          message: "Employee benefit not found",
         })
+      }
+
+      const policy = this.buildPolicy(employeeBenefit)
+      if (!policy.update()) {
+        return this.response.status(403).json({
+          message: "You are not authorized to update this employee benefit",
+        })
+      }
+
+      const permittedAttributes = policy.permitAttributes(this.request.body)
+      const updatedEmployeeBenefit = await UpdateService.perform(
+        employeeBenefit,
+        permittedAttributes
+      )
+      const serializedEmployeeBenefit = ShowSerializer.perform(updatedEmployeeBenefit)
+      return this.response.json({
+        employeeBenefit: serializedEmployeeBenefit,
+        policy,
       })
-      .catch((error) => {
-        return this.response
-          .status(422)
-          .json({ message: `employee benefit update failed: ${error}` })
+    } catch (error) {
+      logger.error(`Error updating employee benefit: ${error}`, { error })
+      return this.response.status(422).json({
+        message: `Error updating employee benefit: ${error}`,
       })
+    }
   }
 
   async destroy() {
-    const employeeBenefit = await this.loadEmployeeBenefit()
-    if (isNil(employeeBenefit))
-      return this.response.status(404).json({ message: "employee benefit not found." })
+    try {
+      const employeeBenefit = await this.loadEmployeeBenefit()
+      if (isNil(employeeBenefit)) {
+        return this.response.status(404).json({
+          message: "Employee benefit not found",
+        })
+      }
 
-    return employeeBenefit
-      .destroy()
-      .then(() => {
-        return this.response.status(204).end()
+      const policy = this.buildPolicy(employeeBenefit)
+      if (!policy.destroy()) {
+        return this.response.status(403).json({
+          message: "You are not authorized to delete this employee benefit",
+        })
+      }
+
+      await employeeBenefit.destroy()
+      return this.response.status(204).send()
+    } catch (error) {
+      logger.error(`Error deleting employee benefit: ${error}`, { error })
+      return this.response.status(422).json({
+        message: `Error deleting employee benefit: ${error}`,
       })
-      .catch((error) => {
-        return this.response
-          .status(422)
-          .json({ message: `employee benefit deletion failed: ${error}` })
-      })
+    }
   }
 
-  private loadEmployeeBenefit(): Promise<EmployeeBenefit | null> {
+  private loadEmployeeBenefit() {
     return EmployeeBenefit.findByPk(this.params.employeeBenefitId)
+  }
+
+  private buildPolicy(employeeBenefit: EmployeeBenefit = EmployeeBenefit.build()) {
+    return new EmployeeBenefitPolicy(this.currentUser, employeeBenefit)
   }
 }
 
