@@ -145,39 +145,19 @@ class DevHelper
   end
 
   # -I enable quoted identifiers, e.g. "table"."column"
-  def sqlcmd(*args, **kwargs) # rubocop:disable Metrics/MethodLength
-    environment_hoist =
+  def sqlcmd(*args, **kwargs)
+    environment_variable_export_commands =
       ENV
         .slice(*%w[DB_NAME DB_USER DB_HOST DB_PORT])
         .map { |key, value| "export #{key}=\"#{value}\"" }
         .join("\n  ")
+
+    tty_argument = ""
+    tty_argument = "-T" if kwargs.fetch(:enable_tty, false)
 
     compose(<<~BASH, **kwargs)
-        exec db sh -c '
-          #{environment_hoist}
-          /opt/mssql-tools18/bin/sqlcmd \
-            -U "$DB_USER" \
-            -P "$DB_PASS" \
-            -H "$DB_HOST" \
-            -d "$DB_NAME" \
-            -C \
-            -I #{args.join(" ")}
-          '
-      BASH
-  end
-
-  def sqlcmd_query(query, *args, **kwargs)
-    raise ArgumentError, "Query cannot be nil or empty" if query.nil? || query.strip.empty?
-
-    environment_hoist =
-      ENV
-        .slice(*%w[DB_NAME DB_USER DB_HOST DB_PORT])
-        .map { |key, value| "export #{key}=\"#{value}\"" }
-        .join("\n  ")
-
-    compose(<<~BASH, pipe_input: query, **kwargs)
-      exec -T db sh -c '
-        #{environment_hoist}
+      exec #{tty_argument} db sh -c '
+        #{environment_variable_export_commands}
         /opt/mssql-tools18/bin/sqlcmd \
           -U "$DB_USER" \
           -P "$DB_PASS" \
@@ -187,6 +167,14 @@ class DevHelper
           -I #{args.join(" ")}
         '
     BASH
+  end
+
+  def sqlcmd_query(query, *args, **kwargs)
+    if query.nil? || query.strip.empty?
+      raise ArgumentError, "Query cannot be nil or empty"
+    end
+
+    sqlcmd(args, enable_tty: true, pipe_input: query, **kwargs)
   end
 
   def db(*args, **kwargs)
@@ -299,13 +287,11 @@ class DevHelper
     environment = kwargs.delete(:environment) { "development" }
     pipe_input = kwargs.delete(:pipe_input)
 
-    base_compose = "docker compose -f docker-compose.#{environment}.yaml #{args.join(' ')}"
-
     if pipe_input
       shell_safe_pipe_input = Shellwords.escape(pipe_input)
-      "cd #{project_root} && printf '%s\n' #{shell_safe_pipe_input} | #{base_compose}"
+      "cd #{project_root} && printf '%s\n' #{shell_safe_pipe_input} | docker compose -f docker-compose.#{environment}.yaml #{args.join(' ')}"
     else
-      "cd #{project_root} && #{base_compose}"
+      "cd #{project_root} && docker compose -f docker-compose.#{environment}.yaml #{args.join(' ')}"
     end
   end
 
