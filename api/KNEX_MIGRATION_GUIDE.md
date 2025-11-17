@@ -1,6 +1,6 @@
 # Knex Migration Guide
 
-This project now supports **Knex.js** for database migrations alongside the existing Umzug migration system. This guide explains how to use Knex for database migrations and seeds.
+This project uses **Knex.js** for all database migrations and seeds. This guide explains how to use Knex for managing database schema changes.
 
 ## Table of Contents
 
@@ -37,26 +37,26 @@ This project now supports **Knex.js** for database migrations alongside the exis
 
 ```bash
 # Create a new migration
-npm run knex:migrate:make <migration_name>
+npm run migrate:make <migration_name>
 
 # Run all pending migrations
-npm run knex:migrate
+npm run migrate
 
 # Rollback the last batch of migrations
-npm run knex:migrate:rollback
+npm run migrate:rollback
 
 # List completed and pending migrations
-npm run knex:migrate:list
+npm run migrate:list
 ```
 
 ### Seed Commands
 
 ```bash
 # Create a new seed file
-npm run knex:seed:make <seed_name>
+npm run seed:make <seed_name>
 
 # Run all seed files
-npm run knex:seed:run
+npm run seed:run
 ```
 
 ### Direct Knex CLI Access
@@ -71,10 +71,10 @@ npm run knex -- <command>
 ### 1. Generate a New Migration
 
 ```bash
-npm run knex:migrate:make create-users-table
+npm run migrate:make create-users-table
 ```
 
-This creates a new migration file in `api/src/db/migrations/` with a timestamp prefix (e.g., `20241207001_create-users-table.ts`).
+This creates a new migration file in `api/src/db/migrations/` with a timestamp prefix (e.g., `20241117000013_create-users-table.ts`).
 
 ### 2. Edit the Migration File
 
@@ -251,19 +251,19 @@ export async function down(knex: Knex): Promise<void> {
 
 ### Automatic (On Server Start)
 
-Migrations run automatically when the server starts via the `21-run-knex-migrations.ts` initializer. This ensures the database schema is always up-to-date.
+Migrations run automatically when the server starts via the `20-run-migrations.ts` initializer. This ensures the database schema is always up-to-date.
 
 ### Manual Execution
 
 ```bash
 # Run all pending migrations
-npm run knex:migrate
+npm run migrate
 
 # Check migration status
-npm run knex:migrate:list
+npm run migrate:list
 
 # Rollback the last batch
-npm run knex:migrate:rollback
+npm run migrate:rollback
 ```
 
 ## Creating Seeds
@@ -271,7 +271,7 @@ npm run knex:migrate:rollback
 ### 1. Generate a New Seed
 
 ```bash
-npm run knex:seed:make fill-centres-table
+npm run seed:make fill-centres-table
 ```
 
 This creates a new seed file in `api/src/db/seeds/{environment}/`.
@@ -315,36 +315,40 @@ export async function seed(knex: Knex): Promise<void> {
 
 ### Automatic (On Server Start in Development)
 
-Seeds run automatically in development environment via the `31-run-knex-seeds.ts` initializer.
+Seeds run automatically in development environment via the `30-run-seeds.ts` initializer.
 
 ### Manual Execution
 
 ```bash
 # Run all seed files
-npm run knex:seed:run
+npm run seed:run
 ```
 
 **Note**: Seeds are skipped in production environments for safety.
 
 ## Migration Strategy
 
-### Current Approach: Soft Migration
+This project uses **Knex** as its sole migration system. The database schema is defined
+through 12 base migrations created on 2024-11-17 that establish the complete schema:
 
-This project uses a **soft migration** approach:
-
-1. **Umzug migrations remain functional** - Existing migrations continue to work
-2. **Knex runs after Umzug** - The initializers run in order:
-   - `20-run-migrations.ts` (Umzug)
-   - `21-run-knex-migrations.ts` (Knex)
-3. **New migrations use Knex** - All new migrations should be created using Knex
-4. **Gradual transition** - Umzug will be phased out over time
+1. `20241117000001_create-users-table.ts`
+2. `20241117000002_create-centres-table.ts`
+3. `20241117000003_create-fiscal-periods-table.ts`
+4. `20241117000004_create-funding-periods-table.ts`
+5. `20241117000005_create-funding-submission-lines-table.ts`
+6. `20241117000006_create-logs-table.ts`
+7. `20241117000007_create-employee-wage-tiers-table.ts`
+8. `20241117000008_create-employee-benefits-table.ts`
+9. `20241117000009_create-funding-submission-line-jsons-table.ts`
+10. `20241117000010_create-payments-table.ts`
+11. `20241117000011_create-user-roles-table.ts`
+12. `20241117000012_create-wage-enhancements-table.ts`
 
 ### Migration Tables
 
-- **Umzug**: Uses `SequelizeMeta` table to track migrations
-- **Knex**: Uses `knex_migrations` and `knex_migrations_lock` tables
-
-Both systems track their migrations independently, allowing them to coexist.
+Knex uses two tables to track migrations:
+- `knex_migrations` - Stores executed migration names and batch numbers
+- `knex_migrations_lock` - Prevents concurrent migrations from running
 
 ## Best Practices
 
@@ -396,13 +400,13 @@ await knex("centres").insert([{ id: 1, name: "Test" }])
 
 ```bash
 # ✅ Good
-npm run knex:migrate:make create-users-table
-npm run knex:migrate:make add-phone-to-centres
-npm run knex:migrate:make backfill-region-column
+npm run migrate:make create-users-table
+npm run migrate:make add-phone-to-centres
+npm run migrate:make backfill-region-column
 
 # ❌ Bad
-npm run knex:migrate:make migration1
-npm run knex:migrate:make update
+npm run migrate:make migration1
+npm run migrate:make update
 ```
 
 ### 5. Test Rollbacks
@@ -410,9 +414,9 @@ npm run knex:migrate:make update
 Always test that your `down()` function works:
 
 ```bash
-npm run knex:migrate
-npm run knex:migrate:rollback
-npm run knex:migrate
+npm run migrate
+npm run migrate:rollback
+npm run migrate
 ```
 
 ### 6. Use MSSQL-Specific Types When Needed
@@ -456,7 +460,7 @@ Knex configuration is managed in:
 
 ```bash
 # Check migration status
-npm run knex:migrate:list
+npm run migrate:list
 
 # Check database connection
 npm run knex -- migrate:currentVersion
@@ -473,10 +477,10 @@ npm run knex -- migrate:up <migration_name>
 
 ```bash
 # Rollback all migrations
-npm run knex:migrate:rollback --all
+npm run migrate:rollback --all
 
 # Re-run all migrations
-npm run knex:migrate
+npm run migrate
 ```
 
 ## Additional Resources
