@@ -37,12 +37,12 @@ export function buildKnexConfig(options?: Knex.Config): Knex.Config {
       migrations: {
         directory: path.resolve(__dirname, "./migrations"),
         extension: "ts",
-        stub: path.resolve(__dirname, "./templates/sample-migration-knex.ts"),
+        stub: path.resolve(__dirname, "./templates/sample-migration.ts"),
       },
       seeds: {
         directory: path.resolve(__dirname, `./seeds/${NODE_ENV}`),
         extension: "ts",
-        stub: path.resolve(__dirname, "./templates/sample-seed-knex.ts"),
+        stub: path.resolve(__dirname, "./templates/sample-seed.ts"),
       },
     },
     options

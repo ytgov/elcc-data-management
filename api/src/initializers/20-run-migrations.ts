@@ -1,35 +1,35 @@
-import { migrator } from "@/db/umzug"
+import knex from "@/db/db-migration-client"
 
-export async function runMigrations(): Promise<void> {
-  migrator.on("migrating", (event) => {
-    console.info(`Running migration: ${event.name}`)
-  })
+type MigrationInfo = {
+  file: string
+  directory: string
+}
 
-  migrator.on("migrated", (event) => {
-    console.info(`Completed migration: ${event.name}`)
-  })
+async function runMigrations(): Promise<void> {
+  const [_completedMigrations, pendingMigrations]: [MigrationInfo[], MigrationInfo[]] =
+    await knex.migrate.list()
 
-  try {
-    const executedMigrations = await migrator.up()
-
-    if (executedMigrations.length === 0) {
-      console.info("No new migrations to run. Database is up to date.")
-    } else {
-      console.info("All migrations completed successfully.")
-    }
-  } catch (error) {
-    console.error(`Migration failed: ${error}`, { error })
-
-    const pendingMigrations = await migrator.pending()
-
-    if (pendingMigrations.length > 0) {
-      console.error(`Failed migration file: ${pendingMigrations[0].name}`)
-    }
-
-    throw error
+  if (pendingMigrations.length === 0) {
+    console.info("No pending migrations.")
+    return
   }
 
-  return
+  console.info(`Found ${pendingMigrations.length} pending migration(s).`)
+
+  return pendingMigrations
+    .reduce(async (previousMigration, { file, directory }) => {
+      await previousMigration
+
+      console.info(`Running migration: ${directory}/${file}`)
+      return knex.migrate.up()
+    }, Promise.resolve())
+    .then(() => {
+      console.info("All migrations completed successfully.")
+    })
+    .catch((error) => {
+      console.error(`Error running migrations: ${error}`, { error })
+      throw error
+    })
 }
 
 export default runMigrations

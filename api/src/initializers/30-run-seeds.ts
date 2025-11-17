@@ -1,24 +1,20 @@
-import { seeder } from "@/db/umzug"
-import { Centre } from "@/models"
+import knex from "@/db/db-migration-client"
+import { NODE_ENV } from "@/config"
 
-export async function runSeeds(): Promise<void> {
-  if (process.env.SKIP_SEEDING_UNLESS_EMPTY === "true") {
-    const count = await Centre.count({ logging: false })
-
-    if (count > 0) {
-      console.warn("Skipping seeding as SKIP_SEEDING_UNLESS_EMPTY set, and data already seeded.")
-      return
-    }
+async function runSeeds(): Promise<void> {
+  if (NODE_ENV === "production") {
+    console.info("Skipping seeds in production environment.")
+    return
   }
 
   try {
-    await seeder.up()
+    console.info("Running seeds...")
+    await knex.seed.run()
+    console.info("Seeds completed successfully.")
   } catch (error) {
     console.error(`Error running seeds: ${error}`, { error })
     throw error
   }
-
-  return
 }
 
 export default runSeeds

@@ -1,40 +1,32 @@
-import { DataTypes } from "@sequelize/core"
+import type { Knex } from "knex"
 
-import type { Migration } from "@/db/umzug"
-import { MssqlSimpleTypes } from "@/db/utils/mssql-simple-types"
-
-export const up: Migration = async ({ context: queryInterface }) => {
+export async function up(knex: Knex): Promise<void> {
   throw new Error("Not implemented")
-  await queryInterface.createTable("users", {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      allowNull: false,
-      autoIncrement: true,
-    },
-    first_name: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    is_admin: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
-    created_at: {
-      type: MssqlSimpleTypes.DATETIME2(0),
-      allowNull: false,
-      defaultValue: MssqlSimpleTypes.NOW,
-    },
-    updated_at: {
-      type: MssqlSimpleTypes.DATETIME2(0),
-      allowNull: false,
-      defaultValue: MssqlSimpleTypes.NOW,
-    },
+  await knex.schema.createTable("table_name", function (table) {
+    table.increments("id").notNullable().primary()
+    table.string("name", 100).notNullable()
+    table.string("status", 50).notNullable()
+
+    // Timestamps using MSSQL DATETIME2 with UTC defaults
+    table
+      .specificType("created_at", "DATETIME2(0)")
+      .notNullable()
+      .defaultTo(knex.raw("GETUTCDATE()"))
+    table
+      .specificType("updated_at", "DATETIME2(0)")
+      .notNullable()
+      .defaultTo(knex.raw("GETUTCDATE()"))
+    table.specificType("deleted_at", "DATETIME2(0)")
+
+    // Example unique constraint excluding soft-deleted records
+    table.unique(["name"], {
+      indexName: "table_name_name_unique",
+      predicate: knex.whereNull("deleted_at"),
+    })
   })
 }
 
-export const down: Migration = async ({ context: queryInterface }) => {
+export async function down(knex: Knex): Promise<void> {
   throw new Error("Not implemented")
-  await queryInterface.dropTable("users")
+  await knex.schema.dropTable("table_name")
 }

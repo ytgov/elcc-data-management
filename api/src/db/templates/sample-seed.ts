@@ -1,41 +1,39 @@
-import type { SeedMigration } from "@/db/umzug"
+import type { Knex } from "knex"
 
-export const up: SeedMigration = async ({ context: { Centre } }) => {
-  await Centre.findOrCreate({
-    where: {
-      name: "Grow with Joy 2nd",
-    },
-    defaults: {
-      name: "Grow with Joy 2nd",
-      license: "123",
-      community: "Whitehorse",
-      region: Centre.Regions.WHITEHORSE,
-      isFirstNationProgram: false,
-      status: "Up to date",
-      hotMeal: true,
-      licensedFor: 19,
-      lastSubmission: new Date("2019-01-01"),
-    },
-  })
-  await Centre.findOrCreate({
-    where: {
-      name: "Happy Hearts Preschool",
-    },
-    defaults: {
-      name: "Grow with Joy 2nd",
-      license: "456",
-      community: "Whitehorse",
-      region: Centre.Regions.WHITEHORSE,
-      isFirstNationProgram: false,
-      status: "Up to date",
-      hotMeal: true,
-      licensedFor: 25,
-      lastSubmission: new Date("2019-01-01"),
-    },
-  })
-}
+export async function seed(knex: Knex): Promise<void> {
+  throw new Error("Not implemented")
 
-export const down: SeedMigration = async () => {
-  // this method needs to exist, but does not need to be implemented.
-  // Seeds should be idempotent.
+  // Example: Insert seed data with upsert pattern
+  // This uses ON CONFLICT for idempotent seeding
+  await knex("table_name")
+    .insert([
+      {
+        id: 1,
+        name: "Example 1",
+        status: "active",
+        created_at: knex.fn.now(),
+        updated_at: knex.fn.now(),
+      },
+      {
+        id: 2,
+        name: "Example 2",
+        status: "active",
+        created_at: knex.fn.now(),
+        updated_at: knex.fn.now(),
+      },
+    ])
+    .onConflict("id")
+    .merge()
+
+  // Alternative: Check if data exists before inserting
+  const existingRecord = await knex("table_name").where({ id: 1 }).first()
+  if (!existingRecord) {
+    await knex("table_name").insert({
+      id: 1,
+      name: "Example",
+      status: "active",
+      created_at: knex.fn.now(),
+      updated_at: knex.fn.now(),
+    })
+  }
 }
