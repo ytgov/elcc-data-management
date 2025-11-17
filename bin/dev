@@ -128,6 +128,17 @@ class DevHelper
   end
 
   def migrate(*args, **kwargs)
+    action = args[0]
+    if action == "up"
+      migrate_api(*%w[up -- --step=1], *args.drop(1), **kwargs)
+    elsif action == "down"
+      migrate_api(*%w[down -- --step=1], *args.drop(1), **kwargs)
+    else
+      migrate_api(*args, **kwargs)
+    end
+  end
+
+  def migrate_api(*args, **kwargs)
     if RUBY_PLATFORM =~ /linux/
       run(*%w[api npm run migrate], *args, execution_mode: WAIT_FOR_PROCESS, **kwargs)
 
