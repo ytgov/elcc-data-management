@@ -106,12 +106,21 @@ class DevHelper
     run(*%w[api npm run ts-node], *args, **kwargs)
   end
 
+  def test(*args, **kwargs)
+    service = args[0]
+    if service == "api"
+      test_api(*args.drop(1), **kwargs)
+    elsif service == "web"
+      test_web(*args.drop(1), **kwargs)
+    else
+      test_api(*args, **kwargs)
+    end
+  end
+
   def test_api(*args, **kwargs)
     reformat_project_relative_path_filter_for_vitest!(args, "api/")
     run(*%w[test_api npm run test], *args, **kwargs)
   end
-
-  alias test test_api
 
   def test_web(*args, **kwargs)
     reformat_project_relative_path_filter_for_vitest!(args, "web/")
