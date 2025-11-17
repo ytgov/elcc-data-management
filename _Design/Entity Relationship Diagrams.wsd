@@ -122,28 +122,6 @@ entity "FundingLineValue" {
   * estimated_computed_total : float
 }
 
-' This table is not in use currently.
-entity "funding_submission_line_values" {
-  * id : int [PK]
-  --
-  * centre_id : int [FK]
-  * submission_line_id : int [FK]
-  --
-  * fiscal_year : nvarchar(10)
-  * section_name : nvarchar(200)
-  * line_name : nvarchar(200)
-  * monthly_amount : float
-  * date_name : nvarchar(100)
-  * date_start : datetime2(0)
-  * date_end : datetime2(0)
-  * child_count : float
-  * computed_total : float
-  * is_actual : bit
-  --
-  * created_at : datetime2
-  * updated_at : datetime2
-}
-
 entity "funding_submission_lines" {
   * id : int [PK]
   --
@@ -232,7 +210,6 @@ entity "wage_enhancements" {
 ' Relationships
 centres::id }o--|| employee_benefits::centre_id
 centres::id }o--|| funding_submission_line_jsons::centre_id
-centres::id }o--|| funding_submission_line_values::centre_id
 centres::id }o--|| payments::centre_id
 centres::id }o--|| wage_enhancements::centre_id
 centres }o--o| logs::table_name
@@ -242,7 +219,6 @@ fiscal_periods::id }o--|| employee_wage_tiers::fiscal_period_id
 fiscal_periods::id }o--|| payments::fiscal_period_id
 funding_submission_line_jsons::values }o--|| FundingLineValue
 funding_submission_lines::id }o--|| FundingLineValue::submission_line_id
-funding_submission_lines::id }o--|| funding_submission_line_values::submission_line_id
 users::id }o--|| user_roles::user_id
 users::email }o--|| logs::user_email
 @enduml
