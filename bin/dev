@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require "shellwords"
 require "rdoc"
 
 require_relative "./jira_api"
@@ -13,6 +14,7 @@ class DevHelper
     "description-from" => :description_from,
     "check-types" => :check_types,
     "edit-pr" => :edit_pr,
+    "sqlcmd-query" => :sqlcmd_query,
   }
   METHOD_TO_COMMAND = COMMAND_TO_METHOD.invert
 
@@ -162,6 +164,27 @@ class DevHelper
             -I #{args.join(" ")}
           '
       BASH
+  end
+
+  def sqlcmd_query(query, **_kwargs)
+    raise ArgumentError, "Query cannot be nil or empty" if query.nil? || query.strip.empty?
+
+    environment_hoist =
+      ENV
+        .slice(*%w[DB_NAME DB_USER DB_HOST DB_PORT])
+        .map { |key, value| "export #{key}=\"#{value}\"" }
+        .join("\n  ")
+
+    # Escape SQL safely for printf
+    safe_sql = Shellwords.escape(query)
+
+    command = <<~CMD.chomp
+      cd #{project_root} && printf '%s\n' #{safe_sql} | \
+      docker compose -f docker-compose.development.yaml exec -T db sh -c '#{environment_hoist} /opt/mssql-tools18/bin/sqlcmd -U "$DB_USER" -P "$DB_PASS" -H "$DB_HOST" -d "$DB_NAME" -C'
+    CMD
+
+    puts "Running: #{command}"
+    exec(command)
   end
 
   def db(*args, **kwargs)
