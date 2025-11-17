@@ -302,11 +302,8 @@ class DevHelper
     base_compose = "docker compose -f docker-compose.#{environment}.yaml #{args.join(' ')}"
 
     if pipe_input
-      # Safely escape the piped input for the host shell
-      safe_pipe_input = Shellwords.escape(pipe_input)
-
-      # Prefix the docker compose invocation with a host-side printf to pipe data into the container's stdin.
-      "cd #{project_root} && printf '%s\n' #{safe_pipe_input} | #{base_compose}"
+      shell_safe_pipe_input = Shellwords.escape(pipe_input)
+      "cd #{project_root} && printf '%s\n' #{shell_safe_pipe_input} | #{base_compose}"
     else
       "cd #{project_root} && #{base_compose}"
     end
