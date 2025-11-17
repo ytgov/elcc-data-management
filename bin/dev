@@ -166,7 +166,7 @@ class DevHelper
       BASH
   end
 
-  def sqlcmd_query(query, **_kwargs)
+  def sqlcmd_query(query, *args, **kwargs)
     raise ArgumentError, "Query cannot be nil or empty" if query.nil? || query.strip.empty?
 
     environment_hoist =
@@ -175,16 +175,18 @@ class DevHelper
         .map { |key, value| "export #{key}=\"#{value}\"" }
         .join("\n  ")
 
-    # Escape SQL safely for printf
-    safe_sql = Shellwords.escape(query)
-
-    command = <<~CMD.chomp
-      cd #{project_root} && printf '%s\n' #{safe_sql} | \
-      docker compose -f docker-compose.development.yaml exec -T db sh -c '#{environment_hoist} /opt/mssql-tools18/bin/sqlcmd -U "$DB_USER" -P "$DB_PASS" -H "$DB_HOST" -d "$DB_NAME" -C'
-    CMD
-
-    puts "Running: #{command}"
-    exec(command)
+    compose(<<~BASH, pipe_input: query, **kwargs)
+      exec -T db sh -c '
+        #{environment_hoist}
+        /opt/mssql-tools18/bin/sqlcmd \
+          -U "$DB_USER" \
+          -P "$DB_PASS" \
+          -H "$DB_HOST" \
+          -d "$DB_NAME" \
+          -C \
+          -I #{args.join(" ")}
+        '
+    BASH
   end
 
   def db(*args, **kwargs)
@@ -294,8 +296,20 @@ class DevHelper
   end
 
   def compose_command(*args, **kwargs)
-    environment = kwargs.fetch(:environment, "development")
-    "cd #{project_root} && docker compose -f docker-compose.#{environment}.yaml #{args.join(" ")}"
+    environment = kwargs.delete(:environment) { "development" }
+    pipe_input = kwargs.delete(:pipe_input)
+
+    base_compose = "docker compose -f docker-compose.#{environment}.yaml #{args.join(' ')}"
+
+    if pipe_input
+      # Safely escape the piped input for the host shell
+      safe_pipe_input = Shellwords.escape(pipe_input)
+
+      # Prefix the docker compose invocation with a host-side printf to pipe data into the container's stdin.
+      "cd #{project_root} && printf '%s\n' #{safe_pipe_input} | #{base_compose}"
+    else
+      "cd #{project_root} && #{base_compose}"
+    end
   end
 
   def project_root
