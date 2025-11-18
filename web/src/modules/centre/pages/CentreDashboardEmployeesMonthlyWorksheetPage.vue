@@ -38,9 +38,13 @@
       <v-col>
         <h3 class="section-header">Employee Benefits</h3>
 
+        <v-skeleton-loader
+          v-if="isNil(employeeBenefitId)"
+          type="table"
+        />
         <EmployeeBenefitEditTable
-          :centre-id="props.centreId"
-          :fiscal-period-id="fiscalPeriodId"
+          v-else
+          :employee-benefit-id="employeeBenefitId"
         />
       </v-col>
     </v-row>
@@ -71,6 +75,7 @@ import { isEmpty, isNil } from "lodash"
 
 import DateTimeUtils from "@/utils/date-time-utils"
 import useFiscalPeriods, { FiscalPeriodMonths } from "@/use/use-fiscal-periods"
+import useEmployeeBenefits from "@/use/use-employee-benefits"
 
 import EmployeeBenefitEditTable from "@/components/employee-benefits/EmployeeBenefitEditTable.vue"
 import EditWageEnhancementsWidget from "@/modules/centre/components/EditWageEnhancementsWidget.vue"
@@ -99,6 +104,17 @@ const fiscalPeriodFormattedDate = computed(() => {
   const formattedDate = DateTimeUtils.fromISO(dateStart).toUTC().toFormat("MMMM yyyy")
   return formattedDate
 })
+
+const employeeBenefitsQuery = computed(() => ({
+  where: {
+    centreId: props.centreId,
+    fiscalPeriodId: fiscalPeriodId.value,
+  },
+}))
+const { employeeBenefits } = useEmployeeBenefits(employeeBenefitsQuery, {
+  skipWatchIf: () => isNil(fiscalPeriodId.value),
+})
+const employeeBenefitId = computed(() => employeeBenefits.value[0]?.id)
 </script>
 
 <style scoped>

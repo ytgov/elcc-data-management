@@ -242,7 +242,7 @@
           <v-btn
             color="success"
             :loading="isLoading"
-            @click="save"
+            @click="saveAndNotify"
           >
             Save
           </v-btn>
@@ -252,51 +252,23 @@
   </v-table>
 </template>
 
-<script lang="ts" setup>
-import { computed, ref } from "vue"
+<script setup lang="ts">
+import { computed, ref, toRefs } from "vue"
 import { isNil, round } from "lodash"
 
-import useSnack from "@/use/use-snack"
-import useEmployeeBenefits from "@/use/use-employee-benefits"
-import employeeBenefitsApi from "@/api/employee-benefits-api"
 import { formatMoney } from "@/utils/format-money"
+
+import useSnack from "@/use/use-snack"
+import useEmployeeBenefit from "@/use/use-employee-benefit"
 
 import CurrencyInput from "@/components/CurrencyInput.vue"
 
-const props = defineProps({
-  centreId: {
-    type: Number,
-    required: true,
-  },
-  fiscalPeriodId: {
-    type: Number,
-    required: true,
-  },
-})
+const props = defineProps<{
+  employeeBenefitId: number
+}>()
 
-const queryOptions = computed(() => ({
-  where: {
-    centreId: props.centreId,
-    fiscalPeriodId: props.fiscalPeriodId,
-  },
-}))
-
-const { employeeBenefits, isLoading, refresh } = useEmployeeBenefits(queryOptions)
-
-// TODO: update modeling so this is not needed
-const employeeBenefit = computed(() => {
-  if (employeeBenefits.value.length === 0) {
-    return null
-  }
-
-  if (employeeBenefits.value.length > 1) {
-    throw new Error(
-      `Multiple employee benefits found for centre ${props.centreId} and fiscal period ${props.fiscalPeriodId}`
-    )
-  }
-
-  return employeeBenefits.value[0]
-})
+const { employeeBenefitId } = toRefs(props)
+const { employeeBenefit, isLoading, save } = useEmployeeBenefit(employeeBenefitId)
 
 const isEditingCostCapPercentage = ref(false)
 
@@ -413,12 +385,11 @@ function updateEmployeeBenefitCurrencyValue(
 
 const snack = useSnack()
 
-async function save() {
+async function saveAndNotify() {
   if (isNil(employeeBenefit.value)) return
 
   try {
-    await employeeBenefitsApi.update(employeeBenefit.value.id, employeeBenefit.value)
-    await refresh()
+    await save()
     snack.success("Employee benefit saved successfully!")
   } catch (error) {
     snack.error(`Failed to save employee benefit: ${error}`)
