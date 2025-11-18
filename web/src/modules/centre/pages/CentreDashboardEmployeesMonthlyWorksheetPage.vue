@@ -38,7 +38,7 @@
       <v-col>
         <h3 class="section-header">Employee Benefits</h3>
 
-        <EditEmployeeBenefitWidget
+        <EmployeeBenefitEditTable
           :centre-id="props.centreId"
           :fiscal-period-id="fiscalPeriodId"
         />
@@ -72,7 +72,7 @@ import { isEmpty, isNil } from "lodash"
 import DateTimeUtils from "@/utils/date-time-utils"
 import useFiscalPeriods, { FiscalPeriodMonths } from "@/use/use-fiscal-periods"
 
-import EditEmployeeBenefitWidget from "@/modules/centre/components/EditEmployeeBenefitWidget.vue"
+import EmployeeBenefitEditTable from "@/components/employee-benefits/EmployeeBenefitEditTable.vue"
 import EditWageEnhancementsWidget from "@/modules/centre/components/EditWageEnhancementsWidget.vue"
 import ReplicateEstimatesButton from "@/components/wage-enhancements/ReplicateEstimatesButton.vue"
 

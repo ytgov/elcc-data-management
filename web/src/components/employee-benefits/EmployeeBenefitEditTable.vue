@@ -1,5 +1,9 @@
 <template>
-  <v-table>
+  <v-skeleton-loader
+    v-if="isNil(employeeBenefit)"
+    type="table"
+  />
+  <v-table v-else>
     <thead>
       <tr>
         <th></th>
@@ -8,12 +12,12 @@
         <th class="text-left">Act. Total</th>
       </tr>
     </thead>
-    <tbody v-if="employeeBenefit !== undefined">
+    <tbody>
       <tr>
         <td>Gross Payroll</td>
         <td>
           <CurrencyInput
-            :model-value="employeeBenefit.grossPayrollMonthlyEstimated"
+            :model-value="Number(employeeBenefit.grossPayrollMonthlyEstimated)"
             aria-label="Gross Payroll Monthly Estimated"
             color="primary"
             density="compact"
@@ -27,7 +31,7 @@
         <td></td>
         <td>
           <CurrencyInput
-            :model-value="employeeBenefit.grossPayrollMonthlyActual"
+            :model-value="Number(employeeBenefit.grossPayrollMonthlyActual)"
             aria-label="Gross Payroll Monthly Actual"
             color="primary"
             density="compact"
@@ -95,7 +99,7 @@
         <td>Employee Cost</td>
         <td>
           <CurrencyInput
-            :model-value="employeeBenefit.employeeCostEstimated"
+            :model-value="Number(employeeBenefit.employeeCostEstimated)"
             aria-label="Employee Cost Estimated"
             color="primary"
             density="compact"
@@ -109,7 +113,7 @@
         <td></td>
         <td>
           <CurrencyInput
-            :model-value="employeeBenefit.employeeCostActual"
+            :model-value="Number(employeeBenefit.employeeCostActual)"
             aria-label="Employee Cost Actual"
             color="primary"
             density="compact"
@@ -123,7 +127,7 @@
         <td>Employer Cost</td>
         <td>
           <CurrencyInput
-            :model-value="employeeBenefit.employerCostEstimated"
+            :model-value="Number(employeeBenefit.employerCostEstimated)"
             aria-label="Employer Cost Estimated"
             color="primary"
             density="compact"
@@ -137,7 +141,7 @@
         <td></td>
         <td>
           <CurrencyInput
-            :model-value="employeeBenefit.employerCostActual"
+            :model-value="Number(employeeBenefit.employerCostActual)"
             aria-label="Employer Cost Actual"
             color="primary"
             density="compact"
@@ -151,10 +155,10 @@
         <td class="d-flex align-center">
           Total Cost
           <v-tooltip location="bottom">
-            <template #activator="{ props }">
+            <template #activator="{ props: activatorProps }">
               <v-icon
                 class="ml-1"
-                v-bind="props"
+                v-bind="activatorProps"
                 >mdi-help-circle-outline</v-icon
               >
             </template>
@@ -191,10 +195,10 @@
         <td class="text-uppercase d-flex align-center">
           Paid Amount
           <v-tooltip location="bottom">
-            <template #activator="{ props }">
+            <template #activator="{ props: activatorProps }">
               <v-icon
                 class="ml-1"
-                v-bind="props"
+                v-bind="activatorProps"
                 >mdi-help-circle-outline</v-icon
               >
             </template>
@@ -249,20 +253,15 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue"
-import { isEmpty, isUndefined, round } from "lodash"
+import { computed, ref } from "vue"
+import { isNil, round } from "lodash"
 
-import employeeBenefitsApi, {
-  isPersistedEmployeeBenefit,
-  type EmployeeBenefit,
-  type NonPersistedEmployeeBenefit,
-} from "@/api/employee-benefits-api"
-import { useNotificationStore } from "@/store/NotificationStore"
+import useSnack from "@/use/use-snack"
+import useEmployeeBenefits from "@/use/use-employee-benefits"
+import employeeBenefitsApi from "@/api/employee-benefits-api"
 import { formatMoney } from "@/utils/format-money"
 
 import CurrencyInput from "@/components/CurrencyInput.vue"
-
-const notificationStore = useNotificationStore()
 
 const props = defineProps({
   centreId: {
@@ -275,180 +274,154 @@ const props = defineProps({
   },
 })
 
-const employeeBenefit = ref<EmployeeBenefit | NonPersistedEmployeeBenefit>()
-const isLoading = ref(true)
+const queryOptions = computed(() => ({
+  where: {
+    centreId: props.centreId,
+    fiscalPeriodId: props.fiscalPeriodId,
+  },
+}))
+
+const { employeeBenefits, isLoading, refresh } = useEmployeeBenefits(queryOptions)
+
+// TODO: update modeling so this is not needed
+const employeeBenefit = computed(() => {
+  if (employeeBenefits.value.length === 0) {
+    return null
+  }
+
+  if (employeeBenefits.value.length > 1) {
+    throw new Error(
+      `Multiple employee benefits found for centre ${props.centreId} and fiscal period ${props.fiscalPeriodId}`
+    )
+  }
+
+  return employeeBenefits.value[0]
+})
+
 const isEditingCostCapPercentage = ref(false)
 
 // NOTE: if you type 8.215, it will round to 8.22
 // successive presses of 5 or higher will continue increasing the value
 const costCapPercentage = computed(() => {
-  if (isUndefined(employeeBenefit.value)) return 0
+  if (isNil(employeeBenefit.value)) {
+    return 0
+  }
 
-  return round(employeeBenefit.value.costCapPercentage * 100, 2)
+  return round(Number(employeeBenefit.value.costCapPercentage) * 100, 2)
 })
-function updateCostCapPercentage(newValue: any) {
-  if (isUndefined(employeeBenefit.value)) return
 
-  const newValueNumber = parseFloat(newValue)
+function updateCostCapPercentage(newValue: string | number) {
+  if (isNil(employeeBenefit.value)) {
+    return
+  }
+
+  const newValueNumber = parseFloat(String(newValue))
   if (isNaN(newValueNumber)) {
-    employeeBenefit.value.costCapPercentage = 0
+    employeeBenefit.value.costCapPercentage = "0"
   } else {
-    employeeBenefit.value.costCapPercentage = round(newValueNumber / 100, 4)
+    employeeBenefit.value.costCapPercentage = String(round(newValueNumber / 100, 4))
   }
 }
 
 const monthlyBenefitCostCapEstimated = computed(() => {
-  if (isUndefined(employeeBenefit.value)) return 0
+  if (isNil(employeeBenefit.value)) {
+    return 0
+  }
 
   return (
-    employeeBenefit.value.grossPayrollMonthlyEstimated * employeeBenefit.value.costCapPercentage
+    Number(employeeBenefit.value.grossPayrollMonthlyEstimated) *
+    Number(employeeBenefit.value.costCapPercentage)
   )
 })
+
 const monthlyBenefitCostCapActual = computed(() => {
-  if (isUndefined(employeeBenefit.value)) return 0
+  if (isNil(employeeBenefit.value)) {
+    return 0
+  }
 
-  return employeeBenefit.value.grossPayrollMonthlyActual * employeeBenefit.value.costCapPercentage
+  return (
+    Number(employeeBenefit.value.grossPayrollMonthlyActual) *
+    Number(employeeBenefit.value.costCapPercentage)
+  )
 })
+
 const totalCostEstimated = computed(() => {
-  if (isUndefined(employeeBenefit.value)) return 0
+  if (isNil(employeeBenefit.value)) {
+    return 0
+  }
 
-  return employeeBenefit.value.employeeCostEstimated + employeeBenefit.value.employerCostEstimated
+  return (
+    Number(employeeBenefit.value.employeeCostEstimated) +
+    Number(employeeBenefit.value.employerCostEstimated)
+  )
 })
+
 const totalCostActual = computed(() => {
-  if (isUndefined(employeeBenefit.value)) return 0
+  if (isNil(employeeBenefit.value)) {
+    return 0
+  }
 
-  return employeeBenefit.value.employeeCostActual + employeeBenefit.value.employerCostActual
+  return (
+    Number(employeeBenefit.value.employeeCostActual) +
+    Number(employeeBenefit.value.employerCostActual)
+  )
 })
+
 const minimumPaidAmountEstimated = computed(() => {
-  if (isUndefined(employeeBenefit.value)) return 0
+  if (isNil(employeeBenefit.value)) {
+    return 0
+  }
 
-  return Math.min(employeeBenefit.value.employerCostEstimated, monthlyBenefitCostCapEstimated.value)
+  return Math.min(
+    Number(employeeBenefit.value.employerCostEstimated),
+    monthlyBenefitCostCapEstimated.value
+  )
 })
+
 const minimumPaidAmountActual = computed(() => {
-  if (isUndefined(employeeBenefit.value)) return 0
+  if (isNil(employeeBenefit.value)) {
+    return 0
+  }
 
-  return Math.min(employeeBenefit.value.employerCostActual, monthlyBenefitCostCapActual.value)
+  return Math.min(
+    Number(employeeBenefit.value.employerCostActual),
+    monthlyBenefitCostCapActual.value
+  )
 })
-
-function buildEmployeeBenefit(attributes: Partial<EmployeeBenefit>): NonPersistedEmployeeBenefit {
-  return {
-    centreId: props.centreId,
-    fiscalPeriodId: props.fiscalPeriodId,
-    grossPayrollMonthlyActual: 0,
-    grossPayrollMonthlyEstimated: 0,
-    costCapPercentage: 0.08,
-    employeeCostActual: 0,
-    employeeCostEstimated: 0,
-    employerCostActual: 0,
-    employerCostEstimated: 0,
-    ...attributes,
-  }
-}
-
-async function fetchEmployeeBenefit(centreId: number, fiscalPeriodId: number) {
-  isLoading.value = false
-  try {
-    const { employeeBenefits } = await employeeBenefitsApi.list({
-      where: {
-        centreId,
-        fiscalPeriodId,
-      },
-    })
-
-    if (isEmpty(employeeBenefits)) {
-      employeeBenefit.value = buildEmployeeBenefit({ centreId, fiscalPeriodId })
-      return
-    } else if (employeeBenefits.length > 1) {
-      throw new Error(`Multiple employ benefits found for ${centreId} ${fiscalPeriodId}`)
-    }
-
-    employeeBenefit.value = employeeBenefits[0]
-  } catch (error) {
-    console.error(error)
-    notificationStore.notify({
-      text: `Failed to fetch employee benefit: ${error}`,
-      variant: "error",
-    })
-  } finally {
-    isLoading.value = false
-  }
-}
-
-watch<[number, number], true>(
-  () => [props.centreId, props.fiscalPeriodId],
-  async ([cenreId, fiscalPeriodId], _oldValues) => {
-    await fetchEmployeeBenefit(cenreId, fiscalPeriodId)
-  },
-  { immediate: true }
-)
 
 function updateEmployeeBenefitCurrencyValue(
-  attribute: keyof (EmployeeBenefit | NonPersistedEmployeeBenefit),
-  newValue: any
+  attribute:
+    | "grossPayrollMonthlyActual"
+    | "grossPayrollMonthlyEstimated"
+    | "employeeCostActual"
+    | "employeeCostEstimated"
+    | "employerCostActual"
+    | "employerCostEstimated",
+  newValue: string | number | null
 ) {
-  if (isUndefined(employeeBenefit.value)) return
+  if (isNil(employeeBenefit.value)) {
+    return
+  }
 
-  if (["-", "", null].includes(newValue)) {
-    employeeBenefit.value[attribute] = 0
+  if (["-", "", null].includes(newValue as string | null)) {
+    employeeBenefit.value[attribute] = "0"
   } else {
-    const newValueNumber = parseFloat(newValue)
-    employeeBenefit.value[attribute] = newValueNumber
+    const newValueNumber = parseFloat(String(newValue))
+    employeeBenefit.value[attribute] = String(newValueNumber)
   }
 }
+
+const snack = useSnack()
 
 async function save() {
-  if (isUndefined(employeeBenefit.value)) return
+  if (isNil(employeeBenefit.value)) return
 
-  if (isPersistedEmployeeBenefit(employeeBenefit.value)) {
-    await update(employeeBenefit.value.id, employeeBenefit.value)
-  } else {
-    await create(employeeBenefit.value)
-  }
-}
-
-async function update(employeeBenefitId: number, employeeBenefitAttributes: EmployeeBenefit) {
-  isLoading.value = true
   try {
-    const { employeeBenefit: newEmployeeBenefit } = await employeeBenefitsApi.update(
-      employeeBenefitId,
-      employeeBenefitAttributes
-    )
-
-    employeeBenefit.value = newEmployeeBenefit
-    notificationStore.notify({
-      text: "Employee benefit saved",
-      variant: "success",
-    })
+    await employeeBenefitsApi.update(employeeBenefit.value.id, employeeBenefit.value)
+    await refresh()
+    snack.success("Employee benefit saved successfully!")
   } catch (error) {
-    console.error(error)
-    notificationStore.notify({
-      text: `Failed to save employee benefit: ${error}`,
-      variant: "error",
-    })
-  } finally {
-    isLoading.value = false
-  }
-}
-
-async function create(employeeBenefitAttributes: NonPersistedEmployeeBenefit) {
-  isLoading.value = true
-  try {
-    const { employeeBenefit: newEmployeeBenefit } =
-      await employeeBenefitsApi.create(employeeBenefitAttributes)
-
-    employeeBenefit.value = newEmployeeBenefit
-    notificationStore.notify({
-      text: "Employee benefit created",
-      variant: "success",
-    })
-  } catch (error) {
-    console.error(error)
-    notificationStore.notify({
-      text: `Failed to create employee benefit: ${error}`,
-      variant: "error",
-    })
-  } finally {
-    isLoading.value = false
+    snack.error(`Failed to save employee benefit: ${error}`)
   }
 }
 </script>
