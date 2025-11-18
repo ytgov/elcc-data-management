@@ -38,8 +38,17 @@
       <v-col>
         <h3 class="section-header">Employee Benefits</h3>
 
+        <v-alert
+          v-if="employeeBenefitNotFound"
+          type="warning"
+          variant="tonal"
+          title="Employee Benefit Not Found"
+        >
+          No employee benefit record exists for this centre and fiscal period. This record should
+          have been created during fiscal year initialization.
+        </v-alert>
         <v-skeleton-loader
-          v-if="isNil(employeeBenefitId)"
+          v-else-if="isLoadingEmployeeBenefits"
           type="table"
         />
         <EmployeeBenefitEditTable
@@ -111,10 +120,16 @@ const employeeBenefitsQuery = computed(() => ({
     fiscalPeriodId: fiscalPeriodId.value,
   },
 }))
-const { employeeBenefits } = useEmployeeBenefits(employeeBenefitsQuery, {
+const {
+  employeeBenefits,
+  isLoading: isLoadingEmployeeBenefits,
+} = useEmployeeBenefits(employeeBenefitsQuery, {
   skipWatchIf: () => isNil(fiscalPeriodId.value),
 })
 const employeeBenefitId = computed(() => employeeBenefits.value[0]?.id)
+const employeeBenefitNotFound = computed(
+  () => !isLoadingEmployeeBenefits.value && isEmpty(employeeBenefits.value)
+)
 </script>
 
 <style scoped>
