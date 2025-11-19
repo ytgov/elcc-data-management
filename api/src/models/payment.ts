@@ -18,7 +18,7 @@ import {
   ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
 
-import { isValidFiscalYear } from "@/utils/validators"
+import { isValidFiscalYearLegacy } from "@/models/validators"
 
 import Centre from "@/models/centre"
 import FiscalPeriod from "@/models/fiscal-period"
@@ -43,7 +43,7 @@ export class Payment extends Model<InferAttributes<Payment>, InferCreationAttrib
   @Attribute(DataTypes.STRING(10))
   @NotNull
   @ValidateAttribute({
-    isValidFiscalYear,
+    isValidFiscalYearLegacy,
   })
   declare fiscalYear: string
 
