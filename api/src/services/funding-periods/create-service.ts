@@ -1,7 +1,8 @@
 import { CreationAttributes } from "@sequelize/core"
-import { isNil } from "lodash"
+import { isNil, times } from "lodash"
+import { DateTime } from "luxon"
 
-import { FundingPeriod } from "@/models"
+import db, { EmployeeWageTier, FiscalPeriod, FundingPeriod } from "@/models"
 import BaseService from "@/services/base-service"
 
 export type FundingPeriodCreationAttributes = Partial<CreationAttributes<FundingPeriod>>
@@ -30,15 +31,83 @@ export class CreateService extends BaseService {
       throw new Error("Title is required")
     }
 
-    const fundingPeriod = await FundingPeriod.create({
-      ...optionalAttributes,
-      fiscalYear,
-      fromDate,
-      toDate,
-      title,
+    return db.transaction(async () => {
+      const fundingPeriod = await FundingPeriod.create({
+        ...optionalAttributes,
+        fiscalYear,
+        fromDate,
+        toDate,
+        title,
+      })
+
+      const { fromDate: fundingPeriodFromDate, fiscalYear: fundingPeriodFiscalYear } = fundingPeriod
+
+      await this.createFiscalPeriods(fundingPeriodFromDate, fundingPeriodFiscalYear)
+      await this.createEmployeeWageTiers(fundingPeriodFiscalYear)
+      await this.createEmployeeBenefits(fundingPeriod)
+      await this.createFundingSubmissionLines(fundingPeriod)
+
+      return fundingPeriod.reload()
+    })
+  }
+
+  private async createFiscalPeriods(fromDate: Date, fiscalYear: string) {
+    const fiscalYearStart = DateTime.fromJSDate(fromDate)
+    const shortFiscalYear = FiscalPeriod.toShortFiscalYearFormat(fiscalYear)
+
+    const fiscalPeriodsAttributes = times(12, (i) => {
+      const date = fiscalYearStart.plus({ months: i }).startOf("month")
+      const dateStart = date.startOf("month")
+      const dateEnd = date.endOf("month").set({ millisecond: 0 })
+      const month = FiscalPeriod.asFiscalPeriodMonth(dateStart)
+
+      return {
+        fiscalYear: shortFiscalYear,
+        month,
+        dateStart: dateStart.toJSDate(),
+        dateEnd: dateEnd.toJSDate(),
+      }
     })
 
-    return fundingPeriod.reload()
+    await FiscalPeriod.bulkCreate(fiscalPeriodsAttributes)
+  }
+
+  private async createEmployeeWageTiers(fiscalYear: string) {
+    const shortFiscalYear = FiscalPeriod.toShortFiscalYearFormat(fiscalYear)
+
+    const fiscalPeriods = await FiscalPeriod.findAll({
+      where: { fiscalYear: shortFiscalYear },
+    })
+
+    const employeeWageTiers = [
+      { tierLevel: 0, tierLabel: "Level 0", wageRatePerHour: 0 },
+      { tierLevel: 1, tierLabel: "Level 1", wageRatePerHour: 4.12 },
+      { tierLevel: 2, tierLabel: "Level 1a", wageRatePerHour: 6.01 },
+      { tierLevel: 3, tierLabel: "Level 2", wageRatePerHour: 7.44 },
+      { tierLevel: 4, tierLabel: "Level 2a", wageRatePerHour: 9.96 },
+      { tierLevel: 5, tierLabel: "Level 3 Exemption", wageRatePerHour: 12.31 },
+      { tierLevel: 6, tierLabel: "ECE Level 3", wageRatePerHour: 15.31 },
+    ]
+
+    const employeeWageTiersAttributes = fiscalPeriods.flatMap((fiscalPeriod) =>
+      employeeWageTiers.map((employeeWageTier) => ({
+        fiscalPeriodId: fiscalPeriod.id,
+        ...employeeWageTier,
+      }))
+    )
+
+    await EmployeeWageTier.bulkCreate(employeeWageTiersAttributes)
+  }
+
+  private async createEmployeeBenefits(_fundingPeriod: FundingPeriod) {
+    // TODO: Implement employee benefits creation
+    // This would create the default employee benefits for the created funding period
+  }
+
+  private async createFundingSubmissionLines(_fundingPeriod: FundingPeriod) {
+    // TODO: Implement funding submission lines creation
+    // This would create the default funding submission lines for the created funding period
+    // See api/src/db/seeds/development/2023.12.12T00.25.25.fill-funding-submission-lines-table.ts
   }
 }
 

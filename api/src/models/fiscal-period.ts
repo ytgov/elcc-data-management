@@ -17,6 +17,7 @@ import {
   Table,
   ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
+import { DateTime } from "luxon"
 
 import { FiscalPeriodsFiscalYearMonthUniqueIndex } from "@/models/indexes"
 import { isValidFiscalYearShort } from "@/models/validators"
@@ -40,6 +41,8 @@ export enum FiscalPeriodMonths {
   FEBRUARY = "february",
   MARCH = "march",
 }
+
+export const FISCAL_PERIOD_MONTHS = Object.values<string>(FiscalPeriodMonths)
 
 @Table({
   paranoid: false,
@@ -68,8 +71,8 @@ export class FiscalPeriod extends Model<
   @FiscalPeriodsFiscalYearMonthUniqueIndex
   @ValidateAttribute({
     isIn: {
-      args: [Object.values(FiscalPeriodMonths)],
-      msg: `Month must be one of: ${Object.values(FiscalPeriodMonths).join(", ")}`,
+      args: [FISCAL_PERIOD_MONTHS],
+      msg: `Month must be one of: ${FISCAL_PERIOD_MONTHS.join(", ")}`,
     },
   })
   declare month: FiscalPeriodMonths
@@ -91,6 +94,26 @@ export class FiscalPeriod extends Model<
   @NotNull
   @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
+
+  // Helper functions
+  static toShortFiscalYearFormat(fiscalYear: string): string {
+    return fiscalYear.replace(/^(\d{4})-(\d{4})$/, (_, startYear, endYear) => {
+      return `${startYear}-${endYear.slice(-2)}`
+    })
+  }
+
+  static asFiscalPeriodMonth(date: DateTime): FiscalPeriodMonths {
+    const month = date.toFormat("MMMM").toLowerCase()
+    FiscalPeriod.assertIsValidMonth(month)
+
+    return month
+  }
+
+  static assertIsValidMonth(value: string): asserts value is FiscalPeriodMonths {
+    if (!FISCAL_PERIOD_MONTHS.includes(value)) {
+      throw new Error(`Invalid fiscal period month: ${value}`)
+    }
+  }
 
   // Associations
   @HasMany(() => EmployeeBenefit, {
