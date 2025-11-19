@@ -59,8 +59,8 @@ dev sh                      # Access shell in API container
 ```bash
 dev test_api                                    # Run all backend tests
 dev test_web                                    # Run all frontend tests
-dev test_api tests/models/fiscal-period.test.ts # Run single test file
-dev test_web src/components/SomeComponent.test.ts
+dev test api -- --run tests/models/fiscal-period.test.ts  # Run single backend test file
+dev test web -- --run src/components/SomeComponent.test.ts # Run single frontend test file
 ```
 
 **Type Checking:**
