@@ -1,14 +1,18 @@
+import { CreationAttributes } from "@sequelize/core"
+import { isNil } from "lodash"
 import { DateTime } from "luxon"
 
-import type { SeedMigration } from "@/db/umzug"
+import { FiscalPeriod } from "@/models"
 import { FiscalPeriodMonths } from "@/models/fiscal-period"
 
-export const up: SeedMigration = async ({ context: { FiscalPeriod } }) => {
+export async function up() {
   const today = DateTime.now()
   const twoYearsAgo = today.minus({ years: 2 }).year
   const threeYearsFromNow = today.plus({ years: 3 }).year
 
   const APRIL = 4 // Luxon months are 1-indexed
+
+  const fiscalPeriodsAttributes: CreationAttributes<FiscalPeriod>[] = []
 
   for (let year = twoYearsAgo; year <= threeYearsFromNow; year++) {
     let date = DateTime.local(year, APRIL, 1)
@@ -20,25 +24,32 @@ export const up: SeedMigration = async ({ context: { FiscalPeriod } }) => {
 
       const fiscalYear = `${year}-${(year + 1).toString().slice(-2)}`
 
-      await FiscalPeriod.findOrCreate({
-        where: {
-          fiscalYear,
-          month: dateName,
-        },
-        defaults: {
-          fiscalYear,
-          month: dateName,
-          dateStart: dateStart.toJSDate(),
-          dateEnd: dateEnd.toJSDate(),
-        },
+      fiscalPeriodsAttributes.push({
+        fiscalYear,
+        month: dateName,
+        dateStart: dateStart.toJSDate(),
+        dateEnd: dateEnd.toJSDate(),
       })
 
       date = date.plus({ months: 1 })
     }
   }
+
+  for (const fiscalPeriodAttributes of fiscalPeriodsAttributes) {
+    const fiscalPeriod = await FiscalPeriod.findOne({
+      where: {
+        fiscalYear: fiscalPeriodAttributes.fiscalYear,
+        month: fiscalPeriodAttributes.month,
+      },
+    })
+
+    if (isNil(fiscalPeriod)) {
+      await FiscalPeriod.create(fiscalPeriodAttributes)
+    }
+  }
 }
 
-export const down: SeedMigration = async () => {
+export async function down() {
   // this method needs to exist, but does not need to be implemented.
   // Seeds should be idempotent.
 }

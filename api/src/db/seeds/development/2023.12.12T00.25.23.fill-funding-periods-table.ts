@@ -1,11 +1,10 @@
 import { CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
 
-import type { SeedMigration } from "@/db/umzug"
 import { FundingPeriod } from "@/models"
 import { CreateService } from "@/services/funding-periods"
 
-export const up: SeedMigration = async () => {
+export async function up() {
   const fundingPeriodsAttributes: CreationAttributes<FundingPeriod>[] = [
     {
       fiscalYear: "2022-2023",
@@ -58,7 +57,7 @@ export const up: SeedMigration = async () => {
   }
 }
 
-export const down: SeedMigration = async () => {
+export async function down() {
   // this method needs to exist, but does not need to be implemented.
   // Seeds should be idempotent.
 }

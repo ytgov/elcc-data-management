@@ -1,9 +1,8 @@
-import { DataTypes } from "@sequelize/core"
+import { DataTypes, type QueryInterface } from "@sequelize/core"
 
-import type { Migration } from "@/db/umzug"
 import { MssqlSimpleTypes } from "@/db/utils/mssql-simple-types"
 
-export const up: Migration = async ({ context: queryInterface }) => {
+export async function up(queryInterface: QueryInterface) {
   throw new Error("Not implemented")
   await queryInterface.createTable("users", {
     id: {
@@ -34,7 +33,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
   })
 }
 
-export const down: Migration = async ({ context: queryInterface }) => {
+export async function down(queryInterface: QueryInterface) {
   throw new Error("Not implemented")
   await queryInterface.dropTable("users")
 }
