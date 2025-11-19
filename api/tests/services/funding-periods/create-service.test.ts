@@ -9,9 +9,10 @@ describe("api/src/services/funding-periods/create-service.ts", () => {
         // Arrange
         const attributes = {
           fiscalYear: "2024-2025",
-          fromDate: new Date("2024-04-01"),
-          toDate: new Date("2025-03-31"),
+          fromDate: new Date("2024-04-01T00:00:00Z"),
+          toDate: new Date("2025-03-31T23:59:59Z"),
           title: "Test Funding Period",
+          isFiscalYear: true,
         }
 
         // Act
@@ -21,10 +22,11 @@ describe("api/src/services/funding-periods/create-service.ts", () => {
         expect(result).toEqual(
           expect.objectContaining({
             id: expect.any(Number),
-            fiscalYear: attributes.fiscalYear,
-            fromDate: attributes.fromDate,
-            toDate: attributes.toDate,
-            title: attributes.title,
+            fiscalYear: "2024-2025",
+            fromDate: new Date("2024-04-01T00:00:00Z"),
+            toDate: new Date("2025-03-31T23:59:59Z"),
+            title: "Test Funding Period",
+            isFiscalYear: true,
           })
         )
       })
@@ -36,6 +38,7 @@ describe("api/src/services/funding-periods/create-service.ts", () => {
           fromDate: new Date("2024-04-01"),
           toDate: new Date("2025-03-31"),
           title: "Test Funding Period with Fiscal Periods",
+          isFiscalYear: true,
         }
 
         // Act
@@ -43,7 +46,9 @@ describe("api/src/services/funding-periods/create-service.ts", () => {
 
         // Assert
         const fiscalPeriods = await FiscalPeriod.findAll({
-          where: { fiscalYear: "2024-25" },
+          where: {
+            fiscalYear: "2024-25",
+          },
           order: [["dateStart", "ASC"]],
         })
 
@@ -130,6 +135,7 @@ describe("api/src/services/funding-periods/create-service.ts", () => {
           fromDate: new Date("2025-04-01"),
           toDate: new Date("2026-03-31"),
           title: "Test Funding Period with Employee Wage Tiers",
+          isFiscalYear: true,
         }
 
         // Act
@@ -147,6 +153,7 @@ describe("api/src/services/funding-periods/create-service.ts", () => {
           fromDate: new Date("2026-04-01"),
           toDate: new Date("2027-03-31"),
           title: "Test Funding Period Wage Tier Details",
+          isFiscalYear: true,
         }
 
         // Act

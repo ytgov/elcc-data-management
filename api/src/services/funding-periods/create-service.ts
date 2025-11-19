@@ -40,12 +40,15 @@ export class CreateService extends BaseService {
         title,
       })
 
-      const { fromDate: fundingPeriodFromDate, fiscalYear: fundingPeriodFiscalYear } = fundingPeriod
+      if (fundingPeriod.isFiscalYear) {
+        const { fromDate: fundingPeriodFromDate, fiscalYear: fundingPeriodFiscalYear } =
+          fundingPeriod
 
-      await this.createFiscalPeriods(fundingPeriodFromDate, fundingPeriodFiscalYear)
-      await this.createEmployeeWageTiers(fundingPeriodFiscalYear)
-      await this.createEmployeeBenefits(fundingPeriod)
-      await this.createFundingSubmissionLines(fundingPeriod)
+        await this.createFiscalPeriods(fundingPeriodFromDate, fundingPeriodFiscalYear)
+        await this.createEmployeeWageTiers(fundingPeriodFiscalYear)
+        await this.createEmployeeBenefits(fundingPeriod)
+        await this.createFundingSubmissionLines(fundingPeriod)
+      }
 
       return fundingPeriod.reload()
     })
