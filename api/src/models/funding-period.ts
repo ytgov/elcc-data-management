@@ -12,7 +12,10 @@ import {
   NotNull,
   PrimaryKey,
   Table,
+  ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
+
+import { isValidFiscalYearLong } from "@/models/validators"
 
 import BaseModel from "@/models/base-model"
 
@@ -30,6 +33,9 @@ export class FundingPeriod extends BaseModel<
 
   @Attribute(DataTypes.STRING(10))
   @NotNull
+  @ValidateAttribute({
+    isValidFiscalYear: isValidFiscalYearLong,
+  })
   declare fiscalYear: string
 
   @Attribute(DataTypes.DATE)

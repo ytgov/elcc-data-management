@@ -32,7 +32,7 @@ describe("api/tests/models/fiscal-period.test.ts", () => {
           })
 
           await expect(fiscalPeriod.validate()).rejects.toThrow(
-            "Fiscal year must be in format YYYY-YY (e.g., 2023-24)"
+            `Fiscal year ${invalidFiscalYear} must be in format YYYY-YY (e.g., 2023-24)`
           )
         }
       )

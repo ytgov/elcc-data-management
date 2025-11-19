@@ -19,6 +19,8 @@ import {
 } from "@sequelize/core/decorators-legacy"
 
 import { FiscalPeriodsFiscalYearMonthUniqueIndex } from "@/models/indexes"
+import { isValidFiscalYearShort } from "@/models/validators"
+
 import EmployeeBenefit from "@/models/employee-benefit"
 import EmployeeWageTier from "@/models/employee-wage-tier"
 import Payment from "@/models/payment"
@@ -57,27 +59,7 @@ export class FiscalPeriod extends Model<
   @NotNull
   @FiscalPeriodsFiscalYearMonthUniqueIndex
   @ValidateAttribute({
-    is: {
-      args: /^\d{4}-\d{2}$/,
-      msg: "Fiscal year must be in format YYYY-YY (e.g., 2023-24)",
-    },
-    isValidFiscalYearSequence(value: string) {
-      const match = value.match(/^(\d{4})-(\d{2})$/)
-      if (!match) {
-        throw new Error("Fiscal year must be in format YYYY-YY (e.g., 2023-24)")
-      }
-
-      const startYear = parseInt(match[1], 10)
-      const endYearShort = parseInt(match[2], 10)
-      const expectedEndYearShort = (startYear + 1) % 100
-
-      if (endYearShort !== expectedEndYearShort) {
-        const formattedExpectedEndYear = expectedEndYearShort.toString().padStart(2, "0")
-        throw new Error(
-          `Fiscal year end year must be exactly one year after start year (expected ${startYear}-${formattedExpectedEndYear})`
-        )
-      }
-    },
+    isValidFiscalYear: isValidFiscalYearShort,
   })
   declare fiscalYear: string
 
