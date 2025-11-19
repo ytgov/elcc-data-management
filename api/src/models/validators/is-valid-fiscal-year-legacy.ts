@@ -3,6 +3,7 @@
  * This format is maintained for backward compatibility.
  * Checks both format and sequence (end year must be exactly one year after start year).
  *
+ * @deprecated This format is deprecated. Use isValidFiscalYearShort or isValidFiscalYearLong instead.
  * @param value - The fiscal year string to validate
  * @throws Error if the fiscal year format is invalid or sequence is incorrect
  *
