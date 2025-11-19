@@ -685,6 +685,16 @@ export default UpdateService
 - Optionally accepts `_currentUser` for audit logging
 - Call static `perform()` method with constructor arguments (e.g., `CreateService.perform(attributes)`)
 
+**Service naming:**
+
+- Directory: `services/{model-plural}/` (e.g., `services/fiscal-periods/`)
+- File: `create-service.ts`, `update-service.ts`, etc.
+- Class: `CreateService`, `UpdateService`, etc.
+- Always use the standard name, even if the service performs complex operations (e.g., creating multiple related records)
+- The service's specific behavior is an implementation detail, not part of its name
+
+Example: A `CreateService` for fiscal periods creates 12 records (one for each month of the fiscal year). The file is still named `create-service.ts` and the class is still `CreateService`, because it's the standard create operation for that resource.
+
 ### Serializers
 
 **Pattern:** Control exactly which attributes are exposed to the API.
