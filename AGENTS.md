@@ -10,6 +10,10 @@ This file follows the format from https://agents.md/ for AI agent documentation.
 
 ## Table of Contents
 
+- [Development Environment](#development-environment)
+  - [Tech Stack](#tech-stack)
+  - [Common Commands](#common-commands)
+  - [Project Structure](#project-structure)
 - [Code Style Preferences](#code-style-preferences)
 - [Frontend Patterns](#frontend-patterns)
   - [Composables: Singular vs Plural](#composables-singular-vs-plural)
@@ -22,6 +26,105 @@ This file follows the format from https://agents.md/ for AI agent documentation.
   - [Service Layer](#service-layer)
   - [Serializers](#serializers)
 - [Authentication and Authorization](#authentication-and-authorization)
+
+---
+
+## Development Environment
+
+### Tech Stack
+
+- **Frontend**: Vue 3, Vuetify 3, TypeScript, Vite, Pinia
+- **Backend**: Express, Sequelize 7, TypeScript
+- **Database**: Microsoft SQL Server 2019
+- **Infrastructure**: Docker Compose
+- **Testing**: Vitest (both frontend and backend)
+
+### Common Commands
+
+Development uses the `./bin/dev` Ruby helper script (or just `dev` with direnv). It wraps docker compose with convenience helpers.
+
+**Application Management:**
+
+```bash
+dev up --build              # Boot application (--build on first run or after Dockerfile changes)
+dev down                    # Stop application
+dev logs                    # View logs
+dev sh                      # Access shell in API container
+```
+
+**Testing:**
+
+```bash
+dev test_api                                    # Run all backend tests
+dev test_web                                    # Run all frontend tests
+dev test_api tests/models/fiscal-period.test.ts # Run single test file
+dev test_web src/components/SomeComponent.test.ts
+```
+
+**Type Checking:**
+
+```bash
+dev check-types api         # Check backend types
+dev check-types web         # Check frontend types
+```
+
+**Database Management:**
+
+```bash
+dev migrate create -- --name create-users-table.ts  # Create migration
+dev migrate up                                       # Run pending migrations
+dev migrate down                                     # Rollback last migration
+dev migrate down -- --to 0                          # Rollback all migrations
+
+dev seed create -- --name fill-users-table.ts       # Create seed file
+dev seed up                                          # Run seeds
+```
+
+**NPM Commands:**
+
+```bash
+dev api npm install lodash  # Run npm in API container
+dev web npm install vue     # Run npm in web container
+```
+
+**Direct Docker Compose:**
+
+```bash
+docker compose -f docker-compose.development.yaml up --remove-orphans --build
+```
+
+### Project Structure
+
+```
+├── api/                    # Express + Sequelize backend
+│   ├── src/
+│   │   ├── controllers/    # Request handlers (coordinate policies/services/serializers)
+│   │   ├── models/         # Sequelize models (camelCase properties, snake_case DB columns)
+│   │   ├── policies/       # Authorization logic (who can do what, permitted attributes)
+│   │   ├── services/       # Business logic (create/update operations)
+│   │   ├── serializers/    # Response formatting (control exposed attributes)
+│   │   ├── db/
+│   │   │   ├── migrations/ # Database schema changes (snake_case columns)
+│   │   │   └── seeds/      # Environment-specific data (development/production)
+│   │   ├── router.ts       # Route definitions (secure by default)
+│   │   └── ...
+│   └── tests/
+├── web/                    # Vue 3 + Vuetify frontend
+│   ├── src/
+│   │   ├── api/            # API client modules
+│   │   ├── components/     # Vue components ({Model}[Modifier]{VuetifyComponent}.vue)
+│   │   ├── pages/          # Page-level components
+│   │   ├── use/            # Vue composables (use-model.ts singular, use-models.ts plural)
+│   │   ├── router.ts       # Route definitions
+│   │   └── ...
+│   └── tests/
+└── bin/
+    └── dev                 # Ruby development helper script
+```
+
+**Request Flow (Backend):** Route → Controller → Policy → Service → Model → Serializer → Response
+
+**Component Responsibility (Frontend):** Parent discovers data (query/filter) → Child manipulates data (edit/business logic)
 
 ---
 
