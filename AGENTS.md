@@ -31,6 +31,8 @@ This file follows the format from https://agents.md/ for AI agent documentation.
 
 ## Development Environment
 
+> For initial environment setup (installing Ruby, Node.js, creating `.env` files, etc.), see [README.md](./README.md).
+
 ### Tech Stack
 
 - **Frontend**: Vue 3, Vuetify 3, TypeScript, Vite, Pinia
