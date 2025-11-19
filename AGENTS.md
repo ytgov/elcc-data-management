@@ -25,6 +25,8 @@ This file follows the format from https://agents.md/ for AI agent documentation.
   - [Policy Authorization](#policy-authorization)
   - [Service Layer](#service-layer)
   - [Serializers](#serializers)
+- [Testing Conventions](#testing-conventions)
+  - [Test Describe Blocks](#test-describe-blocks)
 - [Authentication and Authorization](#authentication-and-authorization)
 
 ---
@@ -164,6 +166,10 @@ docker compose -f docker-compose.development.yaml up --remove-orphans --build
    // Methods/Functions
    // Lifecycle hooks
    ```
+
+6. **No emojis in code or text files**
+   - Avoid using emojis in source code, documentation files, and configuration files
+   - Exception: Git commit messages use GitHub-style emojis (e.g., :hammer:, :lock:, :recycle:)
 
 ---
 
@@ -861,6 +867,32 @@ export default ShowSerializer
 
 ---
 
+## Testing Conventions
+
+### Test Describe Blocks
+
+**Pattern:** Test describe blocks should reference the source file being tested, not the test file location.
+
+```typescript
+// Correct - references source location
+describe("api/src/models/funding-period.ts", () => {
+  describe("FundingPeriod", () => {
+    describe("#fiscalYear -> validation", () => {
+      // tests...
+    })
+  })
+})
+
+// Incorrect - references test location
+describe("api/tests/models/funding-period.test.ts", () => {
+  // ...
+})
+```
+
+**Rationale:** The test file describes behavior of the source file, so the describe block should point to what's being tested, making it easier to navigate from test output to source code.
+
+---
+
 ## Authentication and Authorization
 
 ### Secure-by-Default Pattern
@@ -883,10 +915,7 @@ router.use("/api", checkJwt, autheticateAndLoadCurrentUser)
 router.route("/api/current-user").get(CurrentUserController.show)
 
 // Full CRUD example for a resource
-router
-  .route("/api/payments")
-  .get(PaymentsController.index)
-  .post(PaymentsController.create)
+router.route("/api/payments").get(PaymentsController.index).post(PaymentsController.create)
 router
   .route("/api/payments/:paymentId")
   .get(PaymentsController.show)
