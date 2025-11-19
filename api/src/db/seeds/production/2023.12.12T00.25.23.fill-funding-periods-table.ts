@@ -2,7 +2,6 @@ import { CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
 
 import { FundingPeriod } from "@/models"
-import { CreateService } from "@/services/funding-periods"
 
 export async function up() {
   const fundingPeriodsAttributes: CreationAttributes<FundingPeriod>[] = [
@@ -47,12 +46,12 @@ export async function up() {
     const fundingPeriod = await FundingPeriod.findOne({
       where: {
         fiscalYear: fundingPeriodAttributes.fiscalYear,
-        isFiscalYear: true,
+        isFiscalYear: fundingPeriodAttributes.isFiscalYear,
       },
     })
 
     if (isNil(fundingPeriod)) {
-      await CreateService.perform(fundingPeriodAttributes)
+      await FundingPeriod.create(fundingPeriodAttributes)
     }
   }
 }
