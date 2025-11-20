@@ -50,16 +50,6 @@ export class FundingPeriod extends BaseModel<
   @NotNull
   declare title: string
 
-  @Attribute(DataTypes.BOOLEAN)
-  @NotNull
-  @Default(false)
-  declare isFiscalYear: CreationOptional<boolean>
-
-  @Attribute(DataTypes.BOOLEAN)
-  @NotNull
-  @Default(true)
-  declare isSchoolMonth: CreationOptional<boolean>
-
   @Attribute(DataTypes.DATE)
   @NotNull
   @Default(sql.fn("getdate"))

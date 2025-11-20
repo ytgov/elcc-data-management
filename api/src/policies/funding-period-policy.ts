@@ -26,7 +26,7 @@ export class FundingPeriodPolicy extends PolicyFactory(FundingPeriod) {
   }
 
   permittedAttributesForCreate(): Path[] {
-    return ["fiscalYear", "isFiscalYear", "isSchoolMonth", ...this.permittedAttributes()]
+    return ["fiscalYear", ...this.permittedAttributes()]
   }
 
   static policyScope(_user: User): FindOptions<Attributes<FundingPeriod>> {

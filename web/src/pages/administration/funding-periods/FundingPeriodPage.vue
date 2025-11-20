@@ -56,26 +56,6 @@
             vertical
           />
         </v-col>
-        <v-col
-          cols="12"
-          md="6"
-        >
-          <DescriptionElement
-            label="Is Fiscal Year?"
-            :model-value="fundingPeriod.isFiscalYear ? 'Yes' : 'No'"
-            vertical
-          />
-        </v-col>
-        <v-col
-          cols="12"
-          md="6"
-        >
-          <DescriptionElement
-            label="Is School Month?"
-            :model-value="fundingPeriod.isSchoolMonth ? 'Yes' : 'No'"
-            vertical
-          />
-        </v-col>
       </v-row>
     </template>
 

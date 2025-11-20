@@ -26,24 +26,6 @@
               :model-value="fundingPeriod.fiscalYear"
             />
           </v-col>
-          <v-col
-            cols="12"
-            md="6"
-          >
-            <DescriptionElement
-              label="Is fiscal year?"
-              :model-value="fundingPeriod.isFiscalYear ? 'Yes' : 'No'"
-            />
-          </v-col>
-          <v-col
-            cols="12"
-            md="6"
-          >
-            <DescriptionElement
-              label="Is school month?"
-              :model-value="fundingPeriod.isSchoolMonth ? 'Yes' : 'No'"
-            />
-          </v-col>
 
           <v-divider class="my-4" />
 

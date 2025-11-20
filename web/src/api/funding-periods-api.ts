@@ -12,8 +12,6 @@ export type FundingPeriod = {
   fromDate: string
   toDate: string
   title: string
-  isFiscalYear: boolean
-  isSchoolMonth: boolean
   createdAt: string
   updatedAt: string
 }
@@ -26,7 +24,7 @@ export type FundingPeriodAsIndex = FundingPeriod
 
 export type FundingPeriodWhereOptions = WhereOptions<
   FundingPeriod,
-  "id" | "fiscalYear" | "fromDate" | "toDate" | "title" | "isFiscalYear" | "isSchoolMonth"
+  "id" | "fiscalYear" | "fromDate" | "toDate" | "title"
 >
 
 export type FundingPeriodFiltersOptions = FiltersOptions<{
