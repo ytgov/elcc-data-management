@@ -1,4 +1,6 @@
-import { EmployeeWageTier, FiscalPeriod } from "@/models"
+import { EmployeeBenefit, EmployeeWageTier, FiscalPeriod } from "@/models"
+
+import { centreFactory } from "@/factories"
 
 import CreateService from "@/services/funding-periods/create-service"
 
@@ -211,6 +213,83 @@ describe("api/src/services/funding-periods/create-service.ts", () => {
             wageRatePerHour: 15.31,
           }),
         ])
+      })
+
+      test("when creating a funding period, creates employee benefits for all centres and fiscal periods", async () => {
+        // Arrange
+        await centreFactory.createList(3)
+
+        const attributes = {
+          fiscalYear: "2027-2028",
+          fromDate: new Date("2027-04-01"),
+          toDate: new Date("2028-03-31"),
+          title: "Test Funding Period with Employee Benefits",
+        }
+
+        // Act
+        await CreateService.perform(attributes)
+
+        // Assert
+        const employeeBenefitsCount = await EmployeeBenefit.count()
+        expect(employeeBenefitsCount).toEqual(36) // 3 centres × 12 fiscal periods = 36 employee benefits
+      })
+
+      test("when creating a funding period, creates employee benefits with default zero values", async () => {
+        // Arrange
+        const centre = await centreFactory.create()
+
+        const attributes = {
+          fiscalYear: "2028-2029",
+          fromDate: new Date("2028-04-01"),
+          toDate: new Date("2029-03-31"),
+          title: "Test Funding Period Employee Benefits Defaults",
+        }
+
+        // Act
+        await CreateService.perform(attributes)
+
+        // Assert
+        const employeeBenefits = await EmployeeBenefit.findOne({
+          where: { centreId: centre.id },
+          include: [
+            {
+              association: "fiscalPeriod",
+              where: {
+                fiscalYear: "2028-29",
+              },
+            },
+          ],
+        })
+        expect(employeeBenefits).toEqual(
+          expect.objectContaining({
+            centreId: centre.id,
+            fiscalPeriodId: expect.any(Number),
+            grossPayrollMonthlyActual: "0",
+            grossPayrollMonthlyEstimated: "0",
+            costCapPercentage: "0",
+            employeeCostActual: "0",
+            employeeCostEstimated: "0",
+            employerCostActual: "0",
+            employerCostEstimated: "0",
+          })
+        )
+      })
+
+      test("when creating a funding period with no centres, creates no employee benefits", async () => {
+        // Arrange
+        const attributes = {
+          fiscalYear: "2029-2030",
+          fromDate: new Date("2029-04-01"),
+          toDate: new Date("2030-03-31"),
+          title: "Test Funding Period No Centres",
+        }
+
+        // Act
+        await CreateService.perform(attributes)
+
+        // Assert
+        const employeeBenefitsCount = await EmployeeBenefit.count()
+        expect(employeeBenefitsCount).toEqual(0)
       })
     })
   })
