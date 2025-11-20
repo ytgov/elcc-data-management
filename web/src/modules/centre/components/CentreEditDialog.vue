@@ -164,7 +164,7 @@
         <v-card-actions class="mx-4 mb-2">
           <v-btn
             :loading="isLoading"
-            color="yg_sun"
+            color="yg-sun"
             variant="outlined"
             @click="close"
             >Close</v-btn

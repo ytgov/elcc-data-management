@@ -62,13 +62,13 @@
       >
         <v-chip
           v-if="isAdmin"
-          color="yg_moss"
+          color="yg-moss"
         >
           Admin
         </v-chip>
         <v-chip
           v-else
-          color="yg_twilight"
+          color="yg-twilight"
         >
           User
         </v-chip>

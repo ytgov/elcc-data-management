@@ -19,7 +19,7 @@
     <v-btn
       v-if="dateName == FIRST_FISCAL_MONTH_NAME"
       :loading="isReplicatingEstimates"
-      color="yg_sun"
+      color="yg-sun"
       class="float-right mb-3"
       size="small"
       @click="replicateEstimatesForward"
