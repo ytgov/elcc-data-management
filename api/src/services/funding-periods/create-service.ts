@@ -2,7 +2,7 @@ import { CreationAttributes } from "@sequelize/core"
 import { isNil, times } from "lodash"
 import { DateTime } from "luxon"
 
-import db, { EmployeeWageTier, FiscalPeriod, FundingPeriod } from "@/models"
+import db, { Centre, EmployeeBenefit, EmployeeWageTier, FiscalPeriod, FundingPeriod } from "@/models"
 import { EMPLOYEE_WAGE_TIER_DEFAULTS } from "@/models/employee-wage-tier"
 import BaseService from "@/services/base-service"
 
@@ -45,7 +45,7 @@ export class CreateService extends BaseService {
 
       await this.createFiscalPeriods(fundingPeriodFromDate, fundingPeriodFiscalYear)
       await this.createEmployeeWageTiers(fundingPeriodFiscalYear)
-      await this.createEmployeeBenefits(fundingPeriod)
+      await this.createEmployeeBenefits(fundingPeriodFiscalYear)
       await this.createFundingSubmissionLines(fundingPeriod)
 
       return fundingPeriod.reload()
@@ -90,9 +90,40 @@ export class CreateService extends BaseService {
     await EmployeeWageTier.bulkCreate(employeeWageTiersAttributes)
   }
 
-  private async createEmployeeBenefits(_fundingPeriod: FundingPeriod) {
-    // TODO: Implement employee benefits creation
-    // This would create the default employee benefits for the created funding period
+  private async createEmployeeBenefits(fiscalYear: string) {
+    const shortFiscalYear = FiscalPeriod.toShortFiscalYearFormat(fiscalYear)
+
+    const fiscalPeriods = await FiscalPeriod.findAll({
+      where: { fiscalYear: shortFiscalYear },
+    })
+
+    let employeeBenefitsAttributes: CreationAttributes<EmployeeBenefit>[] = []
+    const BATCH_SIZE = 1000
+
+    await Centre.findEach(async (centre) => {
+      for (const fiscalPeriod of fiscalPeriods) {
+        employeeBenefitsAttributes.push({
+          centreId: centre.id,
+          fiscalPeriodId: fiscalPeriod.id,
+          grossPayrollMonthlyActual: 0,
+          grossPayrollMonthlyEstimated: 0,
+          costCapPercentage: 0,
+          employeeCostActual: 0,
+          employeeCostEstimated: 0,
+          employerCostActual: 0,
+          employerCostEstimated: 0,
+        })
+
+        if (employeeBenefitsAttributes.length >= BATCH_SIZE) {
+          await EmployeeBenefit.bulkCreate(employeeBenefitsAttributes)
+          employeeBenefitsAttributes = []
+        }
+      }
+    })
+
+    if (employeeBenefitsAttributes.length > 0) {
+      await EmployeeBenefit.bulkCreate(employeeBenefitsAttributes)
+    }
   }
 
   private async createFundingSubmissionLines(_fundingPeriod: FundingPeriod) {

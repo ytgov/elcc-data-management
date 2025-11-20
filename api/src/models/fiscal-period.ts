@@ -1,6 +1,5 @@
 import {
   DataTypes,
-  Model,
   sql,
   type CreationOptional,
   type InferAttributes,
@@ -22,6 +21,7 @@ import { DateTime } from "luxon"
 import { FiscalPeriodsFiscalYearMonthUniqueIndex } from "@/models/indexes"
 import { isValidFiscalYearShort } from "@/models/validators"
 
+import BaseModel from "@/models/base-model"
 import EmployeeBenefit from "@/models/employee-benefit"
 import EmployeeWageTier from "@/models/employee-wage-tier"
 import Payment from "@/models/payment"
@@ -47,7 +47,7 @@ export const FISCAL_PERIOD_MONTHS = Object.values<string>(FiscalPeriodMonths)
 @Table({
   paranoid: false,
 })
-export class FiscalPeriod extends Model<
+export class FiscalPeriod extends BaseModel<
   InferAttributes<FiscalPeriod>,
   InferCreationAttributes<FiscalPeriod>
 > {

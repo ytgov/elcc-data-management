@@ -1,6 +1,5 @@
 import {
   DataTypes,
-  Model,
   sql,
   type CreationOptional,
   type InferAttributes,
@@ -19,13 +18,14 @@ import {
 
 import { EmployeeBenefitsCenterIdFiscalPeriodIdUniqueIndex } from "@/models/indexes"
 
+import BaseModel from "@/models/base-model"
 import Centre from "@/models/centre"
 import FiscalPeriod from "@/models/fiscal-period"
 
 @Table({
   paranoid: false,
 })
-export class EmployeeBenefit extends Model<
+export class EmployeeBenefit extends BaseModel<
   InferAttributes<EmployeeBenefit>,
   InferCreationAttributes<EmployeeBenefit>
 > {
