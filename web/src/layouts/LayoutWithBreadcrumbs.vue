@@ -1,7 +1,7 @@
 <template>
   <div>
     <ExactingBreadcrumbs
-      class="pl-4 mt-n4 mx-n4 mb-3"
+      class="pl-4 mt-n4 mx-n4 mb-3 text-body-1 font-weight-bold"
       bg-color="yg-moss"
       color="white"
       :items="breadcrumbs"

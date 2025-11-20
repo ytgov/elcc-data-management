@@ -3,7 +3,7 @@
     :items="breadcrumbs"
     bg-color="#7A9A01"
     style="margin: -13px -16px 10px -16px"
-    class="pl-4 mb-4"
+    class="pl-4 mb-4 text-body-1 font-weight-bold"
     color="white"
     active-color="#fff"
   >
