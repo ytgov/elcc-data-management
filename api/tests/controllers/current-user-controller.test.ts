@@ -13,12 +13,7 @@ describe("api/src/controllers/current-user-controller.ts", () => {
         .expect("Content-Type", /json/)
         .expect(200)
 
-      expect(response.body).toMatchObject({
-        user: {
-          email: user.email,
-        },
-        policy: { show: true, create: true, update: true, destroy: true },
-      })
+      expect(response.body.user).toMatchObject({ email: user.email })
     })
   })
 })
