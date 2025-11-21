@@ -1,12 +1,12 @@
 import { DataTypes, sql } from "@sequelize/core"
 
-import type { Migration } from "@/db/umzug"
+import { type Migration } from "@/db/umzug"
 
-export const up: Migration = async ({ context: queryInterface }) => {
+export async function up({ context: queryInterface }: Migration) {
   await queryInterface.dropTable("centre_funding_periods")
 }
 
-export const down: Migration = async ({ context: queryInterface }) => {
+export async function down({ context: queryInterface }: Migration) {
   await queryInterface.createTable("centre_funding_periods", {
     id: {
       type: DataTypes.INTEGER,
