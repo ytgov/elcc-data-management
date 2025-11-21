@@ -33,7 +33,7 @@ export const migrator = new Umzug({
     glob: ["migrations/*.{ts,js}", { cwd: __dirname }],
     resolve: sequelizeAutoTransactionResolver,
   },
-  context: sequelize.getQueryInterface(),
+  context: sequelize.queryInterface,
   storage: new SequelizeStorage({
     sequelize,
     model: SequelizeMeta,
