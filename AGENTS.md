@@ -871,10 +871,38 @@ export default ShowSerializer
 
 ### Test Describe Blocks
 
-**Pattern:** Test describe blocks should reference the source file being tested, not the test file location.
+**Pattern:** Use nested describe blocks to organize tests by source file → class → method/route.
+
+**For Controllers:**
 
 ```typescript
-// Correct - references source location
+describe("api/src/controllers/users-controller.ts", () => {
+  describe("UsersController", () => {
+    let currentUser: User
+
+    beforeEach(async () => {
+      currentUser = await userFactory.create()
+      mockCurrentUser(currentUser)
+    })
+
+    describe("#index -> GET /api/users", () => {
+      test("returns users array", async () => {
+        // test implementation
+      })
+    })
+
+    describe("#show -> GET /api/users/:userId", () => {
+      test("returns a specific user", async () => {
+        // test implementation
+      })
+    })
+  })
+})
+```
+
+**For Models:**
+
+```typescript
 describe("api/src/models/funding-period.ts", () => {
   describe("FundingPeriod", () => {
     describe("#fiscalYear -> validation", () => {
@@ -882,14 +910,12 @@ describe("api/src/models/funding-period.ts", () => {
     })
   })
 })
-
-// Incorrect - references test location
-describe("api/tests/models/funding-period.test.ts", () => {
-  // ...
-})
 ```
 
-**Rationale:** The test file describes behavior of the source file, so the describe block should point to what's being tested, making it easier to navigate from test output to source code.
+**Rationale:**
+- First describe references the source file path for easy navigation from test output
+- Second describe groups tests by class/module name
+- Third describe identifies the method/action being tested with format `#methodName -> details`
 
 ### Test Assertions
 
