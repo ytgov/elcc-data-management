@@ -1,9 +1,8 @@
-import { DataTypes, type QueryInterface } from "@sequelize/core"
+import { DataTypes, sql } from "@sequelize/core"
 
-import { MssqlSimpleTypes } from "@/db/utils/mssql-simple-types"
+import { type Migration } from "@/db/umzug"
 
-export async function up(queryInterface: QueryInterface) {
-  throw new Error("Not implemented")
+export async function up({ context: queryInterface }: Migration) {
   await queryInterface.createTable("users", {
     id: {
       type: DataTypes.INTEGER,
@@ -21,19 +20,18 @@ export async function up(queryInterface: QueryInterface) {
       defaultValue: false,
     },
     created_at: {
-      type: MssqlSimpleTypes.DATETIME2(0),
+      type: "datetime2",
       allowNull: false,
-      defaultValue: MssqlSimpleTypes.NOW,
+      defaultValue: sql.fn("getutcdate"),
     },
     updated_at: {
-      type: MssqlSimpleTypes.DATETIME2(0),
+      type: "datetime2",
       allowNull: false,
-      defaultValue: MssqlSimpleTypes.NOW,
+      defaultValue: sql.fn("getutcdate"),
     },
   })
 }
 
-export async function down(queryInterface: QueryInterface) {
-  throw new Error("Not implemented")
+export async function down({ context: queryInterface }: Migration) {
   await queryInterface.dropTable("users")
 }

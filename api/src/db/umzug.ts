@@ -1,12 +1,13 @@
-import { Umzug, SequelizeStorage } from "umzug"
+import { Umzug, SequelizeStorage, MigrationParams } from "umzug"
 import { DataTypes, Model } from "@sequelize/core"
 import { Attribute, NotNull, PrimaryKey, Table } from "@sequelize/core/decorators-legacy"
+import { MsSqlQueryInterface } from "@sequelize/mssql"
 
 import fs from "fs"
 import path from "path"
 
+import logger from "@/utils/logger"
 import sequelize from "@/db/db-client"
-import * as models from "@/models"
 
 import { UmzugNullStorage } from "@/db/umzug-null-storage"
 import { sequelizeAutoTransactionResolver } from "@/db/utils/sequelize-auto-transaction-resolver"
@@ -32,7 +33,7 @@ export const migrator = new Umzug({
     glob: ["migrations/*.{ts,js}", { cwd: __dirname }],
     resolve: sequelizeAutoTransactionResolver,
   },
-  context: sequelize.queryInterface,
+  context: sequelize.getQueryInterface(),
   storage: new SequelizeStorage({
     sequelize,
     model: SequelizeMeta,
@@ -40,7 +41,7 @@ export const migrator = new Umzug({
     // has run in all environments.
     // timestamps: true,
   }),
-  logger: console,
+  logger,
   create: {
     folder: path.join(__dirname, "migrations"),
     template: (filepath) => {
@@ -56,9 +57,8 @@ export const seeder = new Umzug({
   migrations: {
     glob: [`seeds/${environment}/*.{ts,js}`, { cwd: __dirname }],
   },
-  context: models,
   storage: new UmzugNullStorage(),
-  logger: console,
+  logger,
   create: {
     folder: path.join(__dirname, "seeds", environment),
     template: (filepath) => {
@@ -69,5 +69,5 @@ export const seeder = new Umzug({
   },
 })
 
-export type Migration = typeof migrator._types.migration
-export type SeedMigration = typeof seeder._types.migration
+export type Migration = MigrationParams<MsSqlQueryInterface>
+export type SeedMigration = MigrationParams<never>
