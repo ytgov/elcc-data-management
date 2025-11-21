@@ -71,7 +71,9 @@ export const usersApi = {
   },
   async update(
     userId: number,
-    attributes: Partial<User>
+    attributes: Partial<User> & {
+      rolesAttributes?: RoleTypes[]
+    }
   ): Promise<{
     user: UserAsShow
     policy: UserPolicy

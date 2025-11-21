@@ -58,18 +58,18 @@
       </router-link>
       <span class="pl-3">
         <v-chip
-          v-if="isAdmin"
+          v-if="isSystemAdmin"
           title="Toggle user role"
           color="yg-moss"
-          @click="toggleUserRole"
+          @click="toggleSystemAdmin"
         >
-          Admin
+          System Admin
         </v-chip>
         <v-chip
           v-else
           title="Toggle user role"
           color="yg-twilight"
-          @click="toggleUserRole"
+          @click="toggleSystemAdmin"
         >
           User
         </v-chip>
@@ -97,7 +97,7 @@
           </v-list-item>
 
           <v-list-item
-            v-if="isAdmin"
+            v-if="isSystemAdmin"
             :to="{
               name: 'AdministrationPage',
             }"
@@ -133,11 +133,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue"
+import { computed, nextTick, onMounted, ref } from "vue"
 import { useAuth0 } from "@auth0/auth0-vue"
 
 import http from "@/api/http-client"
-import usersApi from "@/api/users-api"
+import usersApi, { RoleTypes } from "@/api/users-api"
 
 import useCurrentUser from "@/use/use-current-user"
 import useSnack from "@/use/use-snack"
@@ -145,7 +145,7 @@ import useSnack from "@/use/use-snack"
 const UNSET_RELEASE_TAG = "2024.01.10.0"
 
 const { logout } = useAuth0()
-const { currentUser, isAdmin, refresh, reset: resetCurrentUser } = useCurrentUser<true>()
+const { currentUser, isSystemAdmin, refresh, reset: resetCurrentUser } = useCurrentUser<true>()
 
 const releaseTag = ref(UNSET_RELEASE_TAG)
 
@@ -159,16 +159,22 @@ onMounted(async () => {
 const isLoading = ref(false)
 const snack = useSnack()
 
-async function toggleUserRole() {
+async function toggleSystemAdmin() {
   isLoading.value = true
 
   try {
+    const role = isSystemAdmin.value ? RoleTypes.USER : RoleTypes.SYSTEM_ADMINISTRATOR
     await usersApi.update(currentUser.value.id, {
-      isAdmin: !isAdmin.value, // TODO: switch to "role" based change
+      rolesAttributes: [
+        {
+          role,
+        },
+      ],
     })
     await refresh()
-    const newRole = isAdmin.value ? "Admin" : "User"
-    snack.success(`User role changed to ${newRole}`)
+
+    await nextTick()
+    snack.success(`User role is now ${role}`)
   } catch (error: unknown) {
     console.error(`Error toggling user role: ${error}`, { error })
     snack.error(`Failed to toggle user role: ${error}`)

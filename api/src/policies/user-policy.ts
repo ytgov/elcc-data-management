@@ -22,7 +22,15 @@ export class UserPolicy extends PolicyFactory(User) {
   }
 
   permittedAttributes(): Path[] {
-    const attributes = ["firstName", "lastName", "status", "isAdmin"]
+    const attributes = [
+      "firstName",
+      "lastName",
+      "status",
+      "isAdmin",
+      {
+        rolesAttributes: ["role"],
+      },
+    ]
 
     return attributes
   }

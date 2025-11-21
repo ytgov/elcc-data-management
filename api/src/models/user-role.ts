@@ -30,6 +30,9 @@ export enum RoleTypes {
   SYSTEM_ADMINISTRATOR = "System Administrator",
 }
 
+// TODO: switch to simplified roles style with users.roles files that is a string array
+// Use Sequelize get/set to parse to a regular array.
+// After that treat roles as an array everywhere in the codebase.
 @Table({
   paranoid: false,
 })
