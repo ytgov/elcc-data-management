@@ -1,4 +1,7 @@
 import { Umzug, SequelizeStorage } from "umzug"
+import { DataTypes, Model } from "@sequelize/core"
+import { Attribute, NotNull, PrimaryKey, Table } from "@sequelize/core/decorators-legacy"
+
 import fs from "fs"
 import path from "path"
 
@@ -8,6 +11,22 @@ import * as models from "@/models"
 import { UmzugNullStorage } from "@/db/umzug-null-storage"
 import { sequelizeAutoTransactionResolver } from "@/db/utils/sequelize-auto-transaction-resolver"
 
+// Create a custom SequelizeMeta model to avoid charset/collate options that are incompatible with MSSQL
+@Table({
+  tableName: "SequelizeMeta",
+  timestamps: false,
+  charset: undefined,
+  collate: undefined,
+})
+class SequelizeMeta extends Model {
+  @Attribute(DataTypes.STRING(255))
+  @PrimaryKey
+  @NotNull
+  declare name: string
+}
+
+sequelize.addModels([SequelizeMeta])
+
 export const migrator = new Umzug({
   migrations: {
     glob: ["migrations/*.{ts,js}", { cwd: __dirname }],
@@ -16,7 +35,7 @@ export const migrator = new Umzug({
   context: sequelize.queryInterface,
   storage: new SequelizeStorage({
     sequelize,
-    tableName: "SequelizeMeta",
+    model: SequelizeMeta,
     // FUTURE: 2023-10-28 enable this once api/src/db/migrations/2023.09.28T23.58.04.add-timestamp-columns-to-sequelize-meta-table.ts
     // has run in all environments.
     // timestamps: true,
