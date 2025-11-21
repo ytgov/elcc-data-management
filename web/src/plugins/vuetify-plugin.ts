@@ -57,6 +57,14 @@ export default createVuetify({
     global: {
       ripple: true,
     },
+    VDateInput: {
+      variant: "outlined",
+      density: "comfortable",
+      color: "primary",
+      prependIcon: "",
+      appendInnerIcon: "mdi-calendar",
+      inputFormat: "yyyy-mm-dd",
+    },
     VTextField: {
       variant: "outlined",
       density: "comfortable",
