@@ -15,7 +15,6 @@ import {
   fundingPeriodRouter,
   migrationRouter,
   submissionLineRouter,
-  userRouter,
 } from "@/routes"
 
 import {
@@ -44,7 +43,6 @@ router.route("/_status").get((_req: Request, res: Response) => {
 })
 
 // TODO: replace legacy routes with newer style
-router.use("/api/user", userRouter)
 router.use("/api/migrate", migrationRouter)
 router.use("/api/centre", checkJwt, autheticateAndLoadUser, centreRouter)
 router.use("/api/funding-period", fundingPeriodRouter)
