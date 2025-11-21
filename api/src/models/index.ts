@@ -12,7 +12,6 @@ import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
 import Log from "@/models/log"
 import Payment from "@/models/payment"
 import User from "@/models/user"
-import UserRole from "@/models/user-role"
 import WageEnhancement from "@/models/wage-enhancement"
 
 db.addModels([
@@ -26,7 +25,6 @@ db.addModels([
   Log,
   Payment,
   User,
-  UserRole,
   WageEnhancement,
 ])
 
@@ -40,7 +38,6 @@ FundingSubmissionLineJson.establishScopes()
 Log.establishScopes()
 Payment.establishScopes()
 User.establishScopes()
-UserRole.establishScopes()
 WageEnhancement.establishScopes()
 
 export {
@@ -54,7 +51,6 @@ export {
   Log,
   Payment,
   User,
-  UserRole,
   WageEnhancement,
 }
 
