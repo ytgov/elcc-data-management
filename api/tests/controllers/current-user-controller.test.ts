@@ -13,7 +13,9 @@ describe("api/src/controllers/current-user-controller.ts", () => {
         .expect("Content-Type", /json/)
         .expect(200)
 
-      expect(response.body.user).toMatchObject({ email: user.email })
+      expect(response.body.user).toMatchObject({
+        email: user.email,
+      })
     })
   })
 })

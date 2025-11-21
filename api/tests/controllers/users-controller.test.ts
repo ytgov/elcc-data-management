@@ -38,7 +38,10 @@ describe("api/src/controllers/users-controller.ts", () => {
         .expect("Content-Type", /json/)
         .expect(200)
 
-      expect(response.body.user).toMatchObject({ id: user.id, email: user.email })
+      expect(response.body.user).toMatchObject({
+        id: user.id,
+        email: user.email,
+      })
     })
 
     test("returns 404 when user not found", async () => {
@@ -68,7 +71,10 @@ describe("api/src/controllers/users-controller.ts", () => {
         .expect("Content-Type", /json/)
         .expect(201)
 
-      expect(response.body.user).toMatchObject({ email: userData.email, firstName: userData.firstName })
+      expect(response.body.user).toMatchObject({
+        email: userData.email,
+        firstName: userData.firstName,
+      })
 
       expect(await User.findOne({ where: { email: userData.email } })).not.toBeNull()
     })
@@ -88,7 +94,10 @@ describe("api/src/controllers/users-controller.ts", () => {
         .expect("Content-Type", /json/)
         .expect(200)
 
-      expect(response.body.user).toMatchObject({ firstName: updates.firstName, lastName: updates.lastName })
+      expect(response.body.user).toMatchObject({
+        firstName: updates.firstName,
+        lastName: updates.lastName,
+      })
 
       await user.reload()
       expect(user).toMatchObject(updates)

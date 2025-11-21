@@ -891,6 +891,23 @@ describe("api/tests/models/funding-period.test.ts", () => {
 
 **Rationale:** The test file describes behavior of the source file, so the describe block should point to what's being tested, making it easier to navigate from test output to source code.
 
+### Test Assertions
+
+**Pattern:** Use multi-line formatting for object matchers, with one property per line.
+
+```typescript
+// Correct - multi-line with one property per line
+expect(response.body.user).toMatchObject({
+  id: user.id,
+  email: user.email,
+})
+
+// Incorrect - single line
+expect(response.body.user).toMatchObject({ id: user.id, email: user.email })
+```
+
+**Rationale:** Multi-line formatting is more readable, easier to modify, and follows the general principle of one thing per line.
+
 ---
 
 ## Authentication and Authorization
