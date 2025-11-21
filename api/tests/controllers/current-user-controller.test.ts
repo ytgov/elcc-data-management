@@ -14,8 +14,10 @@ describe("api/src/controllers/current-user-controller.ts", () => {
         .expect(200)
 
       expect(response.body).toMatchObject({
-        user: { email: user.email },
-        policy: expect.any(Object),
+        user: {
+          email: user.email,
+        },
+        policy: { show: true, create: true, update: true, destroy: true },
       })
     })
   })

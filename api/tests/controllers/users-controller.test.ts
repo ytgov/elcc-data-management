@@ -40,7 +40,7 @@ describe("api/src/controllers/users-controller.ts", () => {
 
       expect(response.body).toMatchObject({
         user: { id: user.id, email: user.email },
-        policy: expect.any(Object),
+        policy: { show: true, create: true, update: true, destroy: true },
       })
     })
 
@@ -73,7 +73,7 @@ describe("api/src/controllers/users-controller.ts", () => {
 
       expect(response.body).toMatchObject({
         user: { email: userData.email, firstName: userData.firstName },
-        policy: expect.any(Object),
+        policy: { show: true, create: true, update: true, destroy: true },
       })
 
       expect(await User.findOne({ where: { email: userData.email } })).not.toBeNull()
@@ -96,7 +96,7 @@ describe("api/src/controllers/users-controller.ts", () => {
 
       expect(response.body).toMatchObject({
         user: { firstName: updates.firstName, lastName: updates.lastName },
-        policy: expect.any(Object),
+        policy: { show: true, create: true, update: true, destroy: true },
       })
 
       await user.reload()
