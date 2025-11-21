@@ -893,7 +893,33 @@ describe("api/tests/models/funding-period.test.ts", () => {
 
 ### Test Assertions
 
-**Pattern:** Use multi-line formatting for object matchers, with one property per line.
+**Pattern 1:** One expect per test. Split tests with multiple assertions into separate test cases.
+
+```typescript
+// Correct - separate tests for each assertion
+describe("POST /api/users", () => {
+  test("returns the created user", async () => {
+    const response = await request().post("/api/users").send(userData)
+
+    expect(response.body.user).toMatchObject({ email: userData.email })
+  })
+
+  test("persists the user to the database", async () => {
+    await request().post("/api/users").send(userData)
+
+    expect(await User.findOne({ where: { email: userData.email } })).not.toBeNull()
+  })
+})
+
+// Incorrect - multiple expects in one test
+test("creates a new user", async () => {
+  const response = await request().post("/api/users").send(userData)
+  expect(response.body.user).toMatchObject({ email: userData.email })
+  expect(await User.findOne({ where: { email: userData.email } })).not.toBeNull()
+})
+```
+
+**Pattern 2:** Use multi-line formatting for object matchers, with one property per line.
 
 ```typescript
 // Correct - multi-line with one property per line
@@ -906,7 +932,9 @@ expect(response.body.user).toMatchObject({
 expect(response.body.user).toMatchObject({ id: user.id, email: user.email })
 ```
 
-**Rationale:** Multi-line formatting is more readable, easier to modify, and follows the general principle of one thing per line.
+**Rationale:**
+- One expect per test makes failures easier to diagnose and tests more focused
+- Multi-line formatting is more readable and follows the principle of one thing per line
 
 ---
 

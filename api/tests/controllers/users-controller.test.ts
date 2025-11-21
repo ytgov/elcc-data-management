@@ -14,7 +14,7 @@ describe("api/src/controllers/users-controller.ts", () => {
   })
 
   describe("GET /api/users", () => {
-    test("returns a list of users", async () => {
+    test("returns users array", async () => {
       await userFactory.createList(2)
 
       const response = await request()
@@ -22,9 +22,17 @@ describe("api/src/controllers/users-controller.ts", () => {
         .expect("Content-Type", /json/)
         .expect(200)
 
-      expect(response.body).toHaveProperty("users")
-      expect(response.body).toHaveProperty("totalCount")
       expect(response.body.users.length).toBeGreaterThanOrEqual(2)
+    })
+
+    test("returns total count", async () => {
+      await userFactory.createList(2)
+
+      const response = await request()
+        .get("/api/users")
+        .expect("Content-Type", /json/)
+        .expect(200)
+
       expect(response.body.totalCount).toBeGreaterThanOrEqual(2)
     })
   })
@@ -55,7 +63,7 @@ describe("api/src/controllers/users-controller.ts", () => {
   })
 
   describe("POST /api/users", () => {
-    test("creates a new user", async () => {
+    test("returns the created user", async () => {
       const userData = {
         email: "newuser@example.com",
         sub: "auth0|newuser123",
@@ -75,13 +83,30 @@ describe("api/src/controllers/users-controller.ts", () => {
         email: userData.email,
         firstName: userData.firstName,
       })
+    })
+
+    test("persists the user to the database", async () => {
+      const userData = {
+        email: "anotheruser@example.com",
+        sub: "auth0|anotheruser123",
+        firstName: "Another",
+        lastName: "User",
+        roles: [User.Roles.USER],
+        status: User.Status.ACTIVE,
+      }
+
+      await request()
+        .post("/api/users")
+        .send(userData)
+        .expect("Content-Type", /json/)
+        .expect(201)
 
       expect(await User.findOne({ where: { email: userData.email } })).not.toBeNull()
     })
   })
 
   describe("PATCH /api/users/:userId", () => {
-    test("updates an existing user", async () => {
+    test("returns the updated user", async () => {
       const user = await userFactory.create()
       const updates = {
         firstName: "Updated",
@@ -98,6 +123,20 @@ describe("api/src/controllers/users-controller.ts", () => {
         firstName: updates.firstName,
         lastName: updates.lastName,
       })
+    })
+
+    test("persists the updates to the database", async () => {
+      const user = await userFactory.create()
+      const updates = {
+        firstName: "Updated",
+        lastName: "Name",
+      }
+
+      await request()
+        .patch(`/api/users/${user.id}`)
+        .send(updates)
+        .expect("Content-Type", /json/)
+        .expect(200)
 
       await user.reload()
       expect(user).toMatchObject(updates)
@@ -115,13 +154,18 @@ describe("api/src/controllers/users-controller.ts", () => {
   })
 
   describe("DELETE /api/users/:userId", () => {
-    test("deletes an existing user", async () => {
+    test("returns 204 status", async () => {
+      const user = await userFactory.create()
+
+      await request().delete(`/api/users/${user.id}`).expect(204)
+    })
+
+    test("removes user from database", async () => {
       const user = await userFactory.create()
 
       await request().delete(`/api/users/${user.id}`).expect(204)
 
-      const deletedUser = await User.findByPk(user.id)
-      expect(deletedUser).toBeNull()
+      expect(await User.findByPk(user.id)).toBeNull()
     })
 
     test("returns 404 when user not found", async () => {
