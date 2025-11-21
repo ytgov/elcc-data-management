@@ -27,7 +27,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue"
 
-import { useUserStore } from "@/store/UserStore"
 import { useCentreStore } from "@/modules/centre/store"
 import { useSubmissionLinesStore } from "@/modules/submission-lines/store"
 import useBreadcrumbs from "@/use/use-breadcrumbs"
@@ -36,7 +35,6 @@ import PageLoader from "@/components/common/PageLoader.vue"
 import DefaultAppBar from "@/components/layouts/DefaultAppBar.vue"
 import ExactingBreadcrumbs from "@/components/layouts/ExactingBreadcrumbs.vue"
 
-const userStore = useUserStore()
 const centreStore = useCentreStore()
 const submissionLinesStore = useSubmissionLinesStore()
 
@@ -44,7 +42,6 @@ const isLoading = ref(true)
 
 onMounted(async () => {
   await Promise.all([
-    userStore.initialize(),
     centreStore.initialize(),
     submissionLinesStore.initialize(),
   ])
