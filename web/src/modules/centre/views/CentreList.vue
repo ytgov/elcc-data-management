@@ -16,7 +16,10 @@
           <v-text-field
             v-model="search"
             label="Search"
-          ></v-text-field>
+            class="ma-3"
+            hide-details
+          />
+
           <v-data-table
             density="comfortable"
             :headers="[
