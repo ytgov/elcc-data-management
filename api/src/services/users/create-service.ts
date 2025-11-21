@@ -40,9 +40,7 @@ export class CreateService extends BaseService {
       lastName,
       status: statusOrFallback,
     })
-    return user.reload({
-      include: ["roles"],
-    })
+    return user.reload()
   }
 }
 
