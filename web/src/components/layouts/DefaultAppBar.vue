@@ -137,7 +137,7 @@ import { computed, nextTick, onMounted, ref } from "vue"
 import { useAuth0 } from "@auth0/auth0-vue"
 
 import http from "@/api/http-client"
-import usersApi, { RoleTypes } from "@/api/users-api"
+import usersApi, { UserRoles } from "@/api/users-api"
 
 import useCurrentUser from "@/use/use-current-user"
 import useSnack from "@/use/use-snack"
@@ -163,7 +163,7 @@ async function toggleSystemAdmin() {
   isLoading.value = true
 
   try {
-    const role = isSystemAdmin.value ? RoleTypes.USER : RoleTypes.SYSTEM_ADMINISTRATOR
+    const role = isSystemAdmin.value ? UserRoles.USER : UserRoles.SYSTEM_ADMINISTRATOR
     await usersApi.update(currentUser.value.id, {
       roles: [role],
     })
