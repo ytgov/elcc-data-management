@@ -1,10 +1,9 @@
 import { computed, reactive, toRefs } from "vue"
 import { DateTime } from "luxon"
 
-import { RoleTypes, type UserRole } from "@/api/user-roles-api"
-import currentUserApi, { type UserAsShow } from "@/api/current-user-api"
+import currentUserApi, { UserRoles, type UserAsShow } from "@/api/current-user-api"
 
-export { RoleTypes, type UserRole, type UserAsShow }
+export { UserRoles, type UserAsShow }
 
 // TODO: consider sending this with every api request?
 export const CURRENT_USERS_TIMEZONE = DateTime.local().zoneName
@@ -33,9 +32,9 @@ export function useCurrentUser<IsLoaded extends boolean = false>() {
   const isReady = computed(() => state.isCached && !state.isLoading && !state.isErrored)
 
   const isSystemAdmin = computed(() =>
-    state.currentUser?.roles?.some((role) => role.role === RoleTypes.SYSTEM_ADMINISTRATOR)
+    state.currentUser?.roles?.includes(UserRoles.SYSTEM_ADMINISTRATOR)
   )
-  const isAdmin = computed(() => state.currentUser?.isAdmin || isSystemAdmin.value)
+  const isAdmin = computed(() => isSystemAdmin.value)
 
   async function fetch(): Promise<UserAsShow> {
     state.isLoading = true

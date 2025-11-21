@@ -165,11 +165,7 @@ async function toggleSystemAdmin() {
   try {
     const role = isSystemAdmin.value ? RoleTypes.USER : RoleTypes.SYSTEM_ADMINISTRATOR
     await usersApi.update(currentUser.value.id, {
-      rolesAttributes: [
-        {
-          role,
-        },
-      ],
+      roles: [role],
     })
     await refresh()
 

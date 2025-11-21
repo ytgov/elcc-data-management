@@ -1,20 +1,16 @@
 import http from "@/api/http-client"
 import { type Policy } from "@/api/base-api"
-import { RoleTypes, type UserRole } from "@/api/user-roles-api"
-import { type User } from "@/api/users-api"
+import { UserRoles, type User } from "@/api/users-api"
 
-export { RoleTypes, type UserRole, type User }
+export { UserRoles }
 
 export type UserAsShow = User & {
   ynetId: string
   directoryId: string
-
-  // Associations
-  roles: UserRole[]
 }
 
 export const currentUserApi = {
-  RoleTypes,
+  UserRoles,
 
   async get(): Promise<{
     user: UserAsShow
