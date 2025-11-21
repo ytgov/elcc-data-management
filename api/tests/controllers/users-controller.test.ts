@@ -15,8 +15,7 @@ describe("api/src/controllers/users-controller.ts", () => {
 
   describe("GET /api/users", () => {
     test("returns a list of users", async () => {
-      const user1 = await userFactory.create()
-      const user2 = await userFactory.create()
+      await userFactory.createList(2)
 
       const response = await request()
         .get("/api/users")
@@ -39,10 +38,10 @@ describe("api/src/controllers/users-controller.ts", () => {
         .expect("Content-Type", /json/)
         .expect(200)
 
-      expect(response.body).toHaveProperty("user")
-      expect(response.body).toHaveProperty("policy")
-      expect(response.body.user.id).toBe(user.id)
-      expect(response.body.user.email).toBe(user.email)
+      expect(response.body).toMatchObject({
+        user: { id: user.id, email: user.email },
+        policy: expect.any(Object),
+      })
     })
 
     test("returns 404 when user not found", async () => {
@@ -72,13 +71,12 @@ describe("api/src/controllers/users-controller.ts", () => {
         .expect("Content-Type", /json/)
         .expect(201)
 
-      expect(response.body).toHaveProperty("user")
-      expect(response.body).toHaveProperty("policy")
-      expect(response.body.user.email).toBe(userData.email)
-      expect(response.body.user.firstName).toBe(userData.firstName)
+      expect(response.body).toMatchObject({
+        user: { email: userData.email, firstName: userData.firstName },
+        policy: expect.any(Object),
+      })
 
-      const createdUser = await User.findOne({ where: { email: userData.email } })
-      expect(createdUser).not.toBeNull()
+      expect(await User.findOne({ where: { email: userData.email } })).not.toBeNull()
     })
   })
 
@@ -96,14 +94,13 @@ describe("api/src/controllers/users-controller.ts", () => {
         .expect("Content-Type", /json/)
         .expect(200)
 
-      expect(response.body).toHaveProperty("user")
-      expect(response.body).toHaveProperty("policy")
-      expect(response.body.user.firstName).toBe(updates.firstName)
-      expect(response.body.user.lastName).toBe(updates.lastName)
+      expect(response.body).toMatchObject({
+        user: { firstName: updates.firstName, lastName: updates.lastName },
+        policy: expect.any(Object),
+      })
 
       await user.reload()
-      expect(user.firstName).toBe(updates.firstName)
-      expect(user.lastName).toBe(updates.lastName)
+      expect(user).toMatchObject(updates)
     })
 
     test("returns 404 when user not found", async () => {

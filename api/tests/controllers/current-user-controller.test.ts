@@ -13,9 +13,10 @@ describe("api/src/controllers/current-user-controller.ts", () => {
         .expect("Content-Type", /json/)
         .expect(200)
 
-      expect(response.body).toHaveProperty("user")
-      expect(response.body).toHaveProperty("policy")
-      expect(response.body.user.email).toBe(user.email)
+      expect(response.body).toMatchObject({
+        user: { email: user.email },
+        policy: expect.any(Object),
+      })
     })
   })
 })
