@@ -1,9 +1,9 @@
 <template>
+  <!-- @deprecated Use LayoutWithBreadcrumbs with ExactingBreadcrumbs instead -->
   <v-breadcrumbs
     :items="breadcrumbs"
     bg-color="#7A9A01"
-    style="margin: -13px -16px 10px -16px"
-    class="pl-4 mb-4 text-body-1 font-weight-bold"
+    class="pl-4 mb-4 mb-2 mt-n3 mx-n4 text-body-1 font-weight-bold"
     color="white"
     active-color="#fff"
   >
@@ -131,3 +131,10 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+/* Breadcrumb disabled state styling */
+:deep(.v-breadcrumbs-item--disabled) {
+  opacity: 0.7 !important;
+}
+</style>

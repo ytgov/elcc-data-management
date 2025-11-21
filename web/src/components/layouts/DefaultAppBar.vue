@@ -4,7 +4,7 @@
     color="#fff"
     flat
     height="70"
-    style="left: 0; border-bottom: 3px #f3b228 solid"
+    style="left: 0; border-bottom: 3px #f3b228 solid; padding-bottom: 3px"
   >
     <router-link
       :to="{
