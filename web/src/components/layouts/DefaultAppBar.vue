@@ -56,19 +56,20 @@
       >
         {{ displayName }}
       </router-link>
-      <span
-        class="pl-3"
-        @click="toggleAdmin"
-      >
+      <span class="pl-3">
         <v-chip
           v-if="isAdmin"
+          title="Toggle user role"
           color="yg-moss"
+          @click="toggleUserRole"
         >
           Admin
         </v-chip>
         <v-chip
           v-else
+          title="Toggle user role"
           color="yg-twilight"
+          @click="toggleUserRole"
         >
           User
         </v-chip>
@@ -136,14 +137,15 @@ import { computed, onMounted, ref } from "vue"
 import { useAuth0 } from "@auth0/auth0-vue"
 
 import http from "@/api/http-client"
+import usersApi from "@/api/users-api"
 
 import useCurrentUser from "@/use/use-current-user"
-import { useUserStore } from "@/store/UserStore"
+import useSnack from "@/use/use-snack"
 
 const UNSET_RELEASE_TAG = "2024.01.10.0"
 
 const { logout } = useAuth0()
-const { currentUser, isAdmin, reset: resetCurrentUser } = useCurrentUser<true>()
+const { currentUser, isAdmin, refresh, reset: resetCurrentUser } = useCurrentUser<true>()
 
 const releaseTag = ref(UNSET_RELEASE_TAG)
 
@@ -154,10 +156,25 @@ onMounted(async () => {
   await fetchVersion()
 })
 
-const userStore = useUserStore()
+const isLoading = ref(false)
+const snack = useSnack()
 
-async function toggleAdmin() {
-  userStore.toggleAdmin()
+async function toggleUserRole() {
+  isLoading.value = true
+
+  try {
+    await usersApi.update(currentUser.value.id, {
+      isAdmin: !isAdmin.value, // TODO: switch to "role" based change
+    })
+    await refresh()
+    const newRole = isAdmin.value ? "Admin" : "User"
+    snack.success(`User role changed to ${newRole}`)
+  } catch (error: unknown) {
+    console.error(`Error toggling user role: ${error}`, { error })
+    snack.error(`Failed to toggle user role: ${error}`)
+  } finally {
+    isLoading.value = false
+  }
 }
 
 function signOut() {
