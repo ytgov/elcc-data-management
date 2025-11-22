@@ -1,5 +1,5 @@
 <template>
-  <v-card :elevation="elevation">
+  <v-card>
     <v-form
       ref="form"
       :model-value="modelValue"
@@ -62,10 +62,6 @@ defineProps({
   dividerClass: {
     type: [String, Object, Array],
     default: "mb-3",
-  },
-  elevation: {
-    type: [String, Number],
-    default: 0,
   },
 })
 

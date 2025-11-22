@@ -1,5 +1,5 @@
 <template>
-  <v-card :elevation="elevation">
+  <v-card>
     <v-card-title class="d-flex flex-column flex-md-row justify-md-space-between align-md-end">
       <slot name="header">
         <component
@@ -50,10 +50,6 @@ defineProps({
   dividerClass: {
     type: [String, Object, Array],
     default: "mb-3",
-  },
-  elevation: {
-    type: [String, Number],
-    default: 0,
   },
 })
 </script>
