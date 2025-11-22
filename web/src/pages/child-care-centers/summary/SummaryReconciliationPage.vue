@@ -290,10 +290,10 @@ async function buildEmployeeValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjus
     const linesForMonth = employeeBenefits.value.find((b) => b.fiscalPeriodId == fiscalPeriod.id)
 
     if (!isNil(linesForMonth)) {
-      if (linesForMonth.grossPayrollMonthlyActual > 0) {
+      if (Number(linesForMonth.grossPayrollMonthlyActual) > 0) {
         let actGrossAmount =
-          linesForMonth.grossPayrollMonthlyActual * linesForMonth.costCapPercentage
-        let actEmployerAmount = linesForMonth.employerCostActual
+          Number(linesForMonth.grossPayrollMonthlyActual) * Number(linesForMonth.costCapPercentage)
+        let actEmployerAmount = Number(linesForMonth.employerCostActual)
         employee.amountInCents = dollarsToCents(Math.min(actGrossAmount, actEmployerAmount))
       } else {
         employee.amountInCents = 0
@@ -316,8 +316,8 @@ function injectEmployeeBenefitMonthlyCost(expense: Adjustment, month: string): v
   const { employerCostActual, grossPayrollMonthlyActual, costCapPercentage } =
     employeeBenefitForMonth
   const actualPaidAmount = Math.min(
-    employerCostActual,
-    grossPayrollMonthlyActual * costCapPercentage
+    Number(employerCostActual),
+    Number(grossPayrollMonthlyActual) * Number(costCapPercentage)
   )
   expense.amountInCents += dollarsToCents(actualPaidAmount)
 }
