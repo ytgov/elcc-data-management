@@ -1,38 +1,44 @@
 <template>
-  <BaseCard show-header>
-    <template #left>
+  <HeaderActionsCard title="Users">
+    <template #header>
       <v-text-field
         v-model="search"
         label="Search"
-        single-line
-        hide-details
         append-inner-icon="mdi-magnify"
         density="compact"
-        class="ml-2"
-      ></v-text-field>
+        hide-details
+      />
     </template>
-    <template #right>
+    <template
+      v-if="isSystemAdmin"
+      #header-actions
+    >
       <v-btn
         color="primary"
-        size="small"
-        @click="openUserCreationDialog"
-        >New User</v-btn
+        :to="{
+          name: 'administration/users/UserNewPage',
+        }"
       >
+        <v-icon class="mr-3">mdi-plus</v-icon>
+        Add User
+      </v-btn>
     </template>
 
     <UsersDataTableServer :filters="usersFilters" />
-  </BaseCard>
+  </HeaderActionsCard>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from "vue"
 
 import useBreadcrumbs from "@/use/use-breadcrumbs"
+import useCurrentUser from "@/use/use-current-user"
 import { type UserFiltersOptions } from "@/use/use-users"
 
-import BaseCard from "@/components/BaseCard.vue"
+import HeaderActionsCard from "@/components/common/HeaderActionsCard.vue"
 import UsersDataTableServer from "@/components/users/UsersDataTableServer.vue"
 
+const { isSystemAdmin } = useCurrentUser()
 const search = ref("")
 
 const usersFilters = computed(() => {
@@ -45,11 +51,7 @@ const usersFilters = computed(() => {
   return filters
 })
 
-function openUserCreationDialog() {
-  alert("TODO: implement user creation")
-}
-
-useBreadcrumbs("Users", [
+const breadcrumbs = computed(() => [
   {
     title: "Administration",
     to: {
@@ -63,4 +65,6 @@ useBreadcrumbs("Users", [
     },
   },
 ])
+
+useBreadcrumbs("Users", breadcrumbs)
 </script>
