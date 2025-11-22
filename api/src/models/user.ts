@@ -125,7 +125,7 @@ export class User extends BaseModel<InferAttributes<User>, InferCreationAttribut
     return [this.firstName, this.lastName].filter(Boolean).join(" ")
   }
 
-  get isSystemAdministrator(): NonAttribute<boolean> {
+  get isSystemAdmin(): NonAttribute<boolean> {
     return this.roles.includes(UserRoles.SYSTEM_ADMINISTRATOR)
   }
 
