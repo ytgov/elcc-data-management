@@ -25,6 +25,12 @@ const routes = [
         props: true,
       },
       {
+        path: "administration/users/:userId/edit",
+        name: "administration/users/UserEditPage",
+        component: () => import("@/pages/administration/users/UserEditPage.vue"),
+        props: true,
+      },
+      {
         path: "administration/funding-periods",
         name: "administration/FundingPeriodsPage",
         component: () => import("@/pages/administration/AdministrationFundingPeriodsPage.vue"),
