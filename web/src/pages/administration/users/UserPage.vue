@@ -52,7 +52,7 @@
         >
           <DescriptionElement
             label="System Admin"
-            :model-value="user.isAdmin ? 'Yes' : 'No'"
+            :model-value="isSystemAdmin ? 'Yes' : 'No'"
             vertical
           />
         </v-col>
@@ -79,7 +79,7 @@ import { computed, useTemplateRef } from "vue"
 import { isNil } from "lodash"
 
 import useBreadcrumbs from "@/use/use-breadcrumbs"
-import useUser from "@/use/use-user"
+import useUser, { UserRoles } from "@/use/use-user"
 
 import DescriptionElement from "@/components/common/DescriptionElement.vue"
 import PageLoader from "@/components/common/PageLoader.vue"
@@ -92,6 +92,7 @@ const props = defineProps<{
 const userIdAsNumber = computed(() => parseInt(props.userId))
 
 const { user } = useUser(userIdAsNumber)
+const isSystemAdmin = computed(() => user.value?.roles.includes(UserRoles.SYSTEM_ADMINISTRATOR))
 
 const userEditorRef = useTemplateRef("userEditorRef")
 
