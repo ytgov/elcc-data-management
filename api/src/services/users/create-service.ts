@@ -18,10 +18,6 @@ export class CreateService extends BaseService {
       throw new Error("Email is required")
     }
 
-    if (isNil(sub)) {
-      throw new Error("Auth0 Subject is required")
-    }
-
     if (isNil(firstName)) {
       throw new Error("First name is required")
     }
@@ -30,12 +26,13 @@ export class CreateService extends BaseService {
       throw new Error("Last name is required")
     }
 
+    const auth0SubjectOrFallback = sub || `pending_auth0_subject_for_${email}`
     const statusOrFallback = status || User.Status.ACTIVE
 
     const user = await User.create({
       ...optionalAttributes,
       email,
-      sub,
+      sub: auth0SubjectOrFallback,
       firstName,
       lastName,
       status: statusOrFallback,
