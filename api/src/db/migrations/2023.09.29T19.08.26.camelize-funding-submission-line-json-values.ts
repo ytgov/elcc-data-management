@@ -1,7 +1,7 @@
 import { QueryTypes, sql } from "@sequelize/core"
 import { mapKeys, camelCase, snakeCase } from "lodash"
 
-import type { Migration } from "@/db/umzug"
+import { type Migration } from "@/db/umzug"
 
 function safeJsonParse<T>(values: string): T[] {
   try {
@@ -18,7 +18,7 @@ function safeJsonParse<T>(values: string): T[] {
   }
 }
 
-export const up: Migration = async ({ context: queryInterface }) => {
+export async function up({ context: queryInterface }: Migration) {
   const fundingSubmissionLineJsons = await queryInterface.sequelize.query<{
     id: number
     values: string
@@ -63,7 +63,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
   return Promise.all(promises)
 }
 
-export const down: Migration = async ({ context: queryInterface }) => {
+export async function down({ context: queryInterface }: Migration) {
   const fundingSubmissionLineJsons = await queryInterface.sequelize.query<{
     id: number
     values: string

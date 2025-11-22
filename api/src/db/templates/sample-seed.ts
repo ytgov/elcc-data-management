@@ -1,11 +1,11 @@
-import type { SeedMigration } from "@/db/umzug"
+import { CreationAttributes } from "@sequelize/core"
+import { isNil } from "lodash"
 
-export const up: SeedMigration = async ({ context: { Centre } }) => {
-  await Centre.findOrCreate({
-    where: {
-      name: "Grow with Joy 2nd",
-    },
-    defaults: {
+import { Centre } from "@/models"
+
+export async function up() {
+  const centresAttributes: CreationAttributes<Centre>[] = [
+    {
       name: "Grow with Joy 2nd",
       license: "123",
       community: "Whitehorse",
@@ -16,13 +16,8 @@ export const up: SeedMigration = async ({ context: { Centre } }) => {
       licensedFor: 19,
       lastSubmission: new Date("2019-01-01"),
     },
-  })
-  await Centre.findOrCreate({
-    where: {
+    {
       name: "Happy Hearts Preschool",
-    },
-    defaults: {
-      name: "Grow with Joy 2nd",
       license: "456",
       community: "Whitehorse",
       region: Centre.Regions.WHITEHORSE,
@@ -32,10 +27,22 @@ export const up: SeedMigration = async ({ context: { Centre } }) => {
       licensedFor: 25,
       lastSubmission: new Date("2019-01-01"),
     },
-  })
+  ]
+
+  for (const centreAttributes of centresAttributes) {
+    const centre = await Centre.findOne({
+      where: {
+        name: centreAttributes.name,
+      },
+    })
+
+    if (isNil(centre)) {
+      await Centre.create(centreAttributes)
+    }
+  }
 }
 
-export const down: SeedMigration = async () => {
+export async function down() {
   // this method needs to exist, but does not need to be implemented.
   // Seeds should be idempotent.
 }

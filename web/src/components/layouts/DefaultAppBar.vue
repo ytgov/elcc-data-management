@@ -4,7 +4,7 @@
     color="#fff"
     flat
     height="70"
-    style="left: 0; border-bottom: 3px #f3b228 solid"
+    style="left: 0; border-bottom: 3px #f3b228 solid; padding-bottom: 3px"
   >
     <router-link
       :to="{
@@ -56,19 +56,20 @@
       >
         {{ displayName }}
       </router-link>
-      <span
-        class="pl-3"
-        @click="toggleAdmin"
-      >
+      <span class="pl-3">
         <v-chip
-          v-if="isAdmin"
-          color="yg_moss"
+          v-if="isSystemAdmin"
+          title="Toggle user role"
+          color="yg-moss"
+          @click="toggleSystemAdmin"
         >
-          Admin
+          System Admin
         </v-chip>
         <v-chip
           v-else
-          color="yg_twilight"
+          title="Toggle user role"
+          color="yg-twilight"
+          @click="toggleSystemAdmin"
         >
           User
         </v-chip>
@@ -96,7 +97,7 @@
           </v-list-item>
 
           <v-list-item
-            v-if="isAdmin"
+            v-if="isSystemAdmin"
             :to="{
               name: 'AdministrationPage',
             }"
@@ -132,18 +133,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue"
+import { computed, nextTick, onMounted, ref } from "vue"
 import { useAuth0 } from "@auth0/auth0-vue"
 
 import http from "@/api/http-client"
+import usersApi, { UserRoles } from "@/api/users-api"
 
 import useCurrentUser from "@/use/use-current-user"
-import { useUserStore } from "@/store/UserStore"
+import useSnack from "@/use/use-snack"
 
 const UNSET_RELEASE_TAG = "2024.01.10.0"
 
 const { logout } = useAuth0()
-const { currentUser, isAdmin, reset: resetCurrentUser } = useCurrentUser<true>()
+const { currentUser, isSystemAdmin, refresh, reset: resetCurrentUser } = useCurrentUser<true>()
 
 const releaseTag = ref(UNSET_RELEASE_TAG)
 
@@ -154,10 +156,27 @@ onMounted(async () => {
   await fetchVersion()
 })
 
-const userStore = useUserStore()
+const isLoading = ref(false)
+const snack = useSnack()
 
-async function toggleAdmin() {
-  userStore.toggleAdmin()
+async function toggleSystemAdmin() {
+  isLoading.value = true
+
+  try {
+    const role = isSystemAdmin.value ? UserRoles.USER : UserRoles.SYSTEM_ADMINISTRATOR
+    await usersApi.update(currentUser.value.id, {
+      roles: [role],
+    })
+    await refresh()
+
+    await nextTick()
+    snack.success(`User role is now ${role}`)
+  } catch (error: unknown) {
+    console.error(`Error toggling user role: ${error}`, { error })
+    snack.error(`Failed to toggle user role: ${error}`)
+  } finally {
+    isLoading.value = false
+  }
 }
 
 function signOut() {

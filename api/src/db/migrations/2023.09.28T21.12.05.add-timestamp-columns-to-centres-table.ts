@@ -1,7 +1,7 @@
-import type { Migration } from "@/db/umzug"
+import { type Migration } from "@/db/umzug"
 import { MssqlSimpleTypes } from "@/db/utils/mssql-simple-types"
 
-export const up: Migration = async ({ context: queryInterface }) => {
+export async function up({ context: queryInterface }: Migration) {
   return queryInterface.sequelize.transaction(async (transaction) => {
     await queryInterface.addColumn(
       "centres",
@@ -39,7 +39,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
   })
 }
 
-export const down: Migration = async ({ context: queryInterface }) => {
+export async function down({ context: queryInterface }: Migration) {
   return queryInterface.sequelize.transaction(async (transaction) => {
     await queryInterface.addColumn(
       "centres",

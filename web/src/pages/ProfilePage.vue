@@ -1,63 +1,78 @@
 <template>
-  <div>
-    <h1>My Profile</h1>
+  <HeaderActionsCard
+    title="My Profile"
+    elevation="3"
+  >
     <v-row>
-      <v-col cols="6">
-        <v-text-field
-          v-model="currentUser.firstName"
+      <v-col
+        cols="12"
+        md="6"
+      >
+        <DescriptionElement
           label="First name"
-          readonly
-          hide-details
-          variant="outlined"
-          density="comfortable"
-          append-inner-icon="mdi-lock"
-        ></v-text-field>
+          :model-value="currentUser.firstName"
+          vertical
+        />
       </v-col>
-      <v-col cols="6">
-        <v-text-field
-          v-model="currentUser.lastName"
+      <v-col
+        cols="12"
+        md="6"
+      >
+        <DescriptionElement
           label="Last name"
-          readonly
-          hide-details
-          variant="outlined"
-          density="comfortable"
-          append-inner-icon="mdi-lock"
-        ></v-text-field>
+          :model-value="currentUser.lastName"
+          vertical
+        />
       </v-col>
 
-      <v-col cols="6">
-        <v-text-field
-          v-model="currentUser.email"
+      <v-col
+        cols="12"
+        md="6"
+      >
+        <DescriptionElement
           label="Email"
-          readonly
-          hide-details
-          variant="outlined"
-          density="comfortable"
-          append-inner-icon="mdi-lock"
-        ></v-text-field>
+          :model-value="currentUser.email"
+          vertical
+        />
       </v-col>
-      <v-col cols="6">
-        <v-text-field
-          v-model="roles"
-          label="Roles"
-          readonly
-          variant="outlined"
-          density="comfortable"
-          append-inner-icon="mdi-lock"
-          hide-details
-        >
-        </v-text-field>
+      <v-col
+        cols="12"
+        md="6"
+      >
+        <h3 class="mb-2">Roles</h3>
+        <UserRolesChips :roles="currentUser.roles" />
       </v-col>
     </v-row>
-  </div>
+  </HeaderActionsCard>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue"
 
+import useBreadcrumbs from "@/use/use-breadcrumbs"
 import useCurrentUser from "@/use/use-current-user"
+
+import DescriptionElement from "@/components/common/DescriptionElement.vue"
+import HeaderActionsCard from "@/components/common/HeaderActionsCard.vue"
+import UserRolesChips from "@/components/users/UserRolesChips.vue"
 
 const { currentUser } = useCurrentUser<true>()
 
-const roles = computed(() => currentUser.value.roles.map(({ role }) => role).join(", "))
+const title = computed(() => currentUser.value?.displayName || "My Profile")
+const breadcrumbs = [
+  {
+    title: "Dashboard",
+    to: {
+      name: "DashboardPage",
+    },
+  },
+  {
+    title: "My Profile",
+    to: {
+      name: "ProfilePage",
+    },
+  },
+]
+
+useBreadcrumbs(title, breadcrumbs)
 </script>

@@ -11,7 +11,7 @@ export function sequelizeAutoTransactionResolver({
   return {
     name,
     up: async () => {
-      const migration = await import(path)
+      const migration = await require(path)
       return context.sequelize
         .transaction(() => {
           return migration.up({ context })
@@ -28,7 +28,7 @@ export function sequelizeAutoTransactionResolver({
         })
     },
     down: async () => {
-      const migration = await import(path)
+      const migration = await require(path)
       return context.sequelize.transaction(() => {
         return migration.down({ context })
       })

@@ -10,8 +10,6 @@ export type FundingPeriodIndexView = Pick<
   | "fromDate"
   | "toDate"
   | "title"
-  | "isFiscalYear"
-  | "isSchoolMonth"
   | "createdAt"
   | "updatedAt"
 >
@@ -24,8 +22,6 @@ export class IndexSerializer extends BaseSerializer<FundingPeriod> {
       "fromDate",
       "toDate",
       "title",
-      "isFiscalYear",
-      "isSchoolMonth",
       "createdAt",
       "updatedAt",
     ])

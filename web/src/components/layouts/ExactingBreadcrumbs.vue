@@ -2,7 +2,6 @@
   <v-breadcrumbs
     class="flex-wrap"
     :items="breadcrumbsWithExactTrueByDefault"
-    large
   >
     <template #prepend>
       <v-icon color="white">mdi-home</v-icon>

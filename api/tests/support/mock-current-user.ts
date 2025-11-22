@@ -18,7 +18,7 @@ export function mockCurrentUser(newCurrentUser: User) {
   vi.mock("@/middleware/authz.middleware")
 
   const mockedCheckJwt = vi.mocked(checkJwt)
-  mockedCheckJwt.mockImplementation((req: Request, _res: Response, next: NextFunction) => next())
+  mockedCheckJwt.mockImplementation((_req: Request, _res: Response, next: NextFunction) => next())
 
   const mockedAutheticateAndLoadUser = vi.mocked(autheticateAndLoadUser)
   mockedAutheticateAndLoadUser.mockImplementation(

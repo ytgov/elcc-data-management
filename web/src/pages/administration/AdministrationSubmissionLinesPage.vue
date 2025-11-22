@@ -1,6 +1,6 @@
 <template>
-  <BaseCard show-header>
-    <template #left>
+  <HeaderActionsCard title="Submission Lines">
+    <template #header>
       <v-row>
         <v-col
           cols="12"
@@ -30,21 +30,23 @@
         </v-col>
       </v-row>
     </template>
-    <template #right>
+    <template #header-actions>
       <v-btn
         color="primary"
-        variant="flat"
-        size="small"
-        @click="openNewFiscalYearDialog"
-        >New Fiscal Year</v-btn
+        :to="{
+          name: 'administration/funding-periods/FundingPeriodNewPage',
+        }"
       >
+        <v-icon class="mr-3">mdi-plus</v-icon>
+        New Fiscal Year
+      </v-btn>
     </template>
 
     <FundingSubmissionLinesDataTableServer
       :where="fundingSubmissionLinesWhere"
       :filters="fundingSubmissionLinesFilters"
     />
-  </BaseCard>
+  </HeaderActionsCard>
 </template>
 <script setup lang="ts">
 import { ref, computed } from "vue"
@@ -57,7 +59,7 @@ import {
   type FundingSubmissionLineWhereOptions,
 } from "@/use/use-funding-submission-lines"
 
-import BaseCard from "@/components/BaseCard.vue"
+import HeaderActionsCard from "@/components/common/HeaderActionsCard.vue"
 import FiscalPeriodFiscalYearSelect from "@/components/fiscal-periods/FiscalPeriodFiscalYearSelect.vue"
 import FundingSubmissionLinesDataTableServer from "@/components/funding-submission-lines/FundingSubmissionLinesDataTableServer.vue"
 
@@ -85,10 +87,6 @@ const fundingSubmissionLinesFilters = computed(() => {
 
   return filters
 })
-
-function openNewFiscalYearDialog() {
-  alert("TODO: implement new fiscal year creation")
-}
 
 useBreadcrumbs("Submission Lines", [
   {

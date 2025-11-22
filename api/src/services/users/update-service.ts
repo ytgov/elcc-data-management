@@ -14,10 +14,7 @@ export class UpdateService extends BaseService {
   }
 
   async perform(): Promise<User> {
-    await this.user.update(this.attributes)
-    return this.user.reload({
-      include: ["roles"],
-    })
+    return this.user.update(this.attributes)
   }
 }
 

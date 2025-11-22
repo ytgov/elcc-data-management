@@ -71,6 +71,4 @@ export interface FundingPeriod {
   fromDate: Date
   toDate: Date
   title: string
-  isFiscalYear: boolean
-  isSchoolMonth: boolean
 }

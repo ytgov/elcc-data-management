@@ -1,7 +1,7 @@
 <template>
   <v-btn
     :loading="loading || isReplicatingEstimates"
-    color="yg_sun"
+    color="yg-sun"
     size="small"
     @click="replicateEstimatesForward"
   >

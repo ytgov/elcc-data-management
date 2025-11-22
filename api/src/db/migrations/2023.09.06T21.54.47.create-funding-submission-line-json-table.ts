@@ -1,9 +1,9 @@
 import { DataTypes } from "@sequelize/core"
 
-import type { Migration } from "@/db/umzug"
+import { type Migration } from "@/db/umzug"
 import { MssqlSimpleTypes } from "@/db/utils/mssql-simple-types"
 
-export const up: Migration = async ({ context: queryInterface }) => {
+export async function up({ context: queryInterface }: Migration) {
   await queryInterface.createTable("funding_submission_line_json", {
     id: {
       type: DataTypes.INTEGER,
@@ -42,6 +42,6 @@ export const up: Migration = async ({ context: queryInterface }) => {
   })
 }
 
-export const down: Migration = async ({ context: queryInterface }) => {
+export async function down({ context: queryInterface }: Migration) {
   await queryInterface.dropTable("funding_submission_line_json")
 }

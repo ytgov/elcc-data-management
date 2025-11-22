@@ -1,8 +1,8 @@
 import { isEqual } from "lodash"
 
-import type { Migration } from "@/db/umzug"
+import { type Migration } from "@/db/umzug"
 
-export const up: Migration = async ({ context: queryInterface }) => {
+export async function up({ context: queryInterface }: Migration) {
   const constraints = await queryInterface.showConstraints("employee_benefits", {
     columnName: "fislcal_period_id",
   })
@@ -26,7 +26,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
   })
 }
 
-export const down: Migration = async ({ context: queryInterface }) => {
+export async function down({ context: queryInterface }: Migration) {
   const constraints = await queryInterface.showConstraints("employee_benefits", {
     columnName: "fiscal_period_id",
   })

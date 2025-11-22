@@ -1,9 +1,9 @@
 import { type Ref, reactive, toRefs, unref, watch } from "vue"
 import { isNil } from "lodash"
 
-import usersApi, { type UserAsShow, type UserPolicy } from "@/api/users-api"
+import usersApi, { UserRoles, type UserAsShow, type UserPolicy } from "@/api/users-api"
 
-export { type UserAsShow, type UserPolicy }
+export { UserRoles, type UserAsShow, type UserPolicy }
 
 export function useUser(userId: Ref<number | null | undefined>) {
   const state = reactive<{

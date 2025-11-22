@@ -5,17 +5,23 @@ import {
   type QueryOptions,
   type WhereOptions,
 } from "@/api/base-api"
-import { RoleTypes, type UserRole } from "@/api/user-roles-api"
 
-export { RoleTypes, type UserRole }
+// Must match roles in api/src/models/user.ts
+export enum UserRoles {
+  EDITOR = "Editor",
+  USER = "User",
+  ADMIN = "Admin",
+  SUPER_ADMIN = "Super Admin",
+  SYSTEM_ADMINISTRATOR = "System Administrator",
+}
 
 export type User = {
   id: number
   email: string
   firstName: string
   lastName: string
+  roles: UserRoles[]
   status: string
-  isAdmin: boolean
   createdAt: string
   updatedAt: string
 } & {
@@ -24,17 +30,13 @@ export type User = {
 
 export type UserPolicy = Policy
 
-export type UserAsShow = User & {
-  roles: UserRole[]
-}
+export type UserAsShow = User
 
-export type UserAsIndex = User & {
-  roles: UserRole[]
-}
+export type UserAsIndex = User
 
 export type UserWhereOptions = WhereOptions<
   User,
-  "id" | "email" | "firstName" | "lastName" | "status" | "isAdmin"
+  "id" | "email" | "firstName" | "lastName" | "status" | "roles"
 >
 
 export type UserFiltersOptions = FiltersOptions<{
@@ -44,7 +46,7 @@ export type UserFiltersOptions = FiltersOptions<{
 export type UserQueryOptions = QueryOptions<UserWhereOptions, UserFiltersOptions>
 
 export const usersApi = {
-  RoleTypes,
+  UserRoles,
 
   async list(params: UserQueryOptions = {}): Promise<{
     users: UserAsIndex[]

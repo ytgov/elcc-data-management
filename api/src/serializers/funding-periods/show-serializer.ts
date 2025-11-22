@@ -5,15 +5,7 @@ import BaseSerializer from "@/serializers/base-serializer"
 
 export type FundingPeriodShowView = Pick<
   FundingPeriod,
-  | "id"
-  | "fiscalYear"
-  | "fromDate"
-  | "toDate"
-  | "title"
-  | "isFiscalYear"
-  | "isSchoolMonth"
-  | "createdAt"
-  | "updatedAt"
+  "id" | "fiscalYear" | "fromDate" | "toDate" | "title" | "createdAt" | "updatedAt"
 >
 
 export class ShowSerializer extends BaseSerializer<FundingPeriod> {
@@ -24,8 +16,6 @@ export class ShowSerializer extends BaseSerializer<FundingPeriod> {
       "fromDate",
       "toDate",
       "title",
-      "isFiscalYear",
-      "isSchoolMonth",
       "createdAt",
       "updatedAt",
     ])

@@ -1,38 +1,35 @@
-import type { SeedMigration } from "@/db/umzug"
+import { CreationAttributes } from "@sequelize/core"
+import { isNil } from "lodash"
 
-export const up: SeedMigration = async ({ context: { FiscalPeriod, EmployeeWageTier } }) => {
+import { EmployeeWageTier, FiscalPeriod } from "@/models"
+import { EMPLOYEE_WAGE_TIER_DEFAULTS } from "@/models/employee-wage-tier"
+
+export async function up() {
   const fiscalPeriods = await FiscalPeriod.findAll()
 
-  const tiers = [
-    { tierLevel: 0, tierLabel: "Level 0", wageRatePerHour: 0 },
-    { tierLevel: 1, tierLabel: "Level 1", wageRatePerHour: 4.12 },
-    { tierLevel: 2, tierLabel: "Level 1a", wageRatePerHour: 6.01 },
-    { tierLevel: 3, tierLabel: "Level 2", wageRatePerHour: 7.44 },
-    { tierLevel: 4, tierLabel: "Level 2a", wageRatePerHour: 9.96 },
-    { tierLevel: 5, tierLabel: "Level 3 Exemption", wageRatePerHour: 12.31 },
-    { tierLevel: 6, tierLabel: "ECE Level 3", wageRatePerHour: 15.31 },
-  ]
+  const employeeWageTiersAttributes: CreationAttributes<EmployeeWageTier>[] = fiscalPeriods.flatMap(
+    (fiscalPeriod) =>
+      EMPLOYEE_WAGE_TIER_DEFAULTS.map((employeeWageTier) => ({
+        fiscalPeriodId: fiscalPeriod.id,
+        ...employeeWageTier,
+      }))
+  )
 
-  const promises = fiscalPeriods.map(async (fiscalPeriod) => {
-    const wageTierPromises = tiers.map(async (tier) => {
-      await EmployeeWageTier.findOrCreate({
-        where: {
-          fiscalPeriodId: fiscalPeriod.id,
-          tierLevel: tier.tierLevel,
-        },
-        defaults: {
-          ...tier,
-          fiscalPeriodId: fiscalPeriod.id,
-        },
-      })
+  for (const employeeWageTierAttributes of employeeWageTiersAttributes) {
+    const employeeWageTier = await EmployeeWageTier.findOne({
+      where: {
+        fiscalPeriodId: employeeWageTierAttributes.fiscalPeriodId,
+        tierLevel: employeeWageTierAttributes.tierLevel,
+      },
     })
-    return Promise.all(wageTierPromises)
-  })
 
-  await Promise.all(promises)
+    if (isNil(employeeWageTier)) {
+      await EmployeeWageTier.create(employeeWageTierAttributes)
+    }
+  }
 }
 
-export const down: SeedMigration = async () => {
+export async function down() {
   // this method needs to exist, but does not need to be implemented.
   // Seeds should be idempotent.
 }

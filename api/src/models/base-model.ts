@@ -2,6 +2,8 @@ import {
   Model,
   type AttributeNames,
   type Attributes,
+  type BulkCreateOptions,
+  type CreationAttributes,
   type FindOptions,
   type ModelStatic,
 } from "@sequelize/core"
@@ -88,6 +90,24 @@ export abstract class BaseModel<
       if (records.length < batchSize) {
         continueProcessing = false
       }
+    }
+  }
+
+  /**
+   * Add the missing batchSize option to bulkCreate.
+   */
+  public static async bulkCreateBatched<M extends BaseModel>(
+    this: ModelStatic<M>,
+    records: CreationAttributes<M>[],
+    options?: BulkCreateOptions<Attributes<M>> & {
+      batchSize?: number
+    }
+  ): Promise<void> {
+    const batchSize = options?.batchSize ?? 1000
+
+    for (let i = 0; i < records.length; i += batchSize) {
+      const batch = records.slice(i, i + batchSize)
+      await this.bulkCreate(batch, options)
     }
   }
 }
