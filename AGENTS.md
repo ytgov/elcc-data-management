@@ -68,8 +68,8 @@ dev test web -- --run src/components/SomeComponent.test.ts # Run single frontend
 **Type Checking:**
 
 ```bash
-dev check-types api         # Check backend types
-dev check-types web         # Check frontend types
+dev web npm run check-types         # Check frontend types
+dev api npm run check-types         # Check backend types
 ```
 
 **Database Management:**
