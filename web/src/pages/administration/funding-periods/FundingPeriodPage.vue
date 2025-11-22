@@ -1,5 +1,8 @@
 <template>
-  <PageLoader v-if="isNil(fundingPeriod)" />
+  <v-skeleton-loader
+    v-if="isNil(fundingPeriod)"
+    type="card"
+  />
   <HeaderActionsCard
     v-else
     title="Funding Period Details"
@@ -10,7 +13,7 @@
         :to="{
           name: 'administration/funding-periods/FundingPeriodEditPage',
           params: {
-            fundingPeriodId: props.fundingPeriodId,
+            fundingPeriodId,
           },
         }"
       >
@@ -74,7 +77,6 @@ import { formatDate } from "@/utils/formatters"
 
 import DescriptionElement from "@/components/common/DescriptionElement.vue"
 import HeaderActionsCard from "@/components/common/HeaderActionsCard.vue"
-import PageLoader from "@/components/common/PageLoader.vue"
 
 const props = defineProps<{
   fundingPeriodId: string
@@ -86,20 +88,9 @@ const { fundingPeriod } = useFundingPeriod(fundingPeriodIdAsNumber)
 
 const title = computed(() => fundingPeriod.value?.title || "Funding Period")
 const fundingPeriodTitle = computed(() => fundingPeriod.value?.title || "Details")
-const formattedFromDate = computed(() => {
-  if (isNil(fundingPeriod.value?.fromDate)) {
-    return ""
-  }
+const formattedFromDate = computed(() => formatDate(fundingPeriod.value?.fromDate))
+const formattedToDate = computed(() => formatDate(fundingPeriod.value?.toDate))
 
-  return formatDate(fundingPeriod.value.fromDate)
-})
-const formattedToDate = computed(() => {
-  if (isNil(fundingPeriod.value?.toDate)) {
-    return ""
-  }
-
-  return formatDate(fundingPeriod.value.toDate)
-})
 const breadcrumbs = computed(() => [
   {
     title: "Administration",

@@ -11,12 +11,12 @@
     </template>
     <template #header-actions>
       <v-btn
-        color="secondary"
-        variant="flat"
+        color="primary"
         :to="{
           name: 'administration/funding-periods/FundingPeriodNewPage',
         }"
       >
+        <v-icon class="mr-3">mdi-plus</v-icon>
         New Funding Period
       </v-btn>
     </template>

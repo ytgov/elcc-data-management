@@ -60,8 +60,13 @@ const routes = [
       {
         path: "administration/submission-lines/:fundingSubmissionLineId",
         name: "administration/submission-lines/SubmissionLinePage",
-        component: () =>
-          import("@/pages/administration/submission-lines/SubmissionLinePage.vue"),
+        component: () => import("@/pages/administration/submission-lines/SubmissionLinePage.vue"),
+        props: true,
+      },
+      {
+        path: "administration/submission-lines/:fundingSubmissionLineId/edit",
+        name: "administration/submission-lines/SubmissionLineEditPage",
+        component: () => import("@/pages/administration/submission-lines/SubmissionLineEditPage.vue"),
         props: true,
       },
     ],
