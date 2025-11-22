@@ -38,14 +38,19 @@ const routes = [
       {
         path: "administration/funding-periods/new",
         name: "administration/funding-periods/FundingPeriodNewPage",
-        component: () =>
-          import("@/pages/administration/funding-periods/FundingPeriodNewPage.vue"),
+        component: () => import("@/pages/administration/funding-periods/FundingPeriodNewPage.vue"),
       },
       {
         path: "administration/funding-periods/:fundingPeriodId",
         name: "administration/funding-periods/FundingPeriodPage",
         component: () => import("@/pages/administration/funding-periods/FundingPeriodPage.vue"),
-        props: true
+        props: true,
+      },
+      {
+        path: "administration/funding-periods/:fundingPeriodId/edit",
+        name: "administration/funding-periods/FundingPeriodEditPage",
+        component: () => import("@/pages/administration/funding-periods/FundingPeriodEditPage.vue"),
+        props: true,
       },
       {
         path: "administration/submission-lines",

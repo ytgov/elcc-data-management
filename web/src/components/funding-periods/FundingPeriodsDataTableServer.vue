@@ -19,6 +19,12 @@
         v-bind="slotProps"
       ></slot>
     </template>
+    <template #item.fromDate="{ item }">
+      {{ formatDate(item.fromDate) }}
+    </template>
+    <template #item.toDate="{ item }">
+      {{ formatDate(item.toDate) }}
+    </template>
     <template #item.actions="{ item }">
       <v-btn
         color="yg-moss"
@@ -41,6 +47,8 @@ import { useRouteQuery } from "@vueuse/router"
 import { useRouter } from "vue-router"
 
 import { integerTransformer } from "@/utils/use-route-query-transformers"
+import { formatDate } from "@/utils/formatters"
+
 import useVuetifySortByToSafeRouteQuery from "@/use/vuetify/use-vuetify-sort-by-to-safe-route-query"
 import useVuetifySortByToSequelizeSafeOrder from "@/use/vuetify/use-vuetify-sort-by-to-sequelize-safe-order"
 import useFundingPeriods, {
