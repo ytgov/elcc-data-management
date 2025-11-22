@@ -2,37 +2,70 @@
   <v-row>
     <v-col>
       <v-card
+        :loading="isLoadingUsers"
         :to="{
           name: 'administration/UsersPage',
         }"
       >
         <v-card-title>Users</v-card-title>
         <v-card-text>
-          <span class="text-h4">{{ usersTotalCount }}</span>
+          <v-progress-circular
+            v-if="isLoadingUsers"
+            indeterminate
+            size="24"
+            width="3"
+          />
+          <span
+            v-else
+            class="text-h4"
+            >{{ usersTotalCount }}</span
+          >
         </v-card-text>
       </v-card>
     </v-col>
     <v-col>
       <v-card
+        :loading="isLoadingFundingPeriods"
         :to="{
           name: 'administration/FundingPeriodsPage',
         }"
       >
         <v-card-title>Funding Periods</v-card-title>
         <v-card-text>
-          <span class="text-h4">{{ fundingPeriodsTotalCount }}</span>
+          <v-progress-circular
+            v-if="isLoadingFundingPeriods"
+            indeterminate
+            size="24"
+            width="3"
+          />
+          <span
+            v-else
+            class="text-h4"
+            >{{ fundingPeriodsTotalCount }}</span
+          >
         </v-card-text>
       </v-card>
     </v-col>
     <v-col>
       <v-card
+        :loading="isLoadingFundingSubmissionLines"
         :to="{
           name: 'administration/AdministrationSubmissionLinesPage',
         }"
       >
         <v-card-title>Submission Lines</v-card-title>
         <v-card-text>
-          <span class="text-h4">{{ fundingSubmissionLinesTotalCount }}</span>
+          <v-progress-circular
+            v-if="isLoadingFundingSubmissionLines"
+            indeterminate
+            size="24"
+            width="3"
+          />
+          <span
+            v-else
+            class="text-h4"
+            >{{ fundingSubmissionLinesTotalCount }}</span
+          >
         </v-card-text>
       </v-card>
     </v-col>
@@ -50,19 +83,19 @@ import useUsers from "@/use/use-users"
 const usersQuery = computed(() => ({
   perPage: 1,
 }))
-const { totalCount: usersTotalCount } = useUsers(usersQuery)
+const { totalCount: usersTotalCount, isLoading: isLoadingUsers } = useUsers(usersQuery)
 
 const fundingPeriodsQuery = computed(() => ({
   perPage: 1,
 }))
-const { totalCount: fundingPeriodsTotalCount } = useFundingPeriods(fundingPeriodsQuery)
+const { totalCount: fundingPeriodsTotalCount, isLoading: isLoadingFundingPeriods } =
+  useFundingPeriods(fundingPeriodsQuery)
 
 const fundingSubmissionLinesQuery = computed(() => ({
   perPage: 1,
 }))
-const { totalCount: fundingSubmissionLinesTotalCount } = useFundingSubmissionLines(
-  fundingSubmissionLinesQuery
-)
+const { totalCount: fundingSubmissionLinesTotalCount, isLoading: isLoadingFundingSubmissionLines } =
+  useFundingSubmissionLines(fundingSubmissionLinesQuery)
 
 useBreadcrumbs("Administration", [
   {
