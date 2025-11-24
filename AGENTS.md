@@ -31,6 +31,14 @@ This file follows the format from https://agents.md/ for AI agent documentation.
 
 ---
 
+## Development Approach
+
+**Pattern Learning:** Study existing code before implementing new features. Find similar functionality and adapt established patterns rather than reinventing approaches. When uncertain, choose the simplest approach that follows existing code structure.
+
+**Pattern Discovery:** Use git to identify emerging patterns by examining recently added files: `git log --since="3 months ago" --diff-filter=A --name-only --pretty=format: | sort | uniq -c | sort -nr`
+
+---
+
 ## Development Environment
 
 > For initial environment setup (installing Ruby, Node.js, creating `.env` files, etc.), see [README.md](./README.md).
@@ -136,23 +144,7 @@ docker compose -f docker-compose.development.yaml up --remove-orphans --build
 
 ### General Principles
 
-1. **Expanded, linear code over terse/functional**
-   - Prefer one thing per line
-
-2. **Guard clauses with blank lines**
-
-   ```typescript
-   if (isNil(value)) return
-
-   // Continue with main logic
-   ```
-
-3. **No abbreviations**
-   - Variables: `migration` not `mig`
-   - SQL tables: `employee_benefits` not `emp_ben`
-   - Function parameters: `fiscalPeriod` not `fp`
-
-4. **Descriptive naming**
+1. **Descriptive naming**
    - Functions: `standardizeHexPattern` over `expandHex`
    - Variables: `employeeBenefitsByMonth` over `benefits`
    - Constants: Hoist magic numbers with descriptive names
@@ -161,7 +153,43 @@ docker compose -f docker-compose.development.yaml up --remove-orphans --build
    - **Direct parameter naming**: Use simple names without redundant context
    - **Minimal parameter passing**: Pass only specific data needed, not entire objects (e.g., `fiscalPeriodId: number` over `fiscalPeriod: FiscalPeriod`)
 
-### Model Enum Patterns
+2. **No abbreviations**
+   - Variables: `migration` not `mig`
+   - SQL tables: `employee_benefits` not `emp_ben`
+   - Function parameters: `fiscalPeriod` not `fp`
+
+3. **Self-documenting code**
+   - Remove extraneous comments when code structure and naming are self-documenting
+   - Trust clear variable names and logic to provide clarity over explanatory comments
+   - Only retain comments that explain non-obvious business logic or complex reasoning
+   - Reference: https://www.rubytapas.com/2016/06/13/episode-418/no-comment/
+
+4. **Expanded, linear code over terse/functional**
+   - Prefer one thing per line
+
+5. **Guard clauses with blank lines**
+
+   ```typescript
+   if (isNil(value)) return
+
+   // Continue with main logic
+   ```
+
+6. **No emojis in code or text files**
+   - Avoid using emojis in source code, documentation files, and configuration files
+   - Exception: Git commit messages use GitHub-style emojis (e.g., :hammer:, :lock:, :recycle:)
+
+### Model Organization
+
+#### Structure
+
+- **Section order**: Fields → Helpers → Associations → Static methods
+- **Helpers section**: Use dedicated "// Helpers" comment for computed properties and helper methods
+- **Getter over method**: Use getters for computed properties that don't take parameters
+- **NonAttribute typing**: Use `NonAttribute<T>` for computed properties that aren't database fields
+- **CreationOptional typing**: Use `CreationOptional<T>` only for actual database fields with defaults
+
+#### Enum Patterns
 
 - **Static enum access**: Add `static readonly Statuses = FundingReconciliationStatuses` to models for convenient access
 - **Plural enum naming**: Use plural forms for enum names (e.g., `FundingReconciliationStatuses` not `Status`)
@@ -169,28 +197,7 @@ docker compose -f docker-compose.development.yaml up --remove-orphans --build
 - **Dynamic validation**: Use template literals with enum arrays: `Status must be one of: ${FUNDING_RECONCILIATION_STATUSES.join(", ")}`
 - **Import reduction**: Consumers only need to import the model, not both model and enum
 
-5. **File organization**
-
-   ```typescript
-   // Types
-   // Constants
-   // Props/Component setup
-   // Computed values
-   // Methods/Functions
-   // Lifecycle hooks
-   ```
-
-6. **No emojis in code or text files**
-   - Avoid using emojis in source code, documentation files, and configuration files
-   - Exception: Git commit messages use GitHub-style emojis (e.g., :hammer:, :lock:, :recycle:)
-
-7. **Self-documenting code**
-   - Remove extraneous comments when code structure and naming are self-documenting
-   - Trust clear variable names and logic to provide clarity over explanatory comments
-   - Only retain comments that explain non-obvious business logic or complex reasoning
-   - Reference: https://www.rubytapas.com/2016/06/13/episode-418-no-comment/
-
-### Sequelize Model Typing
+#### Typing Rules
 
 - **CreationOptional Rule**: Use `CreationOptional` only for non-nullable fields with database defaults
 - **Nullable fields**: Type as `Type | null` without `CreationOptional`
@@ -204,6 +211,18 @@ docker compose -f docker-compose.development.yaml up --remove-orphans --build
 ---
 
 ## Frontend Patterns
+
+### Component Structure
+
+- **Vue component organization**:
+  ```typescript
+  // Types
+  // Constants
+  // Props/Component setup
+  // Computed values
+  // Methods/Functions
+  // Lifecycle hooks
+  ```
 
 ### Composables: Singular vs Plural
 
@@ -778,9 +797,13 @@ export class CreateService extends BaseService {
       grossPayrollMonthlyActual,
     })
 
-    // TODO: log current user action
-
-    return employeeBenefit
+    return employeeBenefit.reload({
+      include: [
+        {
+          association: "someAssociation", // Reload with associations if needed for serialization
+        },
+      ],
+    })
   }
 }
 
@@ -828,6 +851,7 @@ export default UpdateService
 - Controllers focus on authorization and coordination, not business logic
 
 **Service Principles:**
+
 - Services have single responsibilities - don't bloat create/update services
 - Complex business logic should be in dedicated services
 
@@ -845,88 +869,131 @@ Example: A `CreateService` for fiscal periods creates 12 records (one for each m
 
 **Pattern:** Control exactly which attributes are exposed to the API.
 
-#### Organization Structure
-- Each model gets its own serializer directory (e.g., `/funding-reconciliation-adjustments/`)
-- Use `index.ts` for clean exports from each serializer directory
-- Reference serializers follow the pattern: `ModelAsReference` type naming
-  - Example: `FundingReconciliationAdjustmentAsReference` for reference views
-  - Contrast with show serializers: `ModelAsShow` (e.g., `EmployeeBenefitAsShow`)
-  - The "AsReference" suffix indicates a lightweight view for inclusion in parent serializers
-  - Used when a model needs to be referenced/serialized within another model's serializer
+#### Directory Structure
 
-#### Import Patterns
-- Use centralized imports through main index files:
-  ```typescript
-  import { FundingReconciliationAdjustments } from "@/serializers"
-  ```
-- Access types and classes through module namespace:
-  ```typescript
-  adjustments: FundingReconciliationAdjustments.FundingReconciliationAdjustmentAsReference[]
-  const serialized = FundingReconciliationAdjustments.ReferenceSerializer.perform(data)
-  ```
-- Maintain alphabetical ordering in index files for consistency
-- Namespace pattern provides better IDE autocomplete and prevents naming conflicts
+Each model gets its own serializer directory with an `index.ts` that exports types and serializers with short aliases:
 
-#### Association Validation
-- Explicitly check for required associations with descriptive errors:
-  ```typescript
-  const { adjustments } = this.record
-  if (isUndefined(adjustments)) {
-    throw new Error("Expected adjustments association to be preloaded.")
-  }
-  ```
-- Use fail-fast approach rather than optional chaining for required data
+```
+serializers/
+├── index.ts                          # Main entry point with namespace exports
+├── funding-reconciliations/
+│   ├── index.ts                      # Directory exports with aliases
+│   ├── index-serializer.ts           # List view serializer
+│   └── show-serializer.ts            # Detail view serializer
+└── funding-reconciliation-adjustments/
+    ├── index.ts
+    └── reference-serializer.ts       # Lightweight view for inclusion in parents
+```
 
-#### Variable Extraction
-- Extract complex operations to variables before using in return statements:
-  ```typescript
-  const adjustmentsSerialized = ReferenceSerializer.perform(adjustments)
-  return {
-    // ... other fields
-    adjustments: adjustmentsSerialized,
-  }
-  ```
+#### Export Pattern
+
+**Directory index.ts** exports both types and serializers with short aliases:
 
 ```typescript
-// api/src/serializers/employee-benefits/show-serializer.ts
-import { pick } from "lodash"
+// api/src/serializers/funding-reconciliations/index.ts
+export { type FundingReconciliationAsIndex as AsIndex, IndexSerializer } from "./index-serializer"
+export { type FundingReconciliationAsShow as AsShow, ShowSerializer } from "./show-serializer"
+```
 
-import { EmployeeBenefit } from "@/models"
+**Main serializers/index.ts** uses namespace exports:
+
+```typescript
+// api/src/serializers/index.ts
+export * as FundingReconciliations from "./funding-reconciliations"
+export * as FundingReconciliationAdjustments from "./funding-reconciliation-adjustments"
+```
+
+#### Type Naming Convention
+
+- **Full form** (in serializer files): `ModelAsFormat` (e.g., `FundingReconciliationAsIndex`, `FundingReconciliationAsShow`, `FundingReconciliationAdjustmentAsReference`)
+- **Short alias** (in directory index.ts): `AsFormat` (e.g., `AsIndex`, `AsShow`, `AsReference`)
+
+Format suffixes:
+
+- `AsIndex` - List/table views with minimal attributes
+- `AsShow` - Detail views with full attributes and associations
+- `AsReference` - Lightweight views for inclusion in parent serializers
+
+#### Usage Pattern
+
+Import through the main index and access via namespace:
+
+```typescript
+import { FundingReconciliations, FundingReconciliationAdjustments } from "@/serializers"
+
+// Serializer usage
+const fundingReconciliationSerialized =
+  FundingReconciliations.ShowSerializer.perform(fundingReconciliation)
+const fundingReconciliationAdjustmentsSerialized =
+  FundingReconciliationAdjustments.ReferenceSerializer.perform(fundingReconciliationAdjustments)
+```
+
+#### Association Validation
+
+Explicitly check for required associations with descriptive errors:
+
+```typescript
+const { adjustments } = this.record
+if (isUndefined(adjustments)) {
+  throw new Error("Expected adjustments association to be preloaded.")
+}
+```
+
+#### Serializer Implementation
+
+```typescript
+// api/src/serializers/funding-reconciliations/show-serializer.ts
+import { isUndefined, pick } from "lodash"
+
+import { FundingReconciliation } from "@/models"
 import BaseSerializer from "@/serializers/base-serializer"
+import { FundingReconciliationAdjustments } from "@/serializers"
 
-export type EmployeeBenefitAsShow = Pick<
-  EmployeeBenefit,
+export type FundingReconciliationAsShow = Pick<
+  FundingReconciliation,
   | "id"
   | "centreId"
-  | "fiscalPeriodId"
-  | "grossPayrollMonthlyActual"
-  | "grossPayrollMonthlyEstimated"
-  | "costCapPercentage"
-  | "employeeCostActual"
-  | "employeeCostEstimated"
-  | "employerCostActual"
-  | "employerCostEstimated"
+  | "fundingPeriodId"
+  | "status"
+  | "fundingReceivedTotalAmount"
+  | "eligibleExpensesTotalAmount"
+  | "payrollAdjustmentsTotalAmount"
+  | "finalBalanceAmount"
+  | "notes"
+  | "finalizedAt"
+  | "finalizedById"
   | "createdAt"
   | "updatedAt"
->
+> & {
+  adjustments: FundingReconciliationAdjustments.AsReference[]
+}
 
-export class ShowSerializer extends BaseSerializer<EmployeeBenefit> {
-  perform(): EmployeeBenefitAsShow {
+export class ShowSerializer extends BaseSerializer<FundingReconciliation> {
+  perform() {
+    const { adjustments } = this.record
+    if (isUndefined(adjustments)) {
+      throw new Error("Expected adjustments association to be preloaded.")
+    }
+
+    const adjustmentsSerialized =
+      FundingReconciliationAdjustments.ReferenceSerializer.perform(adjustments)
     return {
       ...pick(this.record, [
         "id",
         "centreId",
-        "fiscalPeriodId",
-        "grossPayrollMonthlyActual",
-        "grossPayrollMonthlyEstimated",
-        "costCapPercentage",
-        "employeeCostActual",
-        "employeeCostEstimated",
-        "employerCostActual",
-        "employerCostEstimated",
+        "fundingPeriodId",
+        "status",
+        "fundingReceivedTotalAmount",
+        "eligibleExpensesTotalAmount",
+        "payrollAdjustmentsTotalAmount",
+        "finalBalanceAmount",
+        "notes",
+        "finalizedAt",
+        "finalizedById",
         "createdAt",
         "updatedAt",
       ]),
+      adjustments: adjustmentsSerialized,
     }
   }
 }
@@ -939,8 +1006,8 @@ export default ShowSerializer
 - Extends `BaseSerializer` which provides static `perform()` for single records or arrays
 - Access record via `this.record` (provided by BaseSerializer)
 - Use lodash `pick()` to select attributes by name
-- Type-safe serialization with explicit return type
-- Separate serializers for different contexts (Show vs Index)
+- Separate serializers for different contexts (Index, Show, Reference)
+- Namespace pattern provides better IDE autocomplete and prevents naming conflicts
 
 ---
 
