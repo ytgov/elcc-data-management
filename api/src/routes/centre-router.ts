@@ -12,7 +12,7 @@ export const centreRouter = express.Router()
 centreRouter.use(checkJwt)
 centreRouter.use(autheticateAndLoadUser)
 
-centreRouter.get("/", async (req: Request, res: Response) => {
+centreRouter.get("/", async (_req: Request, res: Response) => {
   try {
     const centres = await Centre.findAll()
     res.json({ data: centres })
@@ -45,7 +45,7 @@ centreRouter.get("/:id", async (req: Request, res: Response) => {
 })
 
 // TODO: implement this endpoint, currently it is returning fake data
-centreRouter.get("/:id/enrollment", async (req: Request, res: Response) => {
+centreRouter.get("/:id/enrollment", async (_req: Request, res: Response) => {
   // const { id } = req.params
   // const centre = await Centre.findByPk(id)
   await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -82,7 +82,7 @@ centreRouter.put("/:id/worksheet/:worksheetId", async (req: Request, res: Respon
   }
 
   // TODO: validate lines format against a JSON schema.
-  const lines = sections.flatMap((s: any) => s.lines)
+  const lines = sections.flatMap((s: unknown) => (s as { lines: unknown[] }).lines)
   const values = JSON.stringify(lines)
   return sheet
     .update({ values })
