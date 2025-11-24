@@ -184,6 +184,12 @@ docker compose -f docker-compose.development.yaml up --remove-orphans --build
    - Avoid using emojis in source code, documentation files, and configuration files
    - Exception: Git commit messages use GitHub-style emojis (e.g., :hammer:, :lock:, :recycle:)
 
+7. **Self-documenting code**
+   - Remove extraneous comments when code structure and naming are self-documenting
+   - Trust clear variable names and logic to provide clarity over explanatory comments
+   - Only retain comments that explain non-obvious business logic or complex reasoning
+   - Reference: https://www.rubytapas.com/2016/06/13/episode-418-no-comment/
+
 ### Sequelize Model Typing
 
 - **CreationOptional Rule**: Use `CreationOptional` only for non-nullable fields with database defaults
@@ -818,7 +824,12 @@ export default UpdateService
 - Destructures required vs optional attributes
 - Inline validation with clear error messages
 - Optionally accepts `_currentUser` for audit logging
-- Call static `perform()` method with constructor arguments (e.g., `CreateService.perform(attributes)`)
+- Call static service methods: `CreateService.perform(attributes)` and `UpdateService.perform(record, attributes)`
+- Controllers focus on authorization and coordination, not business logic
+
+**Service Principles:**
+- Services have single responsibilities - don't bloat create/update services
+- Complex business logic should be in dedicated services
 
 **Service naming:**
 
