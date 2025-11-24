@@ -845,6 +845,48 @@ Example: A `CreateService` for fiscal periods creates 12 records (one for each m
 
 **Pattern:** Control exactly which attributes are exposed to the API.
 
+#### Organization Structure
+- Each model gets its own serializer directory (e.g., `/funding-reconciliation-adjustments/`)
+- Use `index.ts` for clean exports from each serializer directory
+- Reference serializers follow the pattern: `ModelAsReference` type naming
+  - Example: `FundingReconciliationAdjustmentAsReference` for reference views
+  - Contrast with show serializers: `ModelAsShow` (e.g., `EmployeeBenefitAsShow`)
+  - The "AsReference" suffix indicates a lightweight view for inclusion in parent serializers
+  - Used when a model needs to be referenced/serialized within another model's serializer
+
+#### Import Patterns
+- Use centralized imports through main index files:
+  ```typescript
+  import { FundingReconciliationAdjustments } from "@/serializers"
+  ```
+- Access types and classes through module namespace:
+  ```typescript
+  adjustments: FundingReconciliationAdjustments.FundingReconciliationAdjustmentAsReference[]
+  const serialized = FundingReconciliationAdjustments.ReferenceSerializer.perform(data)
+  ```
+- Maintain alphabetical ordering in index files for consistency
+- Namespace pattern provides better IDE autocomplete and prevents naming conflicts
+
+#### Association Validation
+- Explicitly check for required associations with descriptive errors:
+  ```typescript
+  const { adjustments } = this.record
+  if (isUndefined(adjustments)) {
+    throw new Error("Expected adjustments association to be preloaded.")
+  }
+  ```
+- Use fail-fast approach rather than optional chaining for required data
+
+#### Variable Extraction
+- Extract complex operations to variables before using in return statements:
+  ```typescript
+  const adjustmentsSerialized = ReferenceSerializer.perform(adjustments)
+  return {
+    // ... other fields
+    adjustments: adjustmentsSerialized,
+  }
+  ```
+
 ```typescript
 // api/src/serializers/employee-benefits/show-serializer.ts
 import { pick } from "lodash"
