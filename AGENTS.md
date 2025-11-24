@@ -156,6 +156,10 @@ docker compose -f docker-compose.development.yaml up --remove-orphans --build
    - Functions: `standardizeHexPattern` over `expandHex`
    - Variables: `employeeBenefitsByMonth` over `benefits`
    - Constants: Hoist magic numbers with descriptive names
+   - **Concise function naming**: Remove redundant context when clear from caller (e.g., `calculateEmployeeBenefitCost` over `calculateEmployeeBenefitMonthlyCost`)
+   - **Simplified parameter types**: Use minimal types needed, avoid unnecessary complexity
+   - **Direct parameter naming**: Use simple names without redundant context
+   - **Minimal parameter passing**: Pass only specific data needed, not entire objects (e.g., `fiscalPeriodId: number` over `fiscalPeriod: FiscalPeriod`)
 
 5. **File organization**
    ```typescript
