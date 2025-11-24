@@ -290,18 +290,6 @@ async function buildEmployeeAdjustments(fiscalPeriods: FiscalPeriod[]): Promise<
       amountInCents: 0,
     }
     const { month } = fiscalPeriod
-    const linesForMonth = employeeBenefits.value.find((b) => b.fiscalPeriodId == fiscalPeriod.id)
-
-    if (!isNil(linesForMonth)) {
-      if (Number(linesForMonth.grossPayrollMonthlyActual) > 0) {
-        let actGrossAmount =
-          Number(linesForMonth.grossPayrollMonthlyActual) * Number(linesForMonth.costCapPercentage)
-        let actEmployerAmount = Number(linesForMonth.employerCostActual)
-        employeeAdjustment.amountInCents = dollarsToCents(Math.min(actGrossAmount, actEmployerAmount))
-      } else {
-        employeeAdjustment.amountInCents = 0
-      }
-    }
 
     injectEmployeeBenefitMonthlyCost(employeeAdjustment, month)
     await lazyInjectWageEnhancementMonthlyCost(employeeAdjustment, month)
@@ -345,10 +333,10 @@ async function lazyInjectWageEnhancementMonthlyCost(employeeAdjustment: Adjustme
     keyBy(employeeWageTiers, "id"),
     "wageRatePerHour"
   )
+
   const wageEnhancementsActualSubtotal = wageEnhancements.reduce(
     (total, { hoursActual, employeeWageTierId }) => {
       const wageRatePerHour = wageRatePerHoursByEmployeeWageTierId[employeeWageTierId]
-
       return total + hoursActual * wageRatePerHour
     },
     0
