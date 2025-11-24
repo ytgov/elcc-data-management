@@ -45,18 +45,30 @@ export const LINE_NAMES_EXAMPLES = Object.freeze([
 ])
 
 export const fundingSubmissionLineFactory = Factory.define<FundingSubmissionLine>(
-  ({ sequence, onCreate }) => {
-    onCreate((fundingSubmissionLine) => fundingSubmissionLine.save())
+  ({ onCreate }) => {
+    onCreate(async (fundingSubmissionLine) => {
+      try {
+        await fundingSubmissionLine.save()
+        return fundingSubmissionLine
+      } catch (error) {
+        console.error(error)
+        throw new Error(
+          `Could not create FundingSubmissionLine with attributes: ${JSON.stringify(fundingSubmissionLine.dataValues, null, 2)}`
+        )
+      }
+    })
 
     const year = faker.number.int({ min: 2022, max: 2027 })
     const fiscalYear = formatAsFiscalYear(year)
+    const sectionName = faker.helpers.arrayElement(SECTION_NAMES_EXAMPLES)
+    const lineName = faker.helpers.arrayElement(LINE_NAMES_EXAMPLES)
+    const monthlyAmount = Number(faker.finance.amount(0, 1000, 2))
 
     return FundingSubmissionLine.build({
-      id: sequence,
       fiscalYear,
-      sectionName: faker.helpers.arrayElement(SECTION_NAMES_EXAMPLES),
-      lineName: faker.helpers.arrayElement(LINE_NAMES_EXAMPLES),
-      monthlyAmount: Number(faker.finance.amount(0, 1000, 2)),
+      sectionName,
+      lineName,
+      monthlyAmount,
     })
   }
 )

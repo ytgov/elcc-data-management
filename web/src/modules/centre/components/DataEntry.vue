@@ -2,8 +2,7 @@
   <h1 class="text-h5 mb-5">Child Care Centres</h1>
 
   <BaseCard
-    show-header="t"
-    heading=""
+    show-header
     class="pb-3"
   >
     <template #left>
@@ -52,11 +51,14 @@
 </template>
 <script lang="ts">
 import moment from "moment" // TODO: deprecated; replace with luxon
-// import { CareCentre } from "@models";
+
+import BaseCard from "@/components/BaseCard.vue"
 
 export default {
-  name: "Dashboard",
-  components: {},
+  name: "DataEntry",
+  components: {
+    BaseCard,
+  },
   data: () => ({
     total: 0,
     search: "",

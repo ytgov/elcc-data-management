@@ -1,14 +1,14 @@
-import { DataTypes } from "sequelize"
+import { DataTypes } from "@sequelize/core"
 
-import type { Migration } from "@/db/umzug"
+import { type Migration } from "@/db/umzug"
 
-export const up: Migration = async ({ context: queryInterface }) => {
+export async function up({ context: queryInterface }: Migration) {
   await queryInterface.createTable("user_roles", {
     email: {
       type: DataTypes.STRING(200),
       allowNull: false,
       references: {
-        model: "users",
+        table: "users",
         key: "email",
       },
     },
@@ -19,6 +19,6 @@ export const up: Migration = async ({ context: queryInterface }) => {
   })
 }
 
-export const down: Migration = async ({ context: queryInterface }) => {
+export async function down({ context: queryInterface }: Migration) {
   await queryInterface.dropTable("user_roles")
 }

@@ -1,48 +1,73 @@
-import { isNil } from "lodash"
-
 import http from "@/api/http-client"
+import {
+  type FiltersOptions,
+  type Policy,
+  type QueryOptions,
+  type WhereOptions,
+} from "@/api/base-api"
 
 export type Payment = {
   id: number
   centreId: number
+  fiscalPeriodId: number
   fiscalYear: string
   name: string
   amountInCents: number
   paidOn: string
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
 }
 
-export type NonPersistedPayment = Omit<Payment, "id" | "createdAt" | "updatedAt">
+export type PaymentPolicy = Policy
 
-export type Params = {
-  where?: {
-    centreId?: number
-    fiscalYear?: string
-  }
-  page?: number
-  perPage?: number
-  otherParams?: any
-}
+export type PaymentAsShow = Payment
 
-export function isPersistedPayment(payment: Payment | NonPersistedPayment): payment is Payment {
-  return !isNil(payment) && typeof payment === "object" && "id" in payment && !isNil(payment.id)
-}
+export type PaymentAsIndex = Payment
+
+export type PaymentWhereOptions = WhereOptions<
+  Payment,
+  "id" | "centreId" | "fiscalPeriodId" | "fiscalYear" | "name" | "paidOn"
+>
+
+export type PaymentFiltersOptions = FiltersOptions
+
+export type PaymentQueryOptions = QueryOptions<PaymentWhereOptions, PaymentFiltersOptions>
 
 export const paymentsApi = {
-  list(params: Params = {}): Promise<{
-    payments: Payment[]
+  async list(params: PaymentQueryOptions = {}): Promise<{
+    payments: PaymentAsIndex[]
+    totalCount: number
   }> {
-    return http.get("/api/payments", { params }).then(({ data }) => data)
+    const { data } = await http.get("/api/payments", { params })
+    return data
   },
-  create(attributes: Partial<Payment>): Promise<{ payment: Payment }> {
-    return http.post("/api/payments", attributes).then(({ data }) => data)
+  async get(paymentId: number): Promise<{
+    payment: PaymentAsShow
+    policy: Policy
+  }> {
+    const { data } = await http.get(`/api/payments/${paymentId}`)
+    return data
   },
-  update(paymentId: number, attributes: any): Promise<{ payment: Payment }> {
-    return http.patch(`/api/payments/${paymentId}`, attributes).then(({ data }) => data)
+  async create(attributes: Partial<Payment>): Promise<{
+    payment: PaymentAsShow
+    policy: Policy
+  }> {
+    const { data } = await http.post("/api/payments", attributes)
+    return data
   },
-  delete(paymentId: number): Promise<void> {
-    return http.delete(`/api/payments/${paymentId}`).then(({ data }) => data)
+  async update(
+    paymentId: number,
+    attributes: Partial<Payment>
+  ): Promise<{
+    payment: PaymentAsShow
+    policy: Policy
+  }> {
+    const { data } = await http.patch(`/api/payments/${paymentId}`, attributes)
+    return data
+  },
+  async delete(paymentId: number): Promise<void> {
+    const { data } = await http.delete(`/api/payments/${paymentId}`)
+    return data
   },
 }
 

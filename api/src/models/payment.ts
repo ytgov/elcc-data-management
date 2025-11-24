@@ -1,98 +1,96 @@
 import {
-  Association,
-  BelongsToCreateAssociationMixin,
-  BelongsToGetAssociationMixin,
-  BelongsToSetAssociationMixin,
-  CreationOptional,
   DataTypes,
-  ForeignKey,
-  InferAttributes,
-  InferCreationAttributes,
   Model,
-  NonAttribute,
-} from "sequelize"
+  sql,
+  type CreationOptional,
+  type InferAttributes,
+  type InferCreationAttributes,
+  type NonAttribute,
+} from "@sequelize/core"
+import {
+  Attribute,
+  AutoIncrement,
+  BelongsTo,
+  Default,
+  NotNull,
+  PrimaryKey,
+  Table,
+  ValidateAttribute,
+} from "@sequelize/core/decorators-legacy"
 
-import sequelize from "@/db/db-client"
+import { isValidFiscalYearLegacy } from "@/models/validators"
+
 import Centre from "@/models/centre"
+import FiscalPeriod from "@/models/fiscal-period"
 
-import { isValidFiscalYear } from "@/utils/validators"
-
+@Table({
+  paranoid: false,
+})
 export class Payment extends Model<InferAttributes<Payment>, InferCreationAttributes<Payment>> {
+  @Attribute(DataTypes.INTEGER)
+  @PrimaryKey
+  @AutoIncrement
   declare id: CreationOptional<number>
-  declare centreId: ForeignKey<Centre["id"]>
+
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  declare centreId: number
+
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  declare fiscalPeriodId: number
+
+  @Attribute(DataTypes.STRING(10))
+  @NotNull
+  @ValidateAttribute({
+    isValidFiscalYearLegacy,
+  })
   declare fiscalYear: string
+
+  @Attribute(DataTypes.DATEONLY)
+  @NotNull
   declare paidOn: string
+
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
   declare amountInCents: number
+
+  @Attribute(DataTypes.STRING(100))
+  @NotNull
   declare name: string
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare createdAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
 
-  // https://sequelize.org/docs/v6/other-topics/typescript/#usage
-  // https://sequelize.org/docs/v6/core-concepts/assocs/#special-methodsmixins-added-to-instances
-  // https://sequelize.org/api/v7/types/_sequelize_core.index.belongstocreateassociationmixin
-  declare getCentre: BelongsToGetAssociationMixin<Centre>
-  declare setCentre: BelongsToSetAssociationMixin<Centre, Centre["id"]>
-  declare createCentre: BelongsToCreateAssociationMixin<Centre>
-
+  // Associations
+  @BelongsTo(() => Centre, {
+    foreignKey: "centreId",
+    inverse: {
+      as: "payments",
+      type: "hasMany",
+    },
+  })
   declare centre?: NonAttribute<Centre>
 
-  declare static associations: {
-    centre: Association<Payment, Centre>
-  }
+  @BelongsTo(() => FiscalPeriod, {
+    foreignKey: "fiscalPeriodId",
+    inverse: {
+      as: "payments",
+      type: "hasMany",
+    },
+  })
+  declare fiscalPeriod?: NonAttribute<FiscalPeriod>
 
-  static establishAssociations() {
-    this.belongsTo(Centre, {
-      foreignKey: "centreId",
-    })
+  static establishScopes() {
+    // add as needed
   }
 }
-
-Payment.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    centreId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: "centres", // using real table name here
-        key: "id", // using real column name here
-      },
-    },
-    fiscalYear: {
-      type: DataTypes.STRING(10),
-      allowNull: false,
-      validate: { isValidFiscalYear },
-    },
-    paidOn: {
-      type: DataTypes.DATEONLY,
-      allowNull: false,
-    },
-    amountInCents: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    name: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    sequelize,
-  }
-)
 
 export default Payment

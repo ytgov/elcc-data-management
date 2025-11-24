@@ -87,7 +87,7 @@
         <v-card-actions class="mx-4 mb-2">
           <v-btn
             :loading="isLoading"
-            color="yg_sun"
+            color="yg-sun"
             variant="outlined"
             @click="close"
             >Close</v-btn
@@ -112,7 +112,7 @@ import { cloneDeep, isEmpty } from "lodash"
 import { nextTick, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
-import { VForm } from "vuetify/lib/components/index.mjs"
+import { type VForm } from "vuetify/components"
 
 import { required } from "@/utils/validators"
 import centresApi from "@/api/centres-api"

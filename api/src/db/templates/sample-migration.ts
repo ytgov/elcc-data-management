@@ -1,10 +1,8 @@
-import { DataTypes } from "sequelize"
+import { DataTypes, sql } from "@sequelize/core"
 
-import type { Migration } from "@/db/umzug"
-import { MssqlSimpleTypes } from "@/db/utils/mssql-simple-types"
+import { type Migration } from "@/db/umzug"
 
-export const up: Migration = async ({ context: queryInterface }) => {
-  throw new Error("Not implemented")
+export async function up({ context: queryInterface }: Migration) {
   await queryInterface.createTable("users", {
     id: {
       type: DataTypes.INTEGER,
@@ -22,19 +20,18 @@ export const up: Migration = async ({ context: queryInterface }) => {
       defaultValue: false,
     },
     created_at: {
-      type: MssqlSimpleTypes.DATETIME2(0),
+      type: "datetime2",
       allowNull: false,
-      defaultValue: MssqlSimpleTypes.NOW,
+      defaultValue: sql.fn("getutcdate"),
     },
     updated_at: {
-      type: MssqlSimpleTypes.DATETIME2(0),
+      type: "datetime2",
       allowNull: false,
-      defaultValue: MssqlSimpleTypes.NOW,
+      defaultValue: sql.fn("getutcdate"),
     },
   })
 }
 
-export const down: Migration = async ({ context: queryInterface }) => {
-  throw new Error("Not implemented")
+export async function down({ context: queryInterface }: Migration) {
   await queryInterface.dropTable("users")
 }

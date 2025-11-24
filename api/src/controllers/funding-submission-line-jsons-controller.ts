@@ -9,12 +9,15 @@ export class FundingSubmissionLineJsonsController extends BaseController<Funding
     try {
       const where = this.buildWhere()
       const scopes = this.buildFilterScopes()
+      const order = this.buildOrder([["dateStart", "ASC"]])
       const scopedFundingSubmissionLineJsons = FundingSubmissionLineJson.scope(scopes)
 
       const totalCount = await scopedFundingSubmissionLineJsons.count({ where })
       const fundingSubmissionLineJsons = await scopedFundingSubmissionLineJsons.findAll({
         where,
-        order: ["dateStart"],
+        order,
+        limit: this.pagination.limit,
+        offset: this.pagination.offset,
       })
       const serializedfundingSubmissionLineJsons = FundingSubmissionLineJsonSerializer.asTable(
         fundingSubmissionLineJsons

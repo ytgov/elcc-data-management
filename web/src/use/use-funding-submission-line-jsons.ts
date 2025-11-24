@@ -6,6 +6,7 @@ import fundingSubmissionLineJsonsApi, {
   type FundingSubmissionLineJsonAsIndex,
   type FundingSubmissionLineJsonFiltersOptions,
   type FundingSubmissionLineJsonWhereOptions,
+  type FundingSubmissionLineJsonQueryOptions,
 } from "@/api/funding-submission-line-jsons-api"
 
 export {
@@ -13,15 +14,11 @@ export {
   type FundingSubmissionLineJsonAsIndex,
   type FundingSubmissionLineJsonWhereOptions,
   type FundingSubmissionLineJsonFiltersOptions,
+  type FundingSubmissionLineJsonQueryOptions,
 }
 
 export function useFundingSubmissionLineJsons(
-  queryOptions: Ref<{
-    where?: FundingSubmissionLineJsonWhereOptions
-    filters?: FundingSubmissionLineJsonFiltersOptions
-    page?: number
-    perPage?: number
-  }> = ref({}),
+  queryOptions: Ref<FundingSubmissionLineJsonQueryOptions> = ref({}),
   { skipWatchIf = () => false }: { skipWatchIf?: () => boolean } = {}
 ) {
   const state = reactive<{

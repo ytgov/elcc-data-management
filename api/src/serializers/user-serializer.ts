@@ -4,6 +4,7 @@ import { User } from "@/models"
 
 import BaseSerializer from "@/serializers/base-serializer"
 
+/** @deprecated - prefer newer serializers such as Users.IndexSerializer */
 export class UserSerializer extends BaseSerializer<User> {
   static asDetailedTable(users: User[]) {
     return users.map((user) => ({

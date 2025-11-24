@@ -8,6 +8,7 @@ import { FundingSubmissionLine } from "@/models"
 import { FundingSubmissionLineSerializer } from "@/serializers"
 import { FundingSubmissionLineServices } from "@/services"
 
+/** @deprecated - prefer api/src/controllers/funding-submission-lines-controller.ts */
 export const submissionLineRouter = express.Router()
 
 submissionLineRouter.use(checkJwt)

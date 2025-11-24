@@ -1,123 +1,89 @@
 import {
-  Association,
-  BelongsToCreateAssociationMixin,
-  BelongsToGetAssociationMixin,
-  BelongsToSetAssociationMixin,
-  CreationOptional,
   DataTypes,
-  ForeignKey,
-  InferAttributes,
-  InferCreationAttributes,
   Model,
-  NonAttribute,
-} from "sequelize"
+  sql,
+  type CreationOptional,
+  type InferAttributes,
+  type InferCreationAttributes,
+  type NonAttribute,
+} from "@sequelize/core"
+import {
+  Attribute,
+  AutoIncrement,
+  BelongsTo,
+  Default,
+  NotNull,
+  PrimaryKey,
+  Table,
+} from "@sequelize/core/decorators-legacy"
 
-import sequelize from "@/db/db-client"
-import Centre from "./centre"
-import EmployeeWageTier from "./employee-wage-tier"
+import Centre from "@/models/centre"
+import EmployeeWageTier from "@/models/employee-wage-tier"
 
+@Table({
+  paranoid: false,
+})
 export class WageEnhancement extends Model<
   InferAttributes<WageEnhancement>,
   InferCreationAttributes<WageEnhancement>
 > {
+  @Attribute(DataTypes.INTEGER)
+  @PrimaryKey
+  @AutoIncrement
   declare id: CreationOptional<number>
-  declare centreId: ForeignKey<Centre["id"]>
-  declare employeeWageTierId: ForeignKey<EmployeeWageTier["id"]>
+
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  declare centreId: number
+
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  declare employeeWageTierId: number
+
+  @Attribute(DataTypes.STRING(100))
+  @NotNull
   declare employeeName: string
+
+  @Attribute(DataTypes.FLOAT)
+  @NotNull
   declare hoursEstimated: number
+
+  @Attribute(DataTypes.FLOAT)
+  @NotNull
   declare hoursActual: number
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare createdAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
 
-  // https://sequelize.org/docs/v6/other-topics/typescript/#usage
-  // https://sequelize.org/docs/v6/core-concepts/assocs/#special-methodsmixins-added-to-instances
-  // https://sequelize.org/api/v7/types/_sequelize_core.index.belongstocreateassociationmixin
-  declare getCentre: BelongsToGetAssociationMixin<Centre>
-  declare setCentre: BelongsToSetAssociationMixin<Centre, Centre["id"]>
-  declare createCentre: BelongsToCreateAssociationMixin<Centre>
-
-  declare getEmployeeWageTier: BelongsToGetAssociationMixin<EmployeeWageTier>
-  declare setEmployeeWageTier: BelongsToSetAssociationMixin<
-    EmployeeWageTier,
-    EmployeeWageTier["id"]
-  >
-  declare createEmployeeWageTier: BelongsToCreateAssociationMixin<EmployeeWageTier>
-
+  // Associations
+  @BelongsTo(() => Centre, {
+    foreignKey: "centreId",
+    inverse: {
+      as: "wageEnhancements",
+      type: "hasMany",
+    },
+  })
   declare centre?: NonAttribute<Centre>
+
+  @BelongsTo(() => EmployeeWageTier, {
+    foreignKey: "employeeWageTierId",
+    inverse: {
+      as: "wageEnhancements",
+      type: "hasMany",
+    },
+  })
   declare employeeWageTier?: NonAttribute<EmployeeWageTier>
 
-  declare static associations: {
-    centre: Association<WageEnhancement, Centre>
-    employeeWageTier: Association<WageEnhancement, EmployeeWageTier>
-  }
-
-  static establishAssociations() {
-    this.belongsTo(Centre, {
-      foreignKey: "centreId",
-    })
-    this.belongsTo(EmployeeWageTier, {
-      as: "employeeWageTier",
-      foreignKey: "employeeWageTierId",
-    })
+  static establishScopes() {
+    // add as needed
   }
 }
-
-WageEnhancement.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-      allowNull: false,
-    },
-    centreId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: "centres", // use real table name here
-        key: "id",
-      },
-    },
-    employeeWageTierId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: EmployeeWageTier,
-        key: "id",
-      },
-    },
-    employeeName: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    hoursEstimated: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-    },
-    hoursActual: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    sequelize,
-    indexes: [
-      {
-        unique: true,
-        fields: ["centre_id", "employee_wage_tier_id"], // not sure if these need to be snake_case?
-      },
-    ],
-  }
-)
 
 export default WageEnhancement

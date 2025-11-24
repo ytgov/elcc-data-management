@@ -109,3 +109,6 @@ db/sapassword.env
 
 # DB Data
 db/data
+
+# Claude code local config
+.claude/settings.local.json

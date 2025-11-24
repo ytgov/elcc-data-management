@@ -1,131 +1,137 @@
 import {
-  Model,
   DataTypes,
-  InferAttributes,
-  InferCreationAttributes,
-  CreationOptional,
-  NonAttribute,
-  Association,
-  HasManyGetAssociationsMixin,
-  HasManyAddAssociationMixin,
-  HasManyAddAssociationsMixin,
-  HasManyCountAssociationsMixin,
-  HasManyCreateAssociationMixin,
-  HasManyHasAssociationMixin,
-  HasManyHasAssociationsMixin,
-  HasManyRemoveAssociationMixin,
-  HasManyRemoveAssociationsMixin,
-  HasManySetAssociationsMixin,
-} from "sequelize"
+  sql,
+  type CreationOptional,
+  type InferAttributes,
+  type InferCreationAttributes,
+  type NonAttribute,
+} from "@sequelize/core"
+import {
+  Attribute,
+  AutoIncrement,
+  Default,
+  NotNull,
+  PrimaryKey,
+  Table,
+  Unique,
+  ValidateAttribute,
+} from "@sequelize/core/decorators-legacy"
+import { isEmpty, isNil } from "lodash"
 
-import sequelize from "@/db/db-client"
+import BaseModel from "@/models/base-model"
 
-import UserRole from "@/models/user-role"
-
+// TODO: standardize to snake_case
 export enum UserStatus {
   ACTIVE = "Active",
   INACTIVE = "Inactive",
 }
 
-export class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
-  declare id: CreationOptional<number>
-  declare email: string
-  declare sub: string
-  declare firstName: string
-  declare lastName: string
-  declare status: UserStatus
-  declare isAdmin: CreationOptional<boolean>
-  declare ynetId: string | null
-  declare directoryId: string | null
-  declare createdAt: CreationOptional<Date>
-  declare updatedAt: CreationOptional<Date>
-
-  // https://sequelize.org/docs/v6/other-topics/typescript/#usage
-  // https://sequelize.org/docs/v6/core-concepts/assocs/#foohasmanybar
-  // https://sequelize.org/api/v7/types/_sequelize_core.index.hasmanyaddassociationmixin
-  declare getRoles: HasManyGetAssociationsMixin<UserRole>
-  declare setRoles: HasManySetAssociationsMixin<UserRole, UserRole["userId"]>
-  declare hasRole: HasManyHasAssociationMixin<UserRole, UserRole["userId"]>
-  declare hasRoles: HasManyHasAssociationsMixin<UserRole, UserRole["userId"]>
-  declare addRole: HasManyAddAssociationMixin<UserRole, UserRole["userId"]>
-  declare addRoles: HasManyAddAssociationsMixin<UserRole, UserRole["userId"]>
-  declare removeRole: HasManyRemoveAssociationMixin<UserRole, UserRole["userId"]>
-  declare removeRoles: HasManyRemoveAssociationsMixin<UserRole, UserRole["userId"]>
-  declare countRoles: HasManyCountAssociationsMixin
-  declare createRole: HasManyCreateAssociationMixin<UserRole>
-
-  declare roles?: NonAttribute<UserRole[]> // where user roles assocation gets loaded into
-
-  declare static associations: {
-    roles: Association<User, UserRole>
-  }
-
-  static establishAssociations() {
-    this.hasMany(UserRole, {
-      sourceKey: "id",
-      foreignKey: "userId",
-      as: "roles",
-    })
-  }
+// TODO: standardize to snake_case
+export enum UserRoles {
+  ADMIN = "Admin",
+  EDITOR = "Editor",
+  USER = "User",
+  SUPER_ADMIN = "Super Admin",
+  SYSTEM_ADMINISTRATOR = "System Administrator",
 }
 
-User.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      allowNull: false,
-      autoIncrement: true,
+export const USER_ROLES = Object.values<string>(UserRoles)
+
+@Table({
+  paranoid: false,
+})
+export class User extends BaseModel<InferAttributes<User>, InferCreationAttributes<User>> {
+  static readonly Status = UserStatus
+  static readonly Roles = UserRoles
+
+  @Attribute(DataTypes.INTEGER)
+  @PrimaryKey
+  @AutoIncrement
+  declare id: CreationOptional<number>
+
+  @Attribute(DataTypes.STRING(200))
+  @NotNull
+  @Unique
+  declare email: string
+
+  @Attribute(DataTypes.STRING(200))
+  @NotNull
+  declare sub: string
+
+  @Attribute(DataTypes.STRING(100))
+  @NotNull
+  declare firstName: string
+
+  @Attribute(DataTypes.STRING(100))
+  @NotNull
+  declare lastName: string
+
+  @Attribute(DataTypes.STRING(50))
+  @NotNull
+  @ValidateAttribute({
+    isIn: {
+      args: [Object.values(UserStatus)],
+      msg: `Status must be one of: ${Object.values(UserStatus).join(", ")}`,
     },
-    email: {
-      type: DataTypes.STRING(200),
-      primaryKey: true,
-      autoIncrement: false,
-      allowNull: false,
+  })
+  declare status: UserStatus
+
+  @Attribute({
+    type: DataTypes.STRING(255),
+    allowNull: false,
+    defaultValue: UserRoles.USER,
+    get() {
+      const roles = this.getDataValue("roles")
+      if (isEmpty(roles)) return []
+
+      return roles.split(",")
     },
-    sub: {
-      type: DataTypes.STRING(200),
-      allowNull: false,
+    set(value: string[]) {
+      this.setDataValue("roles", value.join(","))
     },
-    firstName: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
+    validate: {
+      isValidRole(roles: string) {
+        if (isNil(roles) || isEmpty(roles)) return
+
+        const rolesArray = roles.split(",")
+        rolesArray.forEach((role: string) => {
+          if (USER_ROLES.includes(role)) return
+
+          throw new Error(`Invalid role: ${role}. Allowed roles are: ${USER_ROLES.join(", ")}`)
+        })
+      },
     },
-    lastName: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    status: {
-      type: DataTypes.STRING(50),
-      allowNull: false,
-    },
-    isAdmin: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
-    ynetId: {
-      type: DataTypes.STRING(50),
-      allowNull: true,
-    },
-    directoryId: {
-      type: DataTypes.STRING(50),
-      allowNull: true,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    sequelize,
+  })
+  declare roles: CreationOptional<string[]>
+
+  @Attribute(DataTypes.STRING(50))
+  declare ynetId: string | null
+
+  @Attribute(DataTypes.STRING(50))
+  declare directoryId: string | null
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
+  declare createdAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
+  declare updatedAt: CreationOptional<Date>
+
+  // Magic Attributes
+  get displayName(): NonAttribute<string> {
+    return [this.firstName, this.lastName].filter(Boolean).join(" ")
   }
-)
+
+  get isSystemAdmin(): NonAttribute<boolean> {
+    return this.roles.includes(UserRoles.SYSTEM_ADMINISTRATOR)
+  }
+
+  static establishScopes() {
+    this.addSearchScope(["firstName", "lastName", "email"])
+  }
+}
 
 export default User

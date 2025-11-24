@@ -1,12 +1,30 @@
 import {
-  CreationOptional,
   DataTypes,
-  InferAttributes,
-  InferCreationAttributes,
-  Model,
-} from "sequelize"
+  sql,
+  type CreationOptional,
+  type InferAttributes,
+  type InferCreationAttributes,
+  type NonAttribute,
+} from "@sequelize/core"
+import {
+  Attribute,
+  AutoIncrement,
+  Default,
+  HasMany,
+  NotNull,
+  PrimaryKey,
+  Table,
+  ValidateAttribute,
+} from "@sequelize/core/decorators-legacy"
+import { DateTime } from "luxon"
 
-import sequelize from "@/db/db-client"
+import { FiscalPeriodsFiscalYearMonthUniqueIndex } from "@/models/indexes"
+import { isValidFiscalYearShort } from "@/models/validators"
+
+import BaseModel from "@/models/base-model"
+import EmployeeBenefit from "@/models/employee-benefit"
+import EmployeeWageTier from "@/models/employee-wage-tier"
+import Payment from "@/models/payment"
 
 /** Keep in sync with web/src/api/fiscal-periods-api.ts */
 export enum FiscalPeriodMonths {
@@ -24,71 +42,107 @@ export enum FiscalPeriodMonths {
   MARCH = "march",
 }
 
-export class FiscalPeriod extends Model<
+export const FISCAL_PERIOD_MONTHS = Object.values<string>(FiscalPeriodMonths)
+
+@Table({
+  paranoid: false,
+})
+export class FiscalPeriod extends BaseModel<
   InferAttributes<FiscalPeriod>,
   InferCreationAttributes<FiscalPeriod>
 > {
   static readonly Months = FiscalPeriodMonths
 
+  @Attribute(DataTypes.INTEGER)
+  @PrimaryKey
+  @AutoIncrement
   declare id: CreationOptional<number>
-  declare fiscalYear: string
-  declare month: FiscalPeriodMonths
-  declare dateStart: Date
-  declare dateEnd: Date
-  declare createdAt: CreationOptional<Date>
-  declare updatedAt: CreationOptional<Date>
-}
 
-FiscalPeriod.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-      allowNull: false,
+  @Attribute(DataTypes.STRING(10))
+  @NotNull
+  @FiscalPeriodsFiscalYearMonthUniqueIndex
+  @ValidateAttribute({
+    isValidFiscalYear: isValidFiscalYearShort,
+  })
+  declare fiscalYear: string
+
+  @Attribute(DataTypes.STRING(10))
+  @NotNull
+  @FiscalPeriodsFiscalYearMonthUniqueIndex
+  @ValidateAttribute({
+    isIn: {
+      args: [FISCAL_PERIOD_MONTHS],
+      msg: `Month must be one of: ${FISCAL_PERIOD_MONTHS.join(", ")}`,
     },
-    fiscalYear: {
-      type: DataTypes.STRING(10),
-      allowNull: false,
-    },
-    month: {
-      type: DataTypes.STRING(10),
-      allowNull: false,
-      validate: {
-        isIn: {
-          args: [Object.values(FiscalPeriodMonths)],
-          msg: `Month must be one of: ${Object.values(FiscalPeriodMonths).join(", ")}`,
-        },
-      },
-    },
-    dateStart: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    dateEnd: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    sequelize,
-    indexes: [
-      {
-        unique: true,
-        fields: ["fiscal_year", "month"], // not sure if these need to be snake_case?
-      },
-    ],
+  })
+  declare month: FiscalPeriodMonths
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  declare dateStart: Date
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  declare dateEnd: Date
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
+  declare createdAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
+  declare updatedAt: CreationOptional<Date>
+
+  // Helper functions
+  static toShortFiscalYearFormat(fiscalYear: string): string {
+    return fiscalYear.replace(/^(\d{4})-(\d{4})$/, (_, startYear, endYear) => {
+      return `${startYear}-${endYear.slice(-2)}`
+    })
   }
-)
+
+  static asFiscalPeriodMonth(date: DateTime): FiscalPeriodMonths {
+    const month = date.toFormat("MMMM").toLowerCase()
+    FiscalPeriod.assertIsValidMonth(month)
+
+    return month
+  }
+
+  static assertIsValidMonth(value: string): asserts value is FiscalPeriodMonths {
+    if (!FISCAL_PERIOD_MONTHS.includes(value)) {
+      throw new Error(`Invalid fiscal period month: ${value}`)
+    }
+  }
+
+  // Associations
+  @HasMany(() => EmployeeBenefit, {
+    foreignKey: "fiscalPeriodId",
+    inverse: {
+      as: "employeeBenefits",
+    },
+  })
+  declare employeeBenefits?: NonAttribute<EmployeeBenefit[]>
+
+  @HasMany(() => EmployeeWageTier, {
+    foreignKey: "fiscalPeriodId",
+    inverse: {
+      as: "employeeWageTiers",
+    },
+  })
+  declare employeeWageTiers?: NonAttribute<EmployeeWageTier[]>
+
+  @HasMany(() => Payment, {
+    foreignKey: "fiscalPeriodId",
+    inverse: {
+      as: "payments",
+    },
+  })
+  declare payments?: NonAttribute<Payment[]>
+
+  static establishScopes() {
+    // add as needed
+  }
+}
 
 export default FiscalPeriod

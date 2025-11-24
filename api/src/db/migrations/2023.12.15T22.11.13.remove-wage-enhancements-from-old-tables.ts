@@ -1,8 +1,8 @@
-import type { Migration } from "@/db/umzug"
+import { type Migration } from "@/db/umzug"
 
 import { FundingSubmissionLine, FundingSubmissionLineJson } from "@/models"
 
-export const up: Migration = async () => {
+export async function up({ context: queryInterface }: Migration) {
   const SECTION_NAME_TO_REMOVE = "Wage Enhancement"
 
   const fundingSubmissionLines = await FundingSubmissionLine.findAll({
@@ -31,6 +31,6 @@ export const up: Migration = async () => {
   })
 }
 
-export const down: Migration = async () => {
+export async function down({ context: queryInterface }: Migration) {
   // no-op - this migration is not reversible, it is however idempotent
 }

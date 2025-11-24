@@ -1,7 +1,7 @@
-import type { Migration } from "@/db/umzug"
+import { type Migration } from "@/db/umzug"
 import { MssqlSimpleTypes } from "@/db/utils/mssql-simple-types"
 
-export const up: Migration = async ({ context: queryInterface }) => {
+export async function up({ context: queryInterface }: Migration) {
   await queryInterface.addColumn("logs", "created_at", {
     type: MssqlSimpleTypes.DATETIME2(),
     allowNull: false,
@@ -26,7 +26,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
   await queryInterface.removeColumn("logs", "date")
 }
 
-export const down: Migration = async ({ context: queryInterface }) => {
+export async function down({ context: queryInterface }: Migration) {
   await queryInterface.addColumn("logs", "date", {
     type: MssqlSimpleTypes.DATETIME2(0),
     allowNull: false,

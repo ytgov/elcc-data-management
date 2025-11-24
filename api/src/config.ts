@@ -35,6 +35,7 @@ export const DB_USER = process.env.DB_USER || ""
 export const DB_PASS = process.env.DB_PASS || ""
 export const DB_NAME = process.env.DB_NAME || ""
 export const DB_PORT = parseInt(process.env.DB_PORT || "1433")
+export const DB_TRUST_SERVER_CERTIFICATE = process.env.DB_TRUST_SERVER_CERTIFICATE === "true"
 
 export const DB_HEALTH_CHECK_INTERVAL_SECONDS = parseInt(
   process.env.DB_HEALTH_CHECK_INTERVAL_SECONDS || "5"

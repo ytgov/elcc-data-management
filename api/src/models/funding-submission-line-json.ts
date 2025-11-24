@@ -1,119 +1,135 @@
 import {
-  Association,
-  BelongsToCreateAssociationMixin,
-  BelongsToGetAssociationMixin,
-  BelongsToSetAssociationMixin,
-  CreationOptional,
   DataTypes,
-  ForeignKey,
-  InferAttributes,
-  InferCreationAttributes,
-  NonAttribute,
-} from "sequelize"
-
-import sequelize from "@/db/db-client"
+  Op,
+  sql,
+  type CreationOptional,
+  type InferAttributes,
+  type InferCreationAttributes,
+  type NonAttribute,
+} from "@sequelize/core"
+import {
+  Attribute,
+  AutoIncrement,
+  BelongsTo,
+  Default,
+  NotNull,
+  PrimaryKey,
+  Table,
+} from "@sequelize/core/decorators-legacy"
 
 import BaseModel from "@/models/base-model"
 import Centre from "@/models/centre"
 import FundingLineValue from "@/models/funding-line-value"
 
 // TODO: consider renaming this to MonthlyWorksheet?
+// TODO: link this model to a fiscal period, and remove fiscalYear, dateName, dateStart, and dateEnd
+@Table({
+  paranoid: false,
+})
 export class FundingSubmissionLineJson extends BaseModel<
   InferAttributes<FundingSubmissionLineJson>,
   InferCreationAttributes<FundingSubmissionLineJson>
 > {
+  @Attribute(DataTypes.INTEGER)
+  @PrimaryKey
+  @AutoIncrement
   declare id: CreationOptional<number>
-  declare centreId: ForeignKey<Centre["id"]>
-  // TODO: link this to a fiscal period, and remove fiscalYear, dateName, dateStart, and dateEnd
+
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  declare centreId: number
+
+  @Attribute(DataTypes.STRING(10))
+  @NotNull
   declare fiscalYear: string
+
+  @Attribute(DataTypes.STRING(100))
+  @NotNull
   declare dateName: string
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
   declare dateStart: Date
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
   declare dateEnd: Date
+
+  @Attribute(DataTypes.TEXT)
+  @NotNull
   declare values: string
+
+  @Attribute({
+    type: DataTypes.VIRTUAL(DataTypes.STRING, ["values"]),
+    get() {
+      return JSON.parse(this.getDataValue("values"))
+    },
+    set(value: FundingLineValue[]) {
+      this.setDataValue("values", JSON.stringify(value))
+    },
+  })
   declare lines: CreationOptional<FundingLineValue[]>
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare createdAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
 
-  // https://sequelize.org/docs/v6/other-topics/typescript/#usage
-  // https://sequelize.org/docs/v6/core-concepts/assocs/#special-methodsmixins-added-to-instances
-  // https://sequelize.org/api/v7/types/_sequelize_core.index.belongstocreateassociationmixin
-  declare getCentre: BelongsToGetAssociationMixin<Centre>
-  declare setCentre: BelongsToSetAssociationMixin<Centre, Centre["id"]>
-  declare createCentre: BelongsToCreateAssociationMixin<Centre>
-
+  // Associations
+  @BelongsTo(() => Centre, {
+    foreignKey: "centreId",
+    inverse: {
+      as: "fundingSubmissionLineJsons",
+      type: "hasMany",
+    },
+  })
   declare centre?: NonAttribute<Centre>
 
-  declare static associations: {
-    centre: Association<FundingSubmissionLineJson, Centre>
-  }
-
-  static establishAssociations() {
-    this.belongsTo(Centre, {
-      foreignKey: "centreId",
+  static establishScopes() {
+    this.addScope("withChildOccupancyRate", (sectionName: string) => {
+      const withChildOccupancyRateQuery = sql`
+        (
+          SELECT
+            funding_submission_line_jsons.id
+          FROM
+            funding_submission_line_jsons
+            CROSS APPLY OPENJSON (funding_submission_line_jsons.[values]) AS json_array_element
+          WHERE
+            JSON_VALUE(json_array_element.value, '$.sectionName') = :sectionName
+          GROUP BY
+            funding_submission_line_jsons.id,
+            JSON_VALUE(json_array_element.value, '$.sectionName')
+          HAVING
+            SUM(
+              COALESCE(
+                TRY_CAST(
+                  JSON_VALUE(
+                    json_array_element.value,
+                    '$.actualChildOccupancyRate'
+                  ) AS int
+                ),
+                0
+              )
+            ) > 0
+        )
+      `
+      return {
+        where: {
+          id: {
+            [Op.in]: withChildOccupancyRateQuery,
+          },
+        },
+        replacements: {
+          sectionName,
+        },
+      }
     })
   }
 }
-
-FundingSubmissionLineJson.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-      allowNull: false,
-    },
-    centreId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: "centres",
-        key: "id",
-      },
-    },
-    fiscalYear: {
-      type: DataTypes.STRING(10),
-      allowNull: false,
-    },
-    dateName: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    dateStart: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    dateEnd: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    values: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
-    // TODO: investigate moving these to a get/set on the "values" attribute
-    lines: {
-      type: DataTypes.VIRTUAL,
-      get() {
-        return JSON.parse(this.getDataValue("values"))
-      },
-      set(value: FundingLineValue[]) {
-        this.setDataValue("values", JSON.stringify(value))
-      },
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    sequelize,
-  }
-)
 
 export default FundingSubmissionLineJson

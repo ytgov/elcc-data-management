@@ -1,23 +1,30 @@
-import { DeepPartial, Factory } from "fishery"
+import { Factory } from "fishery"
 import { faker } from "@faker-js/faker"
 import { DateTime } from "luxon"
 
 import { FundingSubmissionLineJson } from "@/models"
 import { formatAsFiscalYear } from "@/factories/helpers"
-
-function assertParamsHasCentreId(
-  params: DeepPartial<FundingSubmissionLineJson>
-): asserts params is DeepPartial<FundingSubmissionLineJson> & { centreId: number } {
-  if (typeof params.centreId !== "number") {
-    throw new Error("centreId is must be a number")
-  }
-}
+import centreFactory from "@/factories/centre-factory"
 
 export const fundingSubmissionLineJsonFactory = Factory.define<FundingSubmissionLineJson>(
-  ({ sequence, params, onCreate }) => {
-    onCreate((fundingSubmissionLineJson) => fundingSubmissionLineJson.save())
+  ({ associations, params, onCreate }) => {
+    onCreate(async (fundingSubmissionLineJson) => {
+      try {
+        await fundingSubmissionLineJson.save()
+        return fundingSubmissionLineJson
+      } catch (error) {
+        console.error(error)
+        throw new Error(
+          `Could not create FundingSubmissionLineJson with attributes: ${JSON.stringify(fundingSubmissionLineJson.dataValues, null, 2)}`
+        )
+      }
+    })
 
-    assertParamsHasCentreId(params)
+    const centre =
+      associations.centre ??
+      centreFactory.build({
+        id: params.centreId,
+      })
 
     const year = faker.number.int({ min: 2022, max: 2027 })
     const month = faker.number.int({ min: 1, max: 12 })
@@ -29,15 +36,18 @@ export const fundingSubmissionLineJsonFactory = Factory.define<FundingSubmission
     const fiscalYearStartYear = month >= APRIL ? year : year - 1
     const fiscalYear = formatAsFiscalYear(fiscalYearStartYear)
 
-    return FundingSubmissionLineJson.build({
-      id: sequence,
-      centreId: params.centreId,
+    const fundingSubmissionLineJson = FundingSubmissionLineJson.build({
+      centreId: centre.id,
       fiscalYear,
       dateName,
       dateStart: dateStart.toJSDate(),
       dateEnd: dateEnd.toJSDate(),
       values: JSON.stringify([]),
     })
+
+    fundingSubmissionLineJson.centre = centre
+
+    return fundingSubmissionLineJson
   }
 )
 

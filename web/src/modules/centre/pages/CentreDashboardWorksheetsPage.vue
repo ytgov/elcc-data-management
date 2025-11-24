@@ -7,7 +7,7 @@
   </div>
   <div v-else>
     <v-toolbar
-      color="#0097a966"
+      color="yg-blue-light"
       density="compact"
     >
       <v-tabs>
@@ -28,7 +28,15 @@
       </v-tabs>
     </v-toolbar>
 
-    <router-view v-if="!isEmpty(defaultMonth)"></router-view>
+    <router-view
+      v-if="!isEmpty(defaultMonth)"
+      v-slot="{ Component }"
+    >
+      <component
+        :is="Component"
+        @update:funding-submission-line-json="emit('update:fundingSubmissionLineJson', $event)"
+      />
+    </router-view>
   </div>
 </template>
 
@@ -45,6 +53,10 @@ const router = useRouter()
 const props = defineProps<{
   centreId: number
   fiscalYearSlug: string
+}>()
+
+const emit = defineEmits<{
+  "update:fundingSubmissionLineJson": [fundingSubmissionLineJsonId: number]
 }>()
 
 const fiscalPeriodsQuery = computed(() => ({

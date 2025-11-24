@@ -1,65 +1,156 @@
 import { isNil } from "lodash"
-import { WhereOptions } from "sequelize"
 
-import BaseController from "./base-controller"
-
+import logger from "@/utils/logger"
 import { Payment } from "@/models"
+import { PaymentPolicy } from "@/policies"
+import { CreateService, UpdateService } from "@/services/payments"
+import { IndexSerializer, ShowSerializer } from "@/serializers/payments"
+import BaseController from "@/controllers/base-controller"
 
-export class PaymentsController extends BaseController {
+export class PaymentsController extends BaseController<Payment> {
   async index() {
-    const where = this.query.where as WhereOptions<Payment>
-    return Payment.findAll({
-      where,
-      order: ["paidOn"],
-    })
-      .then((payments) => {
-        return this.response.json({ payments })
+    try {
+      const where = this.buildWhere()
+      const scopes = this.buildFilterScopes()
+      const order = this.buildOrder([["paidOn", "ASC"]])
+      const scopedPayments = PaymentPolicy.applyScope(scopes, this.currentUser)
+
+      const totalCount = await scopedPayments.count({ where })
+      const payments = await scopedPayments.findAll({
+        where,
+        order,
+        limit: this.pagination.limit,
+        offset: this.pagination.offset,
       })
-      .catch((error) => {
-        return this.response.status(400).json({ message: `Invalid query for payments: ${error}` })
+      const serializedPayments = IndexSerializer.perform(payments)
+      return this.response.json({
+        payments: serializedPayments,
+        totalCount,
       })
+    } catch (error) {
+      logger.error(`Error fetching payments: ${error}`, { error })
+      return this.response.status(400).json({
+        message: `Error fetching payments: ${error}`,
+      })
+    }
+  }
+
+  async show() {
+    try {
+      const payment = await this.loadPayment()
+      if (isNil(payment)) {
+        return this.response.status(404).json({
+          message: "Payment not found",
+        })
+      }
+
+      const policy = this.buildPolicy(payment)
+      if (!policy.show()) {
+        return this.response.status(403).json({
+          message: "You are not authorized to view this payment",
+        })
+      }
+
+      const serializedPayment = ShowSerializer.perform(payment)
+      return this.response.json({
+        payment: serializedPayment,
+        policy,
+      })
+    } catch (error) {
+      logger.error(`Error fetching payment: ${error}`, { error })
+      return this.response.status(400).json({
+        message: `Error fetching payment: ${error}`,
+      })
+    }
   }
 
   async create() {
-    return Payment.create(this.request.body)
-      .then((payment) => {
-        return this.response.status(201).json({ payment })
+    try {
+      const policy = this.buildPolicy()
+      if (!policy.create()) {
+        return this.response.status(403).json({
+          message: "You are not authorized to create payments",
+        })
+      }
+
+      const permittedAttributes = policy.permitAttributesForCreate(this.request.body)
+      const payment = await CreateService.perform(permittedAttributes)
+      const serializedPayment = ShowSerializer.perform(payment)
+      return this.response.status(201).json({
+        payment: serializedPayment,
+        policy,
       })
-      .catch((error) => {
-        return this.response.status(422).json({ message: `Payment creation failed: ${error}` })
+    } catch (error) {
+      logger.error(`Error creating payment: ${error}`, { error })
+      return this.response.status(422).json({
+        message: `Error creating payment: ${error}`,
       })
+    }
   }
 
   async update() {
-    const payment = await this.loadPayment()
-    if (isNil(payment)) return this.response.status(404).json({ message: "Payment not found." })
+    try {
+      const payment = await this.loadPayment()
+      if (isNil(payment)) {
+        return this.response.status(404).json({
+          message: "Payment not found",
+        })
+      }
 
-    return payment
-      .update(this.request.body)
-      .then((payment) => {
-        return this.response.json({ payment })
+      const policy = this.buildPolicy(payment)
+      if (!policy.update()) {
+        return this.response.status(403).json({
+          message: "You are not authorized to update this payment",
+        })
+      }
+
+      const permittedAttributes = policy.permitAttributes(this.request.body)
+      const updatedPayment = await UpdateService.perform(payment, permittedAttributes)
+      const serializedPayment = ShowSerializer.perform(updatedPayment)
+      return this.response.json({
+        payment: serializedPayment,
+        policy,
       })
-      .catch((error) => {
-        return this.response.status(422).json({ message: `Payment update failed: ${error}` })
+    } catch (error) {
+      logger.error(`Error updating payment: ${error}`, { error })
+      return this.response.status(422).json({
+        message: `Error updating payment: ${error}`,
       })
+    }
   }
 
   async destroy() {
-    const payment = await this.loadPayment()
-    if (isNil(payment)) return this.response.status(404).json({ message: "Payment not found." })
+    try {
+      const payment = await this.loadPayment()
+      if (isNil(payment)) {
+        return this.response.status(404).json({
+          message: "Payment not found",
+        })
+      }
 
-    return payment
-      .destroy()
-      .then(() => {
-        return this.response.status(204).end()
+      const policy = this.buildPolicy(payment)
+      if (!policy.destroy()) {
+        return this.response.status(403).json({
+          message: "You are not authorized to delete this payment",
+        })
+      }
+
+      await payment.destroy()
+      return this.response.status(204).send()
+    } catch (error) {
+      logger.error(`Error deleting payment: ${error}`, { error })
+      return this.response.status(422).json({
+        message: `Error deleting payment: ${error}`,
       })
-      .catch((error) => {
-        return this.response.status(422).json({ message: `Payment deletion failed: ${error}` })
-      })
+    }
   }
 
-  private loadPayment(): Promise<Payment | null> {
+  private loadPayment() {
     return Payment.findByPk(this.params.paymentId)
+  }
+
+  private buildPolicy(payment: Payment = Payment.build()) {
+    return new PaymentPolicy(this.currentUser, payment)
   }
 }
 

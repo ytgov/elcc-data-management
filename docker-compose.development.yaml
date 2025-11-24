@@ -6,6 +6,7 @@ x-default-environment: &default-environment
   DB_NAME: elcc_development
   DB_PASS: &default-db-password DevPwd99!
   DB_PORT: &default-db-port 1433
+  DB_TRUST_SERVER_CERTIFICATE: "true"
   DB_HEALTH_CHECK_INTERVAL_SECONDS: 5
   DB_HEALTH_CHECK_TIMEOUT_SECONDS: 10
   DB_HEALTH_CHECK_RETRIES: 3
@@ -23,7 +24,9 @@ services:
       RELEASE_TAG: ${RELEASE_TAG:-development}
       GIT_COMMIT_HASH: ${GIT_COMMIT_HASH:-not-set}
     tty: true # allows attaching debugger, equivalent of docker exec -t
+    init: true
     # stdin_open: true # equivalent of docker exec -i
+    user: "${HOST_USER_ID:-0}:${HOST_GROUP_ID:-0}"
     ports:
       - "3000:3000"
     volumes:
@@ -101,6 +104,8 @@ services:
       - 9999:8080
     environment:
       PLANTUML_LIMIT_SIZE: 8192
+    profiles:
+      - design
 
 volumes:
   db_data:

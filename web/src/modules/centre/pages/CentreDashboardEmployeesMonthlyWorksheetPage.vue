@@ -38,9 +38,22 @@
       <v-col>
         <h3 class="section-header">Employee Benefits</h3>
 
-        <EditEmployeeBenefitWidget
-          :centre-id="props.centreId"
-          :fiscal-period-id="fiscalPeriodId"
+        <v-alert
+          v-if="employeeBenefitNotFound"
+          type="warning"
+          variant="tonal"
+          title="Employee Benefit Not Found"
+        >
+          No employee benefit record exists for this centre and fiscal period. This record should
+          have been created during fiscal year initialization.
+        </v-alert>
+        <v-skeleton-loader
+          v-else-if="isLoadingEmployeeBenefits"
+          type="table"
+        />
+        <EmployeeBenefitEditTable
+          v-else
+          :employee-benefit-id="employeeBenefitId"
         />
       </v-col>
     </v-row>
@@ -71,8 +84,9 @@ import { isEmpty, isNil } from "lodash"
 
 import DateTimeUtils from "@/utils/date-time-utils"
 import useFiscalPeriods, { FiscalPeriodMonths } from "@/use/use-fiscal-periods"
+import useEmployeeBenefits from "@/use/use-employee-benefits"
 
-import EditEmployeeBenefitWidget from "@/modules/centre/components/EditEmployeeBenefitWidget.vue"
+import EmployeeBenefitEditTable from "@/components/employee-benefits/EmployeeBenefitEditTable.vue"
 import EditWageEnhancementsWidget from "@/modules/centre/components/EditWageEnhancementsWidget.vue"
 import ReplicateEstimatesButton from "@/components/wage-enhancements/ReplicateEstimatesButton.vue"
 
@@ -99,6 +113,23 @@ const fiscalPeriodFormattedDate = computed(() => {
   const formattedDate = DateTimeUtils.fromISO(dateStart).toUTC().toFormat("MMMM yyyy")
   return formattedDate
 })
+
+const employeeBenefitsQuery = computed(() => ({
+  where: {
+    centreId: props.centreId,
+    fiscalPeriodId: fiscalPeriodId.value,
+  },
+}))
+const {
+  employeeBenefits,
+  isLoading: isLoadingEmployeeBenefits,
+} = useEmployeeBenefits(employeeBenefitsQuery, {
+  skipWatchIf: () => isNil(fiscalPeriodId.value),
+})
+const employeeBenefitId = computed(() => employeeBenefits.value[0]?.id)
+const employeeBenefitNotFound = computed(
+  () => !isLoadingEmployeeBenefits.value && isEmpty(employeeBenefits.value)
+)
 </script>
 
 <style scoped>

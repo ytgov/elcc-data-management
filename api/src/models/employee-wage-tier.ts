@@ -1,150 +1,105 @@
 import {
-  Association,
-  BelongsToCreateAssociationMixin,
-  BelongsToGetAssociationMixin,
-  BelongsToSetAssociationMixin,
-  CreationOptional,
   DataTypes,
-  ForeignKey,
-  HasManyAddAssociationMixin,
-  HasManyAddAssociationsMixin,
-  HasManyCountAssociationsMixin,
-  HasManyCreateAssociationMixin,
-  HasManyGetAssociationsMixin,
-  HasManyHasAssociationMixin,
-  HasManyHasAssociationsMixin,
-  HasManyRemoveAssociationMixin,
-  HasManyRemoveAssociationsMixin,
-  HasManySetAssociationsMixin,
-  InferAttributes,
-  InferCreationAttributes,
-  NonAttribute,
-} from "sequelize"
+  sql,
+  type CreationOptional,
+  type InferAttributes,
+  type InferCreationAttributes,
+  type NonAttribute,
+} from "@sequelize/core"
+import {
+  Attribute,
+  AutoIncrement,
+  BelongsTo,
+  Default,
+  HasMany,
+  NotNull,
+  PrimaryKey,
+  Table,
+} from "@sequelize/core/decorators-legacy"
 
-import sequelize from "@/db/db-client"
+import { EmployeeWageTiersFiscalPeriodIdTierLevelUniqueIndex } from "@/models/indexes"
+
 import BaseModel from "@/models/base-model"
 import FiscalPeriod from "@/models/fiscal-period"
-import WageEnhancement from "./wage-enhancement"
+import WageEnhancement from "@/models/wage-enhancement"
 
+export type EmployeeWageTierDefault = Pick<
+  EmployeeWageTier,
+  "tierLevel" | "tierLabel" | "wageRatePerHour"
+>
+
+// TODO: make these end user editable, or clone forward when creating?
+export const EMPLOYEE_WAGE_TIER_DEFAULTS: ReadonlyArray<EmployeeWageTierDefault> = Object.freeze([
+  { tierLevel: 0, tierLabel: "Level 0", wageRatePerHour: 0 },
+  { tierLevel: 1, tierLabel: "Level 1", wageRatePerHour: 4.12 },
+  { tierLevel: 2, tierLabel: "Level 1a", wageRatePerHour: 6.01 },
+  { tierLevel: 3, tierLabel: "Level 2", wageRatePerHour: 7.44 },
+  { tierLevel: 4, tierLabel: "Level 2a", wageRatePerHour: 9.96 },
+  { tierLevel: 5, tierLabel: "Level 3 Exemption", wageRatePerHour: 12.31 },
+  { tierLevel: 6, tierLabel: "ECE Level 3", wageRatePerHour: 15.31 },
+])
+
+@Table({
+  paranoid: false,
+})
 export class EmployeeWageTier extends BaseModel<
   InferAttributes<EmployeeWageTier>,
   InferCreationAttributes<EmployeeWageTier>
 > {
+  @Attribute(DataTypes.INTEGER)
+  @PrimaryKey
+  @AutoIncrement
   declare id: CreationOptional<number>
-  declare fiscalPeriodId: ForeignKey<FiscalPeriod["id"]>
+
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  @EmployeeWageTiersFiscalPeriodIdTierLevelUniqueIndex
+  declare fiscalPeriodId: number
+
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  @EmployeeWageTiersFiscalPeriodIdTierLevelUniqueIndex
   declare tierLevel: number
+
+  @Attribute(DataTypes.STRING(50))
+  @NotNull
   declare tierLabel: string
+
+  @Attribute(DataTypes.FLOAT)
+  @NotNull
   declare wageRatePerHour: number
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare createdAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
 
-  // https://sequelize.org/docs/v6/other-topics/typescript/#usage
-  // https://sequelize.org/docs/v6/core-concepts/assocs/#special-methodsmixins-added-to-instances
-  // https://sequelize.org/api/v7/types/_sequelize_core.index.belongstocreateassociationmixin
-  declare getFiscalPeriod: BelongsToGetAssociationMixin<FiscalPeriod>
-  declare setFiscalPeriod: BelongsToSetAssociationMixin<FiscalPeriod, FiscalPeriod["id"]>
-  declare createFiscalPeriod: BelongsToCreateAssociationMixin<FiscalPeriod>
-
-  declare getWageEnhancements: HasManyGetAssociationsMixin<WageEnhancement>
-  declare setWageEnhancements: HasManySetAssociationsMixin<
-    WageEnhancement,
-    WageEnhancement["employeeWageTierId"]
-  >
-  declare hasWageEnhancement: HasManyHasAssociationMixin<
-    WageEnhancement,
-    WageEnhancement["employeeWageTierId"]
-  >
-  declare hasWageEnhancements: HasManyHasAssociationsMixin<
-    WageEnhancement,
-    WageEnhancement["employeeWageTierId"]
-  >
-  declare addWageEnhancement: HasManyAddAssociationMixin<
-    WageEnhancement,
-    WageEnhancement["employeeWageTierId"]
-  >
-  declare addWageEnhancements: HasManyAddAssociationsMixin<
-    WageEnhancement,
-    WageEnhancement["employeeWageTierId"]
-  >
-  declare removeWageEnhancement: HasManyRemoveAssociationMixin<
-    WageEnhancement,
-    WageEnhancement["employeeWageTierId"]
-  >
-  declare removeWageEnhancements: HasManyRemoveAssociationsMixin<
-    WageEnhancement,
-    WageEnhancement["employeeWageTierId"]
-  >
-  declare countWageEnhancements: HasManyCountAssociationsMixin
-  declare createWageEnhancement: HasManyCreateAssociationMixin<WageEnhancement>
-
+  // Associations
+  @BelongsTo(() => FiscalPeriod, {
+    foreignKey: "fiscalPeriodId",
+    inverse: {
+      as: "employeeWageTiers",
+      type: "hasMany",
+    },
+  })
   declare fiscalPeriod?: NonAttribute<FiscalPeriod>
-  declare wageEnhancements?: NonAttribute<WageEnhancement[]>
-  declare static associations: {
-    fiscalPeriod: Association<EmployeeWageTier, FiscalPeriod>
-    wageEnhancements: Association<EmployeeWageTier, WageEnhancement>
-  }
 
-  static establishAssociations() {
-    this.belongsTo(FiscalPeriod, {
-      foreignKey: "fiscalPeriodId",
-    })
-    this.hasMany(WageEnhancement, {
-      sourceKey: "id",
-      foreignKey: "employeeWageTierId",
-      as: "wageEnhancements",
-    })
+  @HasMany(() => WageEnhancement, {
+    foreignKey: "employeeWageTierId",
+    inverse: {
+      as: "employeeWageTier",
+    },
+  })
+  declare wageEnhancements?: NonAttribute<WageEnhancement[]>
+
+  static establishScopes() {
+    // add as needed
   }
 }
-
-EmployeeWageTier.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-      allowNull: false,
-    },
-    fiscalPeriodId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: "fiscal_periods", // use real table name here
-        key: "id",
-      },
-    },
-    tierLevel: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      unique: true,
-    },
-    tierLabel: {
-      type: DataTypes.STRING(50),
-      allowNull: false,
-    },
-    wageRatePerHour: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    sequelize,
-    indexes: [
-      {
-        unique: true,
-        fields: ["fiscal_period_id", "tier_level"], // not sure if these need to be snake_case?
-      },
-    ],
-  }
-)
 
 export default EmployeeWageTier

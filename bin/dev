@@ -1,7 +1,10 @@
 #!/usr/bin/env ruby
 
+require "shellwords"
+require "rdoc"
+
 require_relative "./jira_api"
-require_relative "./pull-request-editor"
+require_relative "./pull_request_editor"
 
 class DevHelper
   # Support dashes in command names
@@ -11,6 +14,7 @@ class DevHelper
     "description-from" => :description_from,
     "check-types" => :check_types,
     "edit-pr" => :edit_pr,
+    "sqlcmd-query" => :sqlcmd_query,
   }
   METHOD_TO_COMMAND = COMMAND_TO_METHOD.invert
 
@@ -102,62 +106,77 @@ class DevHelper
     run(*%w[api npm run ts-node], *args, **kwargs)
   end
 
+  def test(*args, **kwargs)
+    service = args[0]
+    if service == "api"
+      test_api(*args.drop(1), **kwargs)
+    elsif service == "web"
+      test_web(*args.drop(1), **kwargs)
+    else
+      test_api(*args, **kwargs)
+    end
+  end
+
   def test_api(*args, **kwargs)
+    reformat_project_relative_path_filter_for_vitest!(args, "api/")
     run(*%w[test_api npm run test], *args, **kwargs)
   end
 
-  alias test test_api
-
   def test_web(*args, **kwargs)
+    reformat_project_relative_path_filter_for_vitest!(args, "web/")
     run(*%w[test_web npm run test], *args, **kwargs)
   end
 
   def migrate(*args, **kwargs)
-    if RUBY_PLATFORM =~ /linux/
-      run(*%w[api npm run migrate], *args, execution_mode: WAIT_FOR_PROCESS, **kwargs)
-
-      file_or_directory = "api/src/db/migrations"
-      exit(0) unless take_over_needed?(file_or_directory)
-
-      ownit file_or_directory
+    action = args[0]
+    if action == "up"
+      migrate_api(*%w[up -- --step=1], *args.drop(1), **kwargs)
+    elsif action == "down"
+      migrate_api(*%w[down -- --step=1], *args.drop(1), **kwargs)
     else
-      run(*%w[api npm run migrate], *args, **kwargs)
+      migrate_api(*args, **kwargs)
     end
+  end
+
+  def migrate_api(*args, **kwargs)
+    run(*%w[api npm run migrate], *args, **kwargs)
   end
 
   def seed(*args, **kwargs)
-    if RUBY_PLATFORM =~ /linux/
-      run(*%w[api npm run seed], *args, execution_mode: WAIT_FOR_PROCESS, **kwargs)
-
-      file_or_directory = "api/src/db/seeds"
-      exit(0) unless take_over_needed?(file_or_directory)
-
-      ownit file_or_directory
-    else
-      run(*%w[api npm run seed], *args, **kwargs)
-    end
+    run(*%w[api npm run seed], *args, **kwargs)
   end
 
   # -I enable quoted identifiers, e.g. "table"."column"
-  def sqlcmd(*args, **kwargs) # rubocop:disable Metrics/MethodLength
-    environment_hoist =
+  def sqlcmd(*args, **kwargs)
+    environment_variable_export_commands =
       ENV
         .slice(*%w[DB_NAME DB_USER DB_HOST DB_PORT])
         .map { |key, value| "export #{key}=\"#{value}\"" }
         .join("\n  ")
 
+    tty_argument = ""
+    tty_argument = "-T" if kwargs.fetch(:enable_tty, false)
+
     compose(<<~BASH, **kwargs)
-        exec db sh -c '
-          #{environment_hoist}
-          /opt/mssql-tools18/bin/sqlcmd \
-            -U "$DB_USER" \
-            -P "$DB_PASS" \
-            -H "$DB_HOST" \
-            -d "$DB_NAME" \
-            -C \
-            -I #{args.join(" ")}
-          '
-      BASH
+      exec #{tty_argument} db sh -c '
+        #{environment_variable_export_commands}
+        /opt/mssql-tools18/bin/sqlcmd \
+          -U "$DB_USER" \
+          -P "$DB_PASS" \
+          -H "$DB_HOST" \
+          -d "$DB_NAME" \
+          -C \
+          -I #{args.join(" ")}
+        '
+    BASH
+  end
+
+  def sqlcmd_query(query, *args, **kwargs)
+    if query.nil? || query.strip.empty?
+      raise ArgumentError, "Query cannot be nil or empty"
+    end
+
+    sqlcmd(args, enable_tty: true, pipe_input: query, **kwargs)
   end
 
   def db(*args, **kwargs)
@@ -217,6 +236,45 @@ class DevHelper
     puts completions
   end
 
+  ##
+  # Generate help documentation.
+  def help(*args, **kwargs)
+    rdoc = RDoc::RDoc.new
+    rdoc_arguements = %w[--dry-run --quiet] + [__FILE__]
+    rdoc.document(rdoc_arguements)
+    rdoc_data_for_class = rdoc.store.classes_hash["DevHelper"]
+
+    puts <<~HELP.chomp
+      Development Helper.
+
+      Usage:
+        dev <command> [args]
+
+      Available commands:
+    HELP
+
+    all_public_methods = public_methods(false).sort
+    all_public_methods.delete(:call)
+    longest_command_length = all_public_methods.map(&:length).max
+
+    all_public_methods.each do |method_name|
+      method_doc = rdoc_data_for_class.find_method_named(method_name.to_s)
+      command = METHOD_TO_COMMAND.fetch(method_name, method_name)
+      comment = method_doc.comment
+
+      print "  #{command}"
+      unless comment.empty?
+        first_line_of_comment = comment.to_s.lines[0].strip
+        pad = "-" * (longest_command_length - command.length + 1)
+        print " #{pad} #{first_line_of_comment}"
+      end
+      print "\n"
+    end
+
+    command = compose_command("<args>")
+    puts "\nFallback for unknown commands is to run `#{command}`."
+  end
+
   private
 
   def container_id(container_name, *args, **kwargs)
@@ -228,18 +286,38 @@ class DevHelper
   end
 
   def compose_command(*args, **kwargs)
-    environment = kwargs.fetch(:environment, "development")
-    "cd #{project_root} && docker compose -f docker-compose.#{environment}.yaml #{args.join(" ")}"
+    environment = kwargs.delete(:environment) { "development" }
+    pipe_input = kwargs.delete(:pipe_input)
+
+    go_to_project_root = "cd #{project_root}"
+    bootstrap_docker = "docker compose -f docker-compose.#{environment}.yaml #{args.join(' ')}"
+
+    if pipe_input
+      shell_safe_pipe_input = Shellwords.escape(pipe_input)
+      pipe_input_to_compose = "printf '%s\\n' #{shell_safe_pipe_input} |"
+
+      <<~BASH
+        #{go_to_project_root} && \
+        #{pipe_input_to_compose} #{dynamic_environment_variables} #{bootstrap_docker}
+      BASH
+    else
+      <<~BASH
+        #{go_to_project_root} && \
+        #{dynamic_environment_variables} #{bootstrap_docker}
+      BASH
+    end
   end
 
   def project_root
     @project_root ||= File.absolute_path("#{__dir__}/..")
   end
 
-  def take_over_needed?(file_or_directory)
-    files_owned_by_others =
-      system("find #{file_or_directory} -not -user #{user_id} -print -quit | grep -q .")
-    files_owned_by_others
+  def dynamic_environment_variables
+    if RUBY_PLATFORM =~ /linux/
+      %(HOST_USER_ID="#{user_id}" HOST_GROUP_ID="#{group_id}")
+    else
+      ""
+    end
   end
 
   def user_id
@@ -256,6 +334,23 @@ class DevHelper
     end
 
     `id -g`.strip
+  end
+
+  def reformat_project_relative_path_filter_for_vitest!(args, prefix)
+    if args.length.positive? && args[0].start_with?(prefix)
+      src_path_prefix = "#{prefix}src/"
+      test_path_regex = Regexp.escape(prefix)
+      src_path_regex = Regexp.escape(src_path_prefix)
+
+      if args[0].start_with?(src_path_prefix)
+        args[0] = args[0].gsub(/^#{src_path_regex}/, "tests/").gsub(/\.ts$/, ".test.ts")
+        # TODO: handle other file types
+      else
+        args[0] = args[0].gsub(/^#{test_path_regex}/, "")
+      end
+
+      puts "Reformatted path filter from project relative to service relative for vitest."
+    end
   end
 end
 

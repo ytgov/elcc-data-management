@@ -1,3 +1,15 @@
+/* Typography - needs !important to override Vuetify defaults */
+html {
+  font-size: 15px;
+}
+
+*,
+.text-body-1,
+.text-h6,
+.text-h5 {
+  font-family: Montserrat, Helvetica, Arial, sans-serif !important;
+}
+
 body,
 h1,
 h2,
@@ -6,15 +18,7 @@ p,
 div {
   color: #323232 !important;
 }
-html {
-  font-size: 15px;
-}
-*,
-.text-body-1,
-.text-h6,
-.text-h5 {
-  font-family: Montserrat, Helvetica, Arial, sans-serif !important;
-}
+
 h1 {
   display: block;
   font-size: 2em;
@@ -23,23 +27,21 @@ h1 {
   margin-block-end: 0.67em;
 }
 
+/* Links - anchor color now defined in theme */
 a {
   text-decoration: none;
-  color: #00818f;
-}
-a:hover {
-  color: #00707c;
 }
 
+a:hover {
+  opacity: 0.8;
+}
+
+/* Layout */
 .page-wrapper {
-  background-color: #eee;
   height: 100% !important;
 }
-/* 
-.v-card.default {
-    background-color: #fff2d5;
-} */
 
+/* Component overrides */
 .v-card.default .v-data-table {
   border: 1px #e0d5bb solid;
 }
@@ -58,10 +60,6 @@ ul.v-breadcrumbs {
   padding-left: 0;
 }
 
-.text-error {
-  color: #9b1b27 !important;
-}
-
 .v-btn.v-size--small {
   font-size: 14px;
 }
@@ -73,11 +71,13 @@ ul.v-breadcrumbs {
 .v-toolbar.bg-primary .v-toolbar-title__placeholder {
   color: white !important;
 }
+
 .v-breadcrumbs-item--disabled {
   color: #323232 !important;
   opacity: 80% !important;
 }
 
+/* Utility table class */
 table.table {
   width: 100%;
   text-align: left;

@@ -23,6 +23,7 @@
     v-else
     :funding-submission-line-json-id="fundingSubmissionLineJsonId"
     class="ma-4"
+    @update:funding-submission-line-json="emit('update:fundingSubmissionLineJson', $event)"
   />
 </template>
 
@@ -43,6 +44,10 @@ const props = defineProps<{
   centreId: number
   fiscalYearSlug: string
   month: FiscalPeriodMonths
+}>()
+
+const emit = defineEmits<{
+  "update:fundingSubmissionLineJson": [fundingSubmissionLineJsonId: number]
 }>()
 
 const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))

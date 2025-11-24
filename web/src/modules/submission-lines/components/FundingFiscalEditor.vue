@@ -43,7 +43,7 @@
         >
         <v-spacer></v-spacer>
         <v-btn
-          color="yg_sun"
+          color="yg-sun"
           variant="outlined"
           @click="close"
           >Close</v-btn

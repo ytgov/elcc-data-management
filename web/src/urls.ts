@@ -1,7 +1,5 @@
 import * as config from "./config"
 
-export const PROFILE_URL = `${config.API_BASE_URL}/api/user/me`
-export const USERS_URL = `${config.API_BASE_URL}/api/user`
 export const HEALTHCHECK_URL = `${config.API_BASE_URL}/api/healthcheck`
 
 // App specific URLS

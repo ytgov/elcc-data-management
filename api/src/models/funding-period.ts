@@ -1,76 +1,68 @@
 import {
-  CreationOptional,
   DataTypes,
-  InferAttributes,
-  InferCreationAttributes,
-  Model,
-} from "sequelize"
+  sql,
+  type CreationOptional,
+  type InferAttributes,
+  type InferCreationAttributes,
+} from "@sequelize/core"
+import {
+  Attribute,
+  AutoIncrement,
+  Default,
+  NotNull,
+  PrimaryKey,
+  Table,
+  ValidateAttribute,
+} from "@sequelize/core/decorators-legacy"
 
-import sequelize from "@/db/db-client"
+import { isValidFiscalYearLong } from "@/models/validators"
 
-export class FundingPeriod extends Model<
+import BaseModel from "@/models/base-model"
+
+@Table({
+  paranoid: false,
+})
+export class FundingPeriod extends BaseModel<
   InferAttributes<FundingPeriod>,
   InferCreationAttributes<FundingPeriod>
 > {
+  @Attribute(DataTypes.INTEGER)
+  @PrimaryKey
+  @AutoIncrement
   declare id: CreationOptional<number>
-  declare fiscalYear: string
-  declare fromDate: Date
-  declare toDate: Date
-  declare title: string
-  declare isFiscalYear: boolean
-  declare isSchoolMonth: boolean
-  declare createdAt: CreationOptional<Date>
-  declare updatedAt: CreationOptional<Date>
-}
 
-FundingPeriod.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      allowNull: false,
-      autoIncrement: true,
-    },
-    fiscalYear: {
-      type: DataTypes.STRING(10),
-      allowNull: false,
-    },
-    fromDate: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    toDate: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    title: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    isFiscalYear: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
-    isSchoolMonth: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: true,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    sequelize,
+  @Attribute(DataTypes.STRING(10))
+  @NotNull
+  @ValidateAttribute({
+    isValidFiscalYear: isValidFiscalYearLong,
+  })
+  declare fiscalYear: string
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  declare fromDate: Date
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  declare toDate: Date
+
+  @Attribute(DataTypes.STRING(100))
+  @NotNull
+  declare title: string
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
+  declare createdAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
+  declare updatedAt: CreationOptional<Date>
+
+  static establishScopes() {
+    this.addSearchScope(["fiscalYear", "title", "fromDate", "toDate"])
   }
-)
+}
 
 export default FundingPeriod

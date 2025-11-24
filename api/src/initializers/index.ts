@@ -16,7 +16,7 @@ export async function importAndExecuteInitializers() {
       const { default: initializerAction } = await require(modulePath)
       await initializerAction()
     } catch (error) {
-      console.error(`Failed to run initializer: ${modulePath}`, { error })
+      console.error(`Failed to run initializer: ${modulePath} -> ${error}`, { error })
       throw error
     }
   }

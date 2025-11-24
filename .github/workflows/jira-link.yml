@@ -1,0 +1,150 @@
+name: Link PR to Jira
+
+on:
+  pull_request:
+    types: [opened, edited]
+
+jobs:
+  link:
+    runs-on: ubuntu-latest # Uses ubuntu-24.04 with Ruby 3.2.3
+    env:
+      GLOBAL_ID: github:${{ github.repository }}:pr:${{ github.event.pull_request.number }}
+
+    steps:
+      - name: Extract Jira key from PR title
+        id: from_title
+        shell: bash
+        run: | # ruby
+          ruby <<'RUBY'
+            pr_title = <<~'TITLE_EOF'.chomp
+              ${{ github.event.pull_request.title }}
+            TITLE_EOF
+
+            jira_issue_numbers_from_title = pr_title.scan(/([A-Z]+-[0-9]+)/).flatten.uniq.join(' ')
+
+            puts "jira_issue_numbers_from_title=#{jira_issue_numbers_from_title}"
+            File.open(ENV['GITHUB_OUTPUT'], "a") { |f| f.puts "jira_issue_numbers_from_title=#{jira_issue_numbers_from_title}" }
+          RUBY
+
+      - name: Extract Jira keys from PR body (URLs)
+        id: from_body
+        shell: bash
+        run: | # ruby
+          ruby <<'RUBY'
+            jira_base = "${{ secrets.JIRA_BASE_URL }}"
+            pr_body = <<~'BODY_EOF'.chomp
+              ${{ github.event.pull_request.body }}
+            BODY_EOF
+
+            escaped_base = Regexp.escape(jira_base)
+            pattern = /#{escaped_base}\/browse\/([A-Z]+-[0-9]+)/i
+            keys = pr_body.scan(pattern).flatten.uniq.join(' ')
+
+            puts "jira_issue_numbers_from_body=#{keys}"
+            File.open(ENV['GITHUB_OUTPUT'], "a") { |f| f.puts "jira_issue_numbers_from_body=#{keys}" }
+          RUBY
+
+      - name: Remove Duplicates Jira Keys
+        id: remove_duplicates
+        shell: bash
+        run: | # ruby
+          ruby <<'RUBY'
+            title_keys = "${{ steps.from_title.outputs.jira_issue_numbers_from_title }}".split(' ')
+            body_keys = "${{ steps.from_body.outputs.jira_issue_numbers_from_body }}".split(' ')
+            jira_issue_numbers = title_keys.concat(body_keys).uniq.compact.join(' ')
+
+            puts "jira_issue_numbers=#{jira_issue_numbers}"
+            File.open(ENV['GITHUB_OUTPUT'], "a") { |f| f.puts "jira_issue_numbers=#{jira_issue_numbers}" }
+          RUBY
+
+      - name: Add Web link(s) from PR body to Jira Tickets
+        if: steps.remove_duplicates.outputs.jira_issue_numbers != ''
+        shell: bash
+        run: | # ruby
+          ruby <<'RUBY'
+            require 'net/http'
+            require 'uri'
+            require 'json'
+            require 'base64'
+
+            JIRA_BASE_URL = "${{ secrets.JIRA_BASE_URL }}".freeze
+            AUTH_STRING = Base64.strict_encode64("${{ secrets.JIRA_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}").freeze
+            GLOBAL_ID = "${{ env.GLOBAL_ID }}".freeze
+            PR_URL = "${{ github.event.pull_request.html_url }}".freeze
+            PR_TITLE = "${{ github.event.pull_request.title }}".freeze
+            JIRA_ISSUE_NUMBERS = "${{ steps.remove_duplicates.outputs.jira_issue_numbers }}".split(' ').freeze
+
+            def check_link_exists(key)
+              uri = URI("#{JIRA_BASE_URL}/rest/api/3/issue/#{key}/remotelink?globalId=#{GLOBAL_ID}")
+              http = Net::HTTP.new(uri.host, uri.port)
+              http.use_ssl = true
+
+              request = Net::HTTP::Get.new(uri)
+              request['Content-Type'] = 'application/json'
+              request['Authorization'] = "Basic #{AUTH_STRING}"
+
+              response = http.request(request)
+
+              begin
+                response_data = JSON.parse(response.body)
+              rescue JSON::ParserError
+                puts "Failed to parse response for #{key}: #{response.body}"
+                return false
+              end
+
+              # If we get an array with items, link exists
+              # If we get error messages about non-existent link, it doesn't exist
+              if response_data.is_a?(Array) && !response_data.empty?
+                return true
+              elsif response_data.is_a?(Hash) && response_data["errorMessages"]&.include?("The remote link does not exist.")
+                return false
+              else
+                # For any other response structure, assume link exists to be safe
+                return !response_data.is_a?(Array) || !response_data.empty?
+              end
+            end
+
+            def create_link(key)
+              uri = URI("#{JIRA_BASE_URL}/rest/api/3/issue/#{key}/remotelink")
+              http = Net::HTTP.new(uri.host, uri.port)
+              http.use_ssl = true
+
+              request = Net::HTTP::Post.new(uri)
+              request['Content-Type'] = 'application/json'
+              request['Authorization'] = "Basic #{AUTH_STRING}"
+
+              payload = {
+                "globalId" => GLOBAL_ID,
+                "object" => {
+                  "url" => PR_URL,
+                  "title" => "wrap: #{PR_TITLE}"
+                }
+              }
+
+              request.body = payload.to_json
+              response = http.request(request)
+
+              if response.code.to_i >= 200 && response.code.to_i < 300
+                puts "Successfully created link for #{key}"
+              else
+                puts "Failed to create link for #{key}: #{response.code} #{response.body}"
+              end
+            end
+
+            JIRA_ISSUE_NUMBERS.each do |key|
+              puts "Linking PR to #{key}"
+
+              # Check for existing link
+              link_exists = check_link_exists(key)
+
+              if link_exists
+                puts "Link already exists for #{key}"
+                next
+              end
+
+              puts "Creating link for #{key}"
+
+              # Create new link
+              create_link(key)
+            end
+          RUBY

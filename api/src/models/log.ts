@@ -1,12 +1,20 @@
 import {
-  CreationOptional,
   DataTypes,
-  InferAttributes,
-  InferCreationAttributes,
   Model,
-} from "sequelize"
-
-import sequelize from "@/db/db-client"
+  sql,
+  type CreationOptional,
+  type InferAttributes,
+  type InferCreationAttributes,
+} from "@sequelize/core"
+import {
+  Attribute,
+  AutoIncrement,
+  Default,
+  NotNull,
+  PrimaryKey,
+  Table,
+  ValidateAttribute,
+} from "@sequelize/core/decorators-legacy"
 
 export enum LogOperationTypes {
   CREATE = "create",
@@ -14,54 +22,52 @@ export enum LogOperationTypes {
   DELETE = "delete",
 }
 
+@Table({
+  paranoid: false,
+})
 export class Log extends Model<InferAttributes<Log>, InferCreationAttributes<Log>> {
-  declare id: CreationOptional<number>
-  declare tableName: string
-  declare operation: string
-  declare userEmail: string
-  declare data: string
-  declare createdAt: CreationOptional<Date>
-  declare updatedAt: CreationOptional<Date>
-}
+  static readonly OperationTypes = LogOperationTypes
 
-Log.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true,
-      autoIncrement: true,
+  @Attribute(DataTypes.INTEGER)
+  @PrimaryKey
+  @AutoIncrement
+  declare id: CreationOptional<number>
+
+  @Attribute(DataTypes.STRING(200))
+  @NotNull
+  declare tableName: string
+
+  @Attribute(DataTypes.STRING(200))
+  @NotNull
+  @ValidateAttribute({
+    isIn: {
+      args: [Object.values(LogOperationTypes)],
+      msg: `Operation must be one of: ${Object.values(LogOperationTypes).join(", ")}`,
     },
-    tableName: {
-      type: DataTypes.STRING(200),
-      allowNull: false,
-    },
-    operation: {
-      type: DataTypes.STRING(200),
-      allowNull: false,
-    },
-    userEmail: {
-      type: DataTypes.STRING(200),
-      allowNull: false,
-    },
-    data: {
-      type: DataTypes.STRING(2000),
-      allowNull: false,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    sequelize,
+  })
+  declare operation: string
+
+  @Attribute(DataTypes.STRING(200))
+  @NotNull
+  declare userEmail: string
+
+  @Attribute(DataTypes.STRING(2000))
+  @NotNull
+  declare data: string
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
+  declare createdAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
+  declare updatedAt: CreationOptional<Date>
+
+  static establishScopes() {
+    // add as needed
   }
-)
+}
 
 export default Log

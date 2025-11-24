@@ -1,26 +1,27 @@
 import {
-  Association,
-  CreationOptional,
   DataTypes,
-  HasManyAddAssociationMixin,
-  HasManyAddAssociationsMixin,
-  HasManyCountAssociationsMixin,
-  HasManyCreateAssociationMixin,
-  HasManyGetAssociationsMixin,
-  HasManyHasAssociationMixin,
-  HasManyHasAssociationsMixin,
-  HasManyRemoveAssociationMixin,
-  HasManyRemoveAssociationsMixin,
-  HasManySetAssociationsMixin,
-  InferAttributes,
-  InferCreationAttributes,
-  NonAttribute,
-} from "sequelize"
+  sql,
+  type CreationOptional,
+  type InferAttributes,
+  type InferCreationAttributes,
+  type NonAttribute,
+} from "@sequelize/core"
+import {
+  Attribute,
+  AutoIncrement,
+  Default,
+  HasMany,
+  NotNull,
+  PrimaryKey,
+  Table,
+  ValidateAttribute,
+} from "@sequelize/core/decorators-legacy"
 
-import sequelize from "@/db/db-client"
-import CentreFundingPeriod from "@/models/centre-funding-period"
-import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
 import BaseModel from "@/models/base-model"
+import EmployeeBenefit from "@/models/employee-benefit"
+import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
+import Payment from "@/models/payment"
+import WageEnhancement from "@/models/wage-enhancement"
 
 // Keep in sync with web/src/api/centres-api.ts
 export enum CentreRegions {
@@ -35,236 +36,145 @@ export enum CentreStatuses {
   UP_TO_DATE = "Up to date",
 }
 
+@Table({
+  paranoid: false,
+})
 export class Centre extends BaseModel<InferAttributes<Centre>, InferCreationAttributes<Centre>> {
   static readonly Regions = CentreRegions
   static readonly Statuses = CentreStatuses
 
+  @Attribute(DataTypes.INTEGER)
+  @PrimaryKey
+  @AutoIncrement
   declare id: CreationOptional<number>
+
+  @Attribute(DataTypes.STRING(200))
+  @NotNull
   declare name: string
+
+  @Attribute(DataTypes.STRING(255))
+  @NotNull
   declare community: string
+
+  @Attribute(DataTypes.STRING(100))
+  @NotNull
+  @ValidateAttribute({
+    isIn: {
+      args: [Object.values(CentreRegions)],
+      msg: `Region must be one of: ${Object.values(CentreRegions).join(", ")}`,
+    },
+  })
   declare region: string
+
+  @Attribute(DataTypes.STRING(255))
+  @NotNull
+  @ValidateAttribute({
+    isIn: {
+      args: [Object.values(CentreStatuses)],
+      msg: `Status must be one of: ${Object.values(CentreStatuses).join(", ")}`,
+    },
+  })
   declare status: string
+
+  @Attribute(DataTypes.BOOLEAN)
+  @NotNull
+  @Default(false)
   declare isFirstNationProgram: boolean
-  declare license: CreationOptional<string | null>
-  declare hotMeal: CreationOptional<boolean | null>
-  declare licensedFor: CreationOptional<number | null> // licensed for xx number of children
-  declare licenseHolderName: CreationOptional<string | null>
-  declare contactName: CreationOptional<string | null>
-  declare physicalAddress: CreationOptional<string | null>
-  declare mailingAddress: CreationOptional<string | null>
-  declare email: CreationOptional<string | null>
-  declare altEmail: CreationOptional<string | null>
-  declare phoneNumber: CreationOptional<string | null>
-  declare altPhoneNumber: CreationOptional<string | null>
-  declare faxNumber: CreationOptional<string | null>
-  declare vendorIdentifier: CreationOptional<string | null>
-  declare inspectorName: CreationOptional<string | null>
-  declare neighborhood: CreationOptional<string | null>
-  declare lastSubmission: CreationOptional<Date | null>
+
+  @Attribute(DataTypes.STRING(255))
+  declare license: string | null
+
+  @Attribute(DataTypes.BOOLEAN)
+  declare hotMeal: boolean | null
+
+  @Attribute(DataTypes.INTEGER)
+  declare licensedFor: number | null
+
+  @Attribute(DataTypes.STRING(100))
+  declare licenseHolderName: string | null
+
+  @Attribute(DataTypes.STRING(100))
+  declare contactName: string | null
+
+  @Attribute(DataTypes.STRING(250))
+  declare physicalAddress: string | null
+
+  @Attribute(DataTypes.STRING(250))
+  declare mailingAddress: string | null
+
+  @Attribute(DataTypes.STRING(100))
+  declare email: string | null
+
+  @Attribute(DataTypes.STRING(100))
+  declare altEmail: string | null
+
+  @Attribute(DataTypes.STRING(20))
+  declare phoneNumber: string | null
+
+  @Attribute(DataTypes.STRING(20))
+  declare altPhoneNumber: string | null
+
+  @Attribute(DataTypes.STRING(20))
+  declare faxNumber: string | null
+
+  @Attribute(DataTypes.STRING(20))
+  declare vendorIdentifier: string | null
+
+  @Attribute(DataTypes.STRING(100))
+  declare inspectorName: string | null
+
+  @Attribute(DataTypes.STRING(100))
+  declare neighborhood: string | null
+
+  @Attribute(DataTypes.DATEONLY)
+  declare lastSubmission: Date | null
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare createdAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  @NotNull
+  @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
 
-  // https://sequelize.org/docs/v6/other-topics/typescript/#usage
-  // https://sequelize.org/docs/v6/core-concepts/assocs/#foohasmanybar
-  // https://sequelize.org/api/v7/types/_sequelize_core.index.hasmanyaddassociationmixin
-  declare getFundingPeriods: HasManyGetAssociationsMixin<CentreFundingPeriod>
-  declare setFundingPeriods: HasManySetAssociationsMixin<
-    CentreFundingPeriod,
-    CentreFundingPeriod["centreId"]
-  >
-  declare hasFundingPeriod: HasManyHasAssociationMixin<
-    CentreFundingPeriod,
-    CentreFundingPeriod["centreId"]
-  >
-  declare hasFundingPeriods: HasManyHasAssociationsMixin<
-    CentreFundingPeriod,
-    CentreFundingPeriod["centreId"]
-  >
-  declare addFundingPeriod: HasManyAddAssociationMixin<
-    CentreFundingPeriod,
-    CentreFundingPeriod["centreId"]
-  >
-  declare addFundingPeriods: HasManyAddAssociationsMixin<
-    CentreFundingPeriod,
-    CentreFundingPeriod["centreId"]
-  >
-  declare removeFundingPeriod: HasManyRemoveAssociationMixin<
-    CentreFundingPeriod,
-    CentreFundingPeriod["centreId"]
-  >
-  declare removeFundingPeriods: HasManyRemoveAssociationsMixin<
-    CentreFundingPeriod,
-    CentreFundingPeriod["centreId"]
-  >
-  declare countFundingPeriods: HasManyCountAssociationsMixin
-  declare createFundingPeriod: HasManyCreateAssociationMixin<CentreFundingPeriod>
+  // Associations
+  @HasMany(() => EmployeeBenefit, {
+    foreignKey: "centreId",
+    inverse: {
+      as: "centre",
+    },
+  })
+  declare employeeBenefits?: NonAttribute<EmployeeBenefit[]>
 
-  declare getFundingSubmissionLineJsons: HasManyGetAssociationsMixin<FundingSubmissionLineJson>
-  declare setFundingSubmissionLineJsons: HasManySetAssociationsMixin<
-    FundingSubmissionLineJson,
-    FundingSubmissionLineJson["centreId"]
-  >
-  declare hasFundingSubmissionLineJson: HasManyHasAssociationMixin<
-    FundingSubmissionLineJson,
-    FundingSubmissionLineJson["centreId"]
-  >
-  declare hasFundingSubmissionLineJsons: HasManyHasAssociationsMixin<
-    FundingSubmissionLineJson,
-    FundingSubmissionLineJson["centreId"]
-  >
-  declare addFundingSubmissionLineJson: HasManyAddAssociationMixin<
-    FundingSubmissionLineJson,
-    FundingSubmissionLineJson["centreId"]
-  >
-  declare addFundingSubmissionLineJsons: HasManyAddAssociationsMixin<
-    FundingSubmissionLineJson,
-    FundingSubmissionLineJson["centreId"]
-  >
-  declare removeFundingSubmissionLineJson: HasManyRemoveAssociationMixin<
-    FundingSubmissionLineJson,
-    FundingSubmissionLineJson["centreId"]
-  >
-  declare removeFundingSubmissionLineJsons: HasManyRemoveAssociationsMixin<
-    FundingSubmissionLineJson,
-    FundingSubmissionLineJson["centreId"]
-  >
-  declare countFundingSubmissionLineJsons: HasManyCountAssociationsMixin
-  declare createFundingSubmissionLineJson: HasManyCreateAssociationMixin<FundingSubmissionLineJson>
-
-  declare fundingPeriods?: NonAttribute<CentreFundingPeriod[]>
+  @HasMany(() => FundingSubmissionLineJson, {
+    foreignKey: "centreId",
+    inverse: {
+      as: "centre",
+    },
+  })
   declare fundingSubmissionLineJsons?: NonAttribute<FundingSubmissionLineJson[]>
-  declare static associations: {
-    fundingPeriods: Association<Centre, CentreFundingPeriod>
-    fundingSubmissionLineJsons: Association<Centre, FundingSubmissionLineJson>
-  }
 
-  static establishAssociations() {
-    this.hasMany(CentreFundingPeriod, {
-      sourceKey: "id",
-      foreignKey: "centreId",
-      as: "fundingPeriods",
-    })
-    this.hasMany(FundingSubmissionLineJson, {
-      sourceKey: "id",
-      foreignKey: "centreId",
-      as: "fundingSubmissionLineJsons",
-    })
+  @HasMany(() => Payment, {
+    foreignKey: "centreId",
+    inverse: {
+      as: "centre",
+    },
+  })
+  declare payments?: NonAttribute<Payment[]>
+
+  @HasMany(() => WageEnhancement, {
+    foreignKey: "centreId",
+    inverse: {
+      as: "centre",
+    },
+  })
+  declare wageEnhancements?: NonAttribute<WageEnhancement[]>
+
+  static establishScopes() {
+    // add as needed
   }
 }
-
-Centre.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      allowNull: false,
-      autoIncrement: true,
-    },
-    name: {
-      type: DataTypes.STRING(200),
-      allowNull: false,
-    },
-    community: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-    },
-    isFirstNationProgram: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
-    region: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-      validate: {
-        isIn: [Object.values(CentreRegions)],
-      },
-    },
-    status: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-      validate: {
-        isIn: [Object.values(CentreStatuses)],
-      },
-    },
-    license: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-    },
-    hotMeal: {
-      type: DataTypes.BOOLEAN,
-      allowNull: true,
-    },
-    licensedFor: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    licenseHolderName: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
-    },
-    contactName: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
-    },
-    physicalAddress: {
-      type: DataTypes.STRING(250),
-      allowNull: true,
-    },
-    mailingAddress: {
-      type: DataTypes.STRING(250),
-      allowNull: true,
-    },
-    email: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
-    },
-    altEmail: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
-    },
-    phoneNumber: {
-      type: DataTypes.STRING(20),
-      allowNull: true,
-    },
-    altPhoneNumber: {
-      type: DataTypes.STRING(20),
-      allowNull: true,
-    },
-    faxNumber: {
-      type: DataTypes.STRING(20),
-      allowNull: true,
-    },
-    vendorIdentifier: {
-      type: DataTypes.STRING(20),
-      allowNull: true,
-    },
-    inspectorName: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
-    },
-    neighborhood: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
-    },
-    lastSubmission: {
-      type: DataTypes.DATEONLY,
-      allowNull: true,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    sequelize,
-  }
-)
 
 export default Centre

@@ -1,9 +1,9 @@
-import { DataTypes } from "sequelize"
+import { DataTypes } from "@sequelize/core"
 
-import type { Migration } from "@/db/umzug"
+import { type Migration } from "@/db/umzug"
 import { removeConstraint } from "@/db/utils/mssql-drop-constraint"
 
-export const up: Migration = async ({ context: queryInterface }) => {
+export async function up({ context: queryInterface }: Migration) {
   await queryInterface.addColumn("user_roles", "user_id", {
     type: DataTypes.INTEGER,
   })
@@ -27,13 +27,13 @@ export const up: Migration = async ({ context: queryInterface }) => {
 
   await removeConstraint(queryInterface, "user_roles", {
     fields: ["email"],
-    type: "foreign key",
+    type: "FOREIGN KEY",
   })
   await queryInterface.removeColumn("user_roles", "email")
 
   await queryInterface.addConstraint("user_roles", {
     fields: ["user_id"],
-    type: "foreign key",
+    type: "FOREIGN KEY",
     references: {
       table: "users",
       field: "id",
@@ -43,7 +43,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
   })
 }
 
-export const down: Migration = async ({ context: queryInterface }) => {
+export async function down({ context: queryInterface }: Migration) {
   await queryInterface.addColumn("user_roles", "email", {
     type: DataTypes.STRING(200),
   })
@@ -67,13 +67,13 @@ export const down: Migration = async ({ context: queryInterface }) => {
 
   await removeConstraint(queryInterface, "user_roles", {
     fields: ["user_id"],
-    type: "foreign key",
+    type: "FOREIGN KEY",
   })
   await queryInterface.removeColumn("user_roles", "user_id")
 
   await queryInterface.addConstraint("user_roles", {
     fields: ["email"],
-    type: "foreign key",
+    type: "FOREIGN KEY",
     references: {
       table: "users",
       field: "email",
