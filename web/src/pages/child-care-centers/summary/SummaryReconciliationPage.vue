@@ -21,7 +21,7 @@
     <tbody>
       <template
         v-for="(
-          { label, employee, expense, payment, runningTotal }, adjustmentIndex
+          { label, employeeAdjustment, expense, payment, runningTotal }, adjustmentIndex
         ) in adjustmentRows"
         :key="`adjustment-${adjustmentIndex}`"
       >
@@ -34,7 +34,7 @@
             {{ formatMoney(centsToDollars(expense.amountInCents)) }}
           </td>
           <td class="text-right">
-            {{ formatMoney(centsToDollars(employee.amountInCents)) }}
+            {{ formatMoney(centsToDollars(employeeAdjustment.amountInCents)) }}
           </td>
 
           <td class="text-right">
@@ -149,10 +149,10 @@ const employeeBenefits = ref<
 const employeeBenefitsByMonth = computed(() => keyBy(employeeBenefits.value, "fiscalPeriod.month"))
 
 const expenses = ref<Adjustment[]>([])
-const employees = ref<Adjustment[]>([])
+const employeeAdjustments = ref<Adjustment[]>([])
 
 const expensesByFiscalPeriodId = computed(() => keyBy(expenses.value, "fiscalPeriodId"))
-const employeesByFiscalPeriodId = computed(() => keyBy(employees.value, "fiscalPeriodId"))
+const employeeAdjustmentsByFiscalPeriodId = computed(() => keyBy(employeeAdjustments.value, "fiscalPeriodId"))
 const paymentAdujstments = computed<Adjustment[]>(() => {
   const paymentsByFiscalPeriodId = groupBy(payments.value, "fiscalPeriodId")
 
@@ -175,7 +175,7 @@ const adjustmentRows = computed<
     fiscalPeriodId: number
     label: string
     expense: Adjustment
-    employee: Adjustment
+    employeeAdjustment: Adjustment
     payment: Adjustment
     runningTotal: number
   }[]
@@ -185,7 +185,7 @@ const adjustmentRows = computed<
     const monthName = upperFirst(fiscalPeriod.month)
     const paymentsForPeriod = paymentAdujstmentsByFiscalPeriodId.value[fiscalPeriod.id]
     const expensesForPeriod = expensesByFiscalPeriodId.value[fiscalPeriod.id]
-    const employeesForPeriod = employeesByFiscalPeriodId.value[fiscalPeriod.id]
+    const employeeAdjustmentsForPeriod = employeeAdjustmentsByFiscalPeriodId.value[fiscalPeriod.id]
 
     if (isNil(paymentsForPeriod) || isNil(expensesForPeriod)) {
       return null
@@ -193,13 +193,13 @@ const adjustmentRows = computed<
 
     runningTotal += paymentsForPeriod.amountInCents
     runningTotal -= expensesForPeriod.amountInCents
-    runningTotal -= employeesForPeriod.amountInCents
+    runningTotal -= employeeAdjustmentsForPeriod.amountInCents
 
     return {
       fiscalPeriodId: fiscalPeriod.id,
       label: `${monthName} Expenses`,
       expense: expensesForPeriod,
-      employee: employeesForPeriod,
+      employeeAdjustment: employeeAdjustmentsForPeriod,
       payment: paymentsForPeriod,
       runningTotal,
     }
@@ -210,7 +210,7 @@ const adjustmentRows = computed<
 
 const paymentsTotal = computed(() => sumBy(payments.value, "amountInCents"))
 const expensesTotal = computed(() => sumBy(expenses.value, "amountInCents"))
-const employeesTotal = computed(() => sumBy(employees.value, "amountInCents"))
+const employeesTotal = computed(() => sumBy(employeeAdjustments.value, "amountInCents"))
 const adjustmentsTotal = computed(
   () => paymentsTotal.value - expensesTotal.value - employeesTotal.value
 )
@@ -226,7 +226,7 @@ watch<[number, string], true>(
     await fetchEmployeeBenefits(newCentreId, fiscalPeriodIds)
     await fetchFundingSubmisionLineJsons()
     expenses.value = buildExpenseValues(fiscalPeriods.value)
-    employees.value = await buildEmployeeValues(fiscalPeriods.value)
+    employeeAdjustments.value = await buildEmployeeAdjustments(fiscalPeriods.value)
 
     isLoading.value = false
   },
@@ -280,9 +280,9 @@ function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Adjustment[] {
   return expenseValues
 }
 
-async function buildEmployeeValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjustment[]> {
+async function buildEmployeeAdjustments(fiscalPeriods: FiscalPeriod[]): Promise<Adjustment[]> {
   const employeePromises = fiscalPeriods.map(async (fiscalPeriod) => {
-    const employee: Adjustment = {
+    const employeeAdjustment: Adjustment = {
       fiscalPeriodId: fiscalPeriod.id,
       amountInCents: 0,
     }
@@ -294,22 +294,22 @@ async function buildEmployeeValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjus
         let actGrossAmount =
           Number(linesForMonth.grossPayrollMonthlyActual) * Number(linesForMonth.costCapPercentage)
         let actEmployerAmount = Number(linesForMonth.employerCostActual)
-        employee.amountInCents = dollarsToCents(Math.min(actGrossAmount, actEmployerAmount))
+        employeeAdjustment.amountInCents = dollarsToCents(Math.min(actGrossAmount, actEmployerAmount))
       } else {
-        employee.amountInCents = 0
+        employeeAdjustment.amountInCents = 0
       }
     }
 
-    injectEmployeeBenefitMonthlyCost(employee, month)
-    await lazyInjectWageEnhancementMonthlyCost(employee, month)
+    injectEmployeeBenefitMonthlyCost(employeeAdjustment, month)
+    await lazyInjectWageEnhancementMonthlyCost(employeeAdjustment, month)
 
-    return employee
+    return employeeAdjustment
   })
 
   return Promise.all(employeePromises)
 }
 
-function injectEmployeeBenefitMonthlyCost(expense: Adjustment, month: string): void {
+function injectEmployeeBenefitMonthlyCost(employeeAdjustment: Adjustment, month: string): void {
   const employeeBenefitForMonth = employeeBenefitsByMonth.value[month]
   if (isNil(employeeBenefitForMonth)) return
 
@@ -319,10 +319,10 @@ function injectEmployeeBenefitMonthlyCost(expense: Adjustment, month: string): v
     Number(employerCostActual),
     Number(grossPayrollMonthlyActual) * Number(costCapPercentage)
   )
-  expense.amountInCents += dollarsToCents(actualPaidAmount)
+  employeeAdjustment.amountInCents += dollarsToCents(actualPaidAmount)
 }
 
-async function lazyInjectWageEnhancementMonthlyCost(expense: Adjustment, month: string) {
+async function lazyInjectWageEnhancementMonthlyCost(employeeAdjustment: Adjustment, month: string) {
   const fiscalPeriod = fiscalPeriodsByMonth.value[month]
   const { employeeWageTiers } = await employeeWageTiersApi.list({
     where: {
@@ -352,7 +352,7 @@ async function lazyInjectWageEnhancementMonthlyCost(expense: Adjustment, month: 
   )
   const wageEnhancementsActualTotal = wageEnhancementsActualSubtotal * (1 + EI_CPP_WCB_RATE)
 
-  expense.amountInCents += dollarsToCents(wageEnhancementsActualTotal)
+  employeeAdjustment.amountInCents += dollarsToCents(wageEnhancementsActualTotal)
 }
 </script>
 
