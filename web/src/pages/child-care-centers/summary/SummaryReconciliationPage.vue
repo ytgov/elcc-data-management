@@ -284,40 +284,41 @@ function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Adjustment[] {
 }
 
 async function buildEmployeeAdjustments(fiscalPeriods: FiscalPeriod[]): Promise<Adjustment[]> {
-  const employeePromises = fiscalPeriods.map(async (fiscalPeriod) => {
-    const employeeAdjustment: Adjustment = {
-      fiscalPeriodId: fiscalPeriod.id,
-      amountInCents: 0,
+  const employeeAdjustmentsPromises = fiscalPeriods.map<Promise<Adjustment>>(
+    async (fiscalPeriod) => {
+      const { month } = fiscalPeriod
+
+      const employeeBenefitForMonth = employeeBenefitsByMonth.value[month]
+      const employeeBenefitCost = calculateEmployeeBenefitCost(employeeBenefitForMonth)
+
+      const fiscalPeriodForMonth = fiscalPeriodsByMonth.value[month]
+      const wageEnhancementCost = await calculateWageEnhancementCost(fiscalPeriodForMonth.id)
+
+      return {
+        fiscalPeriodId: fiscalPeriod.id,
+        amountInCents: employeeBenefitCost + wageEnhancementCost,
+      }
     }
-    const { month } = fiscalPeriod
+  )
 
-    injectEmployeeBenefitMonthlyCost(employeeAdjustment, month)
-    await lazyInjectWageEnhancementMonthlyCost(employeeAdjustment, month)
-
-    return employeeAdjustment
-  })
-
-  return Promise.all(employeePromises)
+  return Promise.all(employeeAdjustmentsPromises)
 }
 
-function injectEmployeeBenefitMonthlyCost(employeeAdjustment: Adjustment, month: string): void {
-  const employeeBenefitForMonth = employeeBenefitsByMonth.value[month]
-  if (isNil(employeeBenefitForMonth)) return
+function calculateEmployeeBenefitCost(employeeBenefit: EmployeeBenefit | null): number {
+  if (isNil(employeeBenefit)) return 0
 
-  const { employerCostActual, grossPayrollMonthlyActual, costCapPercentage } =
-    employeeBenefitForMonth
+  const { employerCostActual, grossPayrollMonthlyActual, costCapPercentage } = employeeBenefit
   const actualPaidAmount = Math.min(
     Number(employerCostActual),
     Number(grossPayrollMonthlyActual) * Number(costCapPercentage)
   )
-  employeeAdjustment.amountInCents += dollarsToCents(actualPaidAmount)
+  return dollarsToCents(actualPaidAmount)
 }
 
-async function lazyInjectWageEnhancementMonthlyCost(employeeAdjustment: Adjustment, month: string) {
-  const fiscalPeriod = fiscalPeriodsByMonth.value[month]
+async function calculateWageEnhancementCost(fiscalPeriodId: number): Promise<number> {
   const { employeeWageTiers } = await employeeWageTiersApi.list({
     where: {
-      fiscalPeriodId: fiscalPeriod.id,
+      fiscalPeriodId,
     },
   })
   const employeeWageTierIds = employeeWageTiers.map((employeeWageTier) => employeeWageTier.id)
@@ -327,7 +328,7 @@ async function lazyInjectWageEnhancementMonthlyCost(employeeAdjustment: Adjustme
       employeeWageTierId: employeeWageTierIds,
     },
   })
-  if (isEmpty(wageEnhancements)) return
+  if (isEmpty(wageEnhancements)) return 0
 
   const wageRatePerHoursByEmployeeWageTierId = mapValues(
     keyBy(employeeWageTiers, "id"),
@@ -343,7 +344,7 @@ async function lazyInjectWageEnhancementMonthlyCost(employeeAdjustment: Adjustme
   )
   const wageEnhancementsActualTotal = wageEnhancementsActualSubtotal * (1 + EI_CPP_WCB_RATE)
 
-  employeeAdjustment.amountInCents += dollarsToCents(wageEnhancementsActualTotal)
+  return dollarsToCents(wageEnhancementsActualTotal)
 }
 </script>
 
