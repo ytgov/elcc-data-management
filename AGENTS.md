@@ -161,7 +161,16 @@ docker compose -f docker-compose.development.yaml up --remove-orphans --build
    - **Direct parameter naming**: Use simple names without redundant context
    - **Minimal parameter passing**: Pass only specific data needed, not entire objects (e.g., `fiscalPeriodId: number` over `fiscalPeriod: FiscalPeriod`)
 
+### Model Enum Patterns
+
+- **Static enum access**: Add `static readonly Statuses = FundingReconciliationStatuses` to models for convenient access
+- **Plural enum naming**: Use plural forms for enum names (e.g., `FundingReconciliationStatuses` not `Status`)
+- **Export enum arrays**: `FUNDING_RECONCILIATION_STATUSES = Object.values(FundingReconciliationStatuses)`
+- **Dynamic validation**: Use template literals with enum arrays: `Status must be one of: ${FUNDING_RECONCILIATION_STATUSES.join(", ")}`
+- **Import reduction**: Consumers only need to import the model, not both model and enum
+
 5. **File organization**
+
    ```typescript
    // Types
    // Constants
@@ -917,6 +926,7 @@ describe("api/src/models/funding-period.ts", () => {
 ```
 
 **Rationale:**
+
 - First describe references the source file path for easy navigation from test output
 - Second describe groups tests by class/module name
 - Third describe identifies the method/action being tested with format `#methodName -> details`
@@ -963,6 +973,7 @@ expect(response.body.user).toMatchObject({ id: user.id, email: user.email })
 ```
 
 **Rationale:**
+
 - One expect per test makes failures easier to diagnose and tests more focused
 - Multi-line formatting is more readable and follows the principle of one thing per line
 
