@@ -152,12 +152,15 @@ const expenses = ref<Adjustment[]>([])
 const employeeAdjustments = ref<Adjustment[]>([])
 
 const expensesByFiscalPeriodId = computed(() => keyBy(expenses.value, "fiscalPeriodId"))
-const employeeAdjustmentsByFiscalPeriodId = computed(() => keyBy(employeeAdjustments.value, "fiscalPeriodId"))
-const paymentAdujstments = computed<Adjustment[]>(() => {
-  const paymentsByFiscalPeriodId = groupBy(payments.value, "fiscalPeriodId")
-
+const employeeAdjustmentsByFiscalPeriodId = computed(() =>
+  keyBy(employeeAdjustments.value, "fiscalPeriodId")
+)
+const paymentsByFiscalPeriodId = computed<Record<number, Adjustment[]>>(() =>
+  groupBy(payments.value, "fiscalPeriodId")
+)
+const paymentAdjustments = computed<Adjustment[]>(() => {
   return fiscalPeriods.value.map((fiscalPeriod) => {
-    const paymentsForPeriod = paymentsByFiscalPeriodId[fiscalPeriod.id] || []
+    const paymentsForPeriod = paymentsByFiscalPeriodId.value[fiscalPeriod.id] || []
     const amountInCents = sumBy(paymentsForPeriod, "amountInCents")
 
     return {
@@ -167,7 +170,7 @@ const paymentAdujstments = computed<Adjustment[]>(() => {
   })
 })
 const paymentAdujstmentsByFiscalPeriodId = computed(() =>
-  keyBy(paymentAdujstments.value, "fiscalPeriodId")
+  keyBy(paymentAdjustments.value, "fiscalPeriodId")
 )
 
 const adjustmentRows = computed<
