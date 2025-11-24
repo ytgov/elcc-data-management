@@ -19,6 +19,16 @@ import { isValidFiscalYearLong } from "@/models/validators"
 
 import BaseModel from "@/models/base-model"
 
+/**
+ * Represents a fiscal year for funding reconciliation purposes.
+ * Each funding period spans from April 1st to March 31st of the following year
+ * and is used to track annual government funding allocations and reconciliations
+ * for child care centers.
+ *
+ * TODO: rename to FiscalYear for clarity - this represents an entire fiscal year, not a generic period
+ *
+ * @see FiscalPeriod - The monthly periods that break down this fiscal year
+ */
 @Table({
   paranoid: false,
 })

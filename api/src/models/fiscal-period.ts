@@ -44,6 +44,16 @@ export enum FiscalPeriodMonths {
 
 export const FISCAL_PERIOD_MONTHS = Object.values<string>(FiscalPeriodMonths)
 
+/**
+ * Represents a monthly period within a FundingPeriod for detailed tracking.
+ * Each fiscal period corresponds to a single month (April through March)
+ * and is used to break down annual funding reconciliation into monthly
+ * components for more granular financial tracking and reporting.
+ *
+ * TODO: rename to FiscalMonth for clarity - this represents a specific month within a fiscal year
+ *
+ * @see FundingPeriod - The parent fiscal year that contains these monthly periods
+ */
 @Table({
   paranoid: false,
 })
