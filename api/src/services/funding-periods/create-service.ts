@@ -2,8 +2,17 @@ import { CreationAttributes } from "@sequelize/core"
 import { isNil, times } from "lodash"
 import { DateTime } from "luxon"
 
-import db, { Centre, EmployeeBenefit, EmployeeWageTier, FiscalPeriod, FundingPeriod } from "@/models"
+import db, {
+  Centre,
+  EmployeeBenefit,
+  EmployeeWageTier,
+  FiscalPeriod,
+  FundingPeriod,
+  FundingReconciliation,
+  FundingReconciliationAdjustment,
+} from "@/models"
 import { EMPLOYEE_WAGE_TIER_DEFAULTS } from "@/models/employee-wage-tier"
+import { FundingReconciliationStatuses } from "@/models/funding-reconciliation"
 import BaseService from "@/services/base-service"
 
 export type FundingPeriodCreationAttributes = Partial<CreationAttributes<FundingPeriod>>
@@ -47,6 +56,8 @@ export class CreateService extends BaseService {
       await this.createEmployeeWageTiers(fundingPeriodFiscalYear)
       await this.createEmployeeBenefits(fundingPeriodFiscalYear)
       await this.createFundingSubmissionLines(fundingPeriod)
+      await this.createFundingReconciliations(fundingPeriod)
+      await this.createFundingReconciliationAdjustments(fundingPeriod)
 
       return fundingPeriod.reload()
     })
@@ -130,6 +141,68 @@ export class CreateService extends BaseService {
     // TODO: Implement funding submission lines creation
     // This would create the default funding submission lines for the created funding period
     // See api/src/db/seeds/development/2023.12.12T00.25.25.fill-funding-submission-lines-table.ts
+  }
+
+  private async createFundingReconciliations(fundingPeriod: FundingPeriod) {
+    let fundingReconciliationsAttributes: CreationAttributes<FundingReconciliation>[] = []
+    const BATCH_SIZE = 1000
+
+    await Centre.findEach(async (centre) => {
+      fundingReconciliationsAttributes.push({
+        centreId: centre.id,
+        fundingPeriodId: fundingPeriod.id,
+        status: FundingReconciliationStatuses.DRAFT,
+        fundingReceivedTotalAmount: "0",
+        eligibleExpensesTotalAmount: "0",
+        payrollAdjustmentsTotalAmount: "0",
+        finalBalanceAmount: "0",
+      })
+
+      if (fundingReconciliationsAttributes.length >= BATCH_SIZE) {
+        await FundingReconciliation.bulkCreate(fundingReconciliationsAttributes)
+        fundingReconciliationsAttributes = []
+      }
+    })
+
+    if (fundingReconciliationsAttributes.length > 0) {
+      await FundingReconciliation.bulkCreate(fundingReconciliationsAttributes)
+    }
+  }
+
+  private async createFundingReconciliationAdjustments(fundingPeriod: FundingPeriod) {
+    const shortFiscalYear = FiscalPeriod.toShortFiscalYearFormat(fundingPeriod.fiscalYear)
+
+    const fiscalPeriods = await FiscalPeriod.findAll({
+      where: { fiscalYear: shortFiscalYear },
+    })
+
+    let adjustmentsAttributes: CreationAttributes<FundingReconciliationAdjustment>[] = []
+    const BATCH_SIZE = 1000
+
+    await FundingReconciliation.findEach(
+      { where: { fundingPeriodId: fundingPeriod.id } },
+      async (fundingReconciliation) => {
+        for (const fiscalPeriod of fiscalPeriods) {
+          adjustmentsAttributes.push({
+            fundingReconciliationId: fundingReconciliation.id,
+            fiscalPeriodId: fiscalPeriod.id,
+            fundingReceivedPeriodAmount: "0",
+            eligibleExpensesPeriodAmount: "0",
+            payrollAdjustmentsPeriodAmount: "0",
+            cumulativeBalanceAmount: "0",
+          })
+
+          if (adjustmentsAttributes.length >= BATCH_SIZE) {
+            await FundingReconciliationAdjustment.bulkCreate(adjustmentsAttributes)
+            adjustmentsAttributes = []
+          }
+        }
+      }
+    )
+
+    if (adjustmentsAttributes.length > 0) {
+      await FundingReconciliationAdjustment.bulkCreate(adjustmentsAttributes)
+    }
   }
 }
 
