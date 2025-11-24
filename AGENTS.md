@@ -184,6 +184,17 @@ docker compose -f docker-compose.development.yaml up --remove-orphans --build
    - Avoid using emojis in source code, documentation files, and configuration files
    - Exception: Git commit messages use GitHub-style emojis (e.g., :hammer:, :lock:, :recycle:)
 
+### Sequelize Model Typing
+
+- **CreationOptional Rule**: Use `CreationOptional` only for non-nullable fields with database defaults
+- **Nullable fields**: Type as `Type | null` without `CreationOptional`
+- **Required fields**: Don't use `CreationOptional` when they must be provided during creation
+- **Database defaults**: `CreationOptional` tells TypeScript the database will provide the value
+- **Examples**:
+  - `timestampField: CreationOptional<Date>` (non-nullable with database default)
+  - `optionalField: Type | null` (truly nullable, no CreationOptional)
+  - `requiredField: Type` (required, no CreationOptional)
+
 ---
 
 ## Frontend Patterns
