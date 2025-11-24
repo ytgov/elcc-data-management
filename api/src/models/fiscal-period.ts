@@ -24,6 +24,7 @@ import { isValidFiscalYearShort } from "@/models/validators"
 import BaseModel from "@/models/base-model"
 import EmployeeBenefit from "@/models/employee-benefit"
 import EmployeeWageTier from "@/models/employee-wage-tier"
+import FundingReconciliationAdjustment from "@/models/funding-reconciliation-adjustment"
 import Payment from "@/models/payment"
 
 /** Keep in sync with web/src/api/fiscal-periods-api.ts */
@@ -149,6 +150,14 @@ export class FiscalPeriod extends BaseModel<
     },
   })
   declare payments?: NonAttribute<Payment[]>
+
+  @HasMany(() => FundingReconciliationAdjustment, {
+    foreignKey: "fiscalPeriodId",
+    inverse: {
+      as: "fundingReconciliationAdjustments",
+    },
+  })
+  declare fundingReconciliationAdjustments?: NonAttribute<FundingReconciliationAdjustment[]>
 
   static establishScopes() {
     // add as needed

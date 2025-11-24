@@ -4,11 +4,13 @@ import {
   type CreationOptional,
   type InferAttributes,
   type InferCreationAttributes,
+  type NonAttribute,
 } from "@sequelize/core"
 import {
   Attribute,
   AutoIncrement,
   Default,
+  HasMany,
   NotNull,
   PrimaryKey,
   Table,
@@ -18,6 +20,7 @@ import {
 import { isValidFiscalYearLong } from "@/models/validators"
 
 import BaseModel from "@/models/base-model"
+import FundingReconciliation from "@/models/funding-reconciliation"
 
 /**
  * Represents a fiscal year for funding reconciliation purposes.
@@ -69,6 +72,14 @@ export class FundingPeriod extends BaseModel<
   @NotNull
   @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
+
+  @HasMany(() => FundingReconciliation, {
+    foreignKey: "fundingPeriodId",
+    inverse: {
+      as: "fundingPeriod",
+    },
+  })
+  declare fundingReconciliations?: NonAttribute<FundingReconciliation[]>
 
   static establishScopes() {
     this.addSearchScope(["fiscalYear", "title", "fromDate", "toDate"])
