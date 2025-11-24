@@ -65,6 +65,7 @@ export class EmployeeWageTier extends BaseModel<
   @NotNull
   declare tierLabel: string
 
+  // TODO: convert to DECIMAL(10, 4)
   @Attribute(DataTypes.FLOAT)
   @NotNull
   declare wageRatePerHour: number
