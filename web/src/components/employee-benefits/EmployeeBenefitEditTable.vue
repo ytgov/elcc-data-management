@@ -256,7 +256,7 @@
 import { computed, ref, toRefs } from "vue"
 import { isNil, round } from "lodash"
 
-import { formatMoney } from "@/utils/format-money"
+import { formatMoney } from "@/utils/formatters"
 
 import useSnack from "@/use/use-snack"
 import useEmployeeBenefit from "@/use/use-employee-benefit"

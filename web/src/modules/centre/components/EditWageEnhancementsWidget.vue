@@ -251,13 +251,13 @@
 import { computed, ref, watch, reactive } from "vue"
 import { groupBy, keyBy, mapValues, round, isEmpty } from "lodash"
 
+import { formatMoney } from "@/utils/formatters"
 import employeeWageTiersApi, { type EmployeeWageTier } from "@/api/employee-wage-tiers-api"
 import wageEnhancementsApi, {
   EI_CPP_WCB_RATE,
   type WageEnhancement,
 } from "@/api/wage-enhancements-api"
 import { useNotificationStore } from "@/store/NotificationStore"
-import { formatMoney } from "@/utils"
 
 const notificationStore = useNotificationStore()
 
