@@ -175,9 +175,18 @@ docker compose -f docker-compose.development.yaml up --remove-orphans --build
    // Continue with main logic
    ```
 
-6. **No emojis in code or text files**
+6. **No emojis in code and commit message format**
    - Avoid using emojis in source code, documentation files, and configuration files
-   - Exception: Git commit messages use GitHub-style emojis (e.g., :hammer:, :lock:, :recycle:)
+   - **Git commit messages** use GitHub-style emojis with specific format:
+
+     ```
+     :emoji: concise description
+
+     [optional] Why? Why I made the changes
+     ```
+
+   - **Common emojis**: `:hammer:` (refactoring), `:lock:` (security), `:recycle:` (cleanup), `:sparkles:` (new features), `:bug:` (bug fixes), `:docs:` (documentation), `:truck:` (move files), `:butterfly:` (database/table changes), `:pencil:` (typos/comments), `:fire:` (remove features), `:beetle:` (fix attempts), `:tophat:` (GitHub workflow), `:white_check_mark:` (passing tests), `:heavy_check_mark:` (passing tests), `:construction:` (work in progress), `:x:` (failing tests), `:mute:` (suppress warnings/logging), `:heavy_plus_sign:` (add dependencies), `:gear:` (configuration), `:factory:` (test factories), `:heavy_minus_sign:` (remove dependencies), `:refactor:` (refactoring), `:zap:` (performance), `:art:` (formatting/styling), `:loud_sound:` (logging)
+   - **Guidelines**: Keep first line concise (50 chars or less), use present tense, add "Why?" section for complex changes needing context
 
 7. **Import Organization and Formatting**
    - **Import grouping strategy** (conceptual distance approach):
