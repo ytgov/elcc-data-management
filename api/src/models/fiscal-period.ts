@@ -19,7 +19,7 @@ import {
 } from "@sequelize/core/decorators-legacy"
 import { DateTime } from "luxon"
 
-import { FiscalPeriodsFiscalYearMonthUniqueIndex } from "@/models/indexes"
+import { FiscalPeriodsFundingPeriodIdFiscalYearMonthUniqueIndex } from "@/models/indexes"
 import { isValidFiscalYearShort } from "@/models/validators"
 
 import BaseModel from "@/models/base-model"
@@ -73,11 +73,12 @@ export class FiscalPeriod extends BaseModel<
 
   @Attribute(DataTypes.INTEGER)
   @NotNull
+  @FiscalPeriodsFundingPeriodIdFiscalYearMonthUniqueIndex
   declare fundingPeriodId: number
 
   @Attribute(DataTypes.STRING(10))
   @NotNull
-  @FiscalPeriodsFiscalYearMonthUniqueIndex
+  @FiscalPeriodsFundingPeriodIdFiscalYearMonthUniqueIndex
   @ValidateAttribute({
     isValidFiscalYear: isValidFiscalYearShort,
   })
@@ -85,7 +86,7 @@ export class FiscalPeriod extends BaseModel<
 
   @Attribute(DataTypes.STRING(10))
   @NotNull
-  @FiscalPeriodsFiscalYearMonthUniqueIndex
+  @FiscalPeriodsFundingPeriodIdFiscalYearMonthUniqueIndex
   @ValidateAttribute({
     isIn: {
       args: [FISCAL_PERIOD_MONTHS],
