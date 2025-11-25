@@ -20,6 +20,7 @@ import {
 import { isValidFiscalYearLong } from "@/models/validators"
 
 import BaseModel from "@/models/base-model"
+import FiscalPeriod from "@/models/fiscal-period"
 import FundingReconciliation from "@/models/funding-reconciliation"
 
 /**
@@ -80,6 +81,14 @@ export class FundingPeriod extends BaseModel<
     },
   })
   declare fundingReconciliations?: NonAttribute<FundingReconciliation[]>
+
+  @HasMany(() => FiscalPeriod, {
+    foreignKey: "fundingPeriodId",
+    inverse: {
+      as: "fundingPeriod",
+    },
+  })
+  declare fiscalPeriods?: NonAttribute<FiscalPeriod[]>
 
   static establishScopes() {
     this.addSearchScope(["fiscalYear", "title", "fromDate", "toDate"])

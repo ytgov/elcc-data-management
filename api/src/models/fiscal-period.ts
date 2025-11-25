@@ -9,6 +9,7 @@ import {
 import {
   Attribute,
   AutoIncrement,
+  BelongsTo,
   Default,
   HasMany,
   NotNull,
@@ -24,6 +25,7 @@ import { isValidFiscalYearShort } from "@/models/validators"
 import BaseModel from "@/models/base-model"
 import EmployeeBenefit from "@/models/employee-benefit"
 import EmployeeWageTier from "@/models/employee-wage-tier"
+import FundingPeriod from "@/models/funding-period"
 import FundingReconciliationAdjustment from "@/models/funding-reconciliation-adjustment"
 import Payment from "@/models/payment"
 
@@ -68,6 +70,10 @@ export class FiscalPeriod extends BaseModel<
   @PrimaryKey
   @AutoIncrement
   declare id: CreationOptional<number>
+
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  declare fundingPeriodId: number
 
   @Attribute(DataTypes.STRING(10))
   @NotNull
@@ -127,6 +133,15 @@ export class FiscalPeriod extends BaseModel<
   }
 
   // Associations
+  @BelongsTo(() => FundingPeriod, {
+    foreignKey: "fundingPeriodId",
+    inverse: {
+      as: "fiscalPeriods",
+      type: "hasMany",
+    },
+  })
+  declare fundingPeriod?: NonAttribute<FundingPeriod>
+
   @HasMany(() => EmployeeBenefit, {
     foreignKey: "fiscalPeriodId",
     inverse: {
@@ -143,14 +158,6 @@ export class FiscalPeriod extends BaseModel<
   })
   declare employeeWageTiers?: NonAttribute<EmployeeWageTier[]>
 
-  @HasMany(() => Payment, {
-    foreignKey: "fiscalPeriodId",
-    inverse: {
-      as: "payments",
-    },
-  })
-  declare payments?: NonAttribute<Payment[]>
-
   @HasMany(() => FundingReconciliationAdjustment, {
     foreignKey: "fiscalPeriodId",
     inverse: {
@@ -158,6 +165,14 @@ export class FiscalPeriod extends BaseModel<
     },
   })
   declare fundingReconciliationAdjustments?: NonAttribute<FundingReconciliationAdjustment[]>
+
+  @HasMany(() => Payment, {
+    foreignKey: "fiscalPeriodId",
+    inverse: {
+      as: "payments",
+    },
+  })
+  declare payments?: NonAttribute<Payment[]>
 
   static establishScopes() {
     // add as needed
