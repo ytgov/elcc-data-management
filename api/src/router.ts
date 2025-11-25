@@ -13,7 +13,6 @@ import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 import {
   centreRouter,
   fundingPeriodRouter,
-  migrationRouter,
   submissionLineRouter,
 } from "@/routes"
 
@@ -43,7 +42,6 @@ router.route("/_status").get((_req: Request, res: Response) => {
 })
 
 // TODO: replace legacy routes with newer style
-router.use("/api/migrate", migrationRouter)
 router.use("/api/centre", checkJwt, autheticateAndLoadUser, centreRouter)
 router.use("/api/funding-period", fundingPeriodRouter)
 router.use("/api/submission-line", submissionLineRouter)
