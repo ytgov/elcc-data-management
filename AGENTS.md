@@ -179,6 +179,18 @@ docker compose -f docker-compose.development.yaml up --remove-orphans --build
    - Avoid using emojis in source code, documentation files, and configuration files
    - Exception: Git commit messages use GitHub-style emojis (e.g., :hammer:, :lock:, :recycle:)
 
+7. **Import Organization and Formatting**
+   - **Import grouping strategy** (conceptual distance approach):
+     1. Foreign/third party imports (lodash, @sequelize/core, etc.) - most distant
+     2. Standard library imports - medium distance
+     3. Local application/library specific imports (models, policies, services, serializers) - closest
+   - **Blank lines between groups** as required by PEP 8
+   - **One import per line**: `import fs from "fs"` `import path from "path"` not `import fs, path from "fs"`
+   - **Exception**: Multiple imports from same module: `import { readFile, writeFile } from "fs/promises"`
+   - **Import placement**: Always at top of file, after comments/docstrings, before globals
+   - **Remove unused imports**: Keep import sections clean
+   - Reference: https://peps.python.org/pep-0008/#imports (modified for conceptual distance)
+
 ### Model Organization
 
 #### Structure
@@ -842,8 +854,8 @@ export default UpdateService
 
 **Key patterns:**
 
-- Extends `BaseService` which provides static `perform()` method
-- Uses Sequelize `CreationAttributes` and `Attributes` types
+- Extends `BaseService` with constructor-based dependency injection
+- Uses Sequelize `CreationAttributes` and `Attributes` types with specific type aliases
 - Destructures required vs optional attributes
 - Inline validation with clear error messages
 - Optionally accepts `_currentUser` for audit logging
@@ -854,6 +866,7 @@ export default UpdateService
 
 - Services have single responsibilities - don't bloat create/update services
 - Complex business logic should be in dedicated services
+- **Minimal data loading**: Only load associations that serializers actually need
 
 **Service naming:**
 
