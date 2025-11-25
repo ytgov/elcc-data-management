@@ -1,5 +1,7 @@
-import { BaseConstraintQueryOptions, RemoveConstraintQueryOptions } from "@sequelize/core"
-import { MsSqlQueryInterface } from "@sequelize/mssql"
+import { type BaseConstraintQueryOptions, type RemoveConstraintQueryOptions } from "@sequelize/core"
+import { type MsSqlQueryInterface } from "@sequelize/mssql"
+
+import { type NonEmptyArray } from "@/utils/utility-types"
 
 // TODO: investigate if we even still need this with Sequelize 7.
 
@@ -69,14 +71,14 @@ export enum MSSQL_CONSTRAINT_TYPES {
 }
 
 function findForeignKeyConstraintQuery(tableName: string, columnName: string) {
-  return `
+  return /* sql */ `
     SELECT
       foreign_keys.name AS constraintName
     FROM
       sys.foreign_keys
       INNER JOIN sys.foreign_key_columns ON foreign_keys.object_id = foreign_key_columns.constraint_object_id
       INNER JOIN sys.columns ON foreign_key_columns.parent_column_id = columns.column_id
-        AND foreign_key_columns.parent_object_id = columns.object_id
+      AND foreign_key_columns.parent_object_id = columns.object_id
     WHERE
       foreign_keys.parent_object_id = OBJECT_ID('${tableName}')
       AND columns.name = '${columnName}';
@@ -88,14 +90,14 @@ function findNonForeignKeyConstraintQuery(
   columnName: string,
   constraintType: MSSQL_CONSTRAINT_TYPES
 ) {
-  return `
+  return /* sql */ `
     SELECT
       key_constraints.name as constraintName
     FROM
       sys.key_constraints
       INNER JOIN sys.index_columns ON key_constraints.unique_index_id = index_columns.index_id
       INNER JOIN sys.columns ON index_columns.column_id = columns.column_id
-        AND index_columns.object_id = columns.object_id
+      AND index_columns.object_id = columns.object_id
     WHERE
       key_constraints.type = '${constraintType}'
       AND columns.name = '${columnName}'
@@ -103,9 +105,42 @@ function findNonForeignKeyConstraintQuery(
   `
 }
 
+function findMultiFieldNonForeignKeyConstraintQuery(
+  tableName: string,
+  fields: string[],
+  constraintType: MSSQL_CONSTRAINT_TYPES
+) {
+  const expectedFieldCount = fields.length
+  const fieldNamesList = fields.map((fieldName) => `'${fieldName}'`).join(", ")
+
+  return /* sql */ `
+    SELECT
+      key_constraints.name as constraintName
+    FROM
+      sys.key_constraints AS key_constraints
+      INNER JOIN sys.index_columns AS index_columns ON key_constraints.parent_object_id = index_columns.object_id
+      AND key_constraints.unique_index_id = index_columns.index_id
+      INNER JOIN sys.columns AS columns ON index_columns.object_id = columns.object_id
+      AND index_columns.column_id = columns.column_id
+    WHERE
+      key_constraints.type = '${constraintType}'
+      AND key_constraints.parent_object_id = OBJECT_ID('${tableName}')
+    GROUP BY
+      key_constraints.name
+    HAVING
+      COUNT(*) = ${expectedFieldCount}
+      AND SUM(
+        CASE
+          WHEN columns.name IN (${fieldNamesList}) THEN 1
+          ELSE 0
+        END
+      ) = ${expectedFieldCount};
+  `
+}
+
 export interface RemoveUniqueConstraintOptions extends BaseConstraintQueryOptions {
   type: "UNIQUE"
-  fields: [string]
+  fields: NonEmptyArray<string>
 }
 
 export interface RemoveDefaultConstraintOptions extends BaseConstraintQueryOptions {
@@ -157,18 +192,26 @@ export async function removeConstraint(
       MSSQL_CONSTRAINT_TYPES.PRIMARY_KEY
     )
   } else if (options.type === "UNIQUE") {
-    query = findNonForeignKeyConstraintQuery(
-      tableName,
-      options.fields[0],
-      MSSQL_CONSTRAINT_TYPES.UNIQUE
-    )
+    if (options.fields.length === 1) {
+      query = findNonForeignKeyConstraintQuery(
+        tableName,
+        options.fields[0],
+        MSSQL_CONSTRAINT_TYPES.UNIQUE
+      )
+    } else {
+      query = findMultiFieldNonForeignKeyConstraintQuery(
+        tableName,
+        options.fields,
+        MSSQL_CONSTRAINT_TYPES.UNIQUE
+      )
+    }
   } else {
     throw new Error(`Constraint type: ${options.type} NOT IMPLEMENTED`)
   }
 
   const [results, metadata] = await queryInterface.sequelize.query(query)
   if ((metadata as number) > 1) {
-    throw new Error("Unsafe operation, to many results, exiting ...")
+    throw new Error("Unsafe operation, too many results, exiting ...")
   } else if (metadata === 0) {
     console.log("No constraint found, skipping...")
     return
