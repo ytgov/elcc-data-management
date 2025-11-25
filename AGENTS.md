@@ -256,45 +256,44 @@ For single-record CRUD operations identified by ID.
 **Pattern:**
 
 ```typescript
-// web/src/use/use-employee-benefit.ts
+// web/src/use/use-user.ts
 import { type Ref, reactive, toRefs, unref, watch } from "vue"
 import { isNil } from "lodash"
-import employeeBenefitsApi, {
-  type EmployeeBenefitAsShow,
-  type EmployeeBenefitPolicy,
-} from "@/api/employee-benefits-api"
 
-export { type EmployeeBenefitAsShow }
+import usersApi, { UserRoles, type UserAsShow, type UserPolicy } from "@/api/users-api"
 
-export function useEmployeeBenefit(id: Ref<number | null | undefined>) {
+export { UserRoles, type UserAsShow, type UserPolicy }
+
+export function useUser(userId: Ref<number | null | undefined>) {
   const state = reactive<{
-    employeeBenefit: EmployeeBenefitAsShow | null
-    policy: EmployeeBenefitPolicy | null
+    user: UserAsShow | null
+    policy: UserPolicy | null
     isLoading: boolean
     isErrored: boolean
   }>({
-    employeeBenefit: null,
+    user: null,
     policy: null,
     isLoading: false,
     isErrored: false,
   })
 
-  async function fetch(): Promise<EmployeeBenefitAsShow> {
-    const staticId = unref(id)
+  async function fetch(): Promise<UserAsShow> {
+    const staticUserId = unref(userId)
 
-    if (isNil(staticId)) {
-      throw new Error("id is required")
+    if (isNil(staticUserId)) {
+      throw new Error("userId is required")
     }
 
     state.isLoading = true
+
     try {
-      const { employeeBenefit, policy } = await employeeBenefitsApi.get(staticId)
+      const { user, policy } = await usersApi.get(staticUserId)
       state.isErrored = false
-      state.employeeBenefit = employeeBenefit
+      state.user = user
       state.policy = policy
-      return employeeBenefit
+      return user
     } catch (error) {
-      console.error(`Failed to fetch employee benefit: ${error}`, { error })
+      console.error(`Failed to fetch user: ${error}`, { error })
       state.isErrored = true
       throw error
     } finally {
@@ -302,27 +301,27 @@ export function useEmployeeBenefit(id: Ref<number | null | undefined>) {
     }
   }
 
-  async function save(): Promise<EmployeeBenefitAsShow> {
-    if (isNil(state.employeeBenefit)) {
-      throw new Error("Employee benefit is required")
+  async function save(): Promise<UserAsShow> {
+    const staticUserId = unref(userId)
+
+    if (isNil(staticUserId)) {
+      throw new Error("userId is required")
     }
 
-    if (isNil(state.employeeBenefit.id)) {
-      throw new Error("Employee benefit must have an id")
+    if (isNil(state.user)) {
+      throw new Error("user is required")
     }
 
     state.isLoading = true
+
     try {
-      const { employeeBenefit, policy } = await employeeBenefitsApi.update(
-        state.employeeBenefit.id,
-        state.employeeBenefit
-      )
+      const { user, policy } = await usersApi.update(staticUserId, state.user)
       state.isErrored = false
-      state.employeeBenefit = employeeBenefit
+      state.user = user
       state.policy = policy
-      return employeeBenefit
+      return user
     } catch (error) {
-      console.error(`Failed to save employee benefit: ${error}`, { error })
+      console.error(`Failed to save user: ${error}`, { error })
       state.isErrored = true
       throw error
     } finally {
@@ -331,9 +330,9 @@ export function useEmployeeBenefit(id: Ref<number | null | undefined>) {
   }
 
   watch(
-    () => unref(id),
-    async (newId) => {
-      if (isNil(newId)) return
+    () => unref(userId),
+    async (newUserId) => {
+      if (isNil(newUserId)) return
 
       await fetch()
     },
@@ -348,7 +347,7 @@ export function useEmployeeBenefit(id: Ref<number | null | undefined>) {
   }
 }
 
-export default useEmployeeBenefit
+export default useUser
 ```
 
 **Key characteristics:**
