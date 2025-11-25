@@ -398,11 +398,18 @@ describe("api/src/services/funding-periods/create-service.ts", () => {
         const fundingReconciliationAdjustment = await FundingReconciliationAdjustment.findOne({
           include: [
             {
-              association: "fundingPeriod",
+              association: "fundingReconciliation",
               where: {
                 centreId: centre.id,
-                id: fundingPeriod.id,
               },
+              include: [
+                {
+                  association: "fundingPeriod",
+                  where: {
+                    id: fundingPeriod.id,
+                  },
+                },
+              ],
             },
           ],
           rejectOnEmpty: true,

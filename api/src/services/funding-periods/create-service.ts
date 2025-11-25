@@ -1,5 +1,5 @@
-import { CreationAttributes } from "@sequelize/core"
-import { isNil, times } from "lodash"
+import { type CreationAttributes } from "@sequelize/core"
+import { isNil } from "lodash"
 import { DateTime } from "luxon"
 
 import db, {
@@ -11,6 +11,7 @@ import db, {
   FundingReconciliation,
   FundingReconciliationAdjustment,
 } from "@/models"
+import { FiscalPeriodMonths } from "@/models/fiscal-period"
 import { EMPLOYEE_WAGE_TIER_DEFAULTS } from "@/models/employee-wage-tier"
 import { FundingReconciliationStatuses } from "@/models/funding-reconciliation"
 import BaseService from "@/services/base-service"
@@ -50,9 +51,19 @@ export class CreateService extends BaseService {
         title,
       })
 
-      const { fromDate: fundingPeriodFromDate, fiscalYear: fundingPeriodFiscalYear } = fundingPeriod
+      const {
+        id: fundingPeriodId,
+        fromDate: fundingPeriodFromDate,
+        toDate: fundingPeriodToDate,
+        fiscalYear: fundingPeriodFiscalYear,
+      } = fundingPeriod
 
-      await this.createFiscalPeriods(fundingPeriodFromDate, fundingPeriodFiscalYear)
+      await this.createFiscalPeriods(
+        fundingPeriodId,
+        fundingPeriodFiscalYear,
+        fundingPeriodFromDate,
+        fundingPeriodToDate
+      )
       await this.createEmployeeWageTiers(fundingPeriodFiscalYear)
       await this.createEmployeeBenefits(fundingPeriodFiscalYear)
       await this.createFundingSubmissionLines(fundingPeriod)
@@ -63,23 +74,33 @@ export class CreateService extends BaseService {
     })
   }
 
-  private async createFiscalPeriods(fromDate: Date, fiscalYear: string) {
-    const fiscalYearStart = DateTime.fromJSDate(fromDate)
-    const shortFiscalYear = FiscalPeriod.toShortFiscalYearFormat(fiscalYear)
+  private async createFiscalPeriods(
+    fundingPeriodId: number,
+    fiscalYearLong: string,
+    fromDate: Date,
+    toDate: Date
+  ) {
+    const fiscalYearShort = FiscalPeriod.toShortFiscalYearFormat(fiscalYearLong)
 
-    const fiscalPeriodsAttributes = times(12, (i) => {
-      const date = fiscalYearStart.plus({ months: i }).startOf("month")
-      const dateStart = date.startOf("month")
-      const dateEnd = date.endOf("month").set({ millisecond: 0 })
-      const month = FiscalPeriod.asFiscalPeriodMonth(dateStart)
+    let currentDate = DateTime.fromJSDate(fromDate)
+    const toDateDateTime = DateTime.fromJSDate(toDate)
+    const fiscalPeriodsAttributes: CreationAttributes<FiscalPeriod>[] = []
 
-      return {
-        fiscalYear: shortFiscalYear,
-        month,
+    while (currentDate <= toDateDateTime) {
+      const dateStart = currentDate.startOf("month")
+      const dateEnd = currentDate.endOf("month").set({ millisecond: 0 })
+      const dateName = dateStart.toFormat("MMMM").toLowerCase()
+
+      fiscalPeriodsAttributes.push({
+        fundingPeriodId,
+        fiscalYear: fiscalYearShort,
+        month: dateName as FiscalPeriodMonths,
         dateStart: dateStart.toJSDate(),
         dateEnd: dateEnd.toJSDate(),
-      }
-    })
+      })
+
+      currentDate = currentDate.plus({ months: 1 })
+    }
 
     await FiscalPeriod.bulkCreate(fiscalPeriodsAttributes)
   }
