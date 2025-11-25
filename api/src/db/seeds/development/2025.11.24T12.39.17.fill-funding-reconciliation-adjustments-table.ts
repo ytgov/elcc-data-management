@@ -1,11 +1,16 @@
 import { isNil, isUndefined } from "lodash"
 
-import { FiscalPeriod, FundingReconciliation, FundingReconciliationAdjustment } from "@/models"
+import { FundingReconciliation, FundingReconciliationAdjustment } from "@/models"
 
 export async function up() {
   await FundingReconciliation.findEach(
     {
-      include: ["fundingPeriod"],
+      include: [
+        {
+          association: "fundingPeriod",
+          include: ["fiscalPeriods"],
+        },
+      ],
     },
     async (fundingReconciliation) => {
       const { fundingPeriod } = fundingReconciliation
@@ -13,35 +18,30 @@ export async function up() {
         throw new Error("Expected fundingPeriod association to be pre-loaded.")
       }
 
-      const { fiscalYear } = fundingPeriod
-      const fiscalYearShort = FiscalPeriod.toShortFiscalYearFormat(fiscalYear)
+      const { fiscalPeriods } = fundingPeriod
+      if (isUndefined(fiscalPeriods)) {
+        throw new Error("Expected fiscalPeriods association to be pre-loaded.")
+      }
 
-      await FiscalPeriod.findEach(
-        {
+      for (const fiscalPeriod of fiscalPeriods) {
+        const existingAdjustment = await FundingReconciliationAdjustment.findOne({
           where: {
-            fiscalYear: fiscalYearShort,
+            fundingReconciliationId: fundingReconciliation.id,
+            fiscalPeriodId: fiscalPeriod.id,
           },
-        },
-        async (fiscalPeriod) => {
-          const existingAdjustment = await FundingReconciliationAdjustment.findOne({
-            where: {
-              fundingReconciliationId: fundingReconciliation.id,
-              fiscalPeriodId: fiscalPeriod.id,
-            },
-          })
+        })
 
-          if (isNil(existingAdjustment)) {
-            await FundingReconciliationAdjustment.create({
-              fundingReconciliationId: fundingReconciliation.id,
-              fiscalPeriodId: fiscalPeriod.id,
-              fundingReceivedPeriodAmount: "0",
-              eligibleExpensesPeriodAmount: "0",
-              payrollAdjustmentsPeriodAmount: "0",
-              cumulativeBalanceAmount: "0",
-            })
-          }
+        if (isNil(existingAdjustment)) {
+          await FundingReconciliationAdjustment.create({
+            fundingReconciliationId: fundingReconciliation.id,
+            fiscalPeriodId: fiscalPeriod.id,
+            fundingReceivedPeriodAmount: "0",
+            eligibleExpensesPeriodAmount: "0",
+            payrollAdjustmentsPeriodAmount: "0",
+            cumulativeBalanceAmount: "0",
+          })
         }
-      )
+      }
     }
   )
 }
