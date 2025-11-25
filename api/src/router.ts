@@ -10,12 +10,7 @@ import { UnauthorizedError } from "express-jwt"
 
 import { GIT_COMMIT_HASH, RELEASE_TAG } from "@/config"
 import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
-import {
-  centreRouter,
-  fundingPeriodRouter,
-  migrationRouter,
-  submissionLineRouter,
-} from "@/routes"
+import { centreRouter, fundingPeriodRouter, migrationRouter, submissionLineRouter } from "@/routes"
 
 import {
   CentresController,
@@ -33,6 +28,7 @@ import {
   WageEnhancements,
   WageEnhancementsController,
 } from "@/controllers"
+import { FundingReconciliationAdjustmentsController } from "@/controllers/funding-reconciliation-adjustments-controller"
 
 export const router = Router()
 
@@ -90,6 +86,16 @@ router
   .get(FundingReconciliationsController.show)
   .patch(FundingReconciliationsController.update)
   .delete(FundingReconciliationsController.destroy)
+
+router
+  .route("/api/funding-reconciliation-adjustments")
+  .get(FundingReconciliationAdjustmentsController.index)
+  .post(FundingReconciliationAdjustmentsController.create)
+router
+  .route("/api/funding-reconciliation-adjustments/:fundingReconciliationAdjustmentId")
+  .get(FundingReconciliationAdjustmentsController.show)
+  .patch(FundingReconciliationAdjustmentsController.update)
+  .delete(FundingReconciliationAdjustmentsController.destroy)
 
 router
   .route("/api/funding-submission-line-jsons")
