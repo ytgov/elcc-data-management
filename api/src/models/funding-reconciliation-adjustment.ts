@@ -13,16 +13,12 @@ import {
   Default,
   NotNull,
   PrimaryKey,
-  Table,
 } from "@sequelize/core/decorators-legacy"
 
 import BaseModel from "@/models/base-model"
 import FiscalPeriod from "@/models/fiscal-period"
 import FundingReconciliation from "@/models/funding-reconciliation"
 
-@Table({
-  paranoid: false,
-})
 export class FundingReconciliationAdjustment extends BaseModel<
   InferAttributes<FundingReconciliationAdjustment>,
   InferCreationAttributes<FundingReconciliationAdjustment>
@@ -69,6 +65,9 @@ export class FundingReconciliationAdjustment extends BaseModel<
   @NotNull
   @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  declare deletedAt: Date | null
 
   // Associations
   @BelongsTo(() => FundingReconciliation, {

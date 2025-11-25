@@ -102,6 +102,11 @@ export class FundingReconciliation extends BaseModel<
   @Attribute(DataTypes.DATE)
   declare deletedAt: Date | null
 
+  // Helpers
+  get isDraftState(): NonAttribute<boolean> {
+    return this.status === FundingReconciliationStatuses.DRAFT
+  }
+
   // Associations
   @BelongsTo(() => Centre, {
     foreignKey: "centreId",

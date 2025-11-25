@@ -24,6 +24,7 @@ import {
   EmployeeWageTiersController,
   FiscalPeriodsController,
   FundingPeriodsController,
+  FundingReconciliationsController,
   FundingSubmissionLineJsons,
   FundingSubmissionLineJsonsController,
   FundingSubmissionLinesController,
@@ -79,6 +80,16 @@ router
   .get(FundingPeriodsController.show)
   .patch(FundingPeriodsController.update)
   .delete(FundingPeriodsController.destroy)
+
+router
+  .route("/api/funding-reconciliations")
+  .get(FundingReconciliationsController.index)
+  .post(FundingReconciliationsController.create)
+router
+  .route("/api/funding-reconciliations/:fundingReconciliationId")
+  .get(FundingReconciliationsController.show)
+  .patch(FundingReconciliationsController.update)
+  .delete(FundingReconciliationsController.destroy)
 
 router
   .route("/api/funding-submission-line-jsons")
