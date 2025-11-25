@@ -144,7 +144,17 @@ export class FundingReconciliation extends BaseModel<
   declare adjustments?: NonAttribute<FundingReconciliationAdjustment[]>
 
   static establishScopes() {
-    // add as needed
+    this.addScope("byFiscalYearLong", (fiscalYear: string) => ({
+      include: [
+        {
+          as: "fundingPeriod",
+          attributes: [],
+          where: {
+            fiscalYear,
+          },
+        },
+      ],
+    }))
   }
 }
 
