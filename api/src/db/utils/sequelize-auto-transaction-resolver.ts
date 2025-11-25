@@ -11,6 +11,7 @@ export function sequelizeAutoTransactionResolver({
   return {
     name,
     up: async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const migration = await require(path)
       return context.sequelize
         .transaction(() => {
@@ -28,6 +29,7 @@ export function sequelizeAutoTransactionResolver({
         })
     },
     down: async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const migration = await require(path)
       return context.sequelize.transaction(() => {
         return migration.down({ context })
