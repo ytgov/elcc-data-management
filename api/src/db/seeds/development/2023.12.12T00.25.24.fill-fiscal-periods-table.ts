@@ -1,52 +1,50 @@
-import { CreationAttributes } from "@sequelize/core"
+import { type CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
 import { DateTime } from "luxon"
 
-import { FiscalPeriod } from "@/models"
+import { FiscalPeriod, FundingPeriod } from "@/models"
 import { FiscalPeriodMonths } from "@/models/fiscal-period"
 
 export async function up() {
-  const today = DateTime.now()
-  const twoYearsAgo = today.minus({ years: 2 }).year
-  const threeYearsFromNow = today.plus({ years: 3 }).year
+  await FundingPeriod.findEach(async (fundingPeriod) => {
+    let currentDate = DateTime.fromJSDate(fundingPeriod.fromDate)
+    const toDate = DateTime.fromJSDate(fundingPeriod.toDate)
 
-  const APRIL = 4 // Luxon months are 1-indexed
+    while (currentDate <= toDate) {
+      const dateStart = currentDate.startOf("month")
+      const dateEnd = currentDate.endOf("month").set({ millisecond: 0 })
+      const dateName = dateStart.toFormat("MMMM").toLowerCase()
 
-  const fiscalPeriodsAttributes: CreationAttributes<FiscalPeriod>[] = []
+      const startYear = dateStart.year
+      const endYear = startYear + 1
+      const endYearSuffix = endYear.toString().slice(-2)
+      const fiscalYear = `${startYear}-${endYearSuffix}`
 
-  for (let year = twoYearsAgo; year <= threeYearsFromNow; year++) {
-    let date = DateTime.local(year, APRIL, 1)
-
-    for (let i = 0; i < 12; i++) {
-      const dateStart = date.startOf("month")
-      const dateEnd = date.endOf("month").set({ millisecond: 0 })
-      const dateName = dateStart.toFormat("MMMM").toLowerCase() as FiscalPeriodMonths
-
-      const fiscalYear = `${year}-${(year + 1).toString().slice(-2)}`
-
-      fiscalPeriodsAttributes.push({
+      const fiscalPeriodAttributes: CreationAttributes<FiscalPeriod> = {
+        fundingPeriodId: fundingPeriod.id,
         fiscalYear,
-        month: dateName,
+        month: dateName as FiscalPeriodMonths,
         dateStart: dateStart.toJSDate(),
         dateEnd: dateEnd.toJSDate(),
+      }
+
+      let fiscalPeriod = await FiscalPeriod.findOne({
+        where: {
+          fundingPeriodId: fiscalPeriodAttributes.fundingPeriodId,
+          fiscalYear: fiscalPeriodAttributes.fiscalYear,
+          month: fiscalPeriodAttributes.month,
+        },
       })
 
-      date = date.plus({ months: 1 })
-    }
-  }
+      if (isNil(fiscalPeriod)) {
+        fiscalPeriod = await FiscalPeriod.create(fiscalPeriodAttributes)
+      } else {
+        await fiscalPeriod.update(fiscalPeriodAttributes)
+      }
 
-  for (const fiscalPeriodAttributes of fiscalPeriodsAttributes) {
-    const fiscalPeriod = await FiscalPeriod.findOne({
-      where: {
-        fiscalYear: fiscalPeriodAttributes.fiscalYear,
-        month: fiscalPeriodAttributes.month,
-      },
-    })
-
-    if (isNil(fiscalPeriod)) {
-      await FiscalPeriod.create(fiscalPeriodAttributes)
+      currentDate = currentDate.plus({ months: 1 })
     }
-  }
+  })
 }
 
 export async function down() {
