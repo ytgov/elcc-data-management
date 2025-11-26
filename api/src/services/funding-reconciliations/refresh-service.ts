@@ -1,6 +1,8 @@
 import Big from "big.js"
 import { isEmpty, upperFirst } from "lodash"
 
+import sumByDecimal from "@/utils/sum-by-decimal"
+
 import {
   FiscalPeriod,
   FundingReconciliation,
@@ -116,16 +118,13 @@ export class RefreshService extends BaseService {
       return "0.0000"
     }
 
-    const eligibleExpensesPeriodAmount = fundingSubmissionLineJsons.reduce(
-      (sumAsBig, fundingSubmissionLineJson) => {
+    const eligibleExpensesPeriodAmount = sumByDecimal(
+      fundingSubmissionLineJsons,
+      (fundingSubmissionLineJson) => {
         const { lines } = fundingSubmissionLineJson
-        const linesSumAsBig = lines.reduce((sumAsBig, line) => {
-          const actualComputedTotalAsBig = Big(line.actualComputedTotal)
-          return sumAsBig.plus(actualComputedTotalAsBig)
-        }, new Big(0))
-        return sumAsBig.plus(linesSumAsBig)
-      },
-      new Big(0)
+        const linesSumAsBig = sumByDecimal(lines, "actualComputedTotal")
+        return linesSumAsBig
+      }
     )
     return eligibleExpensesPeriodAmount.toFixed(4)
   }
@@ -143,9 +142,11 @@ export class RefreshService extends BaseService {
       const { cumulativeBalanceAmount } = previousFundingReconciliationAdjustment
       previousCumulativeBalanceAmount = Big(cumulativeBalanceAmount)
     }
+
     const cumulativeBalanceAmountAsBig = previousCumulativeBalanceAmount
       .plus(Big(fundingReceivedPeriodAmount))
       .minus(Big(eligibleExpensesPeriodAmount))
+
     return cumulativeBalanceAmountAsBig.toFixed(4)
   }
 
@@ -153,17 +154,14 @@ export class RefreshService extends BaseService {
     fundingReconciliation: FundingReconciliation,
     fundingReconciliationAdjustments: FundingReconciliationAdjustment[]
   ) {
-    const totalFundingReceived = fundingReconciliationAdjustments.reduce((sumAsBig, adjustment) => {
-      const fundingReceivedPeriodAmountAsBig = Big(adjustment.fundingReceivedPeriodAmount)
-      return sumAsBig.plus(fundingReceivedPeriodAmountAsBig)
-    }, new Big(0))
+    const totalFundingReceived = sumByDecimal(
+      fundingReconciliationAdjustments,
+      "fundingReceivedPeriodAmount"
+    )
 
-    const totalEligibleExpenses = fundingReconciliationAdjustments.reduce(
-      (sumAsBig, adjustment) => {
-        const eligibleExpensesPeriodAmountAsBig = Big(adjustment.eligibleExpensesPeriodAmount)
-        return sumAsBig.plus(eligibleExpensesPeriodAmountAsBig)
-      },
-      new Big(0)
+    const totalEligibleExpenses = sumByDecimal(
+      fundingReconciliationAdjustments,
+      "eligibleExpensesPeriodAmount"
     )
 
     const finalBalanceAmount = totalFundingReceived.minus(totalEligibleExpenses)
