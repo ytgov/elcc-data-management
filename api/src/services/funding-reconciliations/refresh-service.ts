@@ -1,6 +1,13 @@
 import Big from "big.js"
+import { isEmpty, upperFirst } from "lodash"
 
-import { FundingReconciliation, FundingReconciliationAdjustment, Payment } from "@/models"
+import {
+  FiscalPeriod,
+  FundingReconciliation,
+  FundingReconciliationAdjustment,
+  FundingSubmissionLineJson,
+  Payment,
+} from "@/models"
 import BaseService from "@/services/base-service"
 
 export class RefreshService extends BaseService {
@@ -49,13 +56,19 @@ export class RefreshService extends BaseService {
         centreId,
         fiscalPeriodId
       )
+      const eligibleExpensesPeriodAmount = await this.determineEligibleExpensesPeriodAmount(
+        centreId,
+        fiscalPeriodId
+      )
       const cumulativeBalanceAmount = this.determineCumulativeBalanceAmount(
         fundingReconciliationAdjustments,
         index,
-        fundingReceivedPeriodAmount
+        fundingReceivedPeriodAmount,
+        eligibleExpensesPeriodAmount
       )
       await fundingReconciliationAdjustment.update({
         fundingReceivedPeriodAmount,
+        eligibleExpensesPeriodAmount,
         cumulativeBalanceAmount,
       })
     }
@@ -79,10 +92,49 @@ export class RefreshService extends BaseService {
     return paymentsTotalAmountInDollars.toFixed(4)
   }
 
+  private async determineEligibleExpensesPeriodAmount(
+    centreId: number,
+    fiscalPeriodId: number
+  ): Promise<string> {
+    const fiscalPeriod = await FiscalPeriod.findByPk(fiscalPeriodId, {
+      rejectOnEmpty: true,
+    })
+    const { fiscalYear: fiscalYearShort, month } = fiscalPeriod
+    const fiscalYearLegacy = fiscalYearShort.replace("-", "/")
+    const monthLegacy = upperFirst(month)
+
+    // TODO: find out, or ensure that there can only be one funding submission line json per month
+    const fundingSubmissionLineJsons = await FundingSubmissionLineJson.findAll({
+      where: {
+        centreId,
+        fiscalYear: fiscalYearLegacy,
+        dateName: monthLegacy,
+      },
+    })
+
+    if (isEmpty(fundingSubmissionLineJsons)) {
+      return "0.0000"
+    }
+
+    const eligibleExpensesPeriodAmount = fundingSubmissionLineJsons.reduce(
+      (sumAsBig, fundingSubmissionLineJson) => {
+        const { lines } = fundingSubmissionLineJson
+        const linesSumAsBig = lines.reduce((sumAsBig, line) => {
+          const actualComputedTotalAsBig = Big(line.actualComputedTotal)
+          return sumAsBig.plus(actualComputedTotalAsBig)
+        }, new Big(0))
+        return sumAsBig.plus(linesSumAsBig)
+      },
+      new Big(0)
+    )
+    return eligibleExpensesPeriodAmount.toFixed(4)
+  }
+
   private determineCumulativeBalanceAmount(
     fundingReconciliationAdjustments: FundingReconciliationAdjustment[],
     index: number,
-    fundingReceivedPeriodAmount: string
+    fundingReceivedPeriodAmount: string,
+    eligibleExpensesPeriodAmount: string
   ): string {
     let previousCumulativeBalanceAmount = Big("0")
 
@@ -91,9 +143,9 @@ export class RefreshService extends BaseService {
       const { cumulativeBalanceAmount } = previousFundingReconciliationAdjustment
       previousCumulativeBalanceAmount = Big(cumulativeBalanceAmount)
     }
-    const cumulativeBalanceAmountAsBig = previousCumulativeBalanceAmount.plus(
-      Big(fundingReceivedPeriodAmount)
-    )
+    const cumulativeBalanceAmountAsBig = previousCumulativeBalanceAmount
+      .plus(Big(fundingReceivedPeriodAmount))
+      .minus(Big(eligibleExpensesPeriodAmount))
     return cumulativeBalanceAmountAsBig.toFixed(4)
   }
 
@@ -102,15 +154,25 @@ export class RefreshService extends BaseService {
     fundingReconciliationAdjustments: FundingReconciliationAdjustment[]
   ) {
     const totalFundingReceived = fundingReconciliationAdjustments.reduce((sumAsBig, adjustment) => {
-      const amountAsBig = Big(adjustment.fundingReceivedPeriodAmount)
-      return sumAsBig.plus(amountAsBig)
+      const fundingReceivedPeriodAmountAsBig = Big(adjustment.fundingReceivedPeriodAmount)
+      return sumAsBig.plus(fundingReceivedPeriodAmountAsBig)
     }, new Big(0))
+
+    const totalEligibleExpenses = fundingReconciliationAdjustments.reduce(
+      (sumAsBig, adjustment) => {
+        const eligibleExpensesPeriodAmountAsBig = Big(adjustment.eligibleExpensesPeriodAmount)
+        return sumAsBig.plus(eligibleExpensesPeriodAmountAsBig)
+      },
+      new Big(0)
+    )
+
+    const finalBalanceAmount = totalFundingReceived.minus(totalEligibleExpenses)
 
     await fundingReconciliation.update({
       fundingReceivedTotalAmount: totalFundingReceived.toFixed(4),
-      eligibleExpensesTotalAmount: "0.0000",
+      eligibleExpensesTotalAmount: totalEligibleExpenses.toFixed(4),
       payrollAdjustmentsTotalAmount: "0.0000",
-      finalBalanceAmount: totalFundingReceived.toFixed(4),
+      finalBalanceAmount: finalBalanceAmount.toFixed(4),
     })
   }
 }
