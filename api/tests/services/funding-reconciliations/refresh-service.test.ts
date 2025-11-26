@@ -285,6 +285,489 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
           })
         )
       })
+
+      test("when there are no eligible expenses, updates funding reconciliation eligible expenses to zero", async () => {
+        // Arrange
+        const centre = await centreFactory.create()
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+          fromDate: new Date("2025-04-01"),
+          toDate: new Date("2026-03-31"),
+        })
+        const fundingReconciliation = await fundingReconciliationFactory.create({
+          centreId: centre.id,
+          fundingPeriodId: fundingPeriod.id,
+          eligibleExpensesTotalAmount: "500",
+        })
+
+        const fiscalPeriod = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          month: FiscalPeriod.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+        })
+        await fundingReconciliationAdjustmentFactory.create({
+          fundingReconciliationId: fundingReconciliation.id,
+          fiscalPeriodId: fiscalPeriod.id,
+        })
+
+        // Act
+        const result = await RefreshService.perform(fundingReconciliation)
+
+        // Assert
+        expect(result).toEqual(
+          expect.objectContaining({
+            eligibleExpensesTotalAmount: "0.0000",
+            finalBalanceAmount: "0.0000",
+          })
+        )
+      })
+
+      test("when there are payments and eligible expenses, calculates correct final balance with positive result", async () => {
+        // Arrange
+        const centre = await centreFactory.create()
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+          fromDate: new Date("2025-04-01"),
+          toDate: new Date("2026-03-31"),
+        })
+        const fundingReconciliation = await fundingReconciliationFactory.create({
+          centreId: centre.id,
+          fundingPeriodId: fundingPeriod.id,
+        })
+
+        const fiscalPeriod = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          month: FiscalPeriod.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+        })
+        await fundingReconciliationAdjustmentFactory.create({
+          fundingReconciliationId: fundingReconciliation.id,
+          fiscalPeriodId: fiscalPeriod.id,
+        })
+
+        await paymentFactory.create({
+          centreId: centre.id,
+          fiscalPeriodId: fiscalPeriod.id,
+          fiscalYear: "2025/26",
+          paidOn: "2025-04-15",
+          amountInCents: 200 * 100,
+        })
+
+        await fundingSubmissionLineJsonFactory.create({
+          centreId: centre.id,
+          fiscalYear: "2025/26",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+          values: JSON.stringify([
+            {
+              actualComputedTotal: 75.0,
+            },
+          ]),
+        })
+
+        // Act
+        const result = await RefreshService.perform(fundingReconciliation)
+
+        // Assert
+        expect(result).toEqual(
+          expect.objectContaining({
+            fundingReceivedTotalAmount: "200.0000",
+            eligibleExpensesTotalAmount: "75.0000",
+            finalBalanceAmount: "125.0000",
+          })
+        )
+      })
+
+      test("when there are payments and eligible expenses, calculates correct final balance with negative result", async () => {
+        // Arrange
+        const centre = await centreFactory.create()
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+          fromDate: new Date("2025-04-01"),
+          toDate: new Date("2026-03-31"),
+        })
+        const fundingReconciliation = await fundingReconciliationFactory.create({
+          centreId: centre.id,
+          fundingPeriodId: fundingPeriod.id,
+        })
+
+        const fiscalPeriod = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          month: FiscalPeriod.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+        })
+        await fundingReconciliationAdjustmentFactory.create({
+          fundingReconciliationId: fundingReconciliation.id,
+          fiscalPeriodId: fiscalPeriod.id,
+        })
+
+        await paymentFactory.create({
+          centreId: centre.id,
+          fiscalPeriodId: fiscalPeriod.id,
+          fiscalYear: "2025/26",
+          paidOn: "2025-04-15",
+          amountInCents: 100 * 100,
+        })
+
+        await fundingSubmissionLineJsonFactory.create({
+          centreId: centre.id,
+          fiscalYear: "2025/26",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+          values: JSON.stringify([
+            {
+              actualComputedTotal: 250.0,
+            },
+          ]),
+        })
+
+        // Act
+        const result = await RefreshService.perform(fundingReconciliation)
+
+        // Assert
+        expect(result).toEqual(
+          expect.objectContaining({
+            fundingReceivedTotalAmount: "100.0000",
+            eligibleExpensesTotalAmount: "250.0000",
+            finalBalanceAmount: "-150.0000",
+          })
+        )
+      })
+
+      test("when there are eligible expenses on first and second months, updates funding reconciliation adjustments with correct cumulative balances", async () => {
+        // Arrange
+        const centre = await centreFactory.create()
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+          fromDate: new Date("2025-04-01"),
+          toDate: new Date("2026-03-31"),
+        })
+        const fundingReconciliation = await fundingReconciliationFactory.create({
+          centreId: centre.id,
+          fundingPeriodId: fundingPeriod.id,
+        })
+
+        const fiscalPeriod = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          month: FiscalPeriod.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+        })
+        await fundingReconciliationAdjustmentFactory.create({
+          fundingReconciliationId: fundingReconciliation.id,
+          fiscalPeriodId: fiscalPeriod.id,
+        })
+        await fundingSubmissionLineJsonFactory.create({
+          centreId: centre.id,
+          fiscalYear: "2025/26",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+          values: JSON.stringify([
+            {
+              actualComputedTotal: 100.0,
+            },
+          ]),
+        })
+
+        const fiscalPeriod2 = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          month: FiscalPeriod.Months.MAY,
+          dateStart: new Date("2025-05-01"),
+          dateEnd: new Date("2025-05-31"),
+        })
+        await fundingReconciliationAdjustmentFactory.create({
+          fundingReconciliationId: fundingReconciliation.id,
+          fiscalPeriodId: fiscalPeriod2.id,
+        })
+        await fundingSubmissionLineJsonFactory.create({
+          centreId: centre.id,
+          fiscalYear: "2025/26",
+          dateName: FundingSubmissionLineJson.Months.MAY,
+          dateStart: new Date("2025-05-01"),
+          dateEnd: new Date("2025-05-31"),
+          values: JSON.stringify([
+            {
+              actualComputedTotal: 150.0,
+            },
+          ]),
+        })
+
+        // Act
+        await RefreshService.perform(fundingReconciliation)
+
+        // Assert
+        await fundingReconciliation.reload({
+          include: [
+            {
+              association: "adjustments",
+              include: [
+                {
+                  association: "fiscalPeriod",
+                  attributes: ["dateStart"],
+                },
+              ],
+            },
+          ],
+          order: [["adjustments", "fiscalPeriod", "dateStart", "ASC"]],
+        })
+        expect(fundingReconciliation).toEqual(
+          expect.objectContaining({
+            eligibleExpensesTotalAmount: "250",
+            finalBalanceAmount: "-250",
+            adjustments: [
+              expect.objectContaining({
+                eligibleExpensesPeriodAmount: "100",
+                cumulativeBalanceAmount: "-100",
+              }),
+              expect.objectContaining({
+                eligibleExpensesPeriodAmount: "150",
+                cumulativeBalanceAmount: "-250",
+              }),
+            ],
+          })
+        )
+      })
+
+      test("when there are multiple funding submission line jsons for the same month, sums them correctly", async () => {
+        // Arrange
+        const centre = await centreFactory.create()
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+          fromDate: new Date("2025-04-01"),
+          toDate: new Date("2026-03-31"),
+        })
+        const fundingReconciliation = await fundingReconciliationFactory.create({
+          centreId: centre.id,
+          fundingPeriodId: fundingPeriod.id,
+        })
+
+        const fiscalPeriod = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          month: FiscalPeriod.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+        })
+        await fundingReconciliationAdjustmentFactory.create({
+          fundingReconciliationId: fundingReconciliation.id,
+          fiscalPeriodId: fiscalPeriod.id,
+        })
+
+        await fundingSubmissionLineJsonFactory.create({
+          centreId: centre.id,
+          fiscalYear: "2025/26",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+          values: JSON.stringify([
+            {
+              actualComputedTotal: 30.0,
+            },
+          ]),
+        })
+        await fundingSubmissionLineJsonFactory.create({
+          centreId: centre.id,
+          fiscalYear: "2025/26",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+          values: JSON.stringify([
+            {
+              actualComputedTotal: 70.0,
+            },
+          ]),
+        })
+
+        // Act
+        const result = await RefreshService.perform(fundingReconciliation)
+
+        // Assert
+        expect(result).toEqual(
+          expect.objectContaining({
+            eligibleExpensesTotalAmount: "100.0000",
+          })
+        )
+      })
+
+      test("when there are both payments and eligible expenses across multiple months, calculates correct cumulative balances for each month", async () => {
+        // Arrange
+        const centre = await centreFactory.create()
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+          fromDate: new Date("2025-04-01"),
+          toDate: new Date("2026-03-31"),
+        })
+        const fundingReconciliation = await fundingReconciliationFactory.create({
+          centreId: centre.id,
+          fundingPeriodId: fundingPeriod.id,
+        })
+
+        const fiscalPeriod = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          month: FiscalPeriod.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+        })
+        await fundingReconciliationAdjustmentFactory.create({
+          fundingReconciliationId: fundingReconciliation.id,
+          fiscalPeriodId: fiscalPeriod.id,
+        })
+        await paymentFactory.create({
+          centreId: centre.id,
+          fiscalPeriodId: fiscalPeriod.id,
+          fiscalYear: "2025/26",
+          paidOn: "2025-04-15",
+          amountInCents: 300 * 100,
+        })
+        await fundingSubmissionLineJsonFactory.create({
+          centreId: centre.id,
+          fiscalYear: "2025/26",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+          values: JSON.stringify([
+            {
+              actualComputedTotal: 100.0,
+            },
+          ]),
+        })
+
+        const fiscalPeriod2 = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          month: FiscalPeriod.Months.MAY,
+          dateStart: new Date("2025-05-01"),
+          dateEnd: new Date("2025-05-31"),
+        })
+        await fundingReconciliationAdjustmentFactory.create({
+          fundingReconciliationId: fundingReconciliation.id,
+          fiscalPeriodId: fiscalPeriod2.id,
+        })
+        await paymentFactory.create({
+          centreId: centre.id,
+          fiscalPeriodId: fiscalPeriod2.id,
+          fiscalYear: "2025/26",
+          paidOn: "2025-05-15",
+          amountInCents: 250 * 100,
+        })
+        await fundingSubmissionLineJsonFactory.create({
+          centreId: centre.id,
+          fiscalYear: "2025/26",
+          dateName: FundingSubmissionLineJson.Months.MAY,
+          dateStart: new Date("2025-05-01"),
+          dateEnd: new Date("2025-05-31"),
+          values: JSON.stringify([
+            {
+              actualComputedTotal: 400.0,
+            },
+          ]),
+        })
+
+        // Act
+        await RefreshService.perform(fundingReconciliation)
+
+        // Assert
+        await fundingReconciliation.reload({
+          include: [
+            {
+              association: "adjustments",
+              include: [
+                {
+                  association: "fiscalPeriod",
+                  attributes: ["dateStart"],
+                },
+              ],
+            },
+          ],
+          order: [["adjustments", "fiscalPeriod", "dateStart", "ASC"]],
+        })
+        expect(fundingReconciliation).toEqual(
+          expect.objectContaining({
+            fundingReceivedTotalAmount: "550",
+            eligibleExpensesTotalAmount: "500",
+            finalBalanceAmount: "50",
+            adjustments: [
+              expect.objectContaining({
+                fundingReceivedPeriodAmount: "300",
+                eligibleExpensesPeriodAmount: "100",
+                cumulativeBalanceAmount: "200",
+              }),
+              expect.objectContaining({
+                fundingReceivedPeriodAmount: "250",
+                eligibleExpensesPeriodAmount: "400",
+                cumulativeBalanceAmount: "50",
+              }),
+            ],
+          })
+        )
+      })
+
+      test("when eligible expenses have multiple lines in values array, sums them correctly", async () => {
+        // Arrange
+        const centre = await centreFactory.create()
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+          fromDate: new Date("2025-04-01"),
+          toDate: new Date("2026-03-31"),
+        })
+        const fundingReconciliation = await fundingReconciliationFactory.create({
+          centreId: centre.id,
+          fundingPeriodId: fundingPeriod.id,
+        })
+
+        const fiscalPeriod = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          month: FiscalPeriod.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+        })
+        await fundingReconciliationAdjustmentFactory.create({
+          fundingReconciliationId: fundingReconciliation.id,
+          fiscalPeriodId: fiscalPeriod.id,
+        })
+
+        await fundingSubmissionLineJsonFactory.create({
+          centreId: centre.id,
+          fiscalYear: "2025/26",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+          values: JSON.stringify([
+            {
+              actualComputedTotal: 25.0,
+            },
+            {
+              actualComputedTotal: 35.0,
+            },
+            {
+              actualComputedTotal: 40.0,
+            },
+          ]),
+        })
+
+        // Act
+        const result = await RefreshService.perform(fundingReconciliation)
+
+        // Assert
+        expect(result).toEqual(
+          expect.objectContaining({
+            eligibleExpensesTotalAmount: "100.0000",
+          })
+        )
+      })
     })
   })
 })
