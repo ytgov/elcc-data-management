@@ -80,7 +80,7 @@ export class FiscalPeriod extends BaseModel<
   @NotNull
   @FiscalPeriodsFundingPeriodIdFiscalYearMonthUniqueIndex
   @ValidateAttribute({
-    isValidFiscalYear: isValidFiscalYearShort,
+    isValidFiscalYearShort,
   })
   declare fiscalYear: string
 

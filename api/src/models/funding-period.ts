@@ -48,7 +48,7 @@ export class FundingPeriod extends BaseModel<
   @Attribute(DataTypes.STRING(10))
   @NotNull
   @ValidateAttribute({
-    isValidFiscalYear: isValidFiscalYearLong,
+    isValidFiscalYearLong,
   })
   declare fiscalYear: string
 
