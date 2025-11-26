@@ -7,6 +7,8 @@ import { FiscalPeriodMonths } from "@/models/fiscal-period"
 
 export async function up() {
   await FundingPeriod.findEach(async (fundingPeriod) => {
+    const fiscalYear = FiscalPeriod.toShortFiscalYearFormat(fundingPeriod.fiscalYear)
+
     let currentDate = DateTime.fromJSDate(fundingPeriod.fromDate)
     const toDate = DateTime.fromJSDate(fundingPeriod.toDate)
 
@@ -14,11 +16,6 @@ export async function up() {
       const dateStart = currentDate.startOf("month")
       const dateEnd = currentDate.endOf("month").set({ millisecond: 0 })
       const dateName = dateStart.toFormat("MMMM").toLowerCase()
-
-      const startYear = dateStart.year
-      const endYear = startYear + 1
-      const endYearSuffix = endYear.toString().slice(-2)
-      const fiscalYear = `${startYear}-${endYearSuffix}`
 
       const fiscalPeriodAttributes: CreationAttributes<FiscalPeriod> = {
         fundingPeriodId: fundingPeriod.id,
