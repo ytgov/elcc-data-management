@@ -1,40 +1,65 @@
 import { Factory } from "fishery"
-import { faker } from "@faker-js/faker"
 import { DateTime } from "luxon"
 
 import { FiscalPeriod } from "@/models"
-import { FiscalPeriodMonths } from "@/models/fiscal-period"
-import { formatAsFiscalYear } from "@/factories/helpers"
 
-export const fiscalPeriodFactory = Factory.define<FiscalPeriod>(({ onCreate }) => {
-  onCreate(async (fiscalPeriod) => {
-    try {
-      await fiscalPeriod.save()
-      return fiscalPeriod
-    } catch (error) {
-      console.error(error)
-      throw new Error(
-        `Could not create FiscalPeriod with attributes: ${JSON.stringify(fiscalPeriod.dataValues, null, 2)}`
-      )
+import fundingPeriodFactory from "@/factories/funding-period-factory"
+
+export const fiscalPeriodFactory = Factory.define<FiscalPeriod>(
+  ({ associations, params, onCreate }) => {
+    onCreate(async (fiscalPeriod) => {
+      try {
+        await fiscalPeriod.save()
+        return fiscalPeriod
+      } catch (error) {
+        console.error(error)
+        throw new Error(
+          `Could not create FiscalPeriod with attributes: ${JSON.stringify(fiscalPeriod.dataValues, null, 2)}`
+        )
+      }
+    })
+
+    let currentYear = new Date().getFullYear()
+    if (params.fiscalYear) {
+      currentYear = parseInt(params.fiscalYear.split("-")[0])
+    } else if (associations.fundingPeriod) {
+      currentYear = parseInt(associations.fundingPeriod.fiscalYear.split("-")[0])
     }
-  })
 
-  const year = faker.number.int({ min: 2022, max: 2027 })
-  const month = faker.number.int({ min: 1, max: 12 })
-  const dateStart = DateTime.local(year, month, 1).startOf("month")
-  const dateEnd = dateStart.endOf("month")
-  const monthName = dateStart.toFormat("MMMM").toLowerCase() as FiscalPeriodMonths
+    const nextYear = currentYear + 1
+    const nextYearSuffix = nextYear.toString().slice(-2)
+    const fiscalYearShort = [currentYear, nextYearSuffix].join("-")
+    const fiscalYearLong = [currentYear, nextYear].join("-")
 
-  const APRIL = 4 // Luxon uses 1-indexed months
-  const fiscalYearStartYear = month >= APRIL ? year : year - 1
-  const fiscalYear = formatAsFiscalYear(fiscalYearStartYear, { separator: "-" })
+    const fundingPeriod =
+      associations.fundingPeriod ??
+      fundingPeriodFactory.build({
+        id: params.fundingPeriodId,
+        fiscalYear: fiscalYearLong,
+      })
 
-  return FiscalPeriod.build({
-    fiscalYear,
-    month: monthName,
-    dateStart: dateStart.toJSDate(),
-    dateEnd: dateEnd.toJSDate(),
-  })
-})
+    const dateStart =
+      params.dateStart ??
+      fundingPeriod.fromDate ??
+      DateTime.fromObject({
+        year: currentYear,
+        month: 4,
+        day: 1,
+      }).toJSDate()
+
+    const dateStartDateTime = DateTime.fromJSDate(dateStart)
+
+    const dateEnd = params.dateEnd ?? dateStartDateTime.plus({ months: 1 }).toJSDate()
+    const month = params.month ?? FiscalPeriod.asFiscalPeriodMonth(dateStartDateTime)
+
+    return FiscalPeriod.build({
+      fundingPeriodId: fundingPeriod.id,
+      fiscalYear: fiscalYearShort,
+      month: month,
+      dateStart,
+      dateEnd,
+    })
+  }
+)
 
 export default fiscalPeriodFactory

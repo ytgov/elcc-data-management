@@ -100,11 +100,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, ref, watch } from "vue"
 import { isNil, keyBy, upperFirst } from "lodash"
 
 import { formatMoney } from "@/utils/formatters"
 import normalizeFiscalYearToLongForm from "@/utils/normalize-fiscal-year-to-long-form"
+
+import api from "@/api"
 
 import useFiscalPeriods from "@/use/use-fiscal-periods"
 import useFundingReconciliations from "@/use/use-funding-reconciliations"
@@ -127,21 +129,29 @@ const fundingReconciliationsQuery = computed(() => ({
   },
   perPage: 1,
 }))
-const { fundingReconciliations, isLoading: isLoadingFundingReconciliations } =
-  useFundingReconciliations(fundingReconciliationsQuery)
+const {
+  fundingReconciliations,
+  isLoading: isLoadingFundingReconciliations,
+  refresh: refreshFundingReconciliations,
+} = useFundingReconciliations(fundingReconciliationsQuery)
 
 const fundingReconciliation = computed(() => fundingReconciliations.value[0])
 const fundingReconciliationId = computed(() => fundingReconciliation.value?.id)
+
+// TODO: mabye just load funding reconciliation, and have it's show serializer load these other objects?
 
 const fundingReconciliationAdjustmentsQuery = computed(() => ({
   where: {
     fundingReconciliationId: fundingReconciliationId.value,
   },
 }))
-const { fundingReconciliationAdjustments, isLoading: isLoadingFundingReconciliationAdjustments } =
-  useFundingReconciliationAdjustments(fundingReconciliationAdjustmentsQuery, {
-    skipWatchIf: () => isNil(fundingReconciliationId.value),
-  })
+const {
+  fundingReconciliationAdjustments,
+  isLoading: isLoadingFundingReconciliationAdjustments,
+  refresh: refreshFundingReconciliationAdjustments,
+} = useFundingReconciliationAdjustments(fundingReconciliationAdjustmentsQuery, {
+  skipWatchIf: () => isNil(fundingReconciliationId.value),
+})
 
 const fiscalPeriodsQuery = computed(() => ({
   where: {
@@ -164,6 +174,33 @@ function buildLabel(fiscalPeriodId: number): string {
 
   const capitalizedMonth = upperFirst(fiscalPeriod.month)
   return `${capitalizedMonth} Expenses`
+}
+
+watch(fundingReconciliationId, async (newFundingReconciliationId) => {
+  if (isNil(newFundingReconciliationId)) return
+
+  await refreshFundingReconciliation(newFundingReconciliationId)
+})
+
+const isRefreshing = ref(false)
+
+async function refreshFundingReconciliation(newFundingReconciliationId: number) {
+  isRefreshing.value = true
+  try {
+    const { fundingReconciliation: refreshedFundingReconciliation } =
+      await api.fundingReconciliations.refreshApi.create(newFundingReconciliationId)
+
+    if (refreshedFundingReconciliation.updatedAt !== fundingReconciliation.value.updatedAt) {
+      await refreshFundingReconciliations()
+      await refreshFundingReconciliationAdjustments()
+    }
+  } catch (error) {
+    console.error(`Failed to refresh funding reconciliation ${newFundingReconciliationId}`, {
+      error,
+    })
+  } finally {
+    isRefreshing.value = false
+  }
 }
 </script>
 

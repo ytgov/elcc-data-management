@@ -12,5 +12,6 @@ export { UsersController } from "./users-controller"
 export { WageEnhancementsController } from "./wage-enhancements-controller"
 
 // bundled exports
+export * as FundingReconciliations from "./funding-reconciliations"
 export * as FundingSubmissionLineJsons from "./funding-submission-line-jsons"
 export * as WageEnhancements from "./wage-enhancements"
