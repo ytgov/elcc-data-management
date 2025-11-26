@@ -3,6 +3,7 @@ import { faker } from "@faker-js/faker"
 import { DateTime } from "luxon"
 
 import { FundingSubmissionLineJson } from "@/models"
+import { FundingSubmissionLineJsonMonths } from "@/models/funding-submission-line-json"
 import { formatAsFiscalYear } from "@/factories/helpers"
 import centreFactory from "@/factories/centre-factory"
 
@@ -39,7 +40,7 @@ export const fundingSubmissionLineJsonFactory = Factory.define<FundingSubmission
     const fundingSubmissionLineJson = FundingSubmissionLineJson.build({
       centreId: centre.id,
       fiscalYear,
-      dateName,
+      dateName: dateName as FundingSubmissionLineJsonMonths,
       dateStart: dateStart.toJSDate(),
       dateEnd: dateEnd.toJSDate(),
       values: JSON.stringify([]),

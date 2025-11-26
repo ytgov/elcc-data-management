@@ -6,7 +6,7 @@ describe("api/src/models/funding-submission-line-json.ts", () => {
       it("is #values parsed as json", () => {
         const fundingSubmissionLineJson = FundingSubmissionLineJson.build({
           centreId: -1,
-          dateName: "April",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
           dateStart: new Date("2020-01-01"),
           dateEnd: new Date("2020-01-01"),
           fiscalYear: "2020/21",
@@ -18,7 +18,7 @@ describe("api/src/models/funding-submission-line-json.ts", () => {
       test("when #values is not valid json", () => {
         const fundingSubmissionLineJson = FundingSubmissionLineJson.build({
           centreId: -1,
-          dateName: "April",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
           dateStart: new Date("2020-01-01"),
           dateEnd: new Date("2020-01-01"),
           fiscalYear: "2020/21",

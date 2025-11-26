@@ -40,6 +40,7 @@ export class Payment extends Model<InferAttributes<Payment>, InferCreationAttrib
   @NotNull
   declare fiscalPeriodId: number
 
+  // TODO: normalize to url safe long-form fiscal year 2023-2024
   @Attribute(DataTypes.STRING(10))
   @NotNull
   @ValidateAttribute({
