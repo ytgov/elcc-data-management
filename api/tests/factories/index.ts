@@ -1,4 +1,5 @@
 export { centreFactory } from "./centre-factory"
+export { employeeBenefitFactory } from "./employee-benefit-factory"
 export { employeeWageTierFactory } from "./employee-wage-tier-factory"
 export { fiscalPeriodFactory } from "./fiscal-period-factory"
 export { fundingLineValueFactory } from "./funding-line-value-factory"
