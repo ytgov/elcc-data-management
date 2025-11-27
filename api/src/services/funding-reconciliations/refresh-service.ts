@@ -1,11 +1,11 @@
 import Big from "big.js"
 import { isEmpty, upperFirst } from "lodash"
+import { QueryTypes } from "@sequelize/core"
 
 import minDecimal from "@/utils/min-decimal"
 import sumByDecimal from "@/utils/sum-by-decimal"
 
-import {
-  EmployeeBenefit,
+import db, {
   FiscalPeriod,
   FundingReconciliation,
   FundingReconciliationAdjustment,
@@ -142,31 +142,32 @@ export class RefreshService extends BaseService {
     centreId: number,
     fiscalPeriodId: number
   ): Promise<string> {
-    const employerCostActualTotalOrNull = await EmployeeBenefit.sum("employerCostActual", {
-      where: {
-        centreId,
-        fiscalPeriodId,
-      },
-    })
-    const employerCostActualTotal = employerCostActualTotalOrNull ?? 0
-    const grossPayrollMonthlyActualTotalOrNull = await EmployeeBenefit.sum(
-      "grossPayrollMonthlyActual",
+    const [employeeBenefitTotals] = await db.query<{
+      employerCostActualTotal: number
+      grossPayrollMonthlyActualTotal: number
+      costCapPercentageTotal: number
+    }>(
+      /* sql */ `
+        SELECT
+          COALESCE(SUM(employer_cost_actual), 0) as employerCostActualTotal,
+          COALESCE(SUM(gross_payroll_monthly_actual), 0) as grossPayrollMonthlyActualTotal,
+          COALESCE(SUM(cost_cap_percentage), 0) as costCapPercentageTotal
+        FROM
+          employee_benefits
+        WHERE
+          centre_id = :centreId
+          AND fiscal_period_id = :fiscalPeriodId
+      `,
       {
-        where: {
+        type: QueryTypes.SELECT,
+        replacements: {
           centreId,
           fiscalPeriodId,
         },
       }
     )
-    const grossPayrollMonthlyActualTotal = grossPayrollMonthlyActualTotalOrNull ?? 0
-    const costCapPercentageTotalOrNull = await EmployeeBenefit.sum("costCapPercentage", {
-      where: {
-        centreId,
-        fiscalPeriodId,
-      },
-    })
-    const costCapPercentageTotal = costCapPercentageTotalOrNull ?? 0
-
+    const { employerCostActualTotal, grossPayrollMonthlyActualTotal, costCapPercentageTotal } =
+      employeeBenefitTotals
     const employeeBenefitActualPaidAmount = minDecimal(
       Big(employerCostActualTotal),
       Big(grossPayrollMonthlyActualTotal).mul(costCapPercentageTotal)
