@@ -106,6 +106,7 @@ export class RefreshService extends BaseService {
     const monthLegacy = upperFirst(month)
 
     // TODO: find out, or ensure that there can only be one funding submission line json per month
+    // TODO: link FundingSubmissionLineJson model to a fiscal period so this query can be simplified
     const fundingSubmissionLineJsons = await FundingSubmissionLineJson.findAll({
       where: {
         centreId,
