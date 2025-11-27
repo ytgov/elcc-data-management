@@ -11,6 +11,7 @@ import db, {
   FundingReconciliationAdjustment,
   FundingSubmissionLineJson,
   Payment,
+  WageEnhancement,
 } from "@/models"
 import BaseService from "@/services/base-service"
 
@@ -145,6 +146,26 @@ export class RefreshService extends BaseService {
     centreId: number,
     fiscalPeriodId: number
   ): Promise<string> {
+    const employeeBenefitActualPaidAmount = await this.determineEmployeeBenefitActualPaidAmount(
+      centreId,
+      fiscalPeriodId
+    )
+    const wageEnhancementsActualTotal = await this.determineWageEnhancementsActualTotal(
+      centreId,
+      fiscalPeriodId
+    )
+
+    const payrollAdjustmentsPeriodAmountTotal = employeeBenefitActualPaidAmount.plus(
+      wageEnhancementsActualTotal
+    )
+
+    return payrollAdjustmentsPeriodAmountTotal.toFixed(4)
+  }
+
+  private async determineEmployeeBenefitActualPaidAmount(
+    centreId: number,
+    fiscalPeriodId: number
+  ): Promise<Big> {
     const [employeeBenefitTotals] = await db.query<{
       employerCostActualTotal: number
       grossPayrollMonthlyActualTotal: number
@@ -175,8 +196,45 @@ export class RefreshService extends BaseService {
       Big(employerCostActualTotal),
       Big(grossPayrollMonthlyActualTotal).mul(costCapPercentageTotal)
     )
+    return employeeBenefitActualPaidAmount
+  }
 
-    return employeeBenefitActualPaidAmount.toFixed(4)
+  private async determineWageEnhancementsActualTotal(
+    centreId: number,
+    fiscalPeriodId: number
+  ): Promise<Big> {
+    const [wageEnhancementTotals] = await db.query<{
+      wageEnhancementsActualSubtotal: number
+    }>(
+      /* sql */ `
+        SELECT
+          COALESCE(
+            SUM(
+              wage_enhancements.hours_actual * employee_wage_tiers.wage_rate_per_hour
+            ),
+            0
+          ) as wageEnhancementsActualSubtotal
+        FROM
+          wage_enhancements
+          INNER JOIN employee_wage_tiers ON wage_enhancements.employee_wage_tier_id = employee_wage_tiers.id
+        WHERE
+          wage_enhancements.centre_id = :centreId
+          AND employee_wage_tiers.fiscal_period_id = :fiscalPeriodId
+      `,
+      {
+        type: QueryTypes.SELECT,
+        replacements: {
+          centreId,
+          fiscalPeriodId,
+        },
+      }
+    )
+
+    const { wageEnhancementsActualSubtotal } = wageEnhancementTotals
+    const wageEnhancementsActualTotal = Big(wageEnhancementsActualSubtotal).mul(
+      Big(1).plus(WageEnhancement.EI_CPP_WCB_RATE)
+    )
+    return wageEnhancementsActualTotal
   }
 
   private determineCumulativeBalanceAmount(
