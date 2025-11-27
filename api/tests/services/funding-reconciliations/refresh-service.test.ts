@@ -5,12 +5,14 @@ import { FundingSubmissionLineJson } from "@/models"
 import {
   centreFactory,
   employeeBenefitFactory,
+  employeeWageTierFactory,
   fiscalPeriodFactory,
   fundingPeriodFactory,
   fundingReconciliationAdjustmentFactory,
   fundingReconciliationFactory,
   fundingSubmissionLineJsonFactory,
   paymentFactory,
+  wageEnhancementFactory,
 } from "@/factories"
 
 import RefreshService from "@/services/funding-reconciliations/refresh-service"
@@ -1258,6 +1260,467 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
                 eligibleExpensesPeriodAmount: "200",
                 payrollAdjustmentsPeriodAmount: "150",
                 cumulativeBalanceAmount: "500", // 250 + 600 - 200 - 150 = 500
+              }),
+            ],
+          })
+        )
+      })
+
+      test("when there are wage enhancements, includes them in payroll adjustments", async () => {
+        // Arrange
+        const centre = await centreFactory.create()
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+          fromDate: new Date("2025-04-01"),
+          toDate: new Date("2026-03-31"),
+        })
+        const fundingReconciliation = await fundingReconciliationFactory.create({
+          centreId: centre.id,
+          fundingPeriodId: fundingPeriod.id,
+        })
+
+        const fiscalPeriod = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          month: FiscalPeriod.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+        })
+        await fundingReconciliationAdjustmentFactory.create({
+          fundingReconciliationId: fundingReconciliation.id,
+          fiscalPeriodId: fiscalPeriod.id,
+        })
+
+        // Create employee wage tier with known rate
+        const employeeWageTier = await employeeWageTierFactory.create({
+          fiscalPeriodId: fiscalPeriod.id,
+          tierLevel: 3,
+          tierLabel: "Level 2",
+          wageRatePerHour: 10.0,
+        })
+
+        // Create wage enhancement: 20 hours * $10/hour = $200 subtotal
+        // With EI/CPP/WCB (0.14): $200 * 1.14 = $228
+        await wageEnhancementFactory.create({
+          centreId: centre.id,
+          employeeWageTierId: employeeWageTier.id,
+          employeeName: "John Doe",
+          hoursEstimated: 20,
+          hoursActual: 20,
+        })
+
+        // Act
+        const result = await RefreshService.perform(fundingReconciliation)
+
+        // Assert
+        expect(result).toEqual(
+          expect.objectContaining({
+            payrollAdjustmentsTotalAmount: "228.0000",
+            finalBalanceAmount: "-228.0000",
+          })
+        )
+      })
+
+      test("when there are no wage enhancements, payroll adjustments include only employee benefits", async () => {
+        // Arrange
+        const centre = await centreFactory.create()
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+          fromDate: new Date("2025-04-01"),
+          toDate: new Date("2026-03-31"),
+        })
+        const fundingReconciliation = await fundingReconciliationFactory.create({
+          centreId: centre.id,
+          fundingPeriodId: fundingPeriod.id,
+        })
+
+        const fiscalPeriod = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          month: FiscalPeriod.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+        })
+        await fundingReconciliationAdjustmentFactory.create({
+          fundingReconciliationId: fundingReconciliation.id,
+          fiscalPeriodId: fiscalPeriod.id,
+        })
+
+        await employeeBenefitFactory.create({
+          centreId: centre.id,
+          fiscalPeriodId: fiscalPeriod.id,
+          grossPayrollMonthlyActual: 10000,
+          grossPayrollMonthlyEstimated: 10000,
+          costCapPercentage: 0.02,
+          employeeCostActual: 50,
+          employeeCostEstimated: 50,
+          employerCostActual: 100,
+          employerCostEstimated: 100,
+        })
+
+        // Act
+        const result = await RefreshService.perform(fundingReconciliation)
+
+        // Assert
+        expect(result).toEqual(
+          expect.objectContaining({
+            payrollAdjustmentsTotalAmount: "100.0000",
+            finalBalanceAmount: "-100.0000",
+          })
+        )
+      })
+
+      test("when there are multiple wage enhancements in one period, sums them correctly", async () => {
+        // Arrange
+        const centre = await centreFactory.create()
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+          fromDate: new Date("2025-04-01"),
+          toDate: new Date("2026-03-31"),
+        })
+        const fundingReconciliation = await fundingReconciliationFactory.create({
+          centreId: centre.id,
+          fundingPeriodId: fundingPeriod.id,
+        })
+
+        const fiscalPeriod = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          month: FiscalPeriod.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+        })
+        await fundingReconciliationAdjustmentFactory.create({
+          fundingReconciliationId: fundingReconciliation.id,
+          fiscalPeriodId: fiscalPeriod.id,
+        })
+
+        const employeeWageTier1 = await employeeWageTierFactory.create({
+          fiscalPeriodId: fiscalPeriod.id,
+          tierLevel: 2,
+          tierLabel: "Level 1a",
+          wageRatePerHour: 6.0,
+        })
+
+        const employeeWageTier2 = await employeeWageTierFactory.create({
+          fiscalPeriodId: fiscalPeriod.id,
+          tierLevel: 3,
+          tierLabel: "Level 2",
+          wageRatePerHour: 10.0,
+        })
+
+        // First enhancement: 10 hours * $6/hour = $60
+        await wageEnhancementFactory.create({
+          centreId: centre.id,
+          employeeWageTierId: employeeWageTier1.id,
+          employeeName: "Alice Smith",
+          hoursEstimated: 10,
+          hoursActual: 10,
+        })
+
+        // Second enhancement: 15 hours * $10/hour = $150
+        await wageEnhancementFactory.create({
+          centreId: centre.id,
+          employeeWageTierId: employeeWageTier2.id,
+          employeeName: "Bob Jones",
+          hoursEstimated: 15,
+          hoursActual: 15,
+        })
+
+        // Subtotal: $60 + $150 = $210
+        // With EI/CPP/WCB: $210 * 1.14 = $239.40
+
+        // Act
+        const result = await RefreshService.perform(fundingReconciliation)
+
+        // Assert
+        expect(result).toEqual(
+          expect.objectContaining({
+            payrollAdjustmentsTotalAmount: "239.4000",
+            finalBalanceAmount: "-239.4000",
+          })
+        )
+      })
+
+      test("when there are both employee benefits and wage enhancements, combines them correctly", async () => {
+        // Arrange
+        const centre = await centreFactory.create()
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+          fromDate: new Date("2025-04-01"),
+          toDate: new Date("2026-03-31"),
+        })
+        const fundingReconciliation = await fundingReconciliationFactory.create({
+          centreId: centre.id,
+          fundingPeriodId: fundingPeriod.id,
+        })
+
+        const fiscalPeriod = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          month: FiscalPeriod.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+        })
+        await fundingReconciliationAdjustmentFactory.create({
+          fundingReconciliationId: fundingReconciliation.id,
+          fiscalPeriodId: fiscalPeriod.id,
+        })
+
+        // Employee benefit: min(100, 10000 * 0.02) = min(100, 200) = 100
+        await employeeBenefitFactory.create({
+          centreId: centre.id,
+          fiscalPeriodId: fiscalPeriod.id,
+          grossPayrollMonthlyActual: 10000,
+          grossPayrollMonthlyEstimated: 10000,
+          costCapPercentage: 0.02,
+          employeeCostActual: 50,
+          employeeCostEstimated: 50,
+          employerCostActual: 100,
+          employerCostEstimated: 100,
+        })
+
+        const employeeWageTier = await employeeWageTierFactory.create({
+          fiscalPeriodId: fiscalPeriod.id,
+          tierLevel: 3,
+          tierLabel: "Level 2",
+          wageRatePerHour: 10.0,
+        })
+
+        // Wage enhancement: 20 hours * $10/hour * 1.14 = $228
+        await wageEnhancementFactory.create({
+          centreId: centre.id,
+          employeeWageTierId: employeeWageTier.id,
+          employeeName: "Jane Doe",
+          hoursEstimated: 20,
+          hoursActual: 20,
+        })
+
+        // Total: $100 + $228 = $328
+
+        // Act
+        const result = await RefreshService.perform(fundingReconciliation)
+
+        // Assert
+        expect(result).toEqual(
+          expect.objectContaining({
+            payrollAdjustmentsTotalAmount: "328.0000",
+            finalBalanceAmount: "-328.0000",
+          })
+        )
+      })
+
+      test("when there are payments, eligible expenses, employee benefits, and wage enhancements, calculates correct final balance", async () => {
+        // Arrange
+        const centre = await centreFactory.create()
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+          fromDate: new Date("2025-04-01"),
+          toDate: new Date("2026-03-31"),
+        })
+        const fundingReconciliation = await fundingReconciliationFactory.create({
+          centreId: centre.id,
+          fundingPeriodId: fundingPeriod.id,
+        })
+
+        const fiscalPeriod = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          month: FiscalPeriod.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+        })
+        await fundingReconciliationAdjustmentFactory.create({
+          fundingReconciliationId: fundingReconciliation.id,
+          fiscalPeriodId: fiscalPeriod.id,
+        })
+
+        // Payment: $1000
+        await paymentFactory.create({
+          centreId: centre.id,
+          fiscalPeriodId: fiscalPeriod.id,
+          fiscalYear: "2025/26",
+          paidOn: "2025-04-15",
+          amountInCents: 1000 * 100,
+        })
+
+        // Eligible expense: $300
+        await fundingSubmissionLineJsonFactory.create({
+          centreId: centre.id,
+          fiscalYear: "2025/26",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+          values: JSON.stringify([{ actualComputedTotal: 300.0 }]),
+        })
+
+        // Employee benefit: min(150, 10000 * 0.03) = min(150, 300) = 150
+        await employeeBenefitFactory.create({
+          centreId: centre.id,
+          fiscalPeriodId: fiscalPeriod.id,
+          grossPayrollMonthlyActual: 10000,
+          grossPayrollMonthlyEstimated: 10000,
+          costCapPercentage: 0.03,
+          employeeCostActual: 75,
+          employeeCostEstimated: 75,
+          employerCostActual: 150,
+          employerCostEstimated: 150,
+        })
+
+        const employeeWageTier = await employeeWageTierFactory.create({
+          fiscalPeriodId: fiscalPeriod.id,
+          tierLevel: 3,
+          tierLabel: "Level 2",
+          wageRatePerHour: 10.0,
+        })
+
+        // Wage enhancement: 10 hours * $10/hour * 1.14 = $114
+        await wageEnhancementFactory.create({
+          centreId: centre.id,
+          employeeWageTierId: employeeWageTier.id,
+          employeeName: "Test Employee",
+          hoursEstimated: 10,
+          hoursActual: 10,
+        })
+
+        // Payroll adjustments: $150 + $114 = $264
+        // Final balance: $1000 - $300 - $264 = $436
+
+        // Act
+        const result = await RefreshService.perform(fundingReconciliation)
+
+        // Assert
+        expect(result).toEqual(
+          expect.objectContaining({
+            fundingReceivedTotalAmount: "1000.0000",
+            eligibleExpensesTotalAmount: "300.0000",
+            payrollAdjustmentsTotalAmount: "264.0000",
+            finalBalanceAmount: "436.0000",
+          })
+        )
+      })
+
+      test("when there are wage enhancements across multiple months, calculates correct cumulative balances", async () => {
+        // Arrange
+        const centre = await centreFactory.create()
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+          fromDate: new Date("2025-04-01"),
+          toDate: new Date("2026-03-31"),
+        })
+        const fundingReconciliation = await fundingReconciliationFactory.create({
+          centreId: centre.id,
+          fundingPeriodId: fundingPeriod.id,
+        })
+
+        // Month 1: April
+        const fiscalPeriod = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          month: FiscalPeriod.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+        })
+        await fundingReconciliationAdjustmentFactory.create({
+          fundingReconciliationId: fundingReconciliation.id,
+          fiscalPeriodId: fiscalPeriod.id,
+        })
+
+        await paymentFactory.create({
+          centreId: centre.id,
+          fiscalPeriodId: fiscalPeriod.id,
+          fiscalYear: "2025/26",
+          paidOn: "2025-04-15",
+          amountInCents: 500 * 100,
+        })
+
+        const employeeWageTier1 = await employeeWageTierFactory.create({
+          fiscalPeriodId: fiscalPeriod.id,
+          tierLevel: 3,
+          tierLabel: "Level 2",
+          wageRatePerHour: 10.0,
+        })
+
+        // April wage enhancement: 10 hours * $10/hour * 1.14 = $114
+        await wageEnhancementFactory.create({
+          centreId: centre.id,
+          employeeWageTierId: employeeWageTier1.id,
+          employeeName: "April Worker",
+          hoursEstimated: 10,
+          hoursActual: 10,
+        })
+
+        // Month 2: May
+        const fiscalPeriod2 = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          month: FiscalPeriod.Months.MAY,
+          dateStart: new Date("2025-05-01"),
+          dateEnd: new Date("2025-05-31"),
+        })
+        await fundingReconciliationAdjustmentFactory.create({
+          fundingReconciliationId: fundingReconciliation.id,
+          fiscalPeriodId: fiscalPeriod2.id,
+        })
+
+        await paymentFactory.create({
+          centreId: centre.id,
+          fiscalPeriodId: fiscalPeriod2.id,
+          fiscalYear: "2025/26",
+          paidOn: "2025-05-15",
+          amountInCents: 600 * 100,
+        })
+
+        const employeeWageTier2 = await employeeWageTierFactory.create({
+          fiscalPeriodId: fiscalPeriod2.id,
+          tierLevel: 4,
+          tierLabel: "Level 2a",
+          wageRatePerHour: 12.0,
+        })
+
+        // May wage enhancement: 15 hours * $12/hour * 1.14 = $205.20
+        await wageEnhancementFactory.create({
+          centreId: centre.id,
+          employeeWageTierId: employeeWageTier2.id,
+          employeeName: "May Worker",
+          hoursEstimated: 15,
+          hoursActual: 15,
+        })
+
+        // Act
+        await RefreshService.perform(fundingReconciliation)
+
+        // Assert
+        await fundingReconciliation.reload({
+          include: [
+            {
+              association: "adjustments",
+              include: [
+                {
+                  association: "fiscalPeriod",
+                  attributes: ["dateStart"],
+                },
+              ],
+            },
+          ],
+          order: [["adjustments", "fiscalPeriod", "dateStart", "ASC"]],
+        })
+
+        expect(fundingReconciliation).toEqual(
+          expect.objectContaining({
+            fundingReceivedTotalAmount: "1100",
+            payrollAdjustmentsTotalAmount: "319.2",
+            finalBalanceAmount: "780.8",
+            adjustments: [
+              expect.objectContaining({
+                fundingReceivedPeriodAmount: "500",
+                payrollAdjustmentsPeriodAmount: "114",
+                cumulativeBalanceAmount: "386", // 500 - 114 = 386
+              }),
+              expect.objectContaining({
+                fundingReceivedPeriodAmount: "600",
+                payrollAdjustmentsPeriodAmount: "205.2",
+                cumulativeBalanceAmount: "780.8", // 386 + 600 - 205.2 = 780.8
               }),
             ],
           })
