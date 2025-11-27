@@ -66,10 +66,14 @@
     <h3 class="mb-4">Permissions</h3>
     <v-row>
       <v-col cols="12">
-        <UserRolesChips
-          v-if="!isEmpty(user.roles)"
-          :roles="user.roles"
-        />
+        <template v-if="!isEmpty(user.roles)">
+          <UserRoleChip
+            v-for="role in user.roles"
+            :key="role"
+            class="ma-1"
+            :role="role"
+          />
+        </template>
         <p
           v-else
           class="text-body-2 text-medium-emphasis"
@@ -91,7 +95,7 @@ import useUser, { UserRoles } from "@/use/use-user"
 import DescriptionElement from "@/components/common/DescriptionElement.vue"
 import HeaderActionsCard from "@/components/common/HeaderActionsCard.vue"
 import PageLoader from "@/components/common/PageLoader.vue"
-import UserRolesChips from "@/components/users/UserRolesChips.vue"
+import UserRoleChip from "@/components/users/UserRoleChip.vue"
 
 const props = defineProps<{
   userId: string
