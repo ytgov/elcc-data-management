@@ -62,7 +62,7 @@ export const fundingSubmissionLineFactory = Factory.define<FundingSubmissionLine
     const fiscalYear = formatAsFiscalYear(year)
     const sectionName = faker.helpers.arrayElement(SECTION_NAMES_EXAMPLES)
     const lineName = faker.helpers.arrayElement(LINE_NAMES_EXAMPLES)
-    const monthlyAmount = Number(faker.finance.amount(0, 1000, 2))
+    const monthlyAmount = Number(faker.finance.amount({ min: 0, max: 1000, dec: 2 }))
 
     return FundingSubmissionLine.build({
       fiscalYear,
