@@ -1,6 +1,7 @@
 import Big from "big.js"
 import { isEmpty, upperFirst } from "lodash"
 
+import minDecimal from "@/utils/min-decimal"
 import sumByDecimal from "@/utils/sum-by-decimal"
 
 import {
@@ -166,11 +167,10 @@ export class RefreshService extends BaseService {
     })
     const costCapPercentageTotal = costCapPercentageTotalOrNull ?? 0
 
-    const employeeBenefitActualPaidAmount = Big(employerCostActualTotal).lt(
+    const employeeBenefitActualPaidAmount = minDecimal(
+      Big(employerCostActualTotal),
       Big(grossPayrollMonthlyActualTotal).mul(costCapPercentageTotal)
     )
-      ? Big(employerCostActualTotal)
-      : Big(grossPayrollMonthlyActualTotal).mul(costCapPercentageTotal)
 
     return employeeBenefitActualPaidAmount.toFixed(4)
   }
