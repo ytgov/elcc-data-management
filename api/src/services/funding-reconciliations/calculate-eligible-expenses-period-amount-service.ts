@@ -1,8 +1,8 @@
-import { isEmpty, upperFirst } from "lodash"
+import Big from "big.js"
+import { upperFirst } from "lodash"
+import { QueryTypes } from "@sequelize/core"
 
-import sumByDecimal from "@/utils/sum-by-decimal"
-
-import { FiscalPeriod, FundingSubmissionLineJson } from "@/models"
+import db, { FiscalPeriod } from "@/models"
 import BaseService from "@/services/base-service"
 
 export class CalculateEligibleExpensesPeriodAmountService extends BaseService {
@@ -23,28 +23,40 @@ export class CalculateEligibleExpensesPeriodAmountService extends BaseService {
 
     // TODO: find out, or ensure that there can only be one funding submission line json per month
     // TODO: link FundingSubmissionLineJson model to a fiscal period so this query can be simplified
-    const fundingSubmissionLineJsons = await FundingSubmissionLineJson.findAll({
-      where: {
-        centreId: this.centreId,
-        fiscalYear: fiscalYearLegacy,
-        dateName: monthLegacy,
-      },
-    })
-
-    if (isEmpty(fundingSubmissionLineJsons)) {
-      return "0.0000"
-    }
-
-    const eligibleExpensesPeriodAmount = sumByDecimal(
-      fundingSubmissionLineJsons,
-      (fundingSubmissionLineJson) => {
-        const { lines } = fundingSubmissionLineJson
-        const linesSumAsBig = sumByDecimal(lines, "actualComputedTotal")
-        return linesSumAsBig
+    const [result] = await db.query<{
+      eligibleExpensesPeriodAmount: number
+    }>(
+      /* sql */ `
+        SELECT
+          COALESCE(
+            SUM(
+              CAST(
+                JSON_VALUE(json_array_element.value, '$.actualComputedTotal') AS DECIMAL(15, 4)
+              )
+            ),
+            0
+          ) as eligibleExpensesPeriodAmount
+        FROM
+          funding_submission_line_jsons
+          CROSS APPLY OPENJSON (funding_submission_line_jsons.[values]) AS json_array_element
+        WHERE
+          funding_submission_line_jsons.centre_id = :centreId
+          AND funding_submission_line_jsons.fiscal_year = :fiscalYear
+          AND funding_submission_line_jsons.date_name = :dateName
+      `,
+      {
+        type: QueryTypes.SELECT,
+        replacements: {
+          centreId: this.centreId,
+          fiscalYear: fiscalYearLegacy,
+          dateName: monthLegacy,
+        },
       }
     )
 
-    return eligibleExpensesPeriodAmount.toFixed(4)
+    const { eligibleExpensesPeriodAmount } = result
+
+    return Big(eligibleExpensesPeriodAmount).toFixed(4)
   }
 }
 
