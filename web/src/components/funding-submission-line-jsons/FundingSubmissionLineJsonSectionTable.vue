@@ -129,7 +129,7 @@
 import { reactive, Ref, ref } from "vue"
 import { isNil } from "lodash"
 
-import { formatMoney } from "@/utils"
+import { formatMoney } from "@/utils/formatters"
 import { FundingLineValue } from "@/api/funding-submission-line-jsons-api"
 
 export type ColumnNames = "estimates" | "actuals"

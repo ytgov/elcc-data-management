@@ -16,27 +16,27 @@ async function listMigrations() {
     .catch(console.error)
 }
 
-migrationRouter.get("/", async (req: Request, res: Response) => {
+migrationRouter.get("/", async (_req: Request, res: Response) => {
   return listMigrations()
     .then((data) => res.json({ data }))
     .catch(console.error)
 })
 
-migrationRouter.get("/up", async (req: Request, res: Response) => {
+migrationRouter.get("/up", async (_req: Request, res: Response) => {
   return migrator
     .up()
     .then(async () => res.json({ data: await listMigrations() }))
     .catch(console.error)
 })
 
-migrationRouter.get("/down", async (req: Request, res: Response) => {
+migrationRouter.get("/down", async (_req: Request, res: Response) => {
   return migrator
     .down()
     .then(async () => res.json({ data: await listMigrations() }))
     .catch(console.error)
 })
 
-migrationRouter.get("/seed", async (req: Request, res: Response) => {
+migrationRouter.get("/seed", async (_req: Request, res: Response) => {
   return seeder
     .up()
     .then((data) => res.json({ data }))

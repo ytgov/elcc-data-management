@@ -56,24 +56,10 @@
       >
         {{ displayName }}
       </router-link>
-      <span class="pl-3">
-        <v-chip
-          v-if="isSystemAdmin"
-          title="Toggle user role"
-          color="yg-moss"
-          @click="toggleSystemAdmin"
-        >
-          System Admin
-        </v-chip>
-        <v-chip
-          v-else
-          title="Toggle user role"
-          color="yg-twilight"
-          @click="toggleSystemAdmin"
-        >
-          User
-        </v-chip>
-      </span>
+      <UserRoleHighestChip
+        class="ml-3"
+        :roles="currentUser.roles"
+      />
 
       <v-menu offset-y>
         <template #activator="{ props }">
@@ -133,19 +119,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from "vue"
+import { computed, onMounted, ref } from "vue"
 import { useAuth0 } from "@auth0/auth0-vue"
 
 import http from "@/api/http-client"
-import usersApi, { UserRoles } from "@/api/users-api"
+
+import UserRoleHighestChip from "@/components/users/UserRoleHighestChip.vue"
 
 import useCurrentUser from "@/use/use-current-user"
-import useSnack from "@/use/use-snack"
 
 const UNSET_RELEASE_TAG = "2024.01.10.0"
 
 const { logout } = useAuth0()
-const { currentUser, isSystemAdmin, refresh, reset: resetCurrentUser } = useCurrentUser<true>()
+const { currentUser, isSystemAdmin, reset: resetCurrentUser } = useCurrentUser<true>()
 
 const releaseTag = ref(UNSET_RELEASE_TAG)
 
@@ -155,29 +141,6 @@ const displayName = computed(() => currentUser.value.displayName)
 onMounted(async () => {
   await fetchVersion()
 })
-
-const isLoading = ref(false)
-const snack = useSnack()
-
-async function toggleSystemAdmin() {
-  isLoading.value = true
-
-  try {
-    const role = isSystemAdmin.value ? UserRoles.USER : UserRoles.SYSTEM_ADMINISTRATOR
-    await usersApi.update(currentUser.value.id, {
-      roles: [role],
-    })
-    await refresh()
-
-    await nextTick()
-    snack.success(`User role is now ${role}`)
-  } catch (error: unknown) {
-    console.error(`Error toggling user role: ${error}`, { error })
-    snack.error(`Failed to toggle user role: ${error}`)
-  } finally {
-    isLoading.value = false
-  }
-}
 
 function signOut() {
   resetCurrentUser()

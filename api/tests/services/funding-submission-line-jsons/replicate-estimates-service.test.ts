@@ -1,12 +1,14 @@
 import { pick } from "lodash"
 
-import { ReplicateEstimatesService } from "@/services/funding-submission-line-jsons"
+import { FundingSubmissionLineJson } from "@/models"
 import {
   centreFactory,
   fundingLineValueFactory,
   fundingSubmissionLineFactory,
   fundingSubmissionLineJsonFactory,
 } from "@/factories"
+
+import ReplicateEstimatesService from "@/services/funding-submission-line-jsons/replicate-estimates-service"
 
 describe("api/src/services/funding-submission-line-jsons/replicate-estimates-service.ts", () => {
   describe("ReplicateEstimatesService", () => {
@@ -36,7 +38,7 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
           fiscalYear: "2023/24",
           dateStart: new Date("2023-04-01T00:00:00Z"),
           dateEnd: new Date("2023-04-30T23:59:59Z"),
-          dateName: "April",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
           lines: [fundingLineValue1],
         })
         const fundingSubmissionLineJson2 = await fundingSubmissionLineJsonFactory.create({
@@ -44,7 +46,7 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
           fiscalYear: "2023/24",
           dateStart: new Date("2023-05-01T00:00:00Z"),
           dateEnd: new Date("2023-05-31T23:59:59Z"),
-          dateName: "May",
+          dateName: FundingSubmissionLineJson.Months.MAY,
           lines: [fundingLineValue2],
         })
 
@@ -90,7 +92,7 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
           fiscalYear: "2023/24",
           dateStart: new Date("2023-04-01T00:00:00Z"),
           dateEnd: new Date("2023-04-30T23:59:59Z"),
-          dateName: "April",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
           lines: [fundingLineValue1],
         })
         const fundingSubmissionLineJson2 = await fundingSubmissionLineJsonFactory.create({
@@ -98,7 +100,7 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
           fiscalYear: "2023/24",
           dateStart: new Date("2023-05-01T00:00:00Z"),
           dateEnd: new Date("2023-05-31T23:59:59Z"),
-          dateName: "May",
+          dateName: FundingSubmissionLineJson.Months.MAY,
           lines: [fundingLineValue2],
         })
 
@@ -145,7 +147,7 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
           fiscalYear: "2023/24",
           dateStart: new Date("2023-04-01T00:00:00Z"),
           dateEnd: new Date("2023-04-30T23:59:59Z"),
-          dateName: "April",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
           lines: [fundingLineValue1],
         })
         const fundingSubmissionLineJson2 = await fundingSubmissionLineJsonFactory.create({
@@ -153,7 +155,7 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
           fiscalYear: "2023/24",
           dateStart: new Date("2023-05-01T00:00:00Z"),
           dateEnd: new Date("2023-05-31T23:59:59Z"),
-          dateName: "May",
+          dateName: FundingSubmissionLineJson.Months.MAY,
           lines: [fundingLineValue2],
         })
 
@@ -199,7 +201,7 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
           fiscalYear: "2023/24",
           dateStart: new Date("2023-04-01T00:00:00Z"),
           dateEnd: new Date("2023-04-30T23:59:59Z"),
-          dateName: "April",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
           lines: [fundingLineValue1],
         })
         const fundingSubmissionLineJson2 = await fundingSubmissionLineJsonFactory.create({
@@ -207,7 +209,7 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
           fiscalYear: "2024/25",
           dateStart: new Date("2024-05-01T00:00:00Z"),
           dateEnd: new Date("2024-05-31T23:59:59Z"),
-          dateName: "May",
+          dateName: FundingSubmissionLineJson.Months.MAY,
           lines: [fundingLineValue2],
         })
 

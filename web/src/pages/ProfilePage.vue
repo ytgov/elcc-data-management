@@ -40,7 +40,12 @@
         md="6"
       >
         <h3 class="mb-2">Roles</h3>
-        <UserRolesChips :roles="currentUser.roles" />
+        <UserRoleChip
+          v-for="role in currentUser.roles"
+          :key="role"
+          class="ma-1"
+          :role="role"
+        />
       </v-col>
     </v-row>
   </HeaderActionsCard>
@@ -54,7 +59,7 @@ import useCurrentUser from "@/use/use-current-user"
 
 import DescriptionElement from "@/components/common/DescriptionElement.vue"
 import HeaderActionsCard from "@/components/common/HeaderActionsCard.vue"
-import UserRolesChips from "@/components/users/UserRolesChips.vue"
+import UserRoleChip from "@/components/users/UserRoleChip.vue"
 
 const { currentUser } = useCurrentUser<true>()
 

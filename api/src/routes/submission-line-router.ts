@@ -14,7 +14,7 @@ export const submissionLineRouter = express.Router()
 submissionLineRouter.use(checkJwt)
 submissionLineRouter.use(autheticateAndLoadUser)
 
-submissionLineRouter.get("/", async (req: Request, res: Response) => {
+submissionLineRouter.get("/", async (_req: Request, res: Response) => {
   const fundingSubmissionLines = await FundingSubmissionLine.findAll()
 
   const serailizedFundingSubmissionLines =
@@ -74,6 +74,6 @@ submissionLineRouter.post("/", async (req: Request, res: Response) => {
     })
 })
 
-submissionLineRouter.delete("/:id", async (req: Request, res: Response) => {
+submissionLineRouter.delete("/:id", async (_req: Request, res: Response) => {
   res.json({})
 })

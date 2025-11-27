@@ -36,7 +36,7 @@ export function useEmployeeBenefit(id: Ref<number | null | undefined>) {
       state.policy = policy
       return employeeBenefit
     } catch (error) {
-      console.error("Failed to fetch employee benefit:", error)
+      console.error(`Failed to fetch employee benefit: ${error}`, { error })
       state.isErrored = true
       throw error
     } finally {

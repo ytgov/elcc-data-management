@@ -150,7 +150,7 @@ import { first, isEmpty, isNil, last } from "lodash"
 
 import DateTimeUtils from "@/utils/date-time-utils"
 import { dateRule } from "@/utils/validators"
-import { centsToDollars, dollarsToCents } from "@/utils/format-money"
+import { centsToDollars, dollarsToCents } from "@/utils/legacy-money-helpers"
 
 import { MAX_PER_PAGE } from "@/api/base-api"
 import paymentsApi, { type Payment } from "@/api/payments-api"

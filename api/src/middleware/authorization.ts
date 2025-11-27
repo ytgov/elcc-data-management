@@ -18,9 +18,9 @@ export function RequireActive(req: Request, res: Response, next: NextFunction) {
   next()
 }
 
-export function RequireRole(value: any) {
+export function RequireRole(value: unknown) {
   // let role = value.role;
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, _res: Response, next: NextFunction) => {
     console.log("Checking user:", req.user, "for role", `'${value}'`)
     next()
   }

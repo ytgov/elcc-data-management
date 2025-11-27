@@ -1,7 +1,5 @@
 import moment from "moment" // TODO: deprecated; replace with luxon
 
-export { formatMoney } from "./format-money"
-
 export function FormatDate(input: Date | string): string {
   return moment.utc(input).format("MMMM D, YYYY")
 }
@@ -18,7 +16,7 @@ export function FormatTime(input: Date): string {
   return moment.utc(input).format("h:mm A")
 }
 
-export function FormatYesNo(input: any): string {
+export function FormatYesNo(input: unknown): string {
   if (input && (input == true || input == "y" || input == "Y" || input == 1)) return "Yes"
   return "No"
 }

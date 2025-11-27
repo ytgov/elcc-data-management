@@ -13,6 +13,7 @@ export async function importAndExecuteInitializers() {
     console.info(`Running initializer: ${modulePath}`)
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { default: initializerAction } = await require(modulePath)
       await initializerAction()
     } catch (error) {

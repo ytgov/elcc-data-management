@@ -1,48 +1,47 @@
-import { CreationAttributes } from "@sequelize/core"
+import { type CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
-import moment from "moment"
+import { DateTime } from "luxon"
 
-import { FiscalPeriod } from "@/models"
+import { FiscalPeriod, FundingPeriod } from "@/models"
 import { FiscalPeriodMonths } from "@/models/fiscal-period"
 
 export async function up() {
-  const APRIL = 3 // JS Date months are zero-indexed
+  await FundingPeriod.findEach(async (fundingPeriod) => {
+    const fiscalYear = FiscalPeriod.toShortFiscalYearFormat(fundingPeriod.fiscalYear)
 
-  const fiscalPeriodsAttributes: CreationAttributes<FiscalPeriod>[] = []
+    let currentDate = DateTime.fromJSDate(fundingPeriod.fromDate)
+    const toDate = DateTime.fromJSDate(fundingPeriod.toDate)
 
-  for (let year = 2022; year <= 2026; year++) {
-    const date = moment(new Date(year, APRIL, 1))
+    while (currentDate <= toDate) {
+      const dateStart = currentDate.startOf("month")
+      const dateEnd = currentDate.endOf("month").set({ millisecond: 0 })
+      const dateName = dateStart.toFormat("MMMM").toLowerCase()
 
-    for (let i = 0; i < 12; i++) {
-      const dateStart = moment(date).startOf("month")
-      const dateEnd = moment(dateStart).endOf("month").milliseconds(0)
-      const dateName = dateStart.format("MMMM").toLowerCase() as FiscalPeriodMonths
-
-      const fiscalYear = `${year}-${(year + 1).toString().slice(-2)}`
-
-      fiscalPeriodsAttributes.push({
+      const fiscalPeriodAttributes: CreationAttributes<FiscalPeriod> = {
+        fundingPeriodId: fundingPeriod.id,
         fiscalYear,
-        month: dateName,
-        dateStart: dateStart.toDate(),
-        dateEnd: dateEnd.toDate(),
+        month: dateName as FiscalPeriodMonths,
+        dateStart: dateStart.toJSDate(),
+        dateEnd: dateEnd.toJSDate(),
+      }
+
+      let fiscalPeriod = await FiscalPeriod.findOne({
+        where: {
+          fundingPeriodId: fiscalPeriodAttributes.fundingPeriodId,
+          fiscalYear: fiscalPeriodAttributes.fiscalYear,
+          month: fiscalPeriodAttributes.month,
+        },
       })
 
-      date.add(1, "month")
-    }
-  }
+      if (isNil(fiscalPeriod)) {
+        fiscalPeriod = await FiscalPeriod.create(fiscalPeriodAttributes)
+      } else {
+        await fiscalPeriod.update(fiscalPeriodAttributes)
+      }
 
-  for (const fiscalPeriodAttributes of fiscalPeriodsAttributes) {
-    const fiscalPeriod = await FiscalPeriod.findOne({
-      where: {
-        fiscalYear: fiscalPeriodAttributes.fiscalYear,
-        month: fiscalPeriodAttributes.month,
-      },
-    })
-
-    if (isNil(fiscalPeriod)) {
-      await FiscalPeriod.create(fiscalPeriodAttributes)
+      currentDate = currentDate.plus({ months: 1 })
     }
-  }
+  })
 }
 
 export async function down() {

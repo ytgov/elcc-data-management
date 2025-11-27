@@ -9,6 +9,7 @@ import {
 import {
   Attribute,
   AutoIncrement,
+  BelongsTo,
   Default,
   HasMany,
   NotNull,
@@ -18,12 +19,14 @@ import {
 } from "@sequelize/core/decorators-legacy"
 import { DateTime } from "luxon"
 
-import { FiscalPeriodsFiscalYearMonthUniqueIndex } from "@/models/indexes"
+import { FiscalPeriodsFundingPeriodIdFiscalYearMonthUniqueIndex } from "@/models/indexes"
 import { isValidFiscalYearShort } from "@/models/validators"
 
 import BaseModel from "@/models/base-model"
 import EmployeeBenefit from "@/models/employee-benefit"
 import EmployeeWageTier from "@/models/employee-wage-tier"
+import FundingPeriod from "@/models/funding-period"
+import FundingReconciliationAdjustment from "@/models/funding-reconciliation-adjustment"
 import Payment from "@/models/payment"
 
 /** Keep in sync with web/src/api/fiscal-periods-api.ts */
@@ -44,6 +47,16 @@ export enum FiscalPeriodMonths {
 
 export const FISCAL_PERIOD_MONTHS = Object.values<string>(FiscalPeriodMonths)
 
+/**
+ * Represents a monthly period within a FundingPeriod for detailed tracking.
+ * Each fiscal period corresponds to a single month (April through March)
+ * and is used to break down annual funding reconciliation into monthly
+ * components for more granular financial tracking and reporting.
+ *
+ * TODO: rename to FiscalMonth for clarity - this represents a specific month within a fiscal year
+ *
+ * @see FundingPeriod - The parent fiscal year that contains these monthly periods
+ */
 @Table({
   paranoid: false,
 })
@@ -58,17 +71,22 @@ export class FiscalPeriod extends BaseModel<
   @AutoIncrement
   declare id: CreationOptional<number>
 
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  @FiscalPeriodsFundingPeriodIdFiscalYearMonthUniqueIndex
+  declare fundingPeriodId: number
+
   @Attribute(DataTypes.STRING(10))
   @NotNull
-  @FiscalPeriodsFiscalYearMonthUniqueIndex
+  @FiscalPeriodsFundingPeriodIdFiscalYearMonthUniqueIndex
   @ValidateAttribute({
-    isValidFiscalYear: isValidFiscalYearShort,
+    isValidFiscalYearShort,
   })
   declare fiscalYear: string
 
   @Attribute(DataTypes.STRING(10))
   @NotNull
-  @FiscalPeriodsFiscalYearMonthUniqueIndex
+  @FiscalPeriodsFundingPeriodIdFiscalYearMonthUniqueIndex
   @ValidateAttribute({
     isIn: {
       args: [FISCAL_PERIOD_MONTHS],
@@ -116,6 +134,15 @@ export class FiscalPeriod extends BaseModel<
   }
 
   // Associations
+  @BelongsTo(() => FundingPeriod, {
+    foreignKey: "fundingPeriodId",
+    inverse: {
+      as: "fiscalPeriods",
+      type: "hasMany",
+    },
+  })
+  declare fundingPeriod?: NonAttribute<FundingPeriod>
+
   @HasMany(() => EmployeeBenefit, {
     foreignKey: "fiscalPeriodId",
     inverse: {
@@ -131,6 +158,14 @@ export class FiscalPeriod extends BaseModel<
     },
   })
   declare employeeWageTiers?: NonAttribute<EmployeeWageTier[]>
+
+  @HasMany(() => FundingReconciliationAdjustment, {
+    foreignKey: "fiscalPeriodId",
+    inverse: {
+      as: "fundingReconciliationAdjustments",
+    },
+  })
+  declare fundingReconciliationAdjustments?: NonAttribute<FundingReconciliationAdjustment[]>
 
   @HasMany(() => Payment, {
     foreignKey: "fiscalPeriodId",

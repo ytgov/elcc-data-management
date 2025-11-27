@@ -1,20 +1,24 @@
 import {
   Model,
+  QueryTypes,
+  sql,
   type AttributeNames,
   type Attributes,
   type BulkCreateOptions,
   type CreationAttributes,
   type FindOptions,
   type ModelStatic,
+  type UpdateOptions,
 } from "@sequelize/core"
 
+import db from "@/db/db-client"
 import searchFieldsByTermsFactory from "@/utils/search-fields-by-terms-factory"
 
 // See /home/marlen/code/icefoganalytics/elcc-data-management/api/node_modules/sequelize/types/model.d.ts -> Model
 export abstract class BaseModel<
-  // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-object-type
   TModelAttributes extends {} = any,
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   TCreationAttributes extends {} = TModelAttributes,
 > extends Model<TModelAttributes, TCreationAttributes> {
   static addSearchScope<M extends BaseModel>(this: ModelStatic<M>, fields: AttributeNames<M>[]) {
@@ -109,6 +113,39 @@ export abstract class BaseModel<
       const batch = records.slice(i, i + batchSize)
       await this.bulkCreate(batch, options)
     }
+  }
+
+  /**
+   * Updates updated_at for multiple instances that match the where options.
+   *
+   * The promise resolves with an array of one element:
+   * - the number of affected rows
+   */
+  public static async touch<M extends BaseModel>(
+    this: ModelStatic<M>,
+    options: Omit<UpdateOptions<Attributes<M>>, "returning" | "silent">
+  ): Promise<[affectedCount: number]> {
+    const { tableName } = this.modelDefinition.table
+
+    const { where } = options
+    const [_results, metadata] = await db.query(
+      sql`
+        UPDATE ${sql.identifier(tableName)}
+        SET
+          updated_at = GETUTCDATE()
+        WHERE
+          ${sql.where(where)}
+      `,
+      {
+        ...options,
+        returning: false,
+        type: QueryTypes.UPDATE,
+      } as UpdateOptions<Attributes<M>> & {
+        returning: false
+        type: QueryTypes.UPDATE
+      }
+    )
+    return [metadata]
   }
 }
 

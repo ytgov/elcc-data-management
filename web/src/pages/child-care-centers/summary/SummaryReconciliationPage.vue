@@ -1,8 +1,6 @@
 <template>
   <v-skeleton-loader
     v-if="isLoading"
-    :rows="10"
-    :columns="5"
     type="table"
   />
   <v-table
@@ -21,34 +19,47 @@
     <tbody>
       <template
         v-for="(
-          { label, employee, expense, payment, runningTotal }, adjustmentIndex
-        ) in adjustmentRows"
-        :key="`adjustment-${adjustmentIndex}`"
+          {
+            fiscalPeriodId,
+            fundingReceivedPeriodAmount,
+            eligibleExpensesPeriodAmount,
+            payrollAdjustmentsPeriodAmount,
+            cumulativeBalanceAmount,
+          },
+          index
+        ) in fundingReconciliationAdjustments"
+        :key="`adjustment-${index}`"
       >
         <tr>
-          <td class="text-left font-weight-bold">{{ label }}</td>
+          <td class="text-left font-weight-bold">{{ buildLabel(fiscalPeriodId) }}</td>
           <td class="text-right">
-            {{ formatMoney(centsToDollars(payment.amountInCents)) }}
+            {{ formatMoney(fundingReceivedPeriodAmount) }}
           </td>
           <td class="text-right">
-            {{ formatMoney(centsToDollars(expense.amountInCents)) }}
+            {{ formatMoney(eligibleExpensesPeriodAmount) }}
           </td>
           <td class="text-right">
-            {{ formatMoney(centsToDollars(employee.amountInCents)) }}
+            {{ formatMoney(payrollAdjustmentsPeriodAmount) }}
           </td>
 
           <td class="text-right">
-            {{ formatMoney(centsToDollars(runningTotal)) }}
+            {{ formatMoney(cumulativeBalanceAmount) }}
           </td>
         </tr>
       </template>
       <tr class="font-weight-bold bg-green-lighten-4">
         <td class="text-left">Totals</td>
-        <td class="text-right">{{ formatMoney(centsToDollars(paymentsTotal)) }}</td>
-        <td class="text-right">{{ formatMoney(centsToDollars(expensesTotal)) }}</td>
-        <td class="text-right">{{ formatMoney(centsToDollars(employeesTotal)) }}</td>
         <td class="text-right">
-          {{ formatMoney(centsToDollars(adjustmentsTotal)) }}
+          {{ formatMoney(fundingReconciliation.fundingReceivedTotalAmount) }}
+        </td>
+        <td class="text-right">
+          {{ formatMoney(fundingReconciliation.eligibleExpensesTotalAmount) }}
+        </td>
+        <td class="text-right">
+          {{ formatMoney(fundingReconciliation.payrollAdjustmentsTotalAmount) }}
+        </td>
+        <td class="text-right">
+          {{ formatMoney(fundingReconciliation.finalBalanceAmount) }}
         </td>
       </tr>
       <tr>
@@ -89,23 +100,17 @@
 </template>
 
 <script setup lang="ts">
-import { compact, groupBy, isEmpty, isNil, keyBy, mapValues, sumBy, upperFirst } from "lodash"
-import { ref, computed, watch } from "vue"
+import { computed, ref, watch } from "vue"
+import { isNil, keyBy, upperFirst } from "lodash"
 
-import { formatMoney, centsToDollars, dollarsToCents } from "@/utils/format-money"
+import { formatMoney } from "@/utils/formatters"
+import normalizeFiscalYearToLongForm from "@/utils/normalize-fiscal-year-to-long-form"
 
-import employeeBenefitsApi, { EmployeeBenefit } from "@/api/employee-benefits-api"
-import employeeWageTiersApi from "@/api/employee-wage-tiers-api"
-import fiscalPeriodsApi, { FiscalPeriod } from "@/api/fiscal-periods-api"
-import wageEnhancementsApi, { EI_CPP_WCB_RATE } from "@/api/wage-enhancements-api"
+import api from "@/api"
 
-import useFundingSubmissionLineJsons from "@/use/use-funding-submission-line-jsons"
-import usePayments from "@/use/use-payments"
-
-type Adjustment = {
-  fiscalPeriodId: number
-  amountInCents: number
-}
+import useFiscalPeriods from "@/use/use-fiscal-periods"
+import useFundingReconciliations from "@/use/use-funding-reconciliations"
+import useFundingReconciliationAdjustments from "@/use/use-funding-reconciliation-adjustments"
 
 const props = defineProps<{
   centreId: string
@@ -113,246 +118,89 @@ const props = defineProps<{
 }>()
 
 const centerIdAsNumber = computed(() => parseInt(props.centreId))
-const fiscalYear = computed(() => props.fiscalYearSlug.replace("-", "/"))
+const fiscalYearLong = computed(() => normalizeFiscalYearToLongForm(props.fiscalYearSlug))
 
-const isLoading = ref(false)
-
-const paymentsQuery = computed(() => ({
+const fundingReconciliationsQuery = computed(() => ({
+  filters: {
+    byFiscalYearLong: fiscalYearLong.value,
+  },
   where: {
     centreId: centerIdAsNumber.value,
-    fiscalYear: fiscalYear.value,
+  },
+  perPage: 1,
+}))
+const {
+  fundingReconciliations,
+  isLoading: isLoadingFundingReconciliations,
+  refresh: refreshFundingReconciliations,
+} = useFundingReconciliations(fundingReconciliationsQuery)
+
+const fundingReconciliation = computed(() => fundingReconciliations.value[0])
+const fundingReconciliationId = computed(() => fundingReconciliation.value?.id)
+
+// TODO: mabye just load funding reconciliation, and have it's show serializer load these other objects?
+
+const fundingReconciliationAdjustmentsQuery = computed(() => ({
+  where: {
+    fundingReconciliationId: fundingReconciliationId.value,
   },
 }))
-const { payments, fetch: fetchPayments } = usePayments(paymentsQuery, {
-  skipWatchIf: () => true,
+const {
+  fundingReconciliationAdjustments,
+  isLoading: isLoadingFundingReconciliationAdjustments,
+  refresh: refreshFundingReconciliationAdjustments,
+} = useFundingReconciliationAdjustments(fundingReconciliationAdjustmentsQuery, {
+  skipWatchIf: () => isNil(fundingReconciliationId.value),
 })
 
-const fundingSubmissionLineJsonsQuery = computed(() => ({
+const fiscalPeriodsQuery = computed(() => ({
   where: {
-    centreId: centerIdAsNumber.value,
-    fiscalYear: fiscalYear.value,
+    fiscalYear: props.fiscalYearSlug,
   },
 }))
-const { fetch: fetchFundingSubmisionLineJsons, linesForMonth: fundingSubmissionLinesForMonth } =
-  useFundingSubmissionLineJsons(fundingSubmissionLineJsonsQuery, {
-    skipWatchIf: () => true,
-  })
-
-const fiscalPeriods = ref<FiscalPeriod[]>([])
+const { fiscalPeriods, isLoading: isLoadingFiscalPeriods } = useFiscalPeriods(fiscalPeriodsQuery)
 const fiscalPeriodsById = computed(() => keyBy(fiscalPeriods.value, "id"))
-const fiscalPeriodsByMonth = computed(() => keyBy(fiscalPeriods.value, "month"))
-const employeeBenefits = ref<
-  (EmployeeBenefit & {
-    fiscalPeriod: FiscalPeriod
-  })[]
->([])
-const employeeBenefitsByMonth = computed(() => keyBy(employeeBenefits.value, "fiscalPeriod.month"))
 
-const expenses = ref<Adjustment[]>([])
-const employees = ref<Adjustment[]>([])
-
-const expensesByFiscalPeriodId = computed(() => keyBy(expenses.value, "fiscalPeriodId"))
-const employeesByFiscalPeriodId = computed(() => keyBy(employees.value, "fiscalPeriodId"))
-const paymentAdujstments = computed<Adjustment[]>(() => {
-  const paymentsByFiscalPeriodId = groupBy(payments.value, "fiscalPeriodId")
-
-  return fiscalPeriods.value.map((fiscalPeriod) => {
-    const paymentsForPeriod = paymentsByFiscalPeriodId[fiscalPeriod.id] || []
-    const amountInCents = sumBy(paymentsForPeriod, "amountInCents")
-
-    return {
-      fiscalPeriodId: fiscalPeriod.id,
-      amountInCents,
-    }
-  })
-})
-const paymentAdujstmentsByFiscalPeriodId = computed(() =>
-  keyBy(paymentAdujstments.value, "fiscalPeriodId")
+const isLoading = computed(
+  () =>
+    isLoadingFundingReconciliations.value ||
+    isLoadingFundingReconciliationAdjustments.value ||
+    isLoadingFiscalPeriods.value
 )
 
-const adjustmentRows = computed<
-  {
-    fiscalPeriodId: number
-    label: string
-    expense: Adjustment
-    employee: Adjustment
-    payment: Adjustment
-    runningTotal: number
-  }[]
->(() => {
-  let runningTotal = 0
-  const rows = fiscalPeriods.value.map((fiscalPeriod) => {
-    const monthName = upperFirst(fiscalPeriod.month)
-    const paymentsForPeriod = paymentAdujstmentsByFiscalPeriodId.value[fiscalPeriod.id]
-    const expensesForPeriod = expensesByFiscalPeriodId.value[fiscalPeriod.id]
-    const employeesForPeriod = employeesByFiscalPeriodId.value[fiscalPeriod.id]
+function buildLabel(fiscalPeriodId: number): string {
+  const fiscalPeriod = fiscalPeriodsById.value[fiscalPeriodId]
+  if (isNil(fiscalPeriod)) return "..."
 
-    if (isNil(paymentsForPeriod) || isNil(expensesForPeriod)) {
-      return null
-    }
+  const capitalizedMonth = upperFirst(fiscalPeriod.month)
+  return `${capitalizedMonth} Expenses`
+}
 
-    runningTotal += paymentsForPeriod.amountInCents
-    runningTotal -= expensesForPeriod.amountInCents
-    runningTotal -= employeesForPeriod.amountInCents
+watch(fundingReconciliationId, async (newFundingReconciliationId) => {
+  if (isNil(newFundingReconciliationId)) return
 
-    return {
-      fiscalPeriodId: fiscalPeriod.id,
-      label: `${monthName} Expenses`,
-      expense: expensesForPeriod,
-      employee: employeesForPeriod,
-      payment: paymentsForPeriod,
-      runningTotal,
-    }
-  })
-
-  return compact(rows)
+  await refreshFundingReconciliation(newFundingReconciliationId)
 })
 
-const paymentsTotal = computed(() => sumBy(payments.value, "amountInCents"))
-const expensesTotal = computed(() => sumBy(expenses.value, "amountInCents"))
-const employeesTotal = computed(() => sumBy(employees.value, "amountInCents"))
-const adjustmentsTotal = computed(
-  () => paymentsTotal.value - expensesTotal.value - employeesTotal.value
-)
+const isRefreshing = ref(false)
 
-watch<[number, string], true>(
-  () => [centerIdAsNumber.value, props.fiscalYearSlug],
-  async ([newCentreId, newFiscalYearSlug], _oldValues) => {
-    isLoading.value = true
+async function refreshFundingReconciliation(newFundingReconciliationId: number) {
+  isRefreshing.value = true
+  try {
+    const { fundingReconciliation: refreshedFundingReconciliation } =
+      await api.fundingReconciliations.refreshApi.create(newFundingReconciliationId)
 
-    await fetchPayments()
-    fiscalPeriods.value = await fetchFiscalPeriods(newFiscalYearSlug)
-    const fiscalPeriodIds = fiscalPeriods.value.map((fiscalPeriod) => fiscalPeriod.id)
-    await fetchEmployeeBenefits(newCentreId, fiscalPeriodIds)
-    await fetchFundingSubmisionLineJsons()
-    expenses.value = buildExpenseValues(fiscalPeriods.value)
-    employees.value = await buildEmployeeValues(fiscalPeriods.value)
-
-    isLoading.value = false
-  },
-  {
-    immediate: true,
+    if (refreshedFundingReconciliation.updatedAt !== fundingReconciliation.value.updatedAt) {
+      await refreshFundingReconciliations()
+      await refreshFundingReconciliationAdjustments()
+    }
+  } catch (error) {
+    console.error(`Failed to refresh funding reconciliation ${newFundingReconciliationId}`, {
+      error,
+    })
+  } finally {
+    isRefreshing.value = false
   }
-)
-
-async function fetchFiscalPeriods(fiscalYearSlug: string): Promise<FiscalPeriod[]> {
-  const { fiscalPeriods } = await fiscalPeriodsApi.list({
-    where: {
-      fiscalYear: fiscalYearSlug,
-    },
-  })
-  return fiscalPeriods
-}
-
-async function fetchEmployeeBenefits(centreId: number, fiscalPeriodsIds: number[]): Promise<void> {
-  const { employeeBenefits: newEmployeeBenefits } = await employeeBenefitsApi.list({
-    where: {
-      centreId,
-      fiscalPeriodId: fiscalPeriodsIds,
-    },
-  })
-
-  employeeBenefits.value = newEmployeeBenefits.map((employeeBenefit) => ({
-    ...employeeBenefit,
-    fiscalPeriod: fiscalPeriodsById.value[employeeBenefit.fiscalPeriodId],
-  }))
-}
-
-function buildExpenseValues(fiscalPeriods: FiscalPeriod[]): Adjustment[] {
-  const expenseValues = fiscalPeriods.map((fiscalPeriod) => {
-    const expense: Adjustment = {
-      fiscalPeriodId: fiscalPeriod.id,
-      amountInCents: 0,
-    }
-    const { month } = fiscalPeriod
-    const monthAsDateName = upperFirst(month)
-    const linesForMonth = fundingSubmissionLinesForMonth(monthAsDateName)
-
-    if (!isNil(linesForMonth)) {
-      const actualSectionsTotal = sumBy(linesForMonth, "actualComputedTotal")
-
-      expense.amountInCents += dollarsToCents(actualSectionsTotal)
-    }
-
-    return expense
-  })
-
-  return expenseValues
-}
-
-async function buildEmployeeValues(fiscalPeriods: FiscalPeriod[]): Promise<Adjustment[]> {
-  const employeePromises = fiscalPeriods.map(async (fiscalPeriod) => {
-    const employee: Adjustment = {
-      fiscalPeriodId: fiscalPeriod.id,
-      amountInCents: 0,
-    }
-    const { month } = fiscalPeriod
-    const linesForMonth = employeeBenefits.value.find((b) => b.fiscalPeriodId == fiscalPeriod.id)
-
-    if (!isNil(linesForMonth)) {
-      if (Number(linesForMonth.grossPayrollMonthlyActual) > 0) {
-        let actGrossAmount =
-          Number(linesForMonth.grossPayrollMonthlyActual) * Number(linesForMonth.costCapPercentage)
-        let actEmployerAmount = Number(linesForMonth.employerCostActual)
-        employee.amountInCents = dollarsToCents(Math.min(actGrossAmount, actEmployerAmount))
-      } else {
-        employee.amountInCents = 0
-      }
-    }
-
-    injectEmployeeBenefitMonthlyCost(employee, month)
-    await lazyInjectWageEnhancementMonthlyCost(employee, month)
-
-    return employee
-  })
-
-  return Promise.all(employeePromises)
-}
-
-function injectEmployeeBenefitMonthlyCost(expense: Adjustment, month: string): void {
-  const employeeBenefitForMonth = employeeBenefitsByMonth.value[month]
-  if (isNil(employeeBenefitForMonth)) return
-
-  const { employerCostActual, grossPayrollMonthlyActual, costCapPercentage } =
-    employeeBenefitForMonth
-  const actualPaidAmount = Math.min(
-    Number(employerCostActual),
-    Number(grossPayrollMonthlyActual) * Number(costCapPercentage)
-  )
-  expense.amountInCents += dollarsToCents(actualPaidAmount)
-}
-
-async function lazyInjectWageEnhancementMonthlyCost(expense: Adjustment, month: string) {
-  const fiscalPeriod = fiscalPeriodsByMonth.value[month]
-  const { employeeWageTiers } = await employeeWageTiersApi.list({
-    where: {
-      fiscalPeriodId: fiscalPeriod.id,
-    },
-  })
-  const employeeWageTierIds = employeeWageTiers.map((employeeWageTier) => employeeWageTier.id)
-  const { wageEnhancements } = await wageEnhancementsApi.list({
-    where: {
-      centreId: centerIdAsNumber.value,
-      employeeWageTierId: employeeWageTierIds,
-    },
-  })
-  if (isEmpty(wageEnhancements)) return
-
-  const wageRatePerHoursByEmployeeWageTierId = mapValues(
-    keyBy(employeeWageTiers, "id"),
-    "wageRatePerHour"
-  )
-  const wageEnhancementsActualSubtotal = wageEnhancements.reduce(
-    (total, { hoursActual, employeeWageTierId }) => {
-      const wageRatePerHour = wageRatePerHoursByEmployeeWageTierId[employeeWageTierId]
-
-      return total + hoursActual * wageRatePerHour
-    },
-    0
-  )
-  const wageEnhancementsActualTotal = wageEnhancementsActualSubtotal * (1 + EI_CPP_WCB_RATE)
-
-  expense.amountInCents += dollarsToCents(wageEnhancementsActualTotal)
 }
 </script>
 

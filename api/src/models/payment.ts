@@ -40,6 +40,7 @@ export class Payment extends Model<InferAttributes<Payment>, InferCreationAttrib
   @NotNull
   declare fiscalPeriodId: number
 
+  // TODO: normalize to url safe long-form fiscal year 2023-2024
   @Attribute(DataTypes.STRING(10))
   @NotNull
   @ValidateAttribute({
@@ -51,6 +52,7 @@ export class Payment extends Model<InferAttributes<Payment>, InferCreationAttrib
   @NotNull
   declare paidOn: string
 
+  // TODO: replace with field with type DECIMAL(15,4)
   @Attribute(DataTypes.INTEGER)
   @NotNull
   declare amountInCents: number

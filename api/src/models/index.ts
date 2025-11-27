@@ -7,6 +7,8 @@ import EmployeeBenefit from "@/models/employee-benefit"
 import EmployeeWageTier from "@/models/employee-wage-tier"
 import FiscalPeriod from "@/models/fiscal-period"
 import FundingPeriod from "@/models/funding-period"
+import FundingReconciliation from "@/models/funding-reconciliation"
+import FundingReconciliationAdjustment from "@/models/funding-reconciliation-adjustment"
 import FundingSubmissionLine from "@/models/funding-submission-line"
 import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
 import Log from "@/models/log"
@@ -20,6 +22,8 @@ db.addModels([
   EmployeeWageTier,
   FiscalPeriod,
   FundingPeriod,
+  FundingReconciliation,
+  FundingReconciliationAdjustment,
   FundingSubmissionLine,
   FundingSubmissionLineJson,
   Log,
@@ -33,6 +37,8 @@ EmployeeBenefit.establishScopes()
 EmployeeWageTier.establishScopes()
 FiscalPeriod.establishScopes()
 FundingPeriod.establishScopes()
+FundingReconciliation.establishScopes()
+FundingReconciliationAdjustment.establishScopes()
 FundingSubmissionLine.establishScopes()
 FundingSubmissionLineJson.establishScopes()
 Log.establishScopes()
@@ -46,6 +52,8 @@ export {
   EmployeeWageTier,
   FiscalPeriod,
   FundingPeriod,
+  FundingReconciliation,
+  FundingReconciliationAdjustment,
   FundingSubmissionLine,
   FundingSubmissionLineJson,
   Log,
