@@ -56,6 +56,9 @@ export class RefreshService extends BaseService {
       fundingReconciliationAdjustment,
     ] of fundingReconciliationAdjustments.entries()) {
       const { fiscalPeriodId } = fundingReconciliationAdjustment
+
+      // TODO: consider moving each of these functions into its own service.
+      // e.g. api/src/services/funding-reconciliations/refresh/calculate-funding-received-period-amount-service.ts
       const fundingReceivedPeriodAmount = await this.determineFundingReceivedPeriodAmount(
         centreId,
         fiscalPeriodId
