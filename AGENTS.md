@@ -27,6 +27,7 @@ This file follows the format from https://agents.md/ for AI agent documentation.
   - [Serializers](#serializers)
 - [Testing Conventions](#testing-conventions)
   - [Test Describe Blocks](#test-describe-blocks)
+  - [Test Structure (AAA Pattern)](#test-structure-aaa-pattern)
 - [Authentication and Authorization](#authentication-and-authorization)
 
 ---
@@ -1128,6 +1129,37 @@ expect(response.body.user).toMatchObject({ id: user.id, email: user.email })
 
 - One expect per test makes failures easier to diagnose and tests more focused
 - Multi-line formatting is more readable and follows the principle of one thing per line
+
+### Test Structure (AAA Pattern)
+
+**Pattern:** Use explicit `// Arrange`, `// Act`, `// Assert` comments to clearly delineate test sections.
+
+```typescript
+test("when there are payments, updates funding reconciliation amounts", async () => {
+  // Arrange
+  const centre = await centreFactory.create()
+  const fundingPeriod = await fundingPeriodFactory.create({
+    fiscalYear: "2025-2026",
+  })
+  const fundingReconciliation = await fundingReconciliationFactory.create({
+    centreId: centre.id,
+    fundingPeriodId: fundingPeriod.id,
+  })
+
+  // Act
+  await RefreshService.perform(fundingReconciliation)
+
+  // Assert
+  await fundingReconciliation.reload()
+  expect(fundingReconciliation.fundingReceivedTotalAmount).toBe("150.0000")
+})
+```
+
+**Rationale:**
+
+- Comments serve as visual separators making tests easier to scan
+- Clearly documents the test's structure and intent
+- Consistent structure across all tests in the codebase
 
 ---
 
