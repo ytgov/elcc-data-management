@@ -4,6 +4,7 @@ import { isEmpty, upperFirst } from "lodash"
 import sumByDecimal from "@/utils/sum-by-decimal"
 
 import {
+  EmployeeBenefit,
   FiscalPeriod,
   FundingReconciliation,
   FundingReconciliationAdjustment,
@@ -62,15 +63,21 @@ export class RefreshService extends BaseService {
         centreId,
         fiscalPeriodId
       )
+      const payrollAdjustmentsPeriodAmount = await this.determinePayrollAdjustmentsPeriodAmount(
+        centreId,
+        fiscalPeriodId
+      )
       const cumulativeBalanceAmount = this.determineCumulativeBalanceAmount(
         fundingReconciliationAdjustments,
         index,
         fundingReceivedPeriodAmount,
-        eligibleExpensesPeriodAmount
+        eligibleExpensesPeriodAmount,
+        payrollAdjustmentsPeriodAmount
       )
       await fundingReconciliationAdjustment.update({
         fundingReceivedPeriodAmount,
         eligibleExpensesPeriodAmount,
+        payrollAdjustmentsPeriodAmount,
         cumulativeBalanceAmount,
       })
     }
@@ -130,11 +137,50 @@ export class RefreshService extends BaseService {
     return eligibleExpensesPeriodAmount.toFixed(4)
   }
 
+  private async determinePayrollAdjustmentsPeriodAmount(
+    centreId: number,
+    fiscalPeriodId: number
+  ): Promise<string> {
+    const employerCostActualTotalOrNull = await EmployeeBenefit.sum("employerCostActual", {
+      where: {
+        centreId,
+        fiscalPeriodId,
+      },
+    })
+    const employerCostActualTotal = employerCostActualTotalOrNull ?? 0
+    const grossPayrollMonthlyActualTotalOrNull = await EmployeeBenefit.sum(
+      "grossPayrollMonthlyActual",
+      {
+        where: {
+          centreId,
+          fiscalPeriodId,
+        },
+      }
+    )
+    const grossPayrollMonthlyActualTotal = grossPayrollMonthlyActualTotalOrNull ?? 0
+    const costCapPercentageTotalOrNull = await EmployeeBenefit.sum("costCapPercentage", {
+      where: {
+        centreId,
+        fiscalPeriodId,
+      },
+    })
+    const costCapPercentageTotal = costCapPercentageTotalOrNull ?? 0
+
+    const employeeBenefitActualPaidAmount = Big(employerCostActualTotal).lt(
+      Big(grossPayrollMonthlyActualTotal).mul(costCapPercentageTotal)
+    )
+      ? Big(employerCostActualTotal)
+      : Big(grossPayrollMonthlyActualTotal).mul(costCapPercentageTotal)
+
+    return employeeBenefitActualPaidAmount.toFixed(4)
+  }
+
   private determineCumulativeBalanceAmount(
     fundingReconciliationAdjustments: FundingReconciliationAdjustment[],
     index: number,
     fundingReceivedPeriodAmount: string,
-    eligibleExpensesPeriodAmount: string
+    eligibleExpensesPeriodAmount: string,
+    payrollAdjustmentsPeriodAmount: string
   ): string {
     let previousCumulativeBalanceAmount = Big("0")
 
@@ -147,10 +193,12 @@ export class RefreshService extends BaseService {
     const cumulativeBalanceAmountAsBig = previousCumulativeBalanceAmount
       .plus(Big(fundingReceivedPeriodAmount))
       .minus(Big(eligibleExpensesPeriodAmount))
+      .minus(Big(payrollAdjustmentsPeriodAmount))
 
     return cumulativeBalanceAmountAsBig.toFixed(4)
   }
 
+  // TODO: investigate if this should simply take the last adjustment's data?
   private async updateFundingReconciliationTotalAmounts(
     fundingReconciliation: FundingReconciliation,
     fundingReconciliationAdjustments: FundingReconciliationAdjustment[]
@@ -165,12 +213,19 @@ export class RefreshService extends BaseService {
       "eligibleExpensesPeriodAmount"
     )
 
-    const finalBalanceAmount = totalFundingReceived.minus(totalEligibleExpenses)
+    const totalPayrollAdjustments = sumByDecimal(
+      fundingReconciliationAdjustments,
+      "payrollAdjustmentsPeriodAmount"
+    )
+
+    const finalBalanceAmount = totalFundingReceived
+      .minus(totalEligibleExpenses)
+      .minus(totalPayrollAdjustments)
 
     await fundingReconciliation.update({
       fundingReceivedTotalAmount: totalFundingReceived.toFixed(4),
       eligibleExpensesTotalAmount: totalEligibleExpenses.toFixed(4),
-      payrollAdjustmentsTotalAmount: "0.0000",
+      payrollAdjustmentsTotalAmount: totalPayrollAdjustments.toFixed(4),
       finalBalanceAmount: finalBalanceAmount.toFixed(4),
     })
   }
