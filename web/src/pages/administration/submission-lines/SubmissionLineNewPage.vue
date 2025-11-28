@@ -96,6 +96,7 @@
         :loading="isLoading"
         :to="{
           name: 'administration/AdministrationSubmissionLinesPage',
+          query: returnToQuery,
         }"
       >
         Cancel
@@ -105,9 +106,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, useTemplateRef, watchEffect } from "vue"
+import { computed, ref, useTemplateRef, watchEffect } from "vue"
 import { useRouter } from "vue-router"
 import { useRouteQuery } from "@vueuse/router"
+import { isNil } from "lodash"
 
 import { greaterThanOrEqualTo, required } from "@/utils/validators"
 import {
@@ -143,6 +145,16 @@ watchEffect(() => {
     fundingSubmissionLineAttributes.value.fiscalYear = normalizeFiscalYearToLegacyForm(
       fiscalYear.value
     )
+  }
+})
+
+const returnToQuery = computed(() => {
+  if (isNil(fiscalYear.value) || fiscalYear.value === CURRENT_FISCAL_YEAR) {
+    return {}
+  }
+
+  return {
+    fiscalYear: fiscalYear.value,
   }
 })
 
