@@ -5,7 +5,7 @@
         icon="mdi-dots-vertical"
         color="primary"
         v-bind="activatorProps"
-      ></v-btn>
+      />
     </template>
 
     <v-list>
@@ -16,9 +16,12 @@
         }"
       >
         <template #prepend>
-          <v-icon>mdi-account</v-icon>
+          <v-avatar color="primary">
+            <v-icon color="white">mdi-account-circle-outline</v-icon>
+          </v-avatar>
         </template>
-        <v-list-item-title>My profile</v-list-item-title>
+        <h4 class="font-weight-semibold">My Profile</h4>
+        <p class="font-weight-regular">Manage your information</p>
       </v-list-item>
 
       <v-list-item
@@ -29,9 +32,12 @@
         }"
       >
         <template #prepend>
-          <v-icon>mdi-cogs</v-icon>
+          <v-avatar color="accent">
+            <v-icon color="white">mdi-cog-outline</v-icon>
+          </v-avatar>
         </template>
-        <v-list-item-title>Administration</v-list-item-title>
+        <h4 class="font-weight-semibold">Administration</h4>
+        <p class="font-weight-regular">Manage this application</p>
       </v-list-item>
 
       <v-divider />
@@ -43,9 +49,14 @@
         }"
       >
         <template #prepend>
-          <v-icon>mdi-clock</v-icon>
+          <v-avatar color="secondary">
+            <v-icon color="white">mdi-clock-outline</v-icon>
+          </v-avatar>
         </template>
-        <v-list-item-title>{{ releaseTag }}</v-list-item-title>
+        <h4 class="font-weight-semibold">Version</h4>
+        <p class="font-weight-regular">
+          {{ releaseTag }}
+        </p>
       </v-list-item>
 
       <v-list-item
@@ -53,9 +64,12 @@
         @click="signOut"
       >
         <template #prepend>
-          <v-icon>mdi-exit-run</v-icon>
+          <v-avatar color="error">
+            <v-icon color="white">mdi-logout-variant</v-icon>
+          </v-avatar>
         </template>
-        <v-list-item-title>Sign out</v-list-item-title>
+        <h4 class="font-weight-semibold">Sign Out</h4>
+        <p class="font-weight-regular">End your session</p>
       </v-list-item>
     </v-list>
   </v-menu>
