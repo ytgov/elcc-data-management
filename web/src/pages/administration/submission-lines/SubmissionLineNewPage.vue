@@ -1,0 +1,179 @@
+<template>
+  <HeaderActionsFormCard
+    ref="headerActionsFormCard"
+    title="New Funding Submission Line"
+    @submit.prevent="createFundingSubmissionLine"
+  >
+    <v-row>
+      <v-col
+        cols="12"
+        md="6"
+      >
+        <FundingPeriodFiscalYearSelect
+          v-model="fundingSubmissionLineAttributes.fiscalYear"
+          label="Fiscal Year *"
+          :rules="[required]"
+          :format-value="normalizeFiscalYearToShortForm"
+        />
+      </v-col>
+      <v-col
+        cols="12"
+        md="6"
+      >
+        <v-text-field
+          v-model="fundingSubmissionLineAttributes.sectionName"
+          label="Section *"
+          required
+          :rules="[required]"
+        />
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col
+        cols="12"
+        md="6"
+      >
+        <v-text-field
+          v-model="fundingSubmissionLineAttributes.lineName"
+          label="Line *"
+          required
+          :rules="[required]"
+        />
+      </v-col>
+      <v-col
+        cols="12"
+        md="6"
+      >
+        <v-text-field
+          v-model="fundingSubmissionLineAttributes.monthlyAmount"
+          label="Monthly Amount *"
+          type="number"
+          step="0.01"
+          required
+          :rules="[required, greaterThanOrEqualTo(0)]"
+        />
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col
+        cols="12"
+        md="6"
+      >
+        <v-text-field
+          v-model="fundingSubmissionLineAttributes.fromAge"
+          label="From Age"
+          type="number"
+          :rules="[greaterThanOrEqualTo(0)]"
+        />
+      </v-col>
+      <v-col
+        cols="12"
+        md="6"
+      >
+        <v-text-field
+          v-model="fundingSubmissionLineAttributes.toAge"
+          label="To Age"
+          type="number"
+          :rules="[greaterThanOrEqualTo(0)]"
+        />
+      </v-col>
+    </v-row>
+
+    <template #actions>
+      <v-btn
+        :loading="isLoading"
+        color="secondary"
+        variant="flat"
+        type="submit"
+      >
+        Create Submission Line
+      </v-btn>
+      <v-spacer />
+      <v-btn
+        color="warning"
+        variant="outlined"
+        :loading="isLoading"
+        :to="{
+          name: 'administration/AdministrationSubmissionLinesPage',
+        }"
+      >
+        Cancel
+      </v-btn>
+    </template>
+  </HeaderActionsFormCard>
+</template>
+
+<script setup lang="ts">
+import { ref, useTemplateRef } from "vue"
+import { useRouter } from "vue-router"
+
+import { greaterThanOrEqualTo, required } from "@/utils/validators"
+import normalizeFiscalYearToShortForm from "@/utils/normalize-fiscal-year-to-short-form"
+
+import fundingSubmissionLinesApi, {
+  type FundingSubmissionLine,
+} from "@/api/funding-submission-lines-api"
+import useBreadcrumbs from "@/use/use-breadcrumbs"
+import useSnack from "@/use/use-snack"
+
+import HeaderActionsFormCard from "@/components/common/HeaderActionsFormCard.vue"
+import FundingPeriodFiscalYearSelect from "@/components/funding-periods/FundingPeriodFiscalYearSelect.vue"
+
+const fundingSubmissionLineAttributes = ref<Partial<FundingSubmissionLine>>({
+  fiscalYear: "",
+  sectionName: "",
+  lineName: "",
+  fromAge: null,
+  toAge: null,
+  monthlyAmount: 0,
+})
+
+const isLoading = ref(false)
+const snack = useSnack()
+const router = useRouter()
+const headerActionsFormCard = useTemplateRef("headerActionsFormCard")
+
+async function createFundingSubmissionLine() {
+  if (headerActionsFormCard.value === null) return
+
+  const { valid } = await headerActionsFormCard.value.validate()
+  if (!valid) return
+
+  isLoading.value = true
+  try {
+    await fundingSubmissionLinesApi.create(fundingSubmissionLineAttributes.value)
+    snack.success("Submission line created successfully!")
+    return router.push({
+      name: "administration/AdministrationSubmissionLinesPage",
+    })
+  } catch (error) {
+    console.error(error)
+    snack.error(`Failed to create submission line: ${error}`)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+useBreadcrumbs("Submission Line Creation", [
+  {
+    title: "Administration",
+    to: {
+      name: "AdministrationPage",
+    },
+  },
+  {
+    title: "Submission Lines",
+    to: {
+      name: "administration/AdministrationSubmissionLinesPage",
+    },
+  },
+  {
+    title: "New Submission Line",
+    to: {
+      name: "administration/submission-lines/SubmissionLineNewPage",
+    },
+  },
+])
+</script>

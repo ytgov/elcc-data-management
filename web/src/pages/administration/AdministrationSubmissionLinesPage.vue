@@ -34,11 +34,11 @@
       <v-btn
         color="primary"
         :to="{
-          name: 'administration/funding-periods/FundingPeriodNewPage',
+          name: 'administration/submission-lines/SubmissionLineNewPage',
         }"
       >
         <v-icon class="mr-3">mdi-plus</v-icon>
-        New Fiscal Year
+        New Submission Line
       </v-btn>
     </template>
 
