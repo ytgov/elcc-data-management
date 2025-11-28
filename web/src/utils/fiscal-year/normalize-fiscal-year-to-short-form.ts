@@ -1,4 +1,8 @@
-import { type FiscalYearFormat } from "@/utils/normalize-fiscal-year-to-long-form"
+import {
+  determineFiscalYearFormat,
+  castFromLongToShortFormat,
+  castFromLegacyToShortFormat,
+} from "@/utils/fiscal-year/fiscal-year-common"
 
 /**
  * Normalizes fiscal year from any supported format to standard short format (YYYY-YY).
@@ -17,7 +21,7 @@ import { type FiscalYearFormat } from "@/utils/normalize-fiscal-year-to-long-for
  * normalizeFiscalYearToShortForm("2023/24") // returns "2023-24"
  */
 export function normalizeFiscalYearToShortForm(fiscalYear: string): string {
-  const format = determineFormat(fiscalYear)
+  const format = determineFiscalYearFormat(fiscalYear)
 
   switch (format) {
     case "YYYY-YY":
@@ -29,33 +33,6 @@ export function normalizeFiscalYearToShortForm(fiscalYear: string): string {
     default:
       throw new Error(`Unsupported fiscal year format: ${format}`)
   }
-}
-
-function determineFormat(fiscalYear: string): FiscalYearFormat {
-  if (/^\d{4}-\d{2}$/.test(fiscalYear)) {
-    return "YYYY-YY"
-  }
-
-  if (/^\d{4}-\d{4}$/.test(fiscalYear)) {
-    return "YYYY-YYYY"
-  }
-
-  if (/^\d{4}\/\d{2}$/.test(fiscalYear)) {
-    return "YYYY/YY"
-  }
-
-  throw new Error(`Unrecognized fiscal year format: ${fiscalYear}`)
-}
-
-function castFromLongToShortFormat(fiscalYear: string): string {
-  const [startYear, endYearLong] = fiscalYear.split("-")
-  const endYearShort = endYearLong.slice(-2)
-  return `${startYear}-${endYearShort}`
-}
-
-function castFromLegacyToShortFormat(fiscalYear: string): string {
-  const [startYear, endYearShort] = fiscalYear.split("/")
-  return `${startYear}-${endYearShort}`
 }
 
 export default normalizeFiscalYearToShortForm

@@ -110,7 +110,7 @@ import { ref, useTemplateRef } from "vue"
 import { useRouter } from "vue-router"
 
 import { greaterThanOrEqualTo, required } from "@/utils/validators"
-import normalizeFiscalYearToShortForm from "@/utils/normalize-fiscal-year-to-short-form"
+import { normalizeFiscalYearToShortForm } from "@/utils/fiscal-year"
 
 import fundingSubmissionLinesApi, {
   type FundingSubmissionLine,

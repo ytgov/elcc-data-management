@@ -51,7 +51,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue"
 
-import getCurrentFiscalYearSlug from "@/utils/get-current-fiscal-year-slug"
+import { getCurrentFiscalYearSlug } from "@/utils/fiscal-year"
 
 import useBreadcrumbs from "@/use/use-breadcrumbs"
 import {
