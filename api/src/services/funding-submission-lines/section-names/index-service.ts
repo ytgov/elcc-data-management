@@ -17,7 +17,7 @@ export class IndexService extends BaseService {
     const fundingSubmissionLines = await this.scopedModel.findAll({
       attributes: ["sectionName"],
       where: this.where,
-      group: ["sectionName"],
+      group: ["section_name"],
       order: this.order,
     })
     const sectionNames = fundingSubmissionLines.map(({ sectionName }) => sectionName)
