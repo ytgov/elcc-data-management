@@ -119,6 +119,9 @@ router
   .get(FundingSubmissionLinesController.index)
   .post(FundingSubmissionLinesController.create)
 router
+  .route("/api/funding-submission-lines/section-names")
+  .get(FundingSubmissionLines.SectionNamesController.index)
+router
   .route("/api/funding-submission-lines/:fundingSubmissionLineId")
   .get(FundingSubmissionLinesController.show)
   .patch(FundingSubmissionLinesController.update)
