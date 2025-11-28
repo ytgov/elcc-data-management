@@ -22,11 +22,12 @@
         cols="12"
         md="6"
       >
-        <v-text-field
+        <FundingSubmissionLineSectionCombobox
           v-model="fundingSubmissionLineAttributes.sectionName"
+          :where="fundingSubmissionLineSectionWhereOptions"
           label="Section *"
-          required
           :rules="[required]"
+          required
         />
       </v-col>
     </v-row>
@@ -129,14 +130,21 @@ import useSnack from "@/use/use-snack"
 
 import HeaderActionsFormCard from "@/components/common/HeaderActionsFormCard.vue"
 import FundingPeriodFiscalYearSelect from "@/components/funding-periods/FundingPeriodFiscalYearSelect.vue"
+import FundingSubmissionLineSectionCombobox from "@/components/funding-submission-lines/FundingSubmissionLineSectionCombobox.vue"
 
 const CURRENT_FISCAL_YEAR = normalizeFiscalYearToLongForm(getCurrentFiscalYearSlug())
 
-const fiscalYear = useRouteQuery<string | null>("fiscalYear", CURRENT_FISCAL_YEAR)
+const fiscalYear = useRouteQuery<string>("fiscalYear", CURRENT_FISCAL_YEAR)
+
+const fundingSubmissionLineSectionWhereOptions = computed(() => {
+  return {
+    fiscalYear: normalizeFiscalYearToLegacyForm(fiscalYear.value),
+  }
+})
 
 const fundingSubmissionLineAttributes = ref<Partial<FundingSubmissionLine>>({
   fiscalYear: "",
-  sectionName: "",
+  sectionName: undefined,
   lineName: "",
   fromAge: null,
   toAge: null,

@@ -68,6 +68,11 @@ export default createVuetify({
     VCard: {
       elevation: 3,
     },
+    VCombobox: {
+      variant: "outlined",
+      density: "comfortable",
+      color: "primary",
+    },
     VDateInput: {
       variant: "outlined",
       density: "comfortable",
