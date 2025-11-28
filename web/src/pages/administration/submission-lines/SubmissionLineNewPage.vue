@@ -10,10 +10,9 @@
         md="6"
       >
         <FundingPeriodFiscalYearSelect
-          v-model="fundingSubmissionLineAttributes.fiscalYear"
+          v-model="fiscalYear"
           label="Fiscal Year *"
           :rules="[required]"
-          :format-value="normalizeFiscalYearToShortForm"
         />
       </v-col>
       <v-col
@@ -106,11 +105,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, useTemplateRef } from "vue"
+import { ref, useTemplateRef, watchEffect } from "vue"
 import { useRouter } from "vue-router"
+import { useRouteQuery } from "@vueuse/router"
 
 import { greaterThanOrEqualTo, required } from "@/utils/validators"
-import { normalizeFiscalYearToShortForm } from "@/utils/fiscal-year"
+import {
+  getCurrentFiscalYearSlug,
+  normalizeFiscalYearToLegacyForm,
+  normalizeFiscalYearToLongForm,
+} from "@/utils/fiscal-year"
 
 import fundingSubmissionLinesApi, {
   type FundingSubmissionLine,
@@ -121,6 +125,10 @@ import useSnack from "@/use/use-snack"
 import HeaderActionsFormCard from "@/components/common/HeaderActionsFormCard.vue"
 import FundingPeriodFiscalYearSelect from "@/components/funding-periods/FundingPeriodFiscalYearSelect.vue"
 
+const CURRENT_FISCAL_YEAR = normalizeFiscalYearToLongForm(getCurrentFiscalYearSlug())
+
+const fiscalYear = useRouteQuery<string | null>("fiscalYear", CURRENT_FISCAL_YEAR)
+
 const fundingSubmissionLineAttributes = ref<Partial<FundingSubmissionLine>>({
   fiscalYear: "",
   sectionName: "",
@@ -128,6 +136,14 @@ const fundingSubmissionLineAttributes = ref<Partial<FundingSubmissionLine>>({
   fromAge: null,
   toAge: null,
   monthlyAmount: 0,
+})
+
+watchEffect(() => {
+  if (fiscalYear.value) {
+    fundingSubmissionLineAttributes.value.fiscalYear = normalizeFiscalYearToLegacyForm(
+      fiscalYear.value
+    )
+  }
 })
 
 const isLoading = ref(false)
