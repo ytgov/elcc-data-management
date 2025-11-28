@@ -13,6 +13,9 @@
           v-model="fiscalYear"
           label="Fiscal Year *"
           :rules="[required]"
+          clearable
+          clear-icon="mdi-restore"
+          @click:clear="fiscalYear = CURRENT_FISCAL_YEAR"
         />
       </v-col>
       <v-col

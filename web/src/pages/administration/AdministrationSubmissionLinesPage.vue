@@ -12,6 +12,9 @@
             single-line
             hide-details
             density="compact"
+            clearable
+            clear-icon="mdi-restore"
+            @click:clear="fiscalYear = CURRENT_FISCAL_YEAR"
           />
         </v-col>
         <v-col
