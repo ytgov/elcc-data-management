@@ -19,6 +19,7 @@ This file follows the format from https://agents.md/ for AI agent documentation.
   - [Composables: Singular vs Plural](#composables-singular-vs-plural)
   - [Component Architecture](#component-architecture)
   - [Component Naming and Location](#component-naming-and-location)
+  - [Route and File Organization](#route-and-file-organization)
   - [Decimal Type Handling](#decimal-type-handling)
 - [Backend Patterns](#backend-patterns)
   - [Controller Structure](#controller-structure)
@@ -513,6 +514,46 @@ components/
   - `Table` - `v-table`
   - `Card` - `v-card`
   - `Form` - `v-form`
+
+### Route and File Organization
+
+**Core Principle:** Organize routes and files by domain, with predictable patterns between route names and file paths.
+
+#### Route Naming Pattern
+
+Use `{domain}/{resource}/{PageName}` format for route names:
+
+- `administration/submission-lines/SubmissionLineNewPage`
+- `administration/funding-periods/FundingPeriodEditPage`
+
+This makes it mechanical to locate the file from the route name.
+
+#### File Organization Pattern
+
+Group by domain, then resource:
+
+```
+pages/
+  administration/
+    AdministrationSubmissionLinesPage.vue      # List page at /administration/submission-lines
+    submission-lines/
+      SubmissionLineNewPage.vue                # New page at /administration/submission-lines/new
+    funding-periods/
+      FundingPeriodEditPage.vue                # Edit page at /administration/funding-periods/:id/edit
+```
+
+#### Route Example
+
+```ts
+// web/src/routes/administration-routes.ts
+{
+  path: "administration/submission-lines/new",
+  name: "administration/submission-lines/SubmissionLineNewPage",
+  component: () => import("@/pages/administration/submission-lines/SubmissionLineNewPage.vue"),
+}
+```
+
+**Pattern:** The route name mirrors the file path under `pages/`.
 
 ### Decimal Type Handling
 
