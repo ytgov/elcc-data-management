@@ -57,7 +57,7 @@
     <template #actions>
       <v-btn
         :loading="isLoading"
-        color="secondary"
+        color="primary"
         variant="flat"
         type="submit"
       >
