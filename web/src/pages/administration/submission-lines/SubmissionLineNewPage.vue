@@ -37,11 +37,13 @@
         cols="12"
         md="6"
       >
-        <v-text-field
+        <FundingSubmissionLineLineNameUniqueTextField
           v-model="fundingSubmissionLineAttributes.lineName"
+          :fiscal-year="fundingSubmissionLineAttributes.fiscalYear"
+          :section-name="fundingSubmissionLineAttributes.sectionName"
           label="Line *"
-          required
           :rules="[required]"
+          required
         />
       </v-col>
       <v-col
@@ -131,6 +133,7 @@ import useSnack from "@/use/use-snack"
 import HeaderActionsFormCard from "@/components/common/HeaderActionsFormCard.vue"
 import FundingPeriodFiscalYearSelect from "@/components/funding-periods/FundingPeriodFiscalYearSelect.vue"
 import FundingSubmissionLineSectionCombobox from "@/components/funding-submission-lines/FundingSubmissionLineSectionCombobox.vue"
+import FundingSubmissionLineLineNameUniqueTextField from "@/components/funding-submission-lines/FundingSubmissionLineLineNameUniqueTextField.vue"
 
 const CURRENT_FISCAL_YEAR = normalizeFiscalYearToLongForm(getCurrentFiscalYearSlug())
 
