@@ -19,17 +19,18 @@ import {
   EmployeeWageTiersController,
   FiscalPeriodsController,
   FundingPeriodsController,
+  FundingReconciliationAdjustmentsController,
   FundingReconciliations,
   FundingReconciliationsController,
   FundingSubmissionLineJsons,
   FundingSubmissionLineJsonsController,
+  FundingSubmissionLines,
   FundingSubmissionLinesController,
   PaymentsController,
   UsersController,
   WageEnhancements,
   WageEnhancementsController,
 } from "@/controllers"
-import { FundingReconciliationAdjustmentsController } from "@/controllers/funding-reconciliation-adjustments-controller"
 
 export const router = Router()
 
@@ -117,6 +118,9 @@ router
   .route("/api/funding-submission-lines")
   .get(FundingSubmissionLinesController.index)
   .post(FundingSubmissionLinesController.create)
+router
+  .route("/api/funding-submission-lines/section-names")
+  .get(FundingSubmissionLines.SectionNamesController.index)
 router
   .route("/api/funding-submission-lines/:fundingSubmissionLineId")
   .get(FundingSubmissionLinesController.show)

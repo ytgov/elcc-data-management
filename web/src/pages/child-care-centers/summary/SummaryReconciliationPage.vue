@@ -104,7 +104,7 @@ import { computed, ref, watch } from "vue"
 import { isNil, keyBy, upperFirst } from "lodash"
 
 import { formatMoney } from "@/utils/formatters"
-import normalizeFiscalYearToLongForm from "@/utils/normalize-fiscal-year-to-long-form"
+import { normalizeFiscalYearToLongForm } from "@/utils/fiscal-year"
 
 import api from "@/api"
 

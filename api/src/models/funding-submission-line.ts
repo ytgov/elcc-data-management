@@ -12,7 +12,10 @@ import {
   NotNull,
   PrimaryKey,
   Table,
+  ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
+
+import { isValidFiscalYearLegacy } from "@/models/validators"
 
 import BaseModel from "@/models/base-model"
 
@@ -28,8 +31,12 @@ export class FundingSubmissionLine extends BaseModel<
   @AutoIncrement
   declare id: CreationOptional<number>
 
+  // TODO: replace with foreign key to FundingPeriod model.
   @Attribute(DataTypes.STRING(10))
   @NotNull
+  @ValidateAttribute({
+    isValidFiscalYearLegacy,
+  })
   declare fiscalYear: string
 
   @Attribute(DataTypes.STRING(200))
