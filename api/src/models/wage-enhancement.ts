@@ -53,11 +53,11 @@ export class WageEnhancement extends Model<
   @NotNull
   declare employeeName: string
 
-  @Attribute(DataTypes.FLOAT)
+  @Attribute(DataTypes.DECIMAL(10, 2))
   @NotNull
   declare hoursEstimated: string
 
-  @Attribute(DataTypes.FLOAT)
+  @Attribute(DataTypes.DECIMAL(10, 2))
   @NotNull
   declare hoursActual: string
 
