@@ -44,33 +44,33 @@ export class EmployeeBenefit extends BaseModel<
   @EmployeeBenefitsCenterIdFiscalPeriodIdUniqueIndex
   declare fiscalPeriodId: number
 
-  @Attribute(DataTypes.DECIMAL(10, 2))
+  @Attribute(DataTypes.DECIMAL(15, 4))
   @NotNull
-  declare grossPayrollMonthlyActual: number
+  declare grossPayrollMonthlyActual: string
 
-  @Attribute(DataTypes.DECIMAL(10, 2))
+  @Attribute(DataTypes.DECIMAL(15, 4))
   @NotNull
-  declare grossPayrollMonthlyEstimated: number
+  declare grossPayrollMonthlyEstimated: string
 
   @Attribute(DataTypes.DECIMAL(5, 2))
   @NotNull
-  declare costCapPercentage: number
+  declare costCapPercentage: string
 
-  @Attribute(DataTypes.DECIMAL(10, 2))
+  @Attribute(DataTypes.DECIMAL(15, 4))
   @NotNull
-  declare employeeCostActual: number
+  declare employeeCostActual: string
 
-  @Attribute(DataTypes.DECIMAL(10, 2))
+  @Attribute(DataTypes.DECIMAL(15, 4))
   @NotNull
-  declare employeeCostEstimated: number
+  declare employeeCostEstimated: string
 
-  @Attribute(DataTypes.DECIMAL(10, 2))
+  @Attribute(DataTypes.DECIMAL(15, 4))
   @NotNull
-  declare employerCostActual: number
+  declare employerCostActual: string
 
-  @Attribute(DataTypes.DECIMAL(10, 2))
+  @Attribute(DataTypes.DECIMAL(15, 4))
   @NotNull
-  declare employerCostEstimated: number
+  declare employerCostEstimated: string
 
   @Attribute(DataTypes.DATE)
   @NotNull
