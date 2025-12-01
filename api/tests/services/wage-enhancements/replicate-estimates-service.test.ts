@@ -4,6 +4,7 @@ import {
   centreFactory,
   employeeWageTierFactory,
   fiscalPeriodFactory,
+  fundingPeriodFactory,
   wageEnhancementFactory,
 } from "@/factories"
 
@@ -13,19 +14,25 @@ describe("api/src/services/wage-enhancements/replicate-estimates-service.ts", ()
       test("when provide a centreId and fiscalPeriodId, replicates wage enhancement estimates forward", async () => {
         // Arrange
         const centre = await centreFactory.create()
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2024-2025",
+        })
         const fiscalPeriod1 = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
           fiscalYear: "2024-25",
           month: FiscalPeriod.Months.APRIL,
           dateStart: new Date("2024-04-01T00:00:00Z"),
           dateEnd: new Date("2024-04-30T23:59:59Z"),
         })
         await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
           fiscalYear: "2024-25",
           month: FiscalPeriod.Months.MAY,
           dateStart: new Date("2024-05-01T00:00:00Z"),
           dateEnd: new Date("2024-05-31T23:59:59Z"),
         })
         await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
           fiscalYear: "2024-25",
           month: FiscalPeriod.Months.JUNE,
           dateStart: new Date("2024-06-01T00:00:00Z"),
@@ -69,48 +76,48 @@ describe("api/src/services/wage-enhancements/replicate-estimates-service.ts", ()
           },
         })
         expect(wageEnhancements.length).toBe(6)
-        expect(wageEnhancements.map((r) => r.dataValues)).toEqual([
+        expect(wageEnhancements).toEqual([
           expect.objectContaining({
             centreId: centre.id,
             employeeWageTierId: employeeWageTier1.id,
             employeeName: "John Doe",
-            hoursEstimated: 35,
-            hoursActual: 38,
+            hoursEstimated: "35",
+            hoursActual: "38",
           }),
           expect.objectContaining({
             centreId: centre.id,
             employeeWageTierId: employeeWageTier2.id,
             employeeName: "Jane Smith",
-            hoursEstimated: 40,
-            hoursActual: 45,
+            hoursEstimated: "40",
+            hoursActual: "45",
           }),
           expect.objectContaining({
             centreId: centre.id,
-            employeeWageTierId: expect.not.stringMatching(employeeWageTier1.id.toString()),
+            employeeWageTierId: expect.toSatisfy((value) => value !== employeeWageTier1.id),
             employeeName: "John Doe",
-            hoursEstimated: 35,
-            hoursActual: 0,
+            hoursEstimated: "35",
+            hoursActual: "0",
           }),
           expect.objectContaining({
             centreId: centre.id,
-            employeeWageTierId: expect.not.stringMatching(employeeWageTier1.id.toString()),
+            employeeWageTierId: expect.toSatisfy((value) => value !== employeeWageTier1.id),
             employeeName: "John Doe",
-            hoursEstimated: 35,
-            hoursActual: 0,
+            hoursEstimated: "35",
+            hoursActual: "0",
           }),
           expect.objectContaining({
             centreId: centre.id,
-            employeeWageTierId: expect.not.stringMatching(employeeWageTier2.id.toString()),
+            employeeWageTierId: expect.toSatisfy((value) => value !== employeeWageTier2.id),
             employeeName: "Jane Smith",
-            hoursEstimated: 40,
-            hoursActual: 0,
+            hoursEstimated: "40",
+            hoursActual: "0",
           }),
           expect.objectContaining({
             centreId: centre.id,
-            employeeWageTierId: expect.not.stringMatching(employeeWageTier2.id.toString()),
+            employeeWageTierId: expect.toSatisfy((value) => value !== employeeWageTier2.id),
             employeeName: "Jane Smith",
-            hoursEstimated: 40,
-            hoursActual: 0,
+            hoursEstimated: "40",
+            hoursActual: "0",
           }),
         ])
       })
@@ -118,13 +125,18 @@ describe("api/src/services/wage-enhancements/replicate-estimates-service.ts", ()
       test("when future wage enhancements exist, with matching user, updates the hours estimated, and does not create a new enhancement", async () => {
         // Arrange
         const centre = await centreFactory.create()
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2024-2025",
+        })
         const fiscalPeriod1 = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
           fiscalYear: "2024-25",
           month: FiscalPeriod.Months.APRIL,
           dateStart: new Date("2024-04-01T00:00:00Z"),
           dateEnd: new Date("2024-04-30T23:59:59Z"),
         })
         const fiscalPeriod2 = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
           fiscalYear: "2024-25",
           month: FiscalPeriod.Months.MAY,
           dateStart: new Date("2024-05-01T00:00:00Z"),
@@ -172,15 +184,15 @@ describe("api/src/services/wage-enhancements/replicate-estimates-service.ts", ()
             centreId: centre.id,
             employeeWageTierId: employeeWageTier1.id,
             employeeName: "John Doe",
-            hoursEstimated: 35,
-            hoursActual: 38,
+            hoursEstimated: "35",
+            hoursActual: "38",
           }),
           expect.objectContaining({
             centreId: centre.id,
             employeeWageTierId: employeeWageTier2.id,
             employeeName: "John Doe",
-            hoursEstimated: 35,
-            hoursActual: 45,
+            hoursEstimated: "35",
+            hoursActual: "45",
           }),
         ])
       })
