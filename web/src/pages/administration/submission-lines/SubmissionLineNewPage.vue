@@ -62,15 +62,26 @@
     </v-row>
 
     <v-row>
+      <v-col cols="12">
+        <v-checkbox
+          v-model="showAgeRange"
+          label="Specify From Age - To Age"
+          hide-details
+        />
+      </v-col>
+    </v-row>
+
+    <v-row v-if="showAgeRange">
       <v-col
         cols="12"
         md="6"
       >
         <v-text-field
-          v-model="fundingSubmissionLineAttributes.fromAge"
-          label="From Age"
+          v-model.number="fundingSubmissionLineAttributes.fromAge"
+          label="From Age *"
           type="number"
-          :rules="[greaterThanOrEqualTo(0)]"
+          :rules="[required, greaterThanOrEqualTo(0)]"
+          required
         />
       </v-col>
       <v-col
@@ -78,10 +89,16 @@
         md="6"
       >
         <v-text-field
-          v-model="fundingSubmissionLineAttributes.toAge"
-          label="To Age"
+          v-model.number="fundingSubmissionLineAttributes.toAge"
+          label="To Age *"
           type="number"
-          :rules="[greaterThanOrEqualTo(0)]"
+          :rules="[
+            required,
+            greaterThan(fromAge, {
+              referenceFieldLabel: `From Age of ${fromAge}`,
+            }),
+          ]"
+          required
         />
       </v-col>
     </v-row>
@@ -117,7 +134,7 @@ import { useRouter } from "vue-router"
 import { useRouteQuery } from "@vueuse/router"
 import { isNil } from "lodash"
 
-import { greaterThanOrEqualTo, required } from "@/utils/validators"
+import { greaterThan, greaterThanOrEqualTo, required } from "@/utils/validators"
 import {
   getCurrentFiscalYearSlug,
   normalizeFiscalYearToLegacyForm,
@@ -161,6 +178,17 @@ watchEffect(() => {
     )
   }
 })
+
+const showAgeRange = ref(false)
+
+watchEffect(() => {
+  if (showAgeRange.value === false) {
+    fundingSubmissionLineAttributes.value.fromAge = null
+    fundingSubmissionLineAttributes.value.toAge = null
+  }
+})
+
+const fromAge = computed(() => fundingSubmissionLineAttributes.value.fromAge)
 
 const returnToQuery = computed(() => {
   if (isNil(fiscalYear.value) || fiscalYear.value === CURRENT_FISCAL_YEAR) {

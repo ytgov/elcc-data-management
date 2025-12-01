@@ -3,8 +3,8 @@ import { isNil } from "lodash"
 export function greaterThanOrEqualTo(
   minimum: number,
   { referenceFieldLabel }: { referenceFieldLabel?: string } = {}
-): (value: string | number) => boolean | string {
-  return (value: string | number) => {
+): (value: unknown) => boolean | string {
+  return (value: unknown) => {
     if (isNil(value) || value === "") {
       return true
     }
@@ -12,8 +12,10 @@ export function greaterThanOrEqualTo(
     let numericValue: number
     if (typeof value === "string") {
       numericValue = parseFloat(value)
-    } else {
+    } else if (typeof value === "number") {
       numericValue = value
+    } else {
+      return `This field must be a number`
     }
 
     const hasValidNumericValue = !Number.isNaN(numericValue)
@@ -23,12 +25,7 @@ export function greaterThanOrEqualTo(
       return true
     }
 
-    let minimumLabel: number | string
-    if (isNil(referenceFieldLabel)) {
-      minimumLabel = minimum
-    } else {
-      minimumLabel = referenceFieldLabel
-    }
+    const minimumLabel = referenceFieldLabel || minimum
 
     return `This field must be greater than or equal to ${minimumLabel}`
   }
