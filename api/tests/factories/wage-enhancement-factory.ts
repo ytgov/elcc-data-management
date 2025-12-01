@@ -30,8 +30,8 @@ export const wageEnhancementFactory = Factory.define<WageEnhancement>(
       centreId: centre.id,
       employeeWageTierId: employeeWageTier.id,
       employeeName: faker.person.fullName(),
-      hoursEstimated: faker.number.int({ min: 0, max: 100 }),
-      hoursActual: faker.number.int({ min: 0, max: 100 }),
+      hoursEstimated: faker.finance.amount({ min: 0, max: 100 }),
+      hoursActual: faker.finance.amount({ min: 0, max: 100 }),
     })
 
     wageEnhancement.centre = centre

@@ -83,7 +83,7 @@ export class ReplicateEstimatesService extends BaseService {
             employeeWageTierId: futureEmployeeWageTier.id,
             employeeName: sourceWageEnhancement.employeeName,
             hoursEstimated: sourceWageEnhancement.hoursEstimated,
-            hoursActual: 0,
+            hoursActual: "0",
           })
         }
       }
