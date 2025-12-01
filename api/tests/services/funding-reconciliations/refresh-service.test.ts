@@ -253,13 +253,13 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
         await employeeBenefitFactory.create({
           centreId: centre.id,
           fiscalPeriodId: fiscalPeriod.id,
-          grossPayrollMonthlyActual: 10000,
-          grossPayrollMonthlyEstimated: 10000,
-          costCapPercentage: 0.02,
-          employeeCostActual: 50,
-          employeeCostEstimated: 50,
-          employerCostActual: 100,
-          employerCostEstimated: 100,
+          grossPayrollMonthlyActual: "10000",
+          grossPayrollMonthlyEstimated: "10000",
+          costCapPercentage: "0.02",
+          employeeCostActual: "50",
+          employeeCostEstimated: "50",
+          employerCostActual: "100",
+          employerCostEstimated: "100",
         })
 
         const fiscalPeriod2 = await fiscalPeriodFactory.create({
@@ -291,13 +291,13 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
         await employeeBenefitFactory.create({
           centreId: centre.id,
           fiscalPeriodId: fiscalPeriod2.id,
-          grossPayrollMonthlyActual: 12000,
-          grossPayrollMonthlyEstimated: 12000,
-          costCapPercentage: 0.025,
-          employeeCostActual: 75,
-          employeeCostEstimated: 75,
-          employerCostActual: 150,
-          employerCostEstimated: 150,
+          grossPayrollMonthlyActual: "12000",
+          grossPayrollMonthlyEstimated: "12000",
+          costCapPercentage: "0.025",
+          employeeCostActual: "75",
+          employeeCostEstimated: "75",
+          employerCostActual: "150",
+          employerCostEstimated: "150",
         })
 
         // Act

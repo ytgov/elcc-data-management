@@ -20,18 +20,18 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
         const fundingLineValue1 = fundingLineValueFactory.build({
           submissionLineId: submissionLine1.id,
           ...pick(submissionLine1.dataValues, "sectionName", "lineName", "monthlyAmount"),
-          estimatedChildOccupancyRate: 1,
-          actualChildOccupancyRate: 2,
-          estimatedComputedTotal: 3,
-          actualComputedTotal: 4,
+          estimatedChildOccupancyRate: "1",
+          actualChildOccupancyRate: "2",
+          estimatedComputedTotal: "3",
+          actualComputedTotal: "4",
         })
         const fundingLineValue2 = fundingLineValueFactory.build({
           submissionLineId: submissionLine1.id,
           ...pick(submissionLine1.dataValues, "sectionName", "lineName", "monthlyAmount"),
-          estimatedChildOccupancyRate: 0,
-          actualChildOccupancyRate: 0,
-          estimatedComputedTotal: 0,
-          actualComputedTotal: 0,
+          estimatedChildOccupancyRate: "0",
+          actualChildOccupancyRate: "0",
+          estimatedComputedTotal: "0",
+          actualComputedTotal: "0",
         })
         const fundingSubmissionLineJson1 = await fundingSubmissionLineJsonFactory.create({
           centreId: centre1.id,
@@ -58,10 +58,10 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
         expect(fundingSubmissionLineJson2.lines).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              estimatedChildOccupancyRate: 1,
-              actualChildOccupancyRate: 0,
-              estimatedComputedTotal: 3,
-              actualComputedTotal: 0,
+              estimatedChildOccupancyRate: "1",
+              actualChildOccupancyRate: "0",
+              estimatedComputedTotal: "3",
+              actualComputedTotal: "0",
             }),
           ])
         )
@@ -74,18 +74,18 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
         const fundingLineValue1 = fundingLineValueFactory.build({
           submissionLineId: submissionLine1.id,
           ...pick(submissionLine1.dataValues, "sectionName", "lineName", "monthlyAmount"),
-          estimatedChildOccupancyRate: 0,
-          actualChildOccupancyRate: 0,
-          estimatedComputedTotal: 0,
-          actualComputedTotal: 0,
+          estimatedChildOccupancyRate: "0",
+          actualChildOccupancyRate: "0",
+          estimatedComputedTotal: "0",
+          actualComputedTotal: "0",
         })
         const fundingLineValue2 = fundingLineValueFactory.build({
           submissionLineId: submissionLine1.id,
           ...pick(submissionLine1.dataValues, "sectionName", "lineName", "monthlyAmount"),
-          estimatedChildOccupancyRate: 1,
-          actualChildOccupancyRate: 2,
-          estimatedComputedTotal: 3,
-          actualComputedTotal: 4,
+          estimatedChildOccupancyRate: "1",
+          actualChildOccupancyRate: "2",
+          estimatedComputedTotal: "3",
+          actualComputedTotal: "4",
         })
         const fundingSubmissionLineJson1 = await fundingSubmissionLineJsonFactory.create({
           centreId: centre1.id,
@@ -112,10 +112,10 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
         expect(fundingSubmissionLineJson1.lines).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              estimatedChildOccupancyRate: 0,
-              actualChildOccupancyRate: 0,
-              estimatedComputedTotal: 0,
-              actualComputedTotal: 0,
+              estimatedChildOccupancyRate: "0",
+              actualChildOccupancyRate: "0",
+              estimatedComputedTotal: "0",
+              actualComputedTotal: "0",
             }),
           ])
         )
@@ -129,18 +129,18 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
         const fundingLineValue1 = fundingLineValueFactory.build({
           submissionLineId: submissionLine1.id,
           ...pick(submissionLine1.dataValues, "sectionName", "lineName", "monthlyAmount"),
-          estimatedChildOccupancyRate: 1,
-          actualChildOccupancyRate: 2,
-          estimatedComputedTotal: 3,
-          actualComputedTotal: 4,
+          estimatedChildOccupancyRate: "1",
+          actualChildOccupancyRate: "2",
+          estimatedComputedTotal: "3",
+          actualComputedTotal: "4",
         })
         const fundingLineValue2 = fundingLineValueFactory.build({
           submissionLineId: submissionLine1.id,
           ...pick(submissionLine1.dataValues, "sectionName", "lineName", "monthlyAmount"),
-          estimatedChildOccupancyRate: 0,
-          actualChildOccupancyRate: 0,
-          estimatedComputedTotal: 0,
-          actualComputedTotal: 0,
+          estimatedChildOccupancyRate: "0",
+          actualChildOccupancyRate: "0",
+          estimatedComputedTotal: "0",
+          actualComputedTotal: "0",
         })
         const fundingSubmissionLineJson1 = await fundingSubmissionLineJsonFactory.create({
           centreId: centre1.id,
@@ -167,10 +167,10 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
         expect(fundingSubmissionLineJson2.lines).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              estimatedChildOccupancyRate: 0,
-              actualChildOccupancyRate: 0,
-              estimatedComputedTotal: 0,
-              actualComputedTotal: 0,
+              estimatedChildOccupancyRate: "0",
+              actualChildOccupancyRate: "0",
+              estimatedComputedTotal: "0",
+              actualComputedTotal: "0",
             }),
           ])
         )
@@ -183,18 +183,18 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
         const fundingLineValue1 = fundingLineValueFactory.build({
           submissionLineId: submissionLine1.id,
           ...pick(submissionLine1.dataValues, "sectionName", "lineName", "monthlyAmount"),
-          estimatedChildOccupancyRate: 1,
-          actualChildOccupancyRate: 2,
-          estimatedComputedTotal: 3,
-          actualComputedTotal: 4,
+          estimatedChildOccupancyRate: "1",
+          actualChildOccupancyRate: "2",
+          estimatedComputedTotal: "3",
+          actualComputedTotal: "4",
         })
         const fundingLineValue2 = fundingLineValueFactory.build({
           submissionLineId: submissionLine1.id,
           ...pick(submissionLine1.dataValues, "sectionName", "lineName", "monthlyAmount"),
-          estimatedChildOccupancyRate: 0,
-          actualChildOccupancyRate: 0,
-          estimatedComputedTotal: 0,
-          actualComputedTotal: 0,
+          estimatedChildOccupancyRate: "0",
+          actualChildOccupancyRate: "0",
+          estimatedComputedTotal: "0",
+          actualComputedTotal: "0",
         })
         const fundingSubmissionLineJson1 = await fundingSubmissionLineJsonFactory.create({
           centreId: centre1.id,
@@ -221,10 +221,10 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
         expect(fundingSubmissionLineJson2.lines).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              estimatedChildOccupancyRate: 0,
-              actualChildOccupancyRate: 0,
-              estimatedComputedTotal: 0,
-              actualComputedTotal: 0,
+              estimatedChildOccupancyRate: "0",
+              actualChildOccupancyRate: "0",
+              estimatedComputedTotal: "0",
+              actualComputedTotal: "0",
             }),
           ])
         )

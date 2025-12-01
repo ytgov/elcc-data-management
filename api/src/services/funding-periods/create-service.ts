@@ -137,13 +137,13 @@ export class CreateService extends BaseService {
         employeeBenefitsAttributes.push({
           centreId: centre.id,
           fiscalPeriodId: fiscalPeriod.id,
-          grossPayrollMonthlyActual: 0,
-          grossPayrollMonthlyEstimated: 0,
-          costCapPercentage: 0,
-          employeeCostActual: 0,
-          employeeCostEstimated: 0,
-          employerCostActual: 0,
-          employerCostEstimated: 0,
+          grossPayrollMonthlyActual: "0",
+          grossPayrollMonthlyEstimated: "0",
+          costCapPercentage: "0",
+          employeeCostActual: "0",
+          employeeCostEstimated: "0",
+          employerCostActual: "0",
+          employerCostEstimated: "0",
         })
 
         if (employeeBenefitsAttributes.length >= BATCH_SIZE) {
