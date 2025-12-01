@@ -143,7 +143,7 @@ export class FundingSubmissionLineJson extends BaseModel<
                   JSON_VALUE(
                     json_array_element.value,
                     '$.actualChildOccupancyRate'
-                  ) AS int
+                  ) AS decimal(10,2)
                 ),
                 0
               )
