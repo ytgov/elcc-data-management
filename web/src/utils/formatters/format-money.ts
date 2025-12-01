@@ -31,7 +31,7 @@ export function formatMoney(
   if (typeof input === "string") {
     inputAsNumber = Number(input)
   } else if (input instanceof Big) {
-    inputAsNumber = Number(input)
+    inputAsNumber = input.toNumber()
   } else {
     inputAsNumber = input
   }
