@@ -3,7 +3,7 @@ import { isNil } from "lodash"
 import logger from "@/utils/logger"
 import { User } from "@/models"
 import { UserPolicy } from "@/policies"
-import { CreateService, UpdateService } from "@/services/users"
+import { CreateService, DestroyService, UpdateService } from "@/services/users"
 import { IndexSerializer, ShowSerializer } from "@/serializers/users"
 import BaseController from "@/controllers/base-controller"
 
@@ -135,7 +135,7 @@ export class UsersController extends BaseController<User> {
         })
       }
 
-      await user.destroy()
+      await DestroyService.perform(user)
       return this.response.status(204).send()
     } catch (error) {
       logger.error(`Error deleting user: ${error}`, { error })
