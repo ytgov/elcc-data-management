@@ -22,12 +22,10 @@ export type FundingSubmissionLinePolicy = Policy
 
 export type FundingSubmissionLineAsIndex = FundingSubmissionLine & {
   ageRange: string
-  monthlyAmountDisplay: string
 }
 
 export type FundingSubmissionLineAsShow = FundingSubmissionLine & {
   ageRange: string
-  monthlyAmountDisplay: string
 }
 
 export type FundingSubmissionLineWhereOptions = WhereOptions<
