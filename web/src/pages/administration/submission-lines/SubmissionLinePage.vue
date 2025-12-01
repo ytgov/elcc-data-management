@@ -10,11 +10,20 @@
         :to="{
           name: 'administration/submission-lines/SubmissionLineEditPage',
           params: {
-            fundingSubmissionLineId: props.fundingSubmissionLineId,
+            fundingSubmissionLineId,
           },
         }"
       >
         Edit
+      </v-btn>
+      <v-btn
+        v-if="policy?.destroy"
+        class="mt-2 mt-md-0 ml-md-2"
+        color="error"
+        :loading="isDeleting"
+        @click="deleteFundingSubmissionLine(fundingSubmissionLineIdAsNumber)"
+      >
+        Delete
       </v-btn>
     </template>
 
@@ -75,11 +84,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, ref } from "vue"
+import { useRouter } from "vue-router"
 import { isNil } from "lodash"
+
+import blockedToTrueConfirm from "@/utils/blocked-to-true-confirm"
+
+import fundingSubmissionLinesApi from "@/api/funding-submission-lines-api"
 
 import useBreadcrumbs from "@/use/use-breadcrumbs"
 import useFundingSubmissionLine from "@/use/use-funding-submission-line"
+import useSnack from "@/use/use-snack"
 
 import DescriptionElement from "@/components/common/DescriptionElement.vue"
 import HeaderActionsCard from "@/components/common/HeaderActionsCard.vue"
@@ -91,7 +106,29 @@ const props = defineProps<{
 
 const fundingSubmissionLineIdAsNumber = computed(() => parseInt(props.fundingSubmissionLineId))
 
-const { fundingSubmissionLine } = useFundingSubmissionLine(fundingSubmissionLineIdAsNumber)
+const { fundingSubmissionLine, policy } = useFundingSubmissionLine(fundingSubmissionLineIdAsNumber)
+
+const isDeleting = ref(false)
+const snack = useSnack()
+const router = useRouter()
+
+async function deleteFundingSubmissionLine(userId: number) {
+  if (!blockedToTrueConfirm("Are you sure you want to remove this submission line?")) return
+
+  isDeleting.value = true
+  try {
+    await fundingSubmissionLinesApi.delete(userId)
+    snack.success("Submission line deleted.")
+    return router.push({
+      name: "administration/AdministrationSubmissionLinesPage",
+    })
+  } catch (error) {
+    console.error(`Failed to delete submission line: ${error}`, { error })
+    snack.error(`Failed to delete submission line: ${error}`)
+  } finally {
+    isDeleting.value = false
+  }
+}
 
 const title = computed(() => fundingSubmissionLine.value?.lineName || "Submission Line")
 const lineName = computed(() => fundingSubmissionLine.value?.lineName || "Details")
