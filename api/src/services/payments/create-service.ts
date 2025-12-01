@@ -17,7 +17,7 @@ export class CreateService extends BaseService {
       fiscalPeriodId,
       fiscalYear,
       paidOn,
-      amountInCents,
+      amount,
       name,
       ...optionalAttributes
     } = this.attributes
@@ -34,8 +34,8 @@ export class CreateService extends BaseService {
       throw new Error("Paid on date is required")
     }
 
-    if (isNil(amountInCents)) {
-      throw new Error("Amount in cents is required")
+    if (isNil(amount)) {
+      throw new Error("Amount is required")
     }
 
     if (isNil(name)) {
@@ -53,7 +53,7 @@ export class CreateService extends BaseService {
       fiscalPeriodId: fiscalPeriodIdOrFallback,
       fiscalYear,
       paidOn,
-      amountInCents,
+      amount,
       name,
     })
     return payment.reload()

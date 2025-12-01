@@ -58,7 +58,7 @@ export const paymentFactory = Factory.define<Payment>(
       .toISOString()
       .split("T")[0]
 
-    const amountInCents = faker.number.int({ min: 1000, max: 100000 })
+    const amount = faker.finance.amount({ min: 10, max: 1000, dec: 2 })
 
     const payment = Payment.build({
       centreId: centre.id,
@@ -66,7 +66,7 @@ export const paymentFactory = Factory.define<Payment>(
       fiscalYear: fiscalYearLegacy,
       paidOn,
       name,
-      amountInCents,
+      amount,
     })
 
     payment.centre = centre

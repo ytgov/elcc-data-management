@@ -52,10 +52,9 @@ export class Payment extends Model<InferAttributes<Payment>, InferCreationAttrib
   @NotNull
   declare paidOn: string
 
-  // TODO: replace with field with type DECIMAL(15,4)
-  @Attribute(DataTypes.INTEGER)
+  @Attribute(DataTypes.DECIMAL(15, 4))
   @NotNull
-  declare amountInCents: number
+  declare amount: string
 
   @Attribute(DataTypes.STRING(100))
   @NotNull

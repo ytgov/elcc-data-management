@@ -47,7 +47,7 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
           fiscalPeriodId: fiscalPeriod.id,
           fiscalYear: "2025/26",
           paidOn: "2025-04-15",
-          amountInCents: 150 * 100,
+          amount: "150.0",
         })
 
         const fiscalPeriod2 = await fiscalPeriodFactory.create({
@@ -66,7 +66,7 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
           fiscalPeriodId: fiscalPeriod2.id,
           fiscalYear: "2025/26",
           paidOn: "2025-05-15",
-          amountInCents: 200 * 100,
+          amount: "200.0",
         })
 
         // Act
@@ -134,7 +134,7 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
           fiscalPeriodId: fiscalPeriod.id,
           fiscalYear: "2025/26",
           paidOn: "2025-04-15",
-          amountInCents: 300 * 100,
+          amount: "300.0",
         })
         await fundingSubmissionLineJsonFactory.create({
           centreId: centre.id,
@@ -161,7 +161,7 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
           fiscalPeriodId: fiscalPeriod2.id,
           fiscalYear: "2025/26",
           paidOn: "2025-05-15",
-          amountInCents: 250 * 100,
+          amount: "250.0",
         })
         await fundingSubmissionLineJsonFactory.create({
           centreId: centre.id,
@@ -240,7 +240,7 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
           fiscalPeriodId: fiscalPeriod.id,
           fiscalYear: "2025/26",
           paidOn: "2025-04-15",
-          amountInCents: 500 * 100,
+          amount: "500.0",
         })
         await fundingSubmissionLineJsonFactory.create({
           centreId: centre.id,
@@ -282,7 +282,7 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
           fiscalPeriodId: fiscalPeriod2.id,
           fiscalYear: "2025/26",
           paidOn: "2025-05-15",
-          amountInCents: 600 * 100,
+          amount: "600.0",
         })
         await fundingSubmissionLineJsonFactory.create({
           centreId: centre.id,

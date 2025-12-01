@@ -10,7 +10,7 @@ export type PaymentAsShow = Pick<
   | "fiscalPeriodId"
   | "fiscalYear"
   | "paidOn"
-  | "amountInCents"
+  | "amount"
   | "name"
   | "createdAt"
   | "updatedAt"
@@ -25,7 +25,7 @@ export class ShowSerializer extends BaseSerializer<Payment> {
         "fiscalPeriodId",
         "fiscalYear",
         "paidOn",
-        "amountInCents",
+        "amount",
         "name",
         "createdAt",
         "updatedAt",

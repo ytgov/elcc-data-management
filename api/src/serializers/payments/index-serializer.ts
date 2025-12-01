@@ -10,7 +10,7 @@ export type PaymentIndexView = Pick<
   | "fiscalPeriodId"
   | "fiscalYear"
   | "paidOn"
-  | "amountInCents"
+  | "amount"
   | "name"
   | "createdAt"
   | "updatedAt"
@@ -25,7 +25,7 @@ export class IndexSerializer extends BaseSerializer<Payment> {
         "fiscalPeriodId",
         "fiscalYear",
         "paidOn",
-        "amountInCents",
+        "amount",
         "name",
         "createdAt",
         "updatedAt",

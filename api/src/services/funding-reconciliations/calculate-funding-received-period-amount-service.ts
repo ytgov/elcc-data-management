@@ -12,14 +12,14 @@ export class CalculateFundingReceivedPeriodAmountService extends BaseService {
   }
 
   async perform(): Promise<string> {
-    const paymentsTotalAmountInCentsOrNull = await Payment.sum("amountInCents", {
+    const paymentsTotalAmountOrNull = await Payment.sum("amount", {
       where: {
         centreId: this.centreId,
         fiscalPeriodId: this.fiscalPeriodId,
       },
     })
-    const paymentsTotalAmountInCents = paymentsTotalAmountInCentsOrNull ?? 0
-    const paymentsTotalAmountInDollars = Big(paymentsTotalAmountInCents).div(100)
+    const paymentsTotalAmount = paymentsTotalAmountOrNull ?? 0
+    const paymentsTotalAmountInDollars = Big(paymentsTotalAmount)
 
     return paymentsTotalAmountInDollars.toFixed(4)
   }

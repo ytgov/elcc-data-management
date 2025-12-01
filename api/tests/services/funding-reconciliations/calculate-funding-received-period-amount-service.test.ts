@@ -33,7 +33,7 @@ describe("api/src/services/funding-reconciliations/calculate-funding-received-pe
           fiscalPeriodId: fiscalPeriod.id,
           fiscalYear: "2025/26",
           paidOn: "2025-04-15",
-          amountInCents: 150 * 100, // $150.00
+          amount: "150.0",
         })
 
         // Act
@@ -93,14 +93,14 @@ describe("api/src/services/funding-reconciliations/calculate-funding-received-pe
           fiscalPeriodId: fiscalPeriod.id,
           fiscalYear: "2025/26",
           paidOn: "2025-04-10",
-          amountInCents: 100 * 100, // $100.00
+          amount: "100.0",
         })
         await paymentFactory.create({
           centreId: centre.id,
           fiscalPeriodId: fiscalPeriod.id,
           fiscalYear: "2025/26",
           paidOn: "2025-04-20",
-          amountInCents: 200 * 100, // $200.00
+          amount: "200.0",
         })
 
         // Act

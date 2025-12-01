@@ -12,7 +12,7 @@ export type Payment = {
   fiscalPeriodId: number
   fiscalYear: string
   name: string
-  amountInCents: number
+  amount: number
   paidOn: string
   createdAt: string
   updatedAt: string
