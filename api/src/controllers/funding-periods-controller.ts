@@ -3,7 +3,7 @@ import { isNil } from "lodash"
 import logger from "@/utils/logger"
 import { FundingPeriod } from "@/models"
 import { FundingPeriodPolicy } from "@/policies"
-import { CreateService, UpdateService } from "@/services/funding-periods"
+import { CreateService, DestroyService, UpdateService } from "@/services/funding-periods"
 import { IndexSerializer, ShowSerializer } from "@/serializers/funding-periods"
 import BaseController from "@/controllers/base-controller"
 
@@ -138,7 +138,7 @@ export class FundingPeriodsController extends BaseController<FundingPeriod> {
         })
       }
 
-      await fundingPeriod.destroy()
+      await DestroyService.perform(fundingPeriod)
       return this.response.status(204).send()
     } catch (error) {
       logger.error(`Error deleting funding period: ${error}`, { error })
