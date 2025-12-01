@@ -168,7 +168,7 @@ const fundingSubmissionLineAttributes = ref<Partial<FundingSubmissionLine>>({
   lineName: "",
   fromAge: null,
   toAge: null,
-  monthlyAmount: 0,
+  monthlyAmount: "0",
 })
 
 watchEffect(() => {

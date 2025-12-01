@@ -1,5 +1,7 @@
+import Big from "big.js"
+
 export function formatMoney(
-  input: number | string | undefined,
+  input: number | string | Big | undefined,
   options: Intl.NumberFormatOptions & {
     locales?: string | string[] | undefined
   } = {}
@@ -25,10 +27,14 @@ export function formatMoney(
     //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
   })
 
+  let inputAsNumber: number
   if (typeof input === "string") {
-    const inputAsNumber = Number(input)
-    return formatter.format(inputAsNumber)
+    inputAsNumber = Number(input)
+  } else if (input instanceof Big) {
+    inputAsNumber = Number(input)
+  } else {
+    inputAsNumber = input
   }
 
-  return formatter.format(input)
+  return formatter.format(inputAsNumber)
 }

@@ -1,4 +1,5 @@
 import http from "@/api/http-client"
+import { type FiltersOptions } from "@/api/base-api"
 
 /** Keep in sync with api/src/models/fiscal-period.ts */
 export enum FiscalPeriodMonths {
@@ -33,9 +34,7 @@ export type FiscalPeriodWhereOptions = {
   dateEnd?: string
 }
 
-export type FiscalPeriodFiltersOptions = {
-  // add model scope signatures as needed
-}
+export type FiscalPeriodFiltersOptions = FiltersOptions
 
 export const fiscalPeriodsApi = {
   async list(

@@ -81,43 +81,22 @@
         <td></td>
         <td class="read-only-td-that-matches-v-text-input py-2">
           <span class="pl-4">
-            {{
-              lines.reduce(
-                (a: number, v: any) => a + parseFloat(v.estimatedChildOccupancyRate || 0),
-                0
-              )
-            }}
+            {{ totalEstimatedChildOccupancyRate }}
           </span>
         </td>
         <td class="read-only-td-that-matches-v-text-input">
           <span class="pl-4">
-            {{
-              formatMoney(
-                lines.reduce(
-                  (a: number, v: any) => a + parseFloat(v.estimatedComputedTotal || 0),
-                  0
-                )
-              )
-            }}
+            {{ formatMoney(totalEstimatedComputedTotal) }}
           </span>
         </td>
         <td class="read-only-td-that-matches-v-text-input">
           <span class="pl-4">
-            {{
-              lines.reduce(
-                (a: number, v: any) => a + parseFloat(v.actualChildOccupancyRate || 0),
-                0
-              )
-            }}
+            {{ totalActualChildOccupancyRate }}
           </span>
         </td>
         <td class="read-only-td-that-matches-v-text-input">
           <span class="pl-4">
-            {{
-              formatMoney(
-                lines.reduce((a: number, v: any) => a + parseFloat(v.actualComputedTotal || 0), 0)
-              )
-            }}
+            {{ formatMoney(totalActualComputedTotal) }}
           </span>
         </td>
       </tr>
@@ -126,10 +105,12 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, Ref, ref } from "vue"
+import { computed, reactive, Ref, ref } from "vue"
 import { isNil } from "lodash"
+import Big from "big.js"
 
 import { formatMoney } from "@/utils/formatters"
+import { sumByDecimal } from "@/utils/sum-by-decimal"
 import { FundingLineValue } from "@/api/funding-submission-line-jsons-api"
 
 export type ColumnNames = "estimates" | "actuals"
@@ -144,6 +125,22 @@ const emit = defineEmits<{
   focusBeyondFirstInColumn: [column: ColumnNames]
 }>()
 
+const totalEstimatedChildOccupancyRate = computed(() =>
+  sumByDecimal(props.lines, "estimatedChildOccupancyRate").toFixed(1)
+)
+
+const totalEstimatedComputedTotal = computed(() =>
+  sumByDecimal(props.lines, "estimatedComputedTotal").toFixed(4)
+)
+
+const totalActualChildOccupancyRate = computed(() =>
+  sumByDecimal(props.lines, "actualChildOccupancyRate").toFixed(1)
+)
+
+const totalActualComputedTotal = computed(() =>
+  sumByDecimal(props.lines, "actualComputedTotal").toFixed(4)
+)
+
 const estimatesFields = ref<HTMLInputElement[]>([])
 const actualsFields = ref<HTMLInputElement[]>([])
 const fieldsMap = reactive<{
@@ -154,13 +151,15 @@ const fieldsMap = reactive<{
 })
 
 function refreshLineTotals(line: FundingLineValue) {
-  line.estimatedComputedTotal = line.monthlyAmount * line.estimatedChildOccupancyRate
-  line.actualComputedTotal = line.monthlyAmount * line.actualChildOccupancyRate
+  line.estimatedComputedTotal = Big(line.monthlyAmount)
+    .mul(line.estimatedChildOccupancyRate)
+    .toFixed(4)
+  line.actualComputedTotal = Big(line.monthlyAmount).mul(line.actualChildOccupancyRate).toFixed(4)
 }
 
 function changeLineAndPropagate(line: FundingLineValue, lineIndex: number) {
-  line.estimatedChildOccupancyRate = line.estimatedChildOccupancyRate || 0
-  line.actualChildOccupancyRate = line.actualChildOccupancyRate || 0
+  line.estimatedChildOccupancyRate = line.estimatedChildOccupancyRate || "0"
+  line.actualChildOccupancyRate = line.actualChildOccupancyRate || "0"
   refreshLineTotals(line)
 
   emit("lineChanged", { line, lineIndex })

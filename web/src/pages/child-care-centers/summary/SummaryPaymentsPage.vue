@@ -34,7 +34,7 @@
         </td>
         <td>
           <CurrencyInput
-            :model-value="centsToDollars(payment.amountInCents)"
+            :model-value="payment.amount"
             aria-label="Payment Amount"
             color="primary"
             density="compact"
@@ -91,7 +91,7 @@
         </td>
         <td>
           <CurrencyInput
-            :model-value="centsToDollars(paymentAttributes.amountInCents)"
+            :model-value="paymentAttributes.amount"
             aria-label="Payment Amount"
             color="primary"
             density="compact"
@@ -150,7 +150,6 @@ import { first, isEmpty, isNil, last } from "lodash"
 
 import DateTimeUtils from "@/utils/date-time-utils"
 import { isDate } from "@/utils/validators"
-import { centsToDollars, dollarsToCents } from "@/utils/legacy-money-helpers"
 
 import { MAX_PER_PAGE } from "@/api/base-api"
 import paymentsApi, { type Payment } from "@/api/payments-api"
@@ -218,10 +217,9 @@ function containedInFiscalYear(value: string) {
 
 function updatePaymentAmount(payment: Payment | Partial<Payment>, newValue: string) {
   if (["-", "", null].includes(newValue)) {
-    payment.amountInCents = 0
+    payment.amount = 0
   } else {
-    const newValueNumber = parseFloat(newValue)
-    payment.amountInCents = dollarsToCents(newValueNumber)
+    payment.amount = parseFloat(newValue)
   }
 }
 
@@ -276,7 +274,7 @@ function addRow() {
     centreId: centreIdAsNumber.value,
     fiscalYear: fiscalYear.value,
     name: name,
-    amountInCents: 0,
+    amount: 0,
     paidOn,
   })
 }
