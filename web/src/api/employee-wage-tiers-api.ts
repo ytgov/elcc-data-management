@@ -1,15 +1,13 @@
 import http from "@/api/http-client"
 
-import { FiscalPeriod } from "@/api/fiscal-periods-api"
-
 export type EmployeeWageTier = {
   id: number
-  fiscalPeriodId: FiscalPeriod["id"]
+  fiscalPeriodId: number
   tierLevel: number
   tierLabel: string
-  wageRatePerHour: number
-  createdAt: Date
-  updatedAt: Date
+  wageRatePerHour: string
+  createdAt: string
+  updatedAt: string
 }
 
 export type Params = {

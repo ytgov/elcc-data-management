@@ -36,27 +36,27 @@ describe("api/src/services/wage-enhancements/replicate-estimates-service.ts", ()
           fiscalPeriodId: fiscalPeriod1.id,
           tierLevel: 1,
           tierLabel: "Level 1",
-          wageRatePerHour: 4.12,
+          wageRatePerHour: "4.12",
         })
         const employeeWageTier2 = await employeeWageTierFactory.create({
           fiscalPeriodId: fiscalPeriod1.id,
           tierLevel: 2,
           tierLabel: "Level 2",
-          wageRatePerHour: 7.44,
+          wageRatePerHour: "7.44",
         })
         await wageEnhancementFactory.create({
           centreId: centre.id,
           employeeWageTierId: employeeWageTier1.id,
           employeeName: "John Doe",
-          hoursEstimated: 35,
-          hoursActual: 38,
+          hoursEstimated: "35",
+          hoursActual: "38",
         })
         await wageEnhancementFactory.create({
           centreId: centre.id,
           employeeWageTierId: employeeWageTier2.id,
           employeeName: "Jane Smith",
-          hoursEstimated: 40,
-          hoursActual: 45,
+          hoursEstimated: "40",
+          hoursActual: "45",
         })
 
         // Act
@@ -134,27 +134,27 @@ describe("api/src/services/wage-enhancements/replicate-estimates-service.ts", ()
           fiscalPeriodId: fiscalPeriod1.id,
           tierLevel: 1,
           tierLabel: "Level 1",
-          wageRatePerHour: 4.12,
+          wageRatePerHour: "4.12",
         })
         const employeeWageTier2 = await employeeWageTierFactory.create({
           fiscalPeriodId: fiscalPeriod2.id,
           tierLevel: 1,
           tierLabel: "Level 1",
-          wageRatePerHour: 4.12,
+          wageRatePerHour: "4.12",
         })
         await wageEnhancementFactory.create({
           centreId: centre.id,
           employeeWageTierId: employeeWageTier1.id,
           employeeName: "John Doe",
-          hoursEstimated: 35,
-          hoursActual: 38,
+          hoursEstimated: "35",
+          hoursActual: "38",
         })
         await wageEnhancementFactory.create({
           centreId: centre.id,
           employeeWageTierId: employeeWageTier2.id,
           employeeName: "John Doe",
-          hoursEstimated: 40,
-          hoursActual: 45,
+          hoursEstimated: "40",
+          hoursActual: "45",
         })
 
         // Act
