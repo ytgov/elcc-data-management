@@ -4,6 +4,7 @@ top to bottom direction
 note as Disclaimer
 PlantUML URL: https://plantuml.com/ie-diagram
 This diagram may be out of date and should be verified against the current database schema.
+Last updated (by Claude Sonet 4.5): 2025-12-01
 end note
 
 entity "centres" {
@@ -42,13 +43,13 @@ entity "employee_benefits" {
   * centre_id : int [FK]
   * fiscal_period_id : int [FK]
   --
-  * gross_payroll_monthly_actual : decimal(10,2)
-  * gross_payroll_monthly_estimated : decimal(10,2)
+  * gross_payroll_monthly_actual : decimal(15,4)
+  * gross_payroll_monthly_estimated : decimal(15,4)
   * cost_cap_percentage : decimal(5,2)
-  * employee_cost_actual : decimal(10,2)
-  * employee_cost_estimated : decimal(10,2)
-  * employer_cost_actual : decimal(10,2)
-  * employer_cost_estimated : decimal(10,2)
+  * employee_cost_actual : decimal(15,4)
+  * employee_cost_estimated : decimal(15,4)
+  * employer_cost_actual : decimal(15,4)
+  * employer_cost_estimated : decimal(15,4)
   --
   * created_at : datetime2
   * updated_at : datetime2
@@ -61,7 +62,7 @@ entity "employee_wage_tiers" {
   --
   * tier_label : nvarchar(50)
   * tier_level : int
-  * wage_rate_per_hour : float
+  * wage_rate_per_hour : decimal(10,4)
   --
   * created_at : datetime2
   * updated_at : datetime2
@@ -115,11 +116,11 @@ entity "FundingLineValue" {
   * submission_line_id : int [FK]
   * section_name : nvarchar(200)
   * line_name : nvarchar(200)
-  * monthly_amount : float
-  * actual_child_occupancy_rate : float
-  * actual_computed_total : float
-  * estimated_child_occupancy_rate : float
-  * estimated_computed_total : float
+  * monthly_amount : string (decimal)
+  * actual_child_occupancy_rate : string (decimal)
+  * actual_computed_total : string (decimal)
+  * estimated_child_occupancy_rate : string (decimal)
+  * estimated_computed_total : string (decimal)
 }
 
 entity "funding_submission_lines" {
@@ -128,7 +129,7 @@ entity "funding_submission_lines" {
   * fiscal_year : nvarchar(10)
   * section_name : nvarchar(200)
   * line_name : nvarchar(200)
-  * monthly_amount : float
+  * monthly_amount : decimal(15,4)
   --
   from_age : int
   to_age : int
@@ -158,7 +159,7 @@ entity "payments" {
   --
   * fiscal_year : nvarchar(10)
   * paid_on : date
-  * amount_in_cents : int
+  * amount : decimal(15,4)
   * name : nvarchar(100)
   --
   * created_at : datetime2
@@ -190,8 +191,8 @@ entity "wage_enhancements" {
   * employee_wage_tier_id : int [FK]
   --
   * employee_name : nvarchar(100)
-  * hours_estimated : float
-  * hours_actual : float
+  * hours_estimated : decimal(10,2)
+  * hours_actual : decimal(10,2)
   --
   * created_at : datetime2
   * updated_at : datetime2
