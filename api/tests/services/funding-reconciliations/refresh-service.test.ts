@@ -248,7 +248,11 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
           dateName: FundingSubmissionLineJson.Months.APRIL,
           dateStart: new Date("2025-04-01"),
           dateEnd: new Date("2025-04-30"),
-          values: JSON.stringify([{ actualComputedTotal: 150.0 }]),
+          values: JSON.stringify([
+            {
+              actualComputedTotal: "150.0",
+            },
+          ]),
         })
         await employeeBenefitFactory.create({
           centreId: centre.id,
@@ -286,7 +290,11 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
           dateName: FundingSubmissionLineJson.Months.MAY,
           dateStart: new Date("2025-05-01"),
           dateEnd: new Date("2025-05-31"),
-          values: JSON.stringify([{ actualComputedTotal: 200.0 }]),
+          values: JSON.stringify([
+            {
+              actualComputedTotal: "200.0",
+            },
+          ]),
         })
         await employeeBenefitFactory.create({
           centreId: centre.id,

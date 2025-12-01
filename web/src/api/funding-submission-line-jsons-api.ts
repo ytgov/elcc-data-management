@@ -5,11 +5,11 @@ export type FundingLineValue = {
   submissionLineId: number
   sectionName: string
   lineName: string
-  monthlyAmount: number
-  estimatedChildOccupancyRate: number
-  actualChildOccupancyRate: number
-  estimatedComputedTotal: number
-  actualComputedTotal: number
+  monthlyAmount: string
+  estimatedChildOccupancyRate: string
+  actualChildOccupancyRate: string
+  estimatedComputedTotal: string
+  actualComputedTotal: string
 }
 
 export type FundingSubmissionLineJson = {

@@ -13,7 +13,7 @@ export type FundingSubmissionLine = {
   lineName: string
   fromAge: number | null
   toAge: number | null
-  monthlyAmount: number
+  monthlyAmount: string
   createdAt: string
   updatedAt: string
 }
