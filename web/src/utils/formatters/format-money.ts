@@ -1,5 +1,6 @@
 import Big from "big.js"
 
+// TODO: rename to formatCurrency
 export function formatMoney(
   input: number | string | Big | undefined,
   options: Intl.NumberFormatOptions & {
