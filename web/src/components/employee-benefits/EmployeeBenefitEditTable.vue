@@ -17,7 +17,7 @@
         <td>Gross Payroll</td>
         <td>
           <CurrencyInput
-            :model-value="Number(employeeBenefit.grossPayrollMonthlyEstimated)"
+            :model-value="employeeBenefit.grossPayrollMonthlyEstimated"
             aria-label="Gross Payroll Monthly Estimated"
             color="primary"
             density="compact"
@@ -31,7 +31,7 @@
         <td></td>
         <td>
           <CurrencyInput
-            :model-value="Number(employeeBenefit.grossPayrollMonthlyActual)"
+            :model-value="employeeBenefit.grossPayrollMonthlyActual"
             aria-label="Gross Payroll Monthly Actual"
             color="primary"
             density="compact"
@@ -99,7 +99,7 @@
         <td>Employee Cost</td>
         <td>
           <CurrencyInput
-            :model-value="Number(employeeBenefit.employeeCostEstimated)"
+            :model-value="employeeBenefit.employeeCostEstimated"
             aria-label="Employee Cost Estimated"
             color="primary"
             density="compact"
@@ -113,7 +113,7 @@
         <td></td>
         <td>
           <CurrencyInput
-            :model-value="Number(employeeBenefit.employeeCostActual)"
+            :model-value="employeeBenefit.employeeCostActual"
             aria-label="Employee Cost Actual"
             color="primary"
             density="compact"
@@ -127,7 +127,7 @@
         <td>Employer Cost</td>
         <td>
           <CurrencyInput
-            :model-value="Number(employeeBenefit.employerCostEstimated)"
+            :model-value="employeeBenefit.employerCostEstimated"
             aria-label="Employer Cost Estimated"
             color="primary"
             density="compact"
@@ -141,7 +141,7 @@
         <td></td>
         <td>
           <CurrencyInput
-            :model-value="Number(employeeBenefit.employerCostActual)"
+            :model-value="employeeBenefit.employerCostActual"
             aria-label="Employer Cost Actual"
             color="primary"
             density="compact"
@@ -254,9 +254,11 @@
 
 <script setup lang="ts">
 import { computed, ref, toRefs } from "vue"
-import { isNil, round } from "lodash"
+import { isNil } from "lodash"
+import Big from "big.js"
 
 import { formatMoney } from "@/utils/formatters"
+import minDecimal from "@/utils/min-decimal"
 
 import useSnack from "@/use/use-snack"
 import useEmployeeBenefit from "@/use/use-employee-benefit"
@@ -276,10 +278,10 @@ const isEditingCostCapPercentage = ref(false)
 // successive presses of 5 or higher will continue increasing the value
 const costCapPercentage = computed(() => {
   if (isNil(employeeBenefit.value)) {
-    return 0
+    return "0"
   }
 
-  return round(Number(employeeBenefit.value.costCapPercentage) * 100, 2)
+  return Big(employeeBenefit.value.costCapPercentage).mul(100).toFixed(2)
 })
 
 function updateCostCapPercentage(newValue: string | number) {
@@ -291,72 +293,68 @@ function updateCostCapPercentage(newValue: string | number) {
   if (isNaN(newValueNumber)) {
     employeeBenefit.value.costCapPercentage = "0"
   } else {
-    employeeBenefit.value.costCapPercentage = String(round(newValueNumber / 100, 4))
+    employeeBenefit.value.costCapPercentage = Big(newValueNumber).div(100).toFixed(4)
   }
 }
 
 const monthlyBenefitCostCapEstimated = computed(() => {
   if (isNil(employeeBenefit.value)) {
-    return 0
+    return Big(0)
   }
 
-  return (
-    Number(employeeBenefit.value.grossPayrollMonthlyEstimated) *
-    Number(employeeBenefit.value.costCapPercentage)
+  return Big(employeeBenefit.value.grossPayrollMonthlyEstimated).mul(
+    employeeBenefit.value.costCapPercentage
   )
 })
 
 const monthlyBenefitCostCapActual = computed(() => {
   if (isNil(employeeBenefit.value)) {
-    return 0
+    return Big(0)
   }
 
-  return (
-    Number(employeeBenefit.value.grossPayrollMonthlyActual) *
-    Number(employeeBenefit.value.costCapPercentage)
+  return Big(employeeBenefit.value.grossPayrollMonthlyActual).mul(
+    employeeBenefit.value.costCapPercentage
   )
 })
 
 const totalCostEstimated = computed(() => {
   if (isNil(employeeBenefit.value)) {
-    return 0
+    return Big(0)
   }
 
-  return (
-    Number(employeeBenefit.value.employeeCostEstimated) +
-    Number(employeeBenefit.value.employerCostEstimated)
+  return Big(employeeBenefit.value.employeeCostEstimated).plus(
+    employeeBenefit.value.employerCostEstimated
   )
 })
 
 const totalCostActual = computed(() => {
   if (isNil(employeeBenefit.value)) {
-    return 0
+    return Big(0)
   }
 
-  return (
-    Number(employeeBenefit.value.employeeCostActual) +
-    Number(employeeBenefit.value.employerCostActual)
+  return Big(employeeBenefit.value.employeeCostActual).plus(
+    employeeBenefit.value.employerCostActual
   )
 })
 
 const minimumPaidAmountEstimated = computed(() => {
   if (isNil(employeeBenefit.value)) {
-    return 0
+    return Big(0)
   }
 
-  return Math.min(
-    Number(employeeBenefit.value.employerCostEstimated),
+  return minDecimal(
+    Big(employeeBenefit.value.employerCostEstimated),
     monthlyBenefitCostCapEstimated.value
   )
 })
 
 const minimumPaidAmountActual = computed(() => {
   if (isNil(employeeBenefit.value)) {
-    return 0
+    return Big(0)
   }
 
-  return Math.min(
-    Number(employeeBenefit.value.employerCostActual),
+  return minDecimal(
+    Big(employeeBenefit.value.employerCostActual),
     monthlyBenefitCostCapActual.value
   )
 })
