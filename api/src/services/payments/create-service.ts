@@ -56,7 +56,9 @@ export class CreateService extends BaseService {
       amount,
       name,
     })
-    return payment.reload()
+    return payment.reload({
+      include: ["fiscalPeriod"],
+    })
   }
 
   private async determineFiscalPeriodIdWithFallback(

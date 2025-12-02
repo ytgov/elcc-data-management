@@ -147,7 +147,9 @@ export class PaymentsController extends BaseController<Payment> {
   }
 
   private loadPayment() {
-    return Payment.findByPk(this.params.paymentId)
+    return Payment.findByPk(this.params.paymentId, {
+      include: ["fiscalPeriod"],
+    })
   }
 
   private buildPolicy(payment: Payment = Payment.build()) {

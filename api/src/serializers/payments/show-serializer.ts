@@ -1,7 +1,8 @@
-import { pick } from "lodash"
+import { isUndefined, pick } from "lodash"
 
 import { Payment } from "@/models"
 import BaseSerializer from "@/serializers/base-serializer"
+import { FiscalPeriods } from "@/serializers"
 
 export type PaymentAsShow = Pick<
   Payment,
@@ -14,10 +15,19 @@ export type PaymentAsShow = Pick<
   | "name"
   | "createdAt"
   | "updatedAt"
->
+> & {
+  fiscalPeriod: FiscalPeriods.AsReference
+}
 
 export class ShowSerializer extends BaseSerializer<Payment> {
   perform(): PaymentAsShow {
+    const { fiscalPeriod } = this.record
+    if (isUndefined(fiscalPeriod)) {
+      throw new Error("Expected fiscalPeriod association to be preloaded.")
+    }
+
+    const fiscalPeriodSerialized = FiscalPeriods.ReferenceSerializer.perform(fiscalPeriod)
+
     return {
       ...pick(this.record, [
         "id",
@@ -30,6 +40,7 @@ export class ShowSerializer extends BaseSerializer<Payment> {
         "createdAt",
         "updatedAt",
       ]),
+      fiscalPeriod: fiscalPeriodSerialized,
     }
   }
 }

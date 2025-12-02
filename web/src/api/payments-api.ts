@@ -32,7 +32,9 @@ export type Payment = {
 
 export type PaymentPolicy = Policy
 
-export type PaymentAsShow = Payment
+export type PaymentAsShow = Payment & {
+  fiscalPeriod: FiscalPeriodAsReference
+}
 
 export type PaymentAsIndex = Payment & {
   fiscalPeriod: FiscalPeriodAsReference
