@@ -1,6 +1,6 @@
 <template>
   <v-skeleton-loader
-    v-if="isEmpty(employeeWageTiers) || isEmpty(wageEnhancementsByEmployeeWageTierId) || isLoading"
+    v-if="isEmpty(employeeWageTiers) || isLoading"
     type="table"
   />
   <v-table v-else>
@@ -258,16 +258,10 @@ import { useNotificationStore } from "@/store/NotificationStore"
 
 const notificationStore = useNotificationStore()
 
-const props = defineProps({
-  centreId: {
-    type: Number,
-    required: true,
-  },
-  fiscalPeriodId: {
-    type: Number,
-    required: true,
-  },
-})
+const props = defineProps<{
+  centreId: number
+  fiscalPeriodId: number
+}>()
 
 const isLoading = ref(true)
 const isLoadingByEmployeeWageTierId = reactive(new Map<number, boolean>())
