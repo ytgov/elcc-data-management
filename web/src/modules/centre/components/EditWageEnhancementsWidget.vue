@@ -70,13 +70,7 @@
           </td>
           <td>
             <v-text-field
-              :model-value="
-                formatMoney(
-                  Big(wageEnhancement.hoursEstimated)
-                    .mul(employeeWageTier.wageRatePerHour)
-                    .toFixed(4)
-                )
-              "
+              :model-value="formatMoney(wageEnhancementEstimatedTotalById[wageEnhancement.id])"
               aria-label="Wage Enhancement Total Estimated"
               color="primary"
               density="compact"
@@ -97,11 +91,7 @@
           </td>
           <td>
             <v-text-field
-              :model-value="
-                formatMoney(
-                  Big(wageEnhancement.hoursActual).mul(employeeWageTier.wageRatePerHour).toFixed(4)
-                )
-              "
+              :model-value="formatMoney(wageEnhancementActualTotalById[wageEnhancement.id])"
               aria-label="Wage Enhancement Total Actual"
               color="primary"
               density="compact"
@@ -293,6 +283,30 @@ const wageEnhancementsByEmployeeWageTierId = computed(() =>
 const wageRatePerHoursByEmployeeWageTierId = computed(() =>
   mapValues(keyBy(employeeWageTiers.value, "id"), "wageRatePerHour")
 )
+const wageEnhancementEstimatedTotalById = computed(() => {
+  const estimatedTotalById: Record<number, string> = {}
+
+  for (const wageEnhancement of wageEnhancements.value) {
+    const wageRatePerHour =
+      wageRatePerHoursByEmployeeWageTierId.value[wageEnhancement.employeeWageTierId]
+    const total = Big(wageEnhancement.hoursEstimated).mul(wageRatePerHour).toFixed(4)
+    estimatedTotalById[wageEnhancement.id] = total
+  }
+
+  return estimatedTotalById
+})
+const wageEnhancementActualTotalById = computed(() => {
+  const actualTotalById: Record<number, string> = {}
+
+  for (const wageEnhancement of wageEnhancements.value) {
+    const wageRatePerHour =
+      wageRatePerHoursByEmployeeWageTierId.value[wageEnhancement.employeeWageTierId]
+    const total = Big(wageEnhancement.hoursActual).mul(wageRatePerHour).toFixed(4)
+    actualTotalById[wageEnhancement.id] = total
+  }
+
+  return actualTotalById
+})
 const wageEnhancementsEstimatedSubtotal = computed(() =>
   wageEnhancements.value.reduce((total, { hoursEstimated, employeeWageTierId }) => {
     const wageRatePerHour = wageRatePerHoursByEmployeeWageTierId.value[employeeWageTierId]
