@@ -17,7 +17,7 @@
     <CurrencyInput
       v-model="paymentAttributes.amount"
       label="Payment Amount"
-      :rules="[required]"
+      :rules="[required, greaterThan(0)]"
       density="comfortable"
     />
 
@@ -25,7 +25,7 @@
       v-model="paymentAttributes.paidOn"
       :loading="isLoadingFundingPeriods"
       label="Paid On"
-      :rules="[required]"
+      :rules="[required, paidOnDateRangeValidator]"
       density="comfortable"
       :min="startOfFundingPeriod"
       :max="endOfFundingPeriod"
@@ -56,7 +56,7 @@ import { isNil } from "lodash"
 
 import DateTimeUtils from "@/utils/date-time-utils"
 import { normalizeFiscalYearToLongForm } from "@/utils/fiscal-year"
-import { required } from "@/utils/validators"
+import { dateBetween, greaterThan, required } from "@/utils/validators"
 
 import paymentsApi, { PAYMENT_NAMES, type Payment } from "@/api/payments-api"
 
@@ -127,6 +127,12 @@ const endOfFundingPeriod = computed(() => {
   const { toDate } = fundingPeriod.value
   return DateTimeUtils.fromISO(toDate, { zone: "utc" }).toISODate()
 })
+const paidOnDateRangeValidator = computed(() =>
+  dateBetween(startOfFundingPeriod.value, endOfFundingPeriod.value, {
+    minLabel: "start of funding period",
+    maxLabel: "end of funding period",
+  })
+)
 
 
 const isCreating = ref(false)

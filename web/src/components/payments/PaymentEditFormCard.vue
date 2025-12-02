@@ -22,14 +22,14 @@
     <CurrencyInput
       v-model="payment.amount"
       label="Payment Amount"
-      :rules="[required]"
+      :rules="[required, greaterThan(0)]"
       density="comfortable"
     />
 
     <StringDateInput
       v-model="payment.paidOn"
       label="Paid On"
-      :rules="[required]"
+      :rules="[required, paidOnDateRangeValidator]"
       density="comfortable"
       :min="startOfFiscalPeriod"
       :max="endOfFiscalPeriod"
@@ -59,7 +59,7 @@ import { computed, ref, toRefs, useTemplateRef } from "vue"
 import { isNil } from "lodash"
 
 import DateTimeUtils from "@/utils/date-time-utils"
-import { required } from "@/utils/validators"
+import { dateBetween, greaterThan, required } from "@/utils/validators"
 
 import paymentsApi from "@/api/payments-api"
 
@@ -97,6 +97,12 @@ const endOfFiscalPeriod = computed(() => {
   const { dateEnd } = fiscalPeriod.value
   return DateTimeUtils.fromISO(dateEnd, { zone: "utc" }).toISODate()
 })
+const paidOnDateRangeValidator = computed(() =>
+  dateBetween(startOfFiscalPeriod.value, endOfFiscalPeriod.value, {
+    minLabel: "start of fiscal period",
+    maxLabel: "end of fiscal period",
+  })
+)
 
 const isUpdating = ref(false)
 const snack = useSnack()
