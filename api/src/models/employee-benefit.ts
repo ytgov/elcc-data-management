@@ -22,6 +22,8 @@ import BaseModel from "@/models/base-model"
 import Centre from "@/models/centre"
 import FiscalPeriod from "@/models/fiscal-period"
 
+export const EMPLOYEE_BENEFIT_DEFAULT_COST_CAP_PERCENTAGE = "0.09"
+
 @Table({
   paranoid: false,
 })
@@ -29,6 +31,8 @@ export class EmployeeBenefit extends BaseModel<
   InferAttributes<EmployeeBenefit>,
   InferCreationAttributes<EmployeeBenefit>
 > {
+  static readonly DEFAULT_COST_CAP_PERCENTAGE = EMPLOYEE_BENEFIT_DEFAULT_COST_CAP_PERCENTAGE
+
   @Attribute(DataTypes.INTEGER)
   @PrimaryKey
   @AutoIncrement

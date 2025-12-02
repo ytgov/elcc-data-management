@@ -273,7 +273,7 @@ describe("api/src/services/funding-periods/create-service.ts", () => {
             fiscalPeriodId: expect.any(Number),
             grossPayrollMonthlyActual: "0",
             grossPayrollMonthlyEstimated: "0",
-            costCapPercentage: "0",
+            costCapPercentage: "0.09",
             employeeCostActual: "0",
             employeeCostEstimated: "0",
             employerCostActual: "0",
