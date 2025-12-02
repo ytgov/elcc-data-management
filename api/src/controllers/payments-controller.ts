@@ -21,6 +21,7 @@ export class PaymentsController extends BaseController<Payment> {
         order,
         limit: this.pagination.limit,
         offset: this.pagination.offset,
+        include: ["fiscalPeriod"],
       })
       const serializedPayments = IndexSerializer.perform(payments)
       return this.response.json({

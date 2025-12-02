@@ -1,5 +1,5 @@
 import http from "@/api/http-client"
-import { type FiltersOptions } from "@/api/base-api"
+import { type FiltersOptions, type QueryOptions, type WhereOptions } from "@/api/base-api"
 
 /** Keep in sync with api/src/models/fiscal-period.ts */
 export enum FiscalPeriodMonths {
@@ -27,24 +27,25 @@ export type FiscalPeriod = {
   updatedAt: string
 }
 
-export type FiscalPeriodWhereOptions = {
-  fiscalYear?: string
-  month?: FiscalPeriodMonths
-  dateStart?: string
-  dateEnd?: string
-}
+export type FiscalPeriodAsReference = Pick<
+  FiscalPeriod,
+  "id" | "fiscalYear" | "month" | "dateStart" | "dateEnd"
+>
+
+export type FiscalPeriodWhereOptions = WhereOptions<
+  FiscalPeriod,
+  "fiscalYear" | "month" | "dateStart" | "dateEnd"
+>
 
 export type FiscalPeriodFiltersOptions = FiltersOptions
 
+export type FiscalPeriodQueryOptions = QueryOptions<
+  FiscalPeriodWhereOptions,
+  FiscalPeriodFiltersOptions
+>
+
 export const fiscalPeriodsApi = {
-  async list(
-    params: {
-      where?: FiscalPeriodWhereOptions
-      filters?: FiscalPeriodFiltersOptions
-      page?: number
-      perPage?: number
-    } = {}
-  ): Promise<{
+  async list(params: FiscalPeriodQueryOptions = {}): Promise<{
     fiscalPeriods: FiscalPeriod[]
     totalCount: number
   }> {

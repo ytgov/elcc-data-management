@@ -5,7 +5,9 @@ import {
   type QueryOptions,
   type WhereOptions,
 } from "@/api/base-api"
+import { type FiscalPeriodAsReference } from "@/api/fiscal-periods-api"
 
+// Keep in sync with api/src/models/payments.ts
 export type Payment = {
   id: number
   centreId: number
@@ -22,7 +24,9 @@ export type PaymentPolicy = Policy
 
 export type PaymentAsShow = Payment
 
-export type PaymentAsIndex = Payment
+export type PaymentAsIndex = Payment & {
+  fiscalPeriod: FiscalPeriodAsReference
+}
 
 export type PaymentWhereOptions = WhereOptions<
   Payment,

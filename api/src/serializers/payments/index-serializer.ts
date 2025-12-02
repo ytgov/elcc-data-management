@@ -1,9 +1,10 @@
-import { pick } from "lodash"
+import { isUndefined, pick } from "lodash"
 
 import { Payment } from "@/models"
 import BaseSerializer from "@/serializers/base-serializer"
+import { FiscalPeriods } from "@/serializers"
 
-export type PaymentIndexView = Pick<
+export type PaymentAsIndex = Pick<
   Payment,
   | "id"
   | "centreId"
@@ -14,10 +15,19 @@ export type PaymentIndexView = Pick<
   | "name"
   | "createdAt"
   | "updatedAt"
->
+> & {
+  fiscalPeriod: FiscalPeriods.AsReference
+}
 
 export class IndexSerializer extends BaseSerializer<Payment> {
-  perform(): PaymentIndexView {
+  perform(): PaymentAsIndex {
+    const { fiscalPeriod } = this.record
+    if (isUndefined(fiscalPeriod)) {
+      throw new Error("Expected fiscalPeriod association to be preloaded.")
+    }
+
+    const fiscalPeriodSerialized = FiscalPeriods.ReferenceSerializer.perform(fiscalPeriod)
+
     return {
       ...pick(this.record, [
         "id",
@@ -30,6 +40,7 @@ export class IndexSerializer extends BaseSerializer<Payment> {
         "createdAt",
         "updatedAt",
       ]),
+      fiscalPeriod: fiscalPeriodSerialized,
     }
   }
 }
