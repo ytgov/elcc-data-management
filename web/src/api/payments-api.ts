@@ -7,6 +7,16 @@ import {
 } from "@/api/base-api"
 import { type FiscalPeriodAsReference } from "@/api/fiscal-periods-api"
 
+export const PAYMENT_NAMES = Object.freeze([
+  "First Advance",
+  "Second Advance",
+  "Third Advance",
+  "Fourth Advance",
+  "Fifth Advance",
+  "Sixth Advance",
+  "Reconciliation",
+])
+
 // Keep in sync with api/src/models/payments.ts
 export type Payment = {
   id: number
@@ -14,7 +24,7 @@ export type Payment = {
   fiscalPeriodId: number
   fiscalYear: string
   name: string
-  amount: number
+  amount: string
   paidOn: string
   createdAt: string
   updatedAt: string

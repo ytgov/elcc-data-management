@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue"
 import { useCurrencyInput, type CurrencyInputOptions, CurrencyDisplay } from "vue-currency-input"
-import { isNil } from "lodash"
+import { isNil, isString } from "lodash"
 
 const DEFAULT_OPTIONS = {
   currency: "CAD",
@@ -25,7 +25,7 @@ const DEFAULT_OPTIONS = {
 }
 
 const props = defineProps<{
-  modelValue: number | null | undefined
+  modelValue: number | string | null | undefined
   options?: Partial<CurrencyInputOptions>
 }>()
 
@@ -45,6 +45,9 @@ watch(
   (value) => {
     if (isNil(value)) {
       setValue(null)
+    } else if (isString(value)) {
+      const valueAsNumber = parseFloat(value)
+      setValue(valueAsNumber)
     } else {
       setValue(value)
     }
@@ -80,6 +83,9 @@ function onEnter() {
 function resetValue() {
   if (isNil(initialNumberValue.value)) {
     setValue(null)
+  } else if (isString(initialNumberValue.value)) {
+    const valueAsNumber = parseFloat(initialNumberValue.value)
+    setValue(valueAsNumber)
   } else {
     setValue(initialNumberValue.value)
   }
