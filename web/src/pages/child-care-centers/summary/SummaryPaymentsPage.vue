@@ -2,9 +2,10 @@
   <v-container>
     <h3>Payments</h3>
 
-    <PaymentsEditDataTable
-      ref="paymentsEditTableRef"
+    <PaymentsEditDataTableServer
+      ref="paymentsEditDataTableServer"
       :where="paymentsWhere"
+      route-query-suffix="Payments"
       @edit="showPaymentEditForm"
     />
 
@@ -64,7 +65,7 @@ import { booleanTransformer, integerTransformer } from "@/utils/use-route-query-
 
 import PaymentCreateFormCard from "@/components/payments/PaymentCreateFormCard.vue"
 import PaymentEditFormCard from "@/components/payments/PaymentEditFormCard.vue"
-import PaymentsEditDataTable from "@/components/payments/PaymentsEditDataTable.vue"
+import PaymentsEditDataTableServer from "@/components/payments/PaymentsEditDataTableServer.vue"
 
 const props = defineProps<{
   centreId: string
@@ -117,15 +118,15 @@ function closePaymentEditForm() {
   paymentId.value = null
 }
 
-const paymentsEditTableRef = useTemplateRef("paymentsEditTableRef")
+const paymentsEditDataTableServer = useTemplateRef("paymentsEditDataTableServer")
 
 async function closeEditFormAndRefresh() {
   closePaymentEditForm()
-  await paymentsEditTableRef.value?.refresh()
+  await paymentsEditDataTableServer.value?.refresh()
 }
 
 async function closeCreateFormAndRefresh() {
   showPaymentCreateForm.value = false
-  await paymentsEditTableRef.value?.refresh()
+  await paymentsEditDataTableServer.value?.refresh()
 }
 </script>
