@@ -12,25 +12,37 @@
       <h4>Edit Payment</h4>
     </template>
 
-    <v-text-field
-      v-model="payment.name"
-      label="Payment Name"
-      :rules="[required]"
-    />
+    <v-row>
+      <v-col cols="12">
+        <v-text-field
+          v-model="payment.name"
+          label="Payment Name"
+          :rules="[required]"
+        />
+      </v-col>
+    </v-row>
 
-    <CurrencyInput
-      v-model="payment.amount"
-      label="Payment Amount"
-      :rules="[required, greaterThan(0)]"
-    />
+    <v-row>
+      <v-col cols="12">
+        <CurrencyInput
+          v-model="payment.amount"
+          label="Payment Amount"
+          :rules="[required, greaterThan(0)]"
+        />
+      </v-col>
+    </v-row>
 
-    <StringDateInput
-      v-model="payment.paidOn"
-      label="Paid On"
-      :rules="[required, paidOnDateRangeValidator]"
-      :min="startOfFiscalPeriod"
-      :max="endOfFiscalPeriod"
-    />
+    <v-row>
+      <v-col cols="12">
+        <StringDateInput
+          v-model="payment.paidOn"
+          label="Paid On"
+          :rules="[required, paidOnDateRangeValidator]"
+          :min="startOfFiscalPeriod"
+          :max="endOfFiscalPeriod"
+        />
+      </v-col>
+    </v-row>
 
     <template #actions>
       <v-btn
@@ -79,7 +91,6 @@ const emit = defineEmits<{
 
 const { paymentId } = toRefs(props)
 const { payment } = usePayment(paymentId)
-
 
 const fiscalPeriod = computed(() => payment.value?.fiscalPeriod)
 const startOfFiscalPeriod = computed(() => {

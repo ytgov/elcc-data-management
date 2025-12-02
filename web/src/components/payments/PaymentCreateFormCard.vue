@@ -7,26 +7,39 @@
       <h4>Create Payment</h4>
     </template>
 
-    <v-text-field
-      v-model="paymentAttributes.name"
-      label="Payment Name"
-      :rules="[required]"
-    />
+    <v-row>
+      <v-col cols="12">
+        <v-text-field
+          v-model="paymentAttributes.name"
+          label="Payment Name"
+          :rules="[required]"
+        />
+      </v-col>
+    </v-row>
 
-    <CurrencyInput
-      v-model="paymentAttributes.amount"
-      label="Payment Amount"
-      :rules="[required, greaterThan(0)]"
-    />
+    <v-row>
+      <v-col cols="12">
+        <CurrencyInput
+          v-model="paymentAttributes.amount"
+          label="Payment Amount"
+          :rules="[required, greaterThan(0)]"
+          validate-on="blur"
+        />
+      </v-col>
+    </v-row>
 
-    <StringDateInput
-      v-model="paymentAttributes.paidOn"
-      :loading="isLoadingFundingPeriods"
-      label="Paid On"
-      :rules="[required, paidOnDateRangeValidator]"
-      :min="startOfFundingPeriod"
-      :max="endOfFundingPeriod"
-    />
+    <v-row>
+      <v-col cols="12">
+        <StringDateInput
+          v-model="paymentAttributes.paidOn"
+          :loading="isLoadingFundingPeriods"
+          label="Paid On"
+          :rules="[required, paidOnDateRangeValidator]"
+          :min="startOfFundingPeriod"
+          :max="endOfFundingPeriod"
+        />
+      </v-col>
+    </v-row>
 
     <template #actions>
       <v-btn
