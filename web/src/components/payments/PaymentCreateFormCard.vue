@@ -11,14 +11,12 @@
       v-model="paymentAttributes.name"
       label="Payment Name"
       :rules="[required]"
-      density="comfortable"
     />
 
     <CurrencyInput
       v-model="paymentAttributes.amount"
       label="Payment Amount"
       :rules="[required, greaterThan(0)]"
-      density="comfortable"
     />
 
     <StringDateInput
@@ -26,7 +24,6 @@
       :loading="isLoadingFundingPeriods"
       label="Paid On"
       :rules="[required, paidOnDateRangeValidator]"
-      density="comfortable"
       :min="startOfFundingPeriod"
       :max="endOfFundingPeriod"
     />
