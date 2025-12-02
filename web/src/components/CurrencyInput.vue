@@ -2,6 +2,7 @@
   <v-text-field
     ref="inputRef"
     :model-value="formattedValue"
+    :rules="transformedRules"
     type="text"
     @focus="onFocus"
     @blur="onBlur"
@@ -11,9 +12,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue"
+import { ref, watch, computed } from "vue"
 import { useCurrencyInput, type CurrencyInputOptions, CurrencyDisplay } from "vue-currency-input"
 import { isNil, isString } from "lodash"
+
+type ValidationRule = (value: unknown) => boolean | string
 
 const DEFAULT_OPTIONS = {
   currency: "CAD",
@@ -24,10 +27,17 @@ const DEFAULT_OPTIONS = {
   hideCurrencySymbolOnFocus: true,
 }
 
-const props = defineProps<{
-  modelValue: number | string | null | undefined
-  options?: Partial<CurrencyInputOptions>
-}>()
+const props = withDefaults(
+  defineProps<{
+    modelValue: number | string | null | undefined
+    options?: Partial<CurrencyInputOptions>
+    rules?: ValidationRule[]
+  }>(),
+  {
+    options: () => ({}),
+    rules: () => [],
+  }
+)
 
 const initialNumberValue = ref(props.modelValue)
 const emit = defineEmits(["update:modelValue"])
@@ -38,6 +48,14 @@ const { inputRef, numberValue, setValue, setOptions, formattedValue } = useCurre
     ...props.options,
   },
   false
+)
+
+// NOTE: This is required to validate against numberValue instead of formattedValue
+// formatedValue includes currency symbol and thousand separators and is impractical to validate against.
+const transformedRules = computed(() =>
+  props.rules.map((rule) => {
+    return () => rule(numberValue.value)
+  })
 )
 
 watch(
