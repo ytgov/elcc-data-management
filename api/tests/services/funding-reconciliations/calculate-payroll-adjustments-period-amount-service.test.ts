@@ -35,13 +35,13 @@ describe("api/src/services/funding-reconciliations/calculate-payroll-adjustments
         await employeeBenefitFactory.create({
           centreId: centre.id,
           fiscalPeriodId: fiscalPeriod.id,
-          grossPayrollMonthlyActual: 10000,
-          grossPayrollMonthlyEstimated: 10000,
-          costCapPercentage: 0.02,
-          employeeCostActual: 50,
-          employeeCostEstimated: 50,
-          employerCostActual: 100,
-          employerCostEstimated: 100,
+          grossPayrollMonthlyActual: "10000",
+          grossPayrollMonthlyEstimated: "10000",
+          costCapPercentage: "0.02",
+          employeeCostActual: "50",
+          employeeCostEstimated: "50",
+          employerCostActual: "100",
+          employerCostEstimated: "100",
         })
 
         // Act
@@ -75,13 +75,13 @@ describe("api/src/services/funding-reconciliations/calculate-payroll-adjustments
         await employeeBenefitFactory.create({
           centreId: centre.id,
           fiscalPeriodId: fiscalPeriod.id,
-          grossPayrollMonthlyActual: 10000,
-          grossPayrollMonthlyEstimated: 10000,
-          costCapPercentage: 0.03,
-          employeeCostActual: 250,
-          employeeCostEstimated: 250,
-          employerCostActual: 500,
-          employerCostEstimated: 500,
+          grossPayrollMonthlyActual: "10000",
+          grossPayrollMonthlyEstimated: "10000",
+          costCapPercentage: "0.03",
+          employeeCostActual: "250",
+          employeeCostEstimated: "250",
+          employerCostActual: "500",
+          employerCostEstimated: "500",
         })
 
         // Act
@@ -140,13 +140,13 @@ describe("api/src/services/funding-reconciliations/calculate-payroll-adjustments
         await employeeBenefitFactory.create({
           centreId: centre.id,
           fiscalPeriodId: fiscalPeriod.id,
-          grossPayrollMonthlyActual: 25000,
-          grossPayrollMonthlyEstimated: 25000,
-          costCapPercentage: 0.05,
-          employeeCostActual: 200,
-          employeeCostEstimated: 200,
-          employerCostActual: 400,
-          employerCostEstimated: 400,
+          grossPayrollMonthlyActual: "25000",
+          grossPayrollMonthlyEstimated: "25000",
+          costCapPercentage: "0.05",
+          employeeCostActual: "200",
+          employeeCostEstimated: "200",
+          employerCostActual: "400",
+          employerCostEstimated: "400",
         })
 
         // Act
@@ -179,7 +179,7 @@ describe("api/src/services/funding-reconciliations/calculate-payroll-adjustments
           fiscalPeriodId: fiscalPeriod.id,
           tierLevel: 3,
           tierLabel: "Level 2",
-          wageRatePerHour: 10.0,
+          wageRatePerHour: "10.0",
         })
 
         // 20 hours * $10/hour = $200 subtotal
@@ -188,8 +188,8 @@ describe("api/src/services/funding-reconciliations/calculate-payroll-adjustments
           centreId: centre.id,
           employeeWageTierId: employeeWageTier.id,
           employeeName: "John Doe",
-          hoursEstimated: 20,
-          hoursActual: 20,
+          hoursEstimated: "20",
+          hoursActual: "20",
         })
 
         // Act
@@ -222,14 +222,14 @@ describe("api/src/services/funding-reconciliations/calculate-payroll-adjustments
           fiscalPeriodId: fiscalPeriod.id,
           tierLevel: 2,
           tierLabel: "Level 1a",
-          wageRatePerHour: 6.0,
+          wageRatePerHour: "6.0",
         })
 
         const employeeWageTier2 = await employeeWageTierFactory.create({
           fiscalPeriodId: fiscalPeriod.id,
           tierLevel: 3,
           tierLabel: "Level 2",
-          wageRatePerHour: 10.0,
+          wageRatePerHour: "10.0",
         })
 
         // First enhancement: 10 hours * $6/hour = $60
@@ -237,8 +237,8 @@ describe("api/src/services/funding-reconciliations/calculate-payroll-adjustments
           centreId: centre.id,
           employeeWageTierId: employeeWageTier1.id,
           employeeName: "Alice Smith",
-          hoursEstimated: 10,
-          hoursActual: 10,
+          hoursEstimated: "10",
+          hoursActual: "10",
         })
 
         // Second enhancement: 15 hours * $10/hour = $150
@@ -246,8 +246,8 @@ describe("api/src/services/funding-reconciliations/calculate-payroll-adjustments
           centreId: centre.id,
           employeeWageTierId: employeeWageTier2.id,
           employeeName: "Bob Jones",
-          hoursEstimated: 15,
-          hoursActual: 15,
+          hoursEstimated: "15",
+          hoursActual: "15",
         })
 
         // Subtotal: $60 + $150 = $210
@@ -283,20 +283,20 @@ describe("api/src/services/funding-reconciliations/calculate-payroll-adjustments
         await employeeBenefitFactory.create({
           centreId: centre.id,
           fiscalPeriodId: fiscalPeriod.id,
-          grossPayrollMonthlyActual: 10000,
-          grossPayrollMonthlyEstimated: 10000,
-          costCapPercentage: 0.02,
-          employeeCostActual: 50,
-          employeeCostEstimated: 50,
-          employerCostActual: 100,
-          employerCostEstimated: 100,
+          grossPayrollMonthlyActual: "10000",
+          grossPayrollMonthlyEstimated: "10000",
+          costCapPercentage: "0.02",
+          employeeCostActual: "50",
+          employeeCostEstimated: "50",
+          employerCostActual: "100",
+          employerCostEstimated: "100",
         })
 
         const employeeWageTier = await employeeWageTierFactory.create({
           fiscalPeriodId: fiscalPeriod.id,
           tierLevel: 3,
           tierLabel: "Level 2",
-          wageRatePerHour: 10.0,
+          wageRatePerHour: "10.0",
         })
 
         // Wage enhancement: 20 hours * $10/hour * 1.14 = $228
@@ -304,8 +304,8 @@ describe("api/src/services/funding-reconciliations/calculate-payroll-adjustments
           centreId: centre.id,
           employeeWageTierId: employeeWageTier.id,
           employeeName: "Jane Doe",
-          hoursEstimated: 20,
-          hoursActual: 20,
+          hoursEstimated: "20",
+          hoursActual: "20",
         })
 
         // Total: $100 + $228 = $328

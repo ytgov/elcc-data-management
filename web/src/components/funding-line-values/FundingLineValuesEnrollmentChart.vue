@@ -19,6 +19,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { isNil } from "lodash"
+import Big from "big.js"
 
 import VueApexCharts from "vue3-apexcharts"
 
@@ -75,10 +76,10 @@ const actualChildOccupancyRates = computed(() => {
 })
 
 const hasActualChildOccupancyRates = computed(() =>
-  actualChildOccupancyRates.value.some((value) => value > 0)
+  actualChildOccupancyRates.value.some((value) => Big(value).gt(0))
 )
 
 defineExpose({
-  refresh
+  refresh,
 })
 </script>

@@ -67,6 +67,11 @@ export default createVuetify({
     },
     VCard: {
       elevation: 3,
+      VCardActions: {
+        VBtn: {
+          variant: "elevated",
+        },
+      },
     },
     VCombobox: {
       variant: "outlined",

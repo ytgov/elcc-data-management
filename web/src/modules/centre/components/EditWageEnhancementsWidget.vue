@@ -1,8 +1,8 @@
 <template>
   <v-skeleton-loader
+    v-if="isEmpty(employeeWageTiers) || isLoading"
     type="table"
-    v-if="isEmpty(employeeWageTiers) && isEmpty(wageEnhancementsByEmployeeWageTierId) && isLoading"
-  ></v-skeleton-loader>
+  />
   <v-table v-else>
     <thead>
       <tr>
@@ -70,9 +70,7 @@
           </td>
           <td>
             <v-text-field
-              :model-value="
-                formatMoney(wageEnhancement.hoursEstimated * employeeWageTier.wageRatePerHour)
-              "
+              :model-value="formatMoney(wageEnhancementEstimatedTotalById[wageEnhancement.id])"
               aria-label="Wage Enhancement Total Estimated"
               color="primary"
               density="compact"
@@ -93,9 +91,7 @@
           </td>
           <td>
             <v-text-field
-              :model-value="
-                formatMoney(wageEnhancement.hoursActual * employeeWageTier.wageRatePerHour)
-              "
+              :model-value="formatMoney(wageEnhancementActualTotalById[wageEnhancement.id])"
               aria-label="Wage Enhancement Total Actual"
               color="primary"
               density="compact"
@@ -249,7 +245,8 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch, reactive } from "vue"
-import { groupBy, keyBy, mapValues, round, isEmpty } from "lodash"
+import { groupBy, keyBy, mapValues, isEmpty } from "lodash"
+import Big from "big.js"
 
 import { formatMoney } from "@/utils/formatters"
 import employeeWageTiersApi, { type EmployeeWageTier } from "@/api/employee-wage-tiers-api"
@@ -261,16 +258,10 @@ import { useNotificationStore } from "@/store/NotificationStore"
 
 const notificationStore = useNotificationStore()
 
-const props = defineProps({
-  centreId: {
-    type: Number,
-    required: true,
-  },
-  fiscalPeriodId: {
-    type: Number,
-    required: true,
-  },
-})
+const props = defineProps<{
+  centreId: number
+  fiscalPeriodId: number
+}>()
 
 const isLoading = ref(true)
 const isLoadingByEmployeeWageTierId = reactive(new Map<number, boolean>())
@@ -286,35 +277,59 @@ const wageEnhancementsByEmployeeWageTierId = computed(() =>
 const wageRatePerHoursByEmployeeWageTierId = computed(() =>
   mapValues(keyBy(employeeWageTiers.value, "id"), "wageRatePerHour")
 )
+const wageEnhancementEstimatedTotalById = computed(() => {
+  const estimatedTotalById: Record<number, string> = {}
+
+  for (const wageEnhancement of wageEnhancements.value) {
+    const wageRatePerHour =
+      wageRatePerHoursByEmployeeWageTierId.value[wageEnhancement.employeeWageTierId]
+    const total = Big(wageEnhancement.hoursEstimated).mul(wageRatePerHour).toFixed(4)
+    estimatedTotalById[wageEnhancement.id] = total
+  }
+
+  return estimatedTotalById
+})
+const wageEnhancementActualTotalById = computed(() => {
+  const actualTotalById: Record<number, string> = {}
+
+  for (const wageEnhancement of wageEnhancements.value) {
+    const wageRatePerHour =
+      wageRatePerHoursByEmployeeWageTierId.value[wageEnhancement.employeeWageTierId]
+    const total = Big(wageEnhancement.hoursActual).mul(wageRatePerHour).toFixed(4)
+    actualTotalById[wageEnhancement.id] = total
+  }
+
+  return actualTotalById
+})
 const wageEnhancementsEstimatedSubtotal = computed(() =>
   wageEnhancements.value.reduce((total, { hoursEstimated, employeeWageTierId }) => {
     const wageRatePerHour = wageRatePerHoursByEmployeeWageTierId.value[employeeWageTierId]
 
-    return total + hoursEstimated * wageRatePerHour
-  }, 0)
+    return Big(total).add(Big(hoursEstimated).mul(Big(wageRatePerHour)))
+  }, Big(0))
 )
 const wageEnhancementsActualSubtotal = computed(() =>
   wageEnhancements.value.reduce((total, { hoursActual, employeeWageTierId }) => {
     const wageRatePerHour = wageRatePerHoursByEmployeeWageTierId.value[employeeWageTierId]
 
-    return total + hoursActual * wageRatePerHour
-  }, 0)
+    return Big(total).add(Big(hoursActual).mul(Big(wageRatePerHour)))
+  }, Big(0))
 )
-const wageEnhancementsEstimatedEiCppWcbTotal = computed(
-  () => wageEnhancementsEstimatedSubtotal.value * EI_CPP_WCB_RATE
+const wageEnhancementsEstimatedEiCppWcbTotal = computed(() =>
+  wageEnhancementsEstimatedSubtotal.value.mul(Big(EI_CPP_WCB_RATE))
 )
-const wageEnhancementsActualEiCppWcbTotal = computed(
-  () => wageEnhancementsActualSubtotal.value * EI_CPP_WCB_RATE
+const wageEnhancementsActualEiCppWcbTotal = computed(() =>
+  wageEnhancementsActualSubtotal.value.mul(Big(EI_CPP_WCB_RATE))
 )
-const wageEnhancementsEstimatedTotal = computed(
-  () => wageEnhancementsEstimatedSubtotal.value * (1 + EI_CPP_WCB_RATE)
+const wageEnhancementsEstimatedTotal = computed(() =>
+  wageEnhancementsEstimatedSubtotal.value.mul(Big(1).plus(Big(EI_CPP_WCB_RATE)))
 )
-const wageEnhancementsActualTotal = computed(
-  () => wageEnhancementsActualSubtotal.value * (1 + EI_CPP_WCB_RATE)
+const wageEnhancementsActualTotal = computed(() =>
+  wageEnhancementsActualSubtotal.value.mul(Big(1).plus(Big(EI_CPP_WCB_RATE)))
 )
 
 const eiCppWcbRatePercentage = computed(() => {
-  return round(EI_CPP_WCB_RATE * 100, 2)
+  return Big(EI_CPP_WCB_RATE).mul(Big(100)).toFixed(2)
 })
 
 watch(
@@ -375,8 +390,8 @@ async function createWageEnhancement(employeeWageTierId: number) {
       employeeWageTierId,
       centreId: props.centreId,
       employeeName: "",
-      hoursEstimated: 0,
-      hoursActual: 0,
+      hoursEstimated: "0",
+      hoursActual: "0",
     })
     wageEnhancements.value.push(newWageEnhancement)
     notificationStore.notify({

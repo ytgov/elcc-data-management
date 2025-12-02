@@ -5,7 +5,7 @@
     "lineName": "Infants",
     "fromAge": 0,
     "toAge": 1,
-    "monthlyAmount": 700.0,
+    "monthlyAmount": "700.0",
     "createdAt": "2023-09-29T17:43:40.610Z",
     "updatedAt": "2023-09-29T17:43:40.610Z"
   },
@@ -15,7 +15,7 @@
     "lineName": "Toddlers",
     "fromAge": 2,
     "toAge": 3,
-    "monthlyAmount": 700.0,
+    "monthlyAmount": "700.0",
     "createdAt": "2023-09-29T17:43:40.620Z",
     "updatedAt": "2023-09-29T17:43:40.620Z"
   },
@@ -25,7 +25,7 @@
     "lineName": "Preschool",
     "fromAge": 4,
     "toAge": 5,
-    "monthlyAmount": 700.0,
+    "monthlyAmount": "700.0",
     "createdAt": "2023-09-29T17:43:40.626Z",
     "updatedAt": "2023-09-29T17:43:40.626Z"
   },
@@ -35,7 +35,7 @@
     "lineName": "Kindergarten (PT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 350.0,
+    "monthlyAmount": "350.0",
     "createdAt": "2023-09-29T17:43:40.633Z",
     "updatedAt": "2023-09-29T17:43:40.633Z"
   },
@@ -45,7 +45,7 @@
     "lineName": "Kindergarten (FT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 700.0,
+    "monthlyAmount": "700.0",
     "createdAt": "2023-09-29T17:43:40.636Z",
     "updatedAt": "2023-09-29T17:43:40.636Z"
   },
@@ -55,7 +55,7 @@
     "lineName": "School Age (PT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 300.0,
+    "monthlyAmount": "300.0",
     "createdAt": "2023-09-29T17:43:40.643Z",
     "updatedAt": "2023-09-29T17:43:40.643Z"
   },
@@ -65,7 +65,7 @@
     "lineName": "School Age (FT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 500.0,
+    "monthlyAmount": "500.0",
     "createdAt": "2023-09-29T17:43:40.650Z",
     "updatedAt": "2023-09-29T17:43:40.650Z"
   },
@@ -75,7 +75,7 @@
     "lineName": "Infants",
     "fromAge": 0,
     "toAge": 1,
-    "monthlyAmount": 70.0,
+    "monthlyAmount": "70.0",
     "createdAt": "2023-09-29T17:43:40.656Z",
     "updatedAt": "2023-09-29T17:43:40.656Z"
   },
@@ -85,7 +85,7 @@
     "lineName": "Toddlers",
     "fromAge": 2,
     "toAge": 3,
-    "monthlyAmount": 70.0,
+    "monthlyAmount": "70.0",
     "createdAt": "2023-09-29T17:43:40.660Z",
     "updatedAt": "2023-09-29T17:43:40.660Z"
   },
@@ -95,7 +95,7 @@
     "lineName": "Preschool",
     "fromAge": 4,
     "toAge": 5,
-    "monthlyAmount": 70.0,
+    "monthlyAmount": "70.0",
     "createdAt": "2023-09-29T17:43:40.666Z",
     "updatedAt": "2023-09-29T17:43:40.666Z"
   },
@@ -105,7 +105,7 @@
     "lineName": "Kindergarten (PT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 35.0,
+    "monthlyAmount": "35.0",
     "createdAt": "2023-09-29T17:43:40.673Z",
     "updatedAt": "2023-09-29T17:43:40.673Z"
   },
@@ -115,7 +115,7 @@
     "lineName": "Kindergarten (FT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 70.0,
+    "monthlyAmount": "70.0",
     "createdAt": "2023-09-29T17:43:40.680Z",
     "updatedAt": "2023-09-29T17:43:40.680Z"
   },
@@ -125,7 +125,7 @@
     "lineName": "School Age (PT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 30.0,
+    "monthlyAmount": "30.0",
     "createdAt": "2023-09-29T17:43:40.686Z",
     "updatedAt": "2023-09-29T17:43:40.686Z"
   },
@@ -135,7 +135,7 @@
     "lineName": "School Age (FT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 50.0,
+    "monthlyAmount": "50.0",
     "createdAt": "2023-09-29T17:43:40.693Z",
     "updatedAt": "2023-09-29T17:43:40.693Z"
   },
@@ -145,7 +145,7 @@
     "lineName": "Infants",
     "fromAge": 0,
     "toAge": 1,
-    "monthlyAmount": 206.1,
+    "monthlyAmount": "206.1",
     "createdAt": "2023-09-29T17:43:40.703Z",
     "updatedAt": "2023-09-29T17:43:40.703Z"
   },
@@ -155,7 +155,7 @@
     "lineName": "Toddlers",
     "fromAge": 2,
     "toAge": 3,
-    "monthlyAmount": 154.58,
+    "monthlyAmount": "154.58",
     "createdAt": "2023-09-29T17:43:40.710Z",
     "updatedAt": "2023-09-29T17:43:40.710Z"
   },
@@ -165,7 +165,7 @@
     "lineName": "Preschool",
     "fromAge": 4,
     "toAge": 5,
-    "monthlyAmount": 114.5,
+    "monthlyAmount": "114.5",
     "createdAt": "2023-09-29T17:43:40.720Z",
     "updatedAt": "2023-09-29T17:43:40.720Z"
   },
@@ -175,7 +175,7 @@
     "lineName": "Kindergarten (PT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 114.5,
+    "monthlyAmount": "114.5",
     "createdAt": "2023-09-29T17:43:40.723Z",
     "updatedAt": "2023-09-29T17:43:40.723Z"
   },
@@ -185,7 +185,7 @@
     "lineName": "Kindergarten (FT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 114.5,
+    "monthlyAmount": "114.5",
     "createdAt": "2023-09-29T17:43:40.730Z",
     "updatedAt": "2023-09-29T17:43:40.730Z"
   },
@@ -195,7 +195,7 @@
     "lineName": "School Age (PT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 97.33,
+    "monthlyAmount": "97.33",
     "createdAt": "2023-09-29T17:43:40.740Z",
     "updatedAt": "2023-09-29T17:43:40.740Z"
   },
@@ -205,7 +205,7 @@
     "lineName": "School Age (FT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 97.33,
+    "monthlyAmount": "97.33",
     "createdAt": "2023-09-29T17:43:40.746Z",
     "updatedAt": "2023-09-29T17:43:40.746Z"
   },
@@ -215,7 +215,7 @@
     "lineName": "Toddlers",
     "fromAge": 2,
     "toAge": 3,
-    "monthlyAmount": 54.96,
+    "monthlyAmount": "54.96",
     "createdAt": "2023-09-29T17:43:40.750Z",
     "updatedAt": "2023-09-29T17:43:40.750Z"
   },
@@ -225,7 +225,7 @@
     "lineName": "Preschool",
     "fromAge": 4,
     "toAge": 5,
-    "monthlyAmount": 91.6,
+    "monthlyAmount": "91.6",
     "createdAt": "2023-09-29T17:43:40.760Z",
     "updatedAt": "2023-09-29T17:43:40.760Z"
   },
@@ -235,7 +235,7 @@
     "lineName": "Kindergarten",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 91.6,
+    "monthlyAmount": "91.6",
     "createdAt": "2023-09-29T17:43:40.766Z",
     "updatedAt": "2023-09-29T17:43:40.766Z"
   },
@@ -245,7 +245,7 @@
     "lineName": "School Age",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 114.5,
+    "monthlyAmount": "114.5",
     "createdAt": "2023-09-29T17:43:40.773Z",
     "updatedAt": "2023-09-29T17:43:40.773Z"
   },
@@ -255,7 +255,7 @@
     "lineName": "Rent or Mortgage",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:40.783Z",
     "updatedAt": "2023-09-29T17:43:40.783Z"
   },
@@ -265,7 +265,7 @@
     "lineName": "Phone",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:40.790Z",
     "updatedAt": "2023-09-29T17:43:40.790Z"
   },
@@ -275,7 +275,7 @@
     "lineName": "Internet",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:40.793Z",
     "updatedAt": "2023-09-29T17:43:40.793Z"
   },
@@ -285,7 +285,7 @@
     "lineName": "Cell Phone",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:40.800Z",
     "updatedAt": "2023-09-29T17:43:40.800Z"
   },
@@ -295,7 +295,7 @@
     "lineName": "Security",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:40.806Z",
     "updatedAt": "2023-09-29T17:43:40.806Z"
   },
@@ -305,7 +305,7 @@
     "lineName": "Electric",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:40.813Z",
     "updatedAt": "2023-09-29T17:43:40.813Z"
   },
@@ -315,7 +315,7 @@
     "lineName": "Fuel",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:40.820Z",
     "updatedAt": "2023-09-29T17:43:40.820Z"
   },
@@ -325,7 +325,7 @@
     "lineName": "Garbage",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:40.823Z",
     "updatedAt": "2023-09-29T17:43:40.823Z"
   },
@@ -335,7 +335,7 @@
     "lineName": "Snow Removal",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:40.830Z",
     "updatedAt": "2023-09-29T17:43:40.830Z"
   },
@@ -345,7 +345,7 @@
     "lineName": "Water/Sewer/Taxes",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:40.836Z",
     "updatedAt": "2023-09-29T17:43:40.836Z"
   },
@@ -355,7 +355,7 @@
     "lineName": "Insurance",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:40.840Z",
     "updatedAt": "2023-09-29T17:43:40.840Z"
   },
@@ -365,7 +365,7 @@
     "lineName": "Janitorial",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:40.846Z",
     "updatedAt": "2023-09-29T17:43:40.846Z"
   },
@@ -375,7 +375,7 @@
     "lineName": "Cleaning Supplies",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:40.853Z",
     "updatedAt": "2023-09-29T17:43:40.853Z"
   },
@@ -385,7 +385,7 @@
     "lineName": "Minor Repairs",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:40.860Z",
     "updatedAt": "2023-09-29T17:43:40.860Z"
   },
@@ -395,7 +395,7 @@
     "lineName": "Infants",
     "fromAge": 0,
     "toAge": 18,
-    "monthlyAmount": 700.0,
+    "monthlyAmount": "700.0",
     "createdAt": "2023-09-29T17:43:40.933Z",
     "updatedAt": "2023-09-29T17:43:40.933Z"
   },
@@ -405,7 +405,7 @@
     "lineName": "Toddlers",
     "fromAge": 19,
     "toAge": 36,
-    "monthlyAmount": 700.0,
+    "monthlyAmount": "700.0",
     "createdAt": "2023-09-29T17:43:40.940Z",
     "updatedAt": "2023-09-29T17:43:40.940Z"
   },
@@ -415,7 +415,7 @@
     "lineName": "Preschool",
     "fromAge": 4,
     "toAge": 5,
-    "monthlyAmount": 700.0,
+    "monthlyAmount": "700.0",
     "createdAt": "2023-09-29T17:43:40.943Z",
     "updatedAt": "2023-09-29T17:43:40.943Z"
   },
@@ -425,7 +425,7 @@
     "lineName": "Kindergarten (PT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 350.0,
+    "monthlyAmount": "350.0",
     "createdAt": "2023-09-29T17:43:40.950Z",
     "updatedAt": "2023-09-29T17:43:40.950Z"
   },
@@ -435,7 +435,7 @@
     "lineName": "Kindergarten (FT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 700.0,
+    "monthlyAmount": "700.0",
     "createdAt": "2023-09-29T17:43:40.953Z",
     "updatedAt": "2023-09-29T17:43:40.953Z"
   },
@@ -445,7 +445,7 @@
     "lineName": "School Age (PT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 300.0,
+    "monthlyAmount": "300.0",
     "createdAt": "2023-09-29T17:43:40.960Z",
     "updatedAt": "2023-09-29T17:43:40.960Z"
   },
@@ -455,7 +455,7 @@
     "lineName": "School Age (FT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 500.0,
+    "monthlyAmount": "500.0",
     "createdAt": "2023-09-29T17:43:40.966Z",
     "updatedAt": "2023-09-29T17:43:40.966Z"
   },
@@ -465,7 +465,7 @@
     "lineName": "Infants",
     "fromAge": 0,
     "toAge": 1,
-    "monthlyAmount": 70.0,
+    "monthlyAmount": "70.0",
     "createdAt": "2023-09-29T17:43:40.973Z",
     "updatedAt": "2023-09-29T17:43:40.973Z"
   },
@@ -475,7 +475,7 @@
     "lineName": "Toddlers",
     "fromAge": 2,
     "toAge": 3,
-    "monthlyAmount": 70.0,
+    "monthlyAmount": "70.0",
     "createdAt": "2023-09-29T17:43:40.980Z",
     "updatedAt": "2023-09-29T17:43:40.980Z"
   },
@@ -485,7 +485,7 @@
     "lineName": "Preschool",
     "fromAge": 4,
     "toAge": 5,
-    "monthlyAmount": 70.0,
+    "monthlyAmount": "70.0",
     "createdAt": "2023-09-29T17:43:40.983Z",
     "updatedAt": "2023-09-29T17:43:40.983Z"
   },
@@ -495,7 +495,7 @@
     "lineName": "Kindergarten (PT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 35.0,
+    "monthlyAmount": "35.0",
     "createdAt": "2023-09-29T17:43:40.990Z",
     "updatedAt": "2023-09-29T17:43:40.990Z"
   },
@@ -505,7 +505,7 @@
     "lineName": "Kindergarten (FT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 70.0,
+    "monthlyAmount": "70.0",
     "createdAt": "2023-09-29T17:43:40.996Z",
     "updatedAt": "2023-09-29T17:43:40.996Z"
   },
@@ -515,7 +515,7 @@
     "lineName": "School Age (PT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 30.0,
+    "monthlyAmount": "30.0",
     "createdAt": "2023-09-29T17:43:41.003Z",
     "updatedAt": "2023-09-29T17:43:41.003Z"
   },
@@ -525,7 +525,7 @@
     "lineName": "School Age (FT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 50.0,
+    "monthlyAmount": "50.0",
     "createdAt": "2023-09-29T17:43:41.010Z",
     "updatedAt": "2023-09-29T17:43:41.010Z"
   },
@@ -535,7 +535,7 @@
     "lineName": "Infants",
     "fromAge": 0,
     "toAge": 1,
-    "monthlyAmount": 206.1,
+    "monthlyAmount": "206.1",
     "createdAt": "2023-09-29T17:43:41.013Z",
     "updatedAt": "2023-09-29T17:43:41.013Z"
   },
@@ -545,7 +545,7 @@
     "lineName": "Toddlers",
     "fromAge": 2,
     "toAge": 3,
-    "monthlyAmount": 154.58,
+    "monthlyAmount": "154.58",
     "createdAt": "2023-09-29T17:43:41.020Z",
     "updatedAt": "2023-09-29T17:43:41.020Z"
   },
@@ -555,7 +555,7 @@
     "lineName": "Preschool",
     "fromAge": 4,
     "toAge": 5,
-    "monthlyAmount": 114.5,
+    "monthlyAmount": "114.5",
     "createdAt": "2023-09-29T17:43:41.026Z",
     "updatedAt": "2023-09-29T17:43:41.026Z"
   },
@@ -565,7 +565,7 @@
     "lineName": "Kindergarten (PT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 114.5,
+    "monthlyAmount": "114.5",
     "createdAt": "2023-09-29T17:43:41.033Z",
     "updatedAt": "2023-09-29T17:43:41.033Z"
   },
@@ -575,7 +575,7 @@
     "lineName": "Kindergarten (FT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 114.5,
+    "monthlyAmount": "114.5",
     "createdAt": "2023-09-29T17:43:41.040Z",
     "updatedAt": "2023-09-29T17:43:41.040Z"
   },
@@ -585,7 +585,7 @@
     "lineName": "School Age (PT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 97.33,
+    "monthlyAmount": "97.33",
     "createdAt": "2023-09-29T17:43:41.046Z",
     "updatedAt": "2023-09-29T17:43:41.046Z"
   },
@@ -595,7 +595,7 @@
     "lineName": "School Age (FT)",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 97.33,
+    "monthlyAmount": "97.33",
     "createdAt": "2023-09-29T17:43:41.053Z",
     "updatedAt": "2023-09-29T17:43:41.053Z"
   },
@@ -605,7 +605,7 @@
     "lineName": "Toddlers",
     "fromAge": 2,
     "toAge": 3,
-    "monthlyAmount": 54.96,
+    "monthlyAmount": "54.96",
     "createdAt": "2023-09-29T17:43:41.060Z",
     "updatedAt": "2023-09-29T17:43:41.060Z"
   },
@@ -615,7 +615,7 @@
     "lineName": "Preschool",
     "fromAge": 4,
     "toAge": 5,
-    "monthlyAmount": 91.6,
+    "monthlyAmount": "91.6",
     "createdAt": "2023-09-29T17:43:41.066Z",
     "updatedAt": "2023-09-29T17:43:41.066Z"
   },
@@ -625,7 +625,7 @@
     "lineName": "Kindergarten",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 91.6,
+    "monthlyAmount": "91.6",
     "createdAt": "2023-09-29T17:43:41.070Z",
     "updatedAt": "2023-09-29T17:43:41.070Z"
   },
@@ -635,7 +635,7 @@
     "lineName": "School Age",
     "fromAge": 5,
     "toAge": 6,
-    "monthlyAmount": 114.5,
+    "monthlyAmount": "114.5",
     "createdAt": "2023-09-29T17:43:41.076Z",
     "updatedAt": "2023-09-29T17:43:41.076Z"
   },
@@ -645,7 +645,7 @@
     "lineName": "Rent or Mortgage",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:41.083Z",
     "updatedAt": "2023-09-29T17:43:41.083Z"
   },
@@ -655,7 +655,7 @@
     "lineName": "Phone",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:41.090Z",
     "updatedAt": "2023-09-29T17:43:41.090Z"
   },
@@ -665,7 +665,7 @@
     "lineName": "Internet",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:41.096Z",
     "updatedAt": "2023-09-29T17:43:41.096Z"
   },
@@ -675,7 +675,7 @@
     "lineName": "Cell Phone",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:41.100Z",
     "updatedAt": "2023-09-29T17:43:41.100Z"
   },
@@ -685,7 +685,7 @@
     "lineName": "Security",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:41.106Z",
     "updatedAt": "2023-09-29T17:43:41.106Z"
   },
@@ -695,7 +695,7 @@
     "lineName": "Electric",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:41.113Z",
     "updatedAt": "2023-09-29T17:43:41.113Z"
   },
@@ -705,7 +705,7 @@
     "lineName": "Fuel",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:41.120Z",
     "updatedAt": "2023-09-29T17:43:41.120Z"
   },
@@ -715,7 +715,7 @@
     "lineName": "Garbage",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:41.123Z",
     "updatedAt": "2023-09-29T17:43:41.123Z"
   },
@@ -725,7 +725,7 @@
     "lineName": "Snow Removal",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:41.130Z",
     "updatedAt": "2023-09-29T17:43:41.130Z"
   },
@@ -735,7 +735,7 @@
     "lineName": "Water/Sewer/Taxes",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:41.136Z",
     "updatedAt": "2023-09-29T17:43:41.136Z"
   },
@@ -745,7 +745,7 @@
     "lineName": "Insurance",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:41.140Z",
     "updatedAt": "2023-09-29T17:43:41.140Z"
   },
@@ -755,7 +755,7 @@
     "lineName": "Janitorial",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:41.146Z",
     "updatedAt": "2023-09-29T17:43:41.146Z"
   },
@@ -765,7 +765,7 @@
     "lineName": "Cleaning Supplies",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:41.153Z",
     "updatedAt": "2023-09-29T17:43:41.153Z"
   },
@@ -775,7 +775,7 @@
     "lineName": "Minor Repairs",
     "fromAge": 0,
     "toAge": 0,
-    "monthlyAmount": 0.37,
+    "monthlyAmount": "0.37",
     "createdAt": "2023-09-29T17:43:41.160Z",
     "updatedAt": "2023-09-29T17:43:41.160Z"
   }

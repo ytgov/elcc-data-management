@@ -25,10 +25,10 @@ export class FundingSubmissionLineJsonServices {
         sectionName: templateLine.sectionName,
         lineName: templateLine.lineName,
         monthlyAmount: templateLine.monthlyAmount,
-        estimatedChildOccupancyRate: 0,
-        actualChildOccupancyRate: 0,
-        estimatedComputedTotal: 0,
-        actualComputedTotal: 0,
+        estimatedChildOccupancyRate: "0",
+        actualChildOccupancyRate: "0",
+        estimatedComputedTotal: "0",
+        actualComputedTotal: "0",
       })
     })
 

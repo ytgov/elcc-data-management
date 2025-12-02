@@ -47,7 +47,7 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
           fiscalPeriodId: fiscalPeriod.id,
           fiscalYear: "2025/26",
           paidOn: "2025-04-15",
-          amountInCents: 150 * 100,
+          amount: "150.0",
         })
 
         const fiscalPeriod2 = await fiscalPeriodFactory.create({
@@ -66,7 +66,7 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
           fiscalPeriodId: fiscalPeriod2.id,
           fiscalYear: "2025/26",
           paidOn: "2025-05-15",
-          amountInCents: 200 * 100,
+          amount: "200.0",
         })
 
         // Act
@@ -134,7 +134,7 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
           fiscalPeriodId: fiscalPeriod.id,
           fiscalYear: "2025/26",
           paidOn: "2025-04-15",
-          amountInCents: 300 * 100,
+          amount: "300.0",
         })
         await fundingSubmissionLineJsonFactory.create({
           centreId: centre.id,
@@ -161,7 +161,7 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
           fiscalPeriodId: fiscalPeriod2.id,
           fiscalYear: "2025/26",
           paidOn: "2025-05-15",
-          amountInCents: 250 * 100,
+          amount: "250.0",
         })
         await fundingSubmissionLineJsonFactory.create({
           centreId: centre.id,
@@ -240,7 +240,7 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
           fiscalPeriodId: fiscalPeriod.id,
           fiscalYear: "2025/26",
           paidOn: "2025-04-15",
-          amountInCents: 500 * 100,
+          amount: "500.0",
         })
         await fundingSubmissionLineJsonFactory.create({
           centreId: centre.id,
@@ -248,18 +248,22 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
           dateName: FundingSubmissionLineJson.Months.APRIL,
           dateStart: new Date("2025-04-01"),
           dateEnd: new Date("2025-04-30"),
-          values: JSON.stringify([{ actualComputedTotal: 150.0 }]),
+          values: JSON.stringify([
+            {
+              actualComputedTotal: "150.0",
+            },
+          ]),
         })
         await employeeBenefitFactory.create({
           centreId: centre.id,
           fiscalPeriodId: fiscalPeriod.id,
-          grossPayrollMonthlyActual: 10000,
-          grossPayrollMonthlyEstimated: 10000,
-          costCapPercentage: 0.02,
-          employeeCostActual: 50,
-          employeeCostEstimated: 50,
-          employerCostActual: 100,
-          employerCostEstimated: 100,
+          grossPayrollMonthlyActual: "10000",
+          grossPayrollMonthlyEstimated: "10000",
+          costCapPercentage: "0.02",
+          employeeCostActual: "50",
+          employeeCostEstimated: "50",
+          employerCostActual: "100",
+          employerCostEstimated: "100",
         })
 
         const fiscalPeriod2 = await fiscalPeriodFactory.create({
@@ -278,7 +282,7 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
           fiscalPeriodId: fiscalPeriod2.id,
           fiscalYear: "2025/26",
           paidOn: "2025-05-15",
-          amountInCents: 600 * 100,
+          amount: "600.0",
         })
         await fundingSubmissionLineJsonFactory.create({
           centreId: centre.id,
@@ -286,18 +290,22 @@ describe("api/src/services/funding-reconciliations/refresh-service.ts", () => {
           dateName: FundingSubmissionLineJson.Months.MAY,
           dateStart: new Date("2025-05-01"),
           dateEnd: new Date("2025-05-31"),
-          values: JSON.stringify([{ actualComputedTotal: 200.0 }]),
+          values: JSON.stringify([
+            {
+              actualComputedTotal: "200.0",
+            },
+          ]),
         })
         await employeeBenefitFactory.create({
           centreId: centre.id,
           fiscalPeriodId: fiscalPeriod2.id,
-          grossPayrollMonthlyActual: 12000,
-          grossPayrollMonthlyEstimated: 12000,
-          costCapPercentage: 0.025,
-          employeeCostActual: 75,
-          employeeCostEstimated: 75,
-          employerCostActual: 150,
-          employerCostEstimated: 150,
+          grossPayrollMonthlyActual: "12000",
+          grossPayrollMonthlyEstimated: "12000",
+          costCapPercentage: "0.025",
+          employeeCostActual: "75",
+          employeeCostEstimated: "75",
+          employerCostActual: "150",
+          employerCostEstimated: "150",
         })
 
         // Act

@@ -12,11 +12,13 @@ import {
   AutoIncrement,
   BelongsTo,
   Default,
+  ModelValidator,
   NotNull,
   PrimaryKey,
   Table,
   ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
+import { isNil } from "lodash"
 
 import { isValidFiscalYearLegacy } from "@/models/validators"
 
@@ -52,10 +54,9 @@ export class Payment extends Model<InferAttributes<Payment>, InferCreationAttrib
   @NotNull
   declare paidOn: string
 
-  // TODO: replace with field with type DECIMAL(15,4)
-  @Attribute(DataTypes.INTEGER)
+  @Attribute(DataTypes.DECIMAL(15, 4))
   @NotNull
-  declare amountInCents: number
+  declare amount: string
 
   @Attribute(DataTypes.STRING(100))
   @NotNull
@@ -70,6 +71,27 @@ export class Payment extends Model<InferAttributes<Payment>, InferCreationAttrib
   @NotNull
   @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
+
+  // Model Validators
+  @ModelValidator
+  async ensureFiscalPeriodAndPaidOnConsistency() {
+    const fiscalPeriod = await FiscalPeriod.findByPk(this.fiscalPeriodId)
+
+    if (isNil(fiscalPeriod)) {
+      throw new Error(`Fiscal period with ID ${this.fiscalPeriodId} not found`)
+    }
+
+    const paidOnDate = new Date(this.paidOn)
+    const dateStart = new Date(fiscalPeriod.dateStart)
+    const dateEnd = new Date(fiscalPeriod.dateEnd)
+
+    if (paidOnDate < dateStart || paidOnDate > dateEnd) {
+      throw new Error(
+        `Paid on date ${this.paidOn} is not aligned with fiscal period: ` +
+          `expected date between ${fiscalPeriod.dateStart} and ${fiscalPeriod.dateEnd}`
+      )
+    }
+  }
 
   // Associations
   @BelongsTo(() => Centre, {

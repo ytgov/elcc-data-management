@@ -31,6 +31,7 @@ This file follows the format from https://agents.md/ for AI agent documentation.
   - [Test Structure (AAA Pattern)](#test-structure-aaa-pattern)
 - [Authentication and Authorization](#authentication-and-authorization)
 - [Changelog Management](#changelog-management)
+- [Pull Request Documentation](#pull-request-documentation)
 
 ---
 
@@ -555,17 +556,84 @@ pages/
 
 **Pattern:** The route name mirrors the file path under `pages/`.
 
-### Decimal Type Handling
+### Financial Precision
 
-**Problem:** SQL DECIMAL types are serialized as strings to preserve precision.
+**Principle:** Financial calculations must minimize rounding errors and be reproducible. Precision loss from floating-point arithmetic must be avoided in intermediate calculations.
 
-**Pattern:** Use `big.js` for precise decimal arithmetic. Convert strings to Big for calculations, then back to strings for storage. For simple display or non-critical calculations, converting to `Number()` is acceptable.
+**Why it matters:**
+- Floating-point arithmetic introduces unpredictable rounding (0.1 + 0.2 ≠ 0.3 in JavaScript)
+- Small errors compound across hundreds of records and fiscal periods
+- Financial reports should reconcile with source data
+- Audit requirements demand reproducible, explainable calculations
+- Rounding should be explicit and controlled, not a side effect of arithmetic
 
-**Key principles:**
+**Current implementation:** The system uses fixed-precision decimal types for storage and arbitrary-precision arithmetic for calculations. Financial values are never stored or calculated using JavaScript's native `Number` type.
 
-- Backend serializes DECIMAL as `string` to preserve precision
-- Frontend types should reflect this: `amount: string` not `amount: number`
-- Use `big.js` for arithmetic to maintain precision
+#### Storage
+
+Financial data uses SQL DECIMAL types with sufficient precision:
+
+- **Money fields**: `DECIMAL(15,4)` - currency amounts
+- **Rate fields**: `DECIMAL(10,4)` - hourly wages, unit rates
+- **Percentage fields**: `DECIMAL(5,2)` - cost caps, rates
+- **Hours/quantities**: `DECIMAL(10,2)` - time tracking, quantities
+
+Database values serialize as strings to preserve precision during JSON transport.
+
+#### Type Definitions
+
+TypeScript types reflect the string serialization:
+
+```typescript
+@Attribute(DataTypes.DECIMAL(15, 4))
+@NotNull
+declare amount: string
+
+@Attribute(DataTypes.DECIMAL(5, 2))
+@NotNull
+declare costCapPercentage: string
+```
+
+#### Arithmetic
+
+All financial calculations use `big.js` for arbitrary-precision arithmetic:
+
+**Backend:**
+
+```typescript
+import Big from "big.js"
+import sumByDecimal from "@/utils/sum-by-decimal"
+
+// Operations return strings
+const total = Big(amount1).plus(amount2).toFixed(4)
+const result = Big(monthlyAmount).mul(rate).toFixed(4)
+
+// Utilities for common operations
+const sum = sumByDecimal(items, "amount").toFixed(4)
+```
+
+**Frontend:**
+
+```typescript
+import Big from "big.js"
+import { formatMoney } from "@/utils/formatters"
+import sumByDecimal from "@/utils/sum-by-decimal"
+
+// Calculations maintain precision
+const total = Big(line.monthlyAmount).mul(rate).toFixed(4)
+const sum = sumByDecimal(items.value, "amount").toFixed(4)
+
+// Display formatting accepts strings or Big instances
+const formatted = formatMoney(total)
+```
+
+#### Rules
+
+- Never use JavaScript arithmetic operators (`+`, `-`, `*`, `/`) on financial values
+- All financial values are strings in TypeScript, never `number`
+- Test data must use string literals: `"100.50"` not `100.50`
+- Use `.toFixed(4)` for money, `.toFixed(2)` for percentages/hours
+- Financial calculations must be reproducible and minimize precision loss.
 
 ---
 
@@ -1363,3 +1431,60 @@ When in doubt, follow these patterns. When extending the codebase, maintain thes
   - Scan `git log` since the last upstream tag.
   - Group commits by emoji into provisional sections (`Added`, `Changed`, `Fixed`, and so on).
   - Output a **draft Unreleased block** that is then manually curated to remove noise and rephrase entries as user-focused bullets.
+
+---
+
+## Pull Request Documentation
+
+### Structure
+
+Pull requests follow the standard template defined in [`.github/pull_request_template.md`](./.github/pull_request_template.md).
+
+### Implementation Section
+
+**Pattern:** Use a numbered list describing high-level technical changes organized by layer or concern.
+
+**Good implementation entries:**
+
+```markdown
+1. Create database migrations to convert money fields to DECIMAL types:
+   - Migrate employee benefits from DECIMAL(10,2) to DECIMAL(15,4)
+   - Migrate payments from INTEGER (cents) to DECIMAL(15,4) (dollars)
+2. Update model definitions to match migrations:
+   - Change DataTypes from FLOAT/INTEGER to DECIMAL
+   - Change TypeScript types from `number` to `string`
+3. Add Big.js utilities for precise decimal arithmetic:
+   - Create sumByDecimal utility in both API and web
+   - Update formatMoney to accept Big type
+```
+
+**Key principles:**
+
+- Focus on **what changed** at an architectural level, not implementation details
+- Group related changes under common themes (migrations, models, utilities, etc.)
+- Use sub-bullets for specificity when a change has multiple parts
+- Mention new patterns or utilities introduced
+- Reference specific technologies or libraries when relevant (Big.js, Sequelize, etc.)
+- Order by dependency: migrations → models → services → components
+- Avoid file paths unless necessary for clarity
+
+### Testing Instructions
+
+**Pattern:** Provide step-by-step verification that covers the main user-facing changes.
+
+**Standard baseline:**
+
+```markdown
+1. Run the test suite via `dev test` (or `dev test_api`)
+2. Boot the app via `dev up`
+3. Check that the app compiles and you can log in at http://localhost:8080
+4. [Feature-specific testing steps]
+```
+
+**Feature-specific steps should:**
+
+- Use imperative mood ("Navigate to...", "Verify that...", "Check that...")
+- Cover the primary user workflows affected by changes
+- Test both happy path and edge cases when relevant
+- Reference specific URLs or UI elements to click
+- Verify data persistence when applicable

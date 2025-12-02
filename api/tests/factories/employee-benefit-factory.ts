@@ -34,13 +34,13 @@ export const employeeBenefitFactory = Factory.define<EmployeeBenefit>(
         id: params.fiscalPeriodId,
       })
 
-    const grossPayrollMonthlyActual = faker.number.int({ min: 1000, max: 50000 })
-    const grossPayrollMonthlyEstimated = faker.number.int({ min: 1000, max: 50000 })
-    const costCapPercentage = faker.number.float({ min: 0.01, max: 0.5, fractionDigits: 2 })
-    const employeeCostActual = faker.number.int({ min: 100, max: 10000 })
-    const employeeCostEstimated = faker.number.int({ min: 100, max: 10000 })
-    const employerCostActual = faker.number.int({ min: 100, max: 10000 })
-    const employerCostEstimated = faker.number.int({ min: 100, max: 10000 })
+    const grossPayrollMonthlyActual = faker.finance.amount({ min: 1000, max: 50000 })
+    const grossPayrollMonthlyEstimated = faker.finance.amount({ min: 1000, max: 50000 })
+    const costCapPercentage = faker.finance.amount({ min: 0.01, max: 0.5 })
+    const employeeCostActual = faker.finance.amount({ min: 100, max: 10000 })
+    const employeeCostEstimated = faker.finance.amount({ min: 100, max: 10000 })
+    const employerCostActual = faker.finance.amount({ min: 100, max: 10000 })
+    const employerCostEstimated = faker.finance.amount({ min: 100, max: 10000 })
 
     const employeeBenefit = EmployeeBenefit.build({
       centreId: centre.id,

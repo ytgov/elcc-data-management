@@ -1,8 +1,15 @@
 <template>
   <v-skeleton-loader
-    v-if="isLoading"
+    v-if="isNil(fundingReconciliation) && isLoading"
     type="table"
   />
+  <v-alert
+    v-else-if="isNil(fundingReconciliation) && !isLoading"
+    type="warning"
+    variant="tonal"
+  >
+    Funding reconciliation data is not available for this centre.
+  </v-alert>
   <v-table
     v-else
     class="ma-4"

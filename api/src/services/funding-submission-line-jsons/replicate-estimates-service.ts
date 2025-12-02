@@ -17,8 +17,8 @@ export class ReplicateEstimatesService extends BaseService {
     const cleanLines = this.fundingSubmissionLineJson.lines.map((line) => {
       return {
         ...line,
-        actualChildOccupancyRate: 0,
-        actualComputedTotal: 0,
+        actualChildOccupancyRate: "0",
+        actualComputedTotal: "0",
       }
     })
     const futureSubmissions = await FundingSubmissionLineJson.findAll({

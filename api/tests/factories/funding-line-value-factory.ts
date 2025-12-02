@@ -22,11 +22,11 @@ export const fundingLineValueFactory = Factory.define<FundingLineValue>(({ param
     submissionLineId: params.submissionLineId,
     sectionName: faker.helpers.arrayElement(SECTION_NAMES_EXAMPLES),
     lineName: faker.helpers.arrayElement(LINE_NAMES_EXAMPLES),
-    monthlyAmount: Number(faker.finance.amount({ min: 0, max: 1000, dec: 2 })),
-    estimatedChildOccupancyRate: 0,
-    actualChildOccupancyRate: 0,
-    estimatedComputedTotal: 0,
-    actualComputedTotal: 0,
+    monthlyAmount: faker.finance.amount({ min: 0, max: 1000, dec: 2 }),
+    estimatedChildOccupancyRate: "0",
+    actualChildOccupancyRate: "0",
+    estimatedComputedTotal: "0",
+    actualComputedTotal: "0",
   }
 })
 

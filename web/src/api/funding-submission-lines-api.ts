@@ -13,7 +13,7 @@ export type FundingSubmissionLine = {
   lineName: string
   fromAge: number | null
   toAge: number | null
-  monthlyAmount: number
+  monthlyAmount: string
   createdAt: string
   updatedAt: string
 }
@@ -22,12 +22,10 @@ export type FundingSubmissionLinePolicy = Policy
 
 export type FundingSubmissionLineAsIndex = FundingSubmissionLine & {
   ageRange: string
-  monthlyAmountDisplay: string
 }
 
 export type FundingSubmissionLineAsShow = FundingSubmissionLine & {
   ageRange: string
-  monthlyAmountDisplay: string
 }
 
 export type FundingSubmissionLineWhereOptions = WhereOptions<

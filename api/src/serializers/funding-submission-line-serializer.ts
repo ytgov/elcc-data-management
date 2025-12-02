@@ -1,7 +1,5 @@
 import { pick } from "lodash"
 
-import { formatDollar } from "@/utils/formatter"
-
 import { FundingSubmissionLine } from "@/models"
 
 import BaseSerializer from "@/serializers/base-serializer"
@@ -25,8 +23,6 @@ export class FundingSubmissionLineSerializer extends BaseSerializer<FundingSubmi
         "monthlyAmount",
       ]),
       ageRange: `${this.record.fromAge} ${this.record.toAge}`,
-      // TODO: move formating of it to the front-end
-      monthlyAmountDisplay: formatDollar(this.record.monthlyAmount),
     }
   }
 }

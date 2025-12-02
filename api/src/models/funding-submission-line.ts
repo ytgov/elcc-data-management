@@ -53,10 +53,9 @@ export class FundingSubmissionLine extends BaseModel<
   @Attribute(DataTypes.INTEGER)
   declare toAge: number | null
 
-  // TODO: migrate column to DataTypes.DECIMAL(19, 4), see https://github.com/icefoganalytics/elcc-data-management/issues/33
-  @Attribute(DataTypes.FLOAT)
+  @Attribute(DataTypes.DECIMAL(15, 4))
   @NotNull
-  declare monthlyAmount: number
+  declare monthlyAmount: string
 
   @Attribute(DataTypes.DATE)
   @NotNull

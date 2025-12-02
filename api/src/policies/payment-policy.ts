@@ -22,7 +22,7 @@ export class PaymentPolicy extends PolicyFactory(Payment) {
   }
 
   permittedAttributes(): Path[] {
-    return ["paidOn", "amountInCents", "name"]
+    return ["paidOn", "amount", "name"]
   }
 
   permittedAttributesForCreate(): Path[] {
