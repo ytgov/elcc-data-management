@@ -12,7 +12,7 @@ export const fundingPeriodRouter = express.Router()
 fundingPeriodRouter.use(checkJwt)
 fundingPeriodRouter.use(autheticateAndLoadUser)
 
-fundingPeriodRouter.get("/", async (req: Request, res: Response) => {
+fundingPeriodRouter.get("/", async (_req: Request, res: Response) => {
   const fundingPeriods = await FundingPeriod.findAll()
   res.json({ data: fundingPeriods })
 })
@@ -49,6 +49,6 @@ fundingPeriodRouter.post("/", async (req: Request, res: Response) => {
     })
 })
 
-fundingPeriodRouter.delete("/:id", async (req: Request, res: Response) => {
+fundingPeriodRouter.delete("/:id", async (_req: Request, res: Response) => {
   res.json({})
 })

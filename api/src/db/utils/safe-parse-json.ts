@@ -1,4 +1,4 @@
-export function safeJsonParse(values: string): any[] {
+export function safeJsonParse(values: string): unknown[] {
   try {
     const lines = JSON.parse(values)
     if (Array.isArray(lines)) {

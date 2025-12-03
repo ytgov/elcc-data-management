@@ -6,12 +6,15 @@
           cols="12"
           md="6"
         >
-          <FiscalPeriodFiscalYearSelect
-            v-model="fiscalYearSlug"
+          <FundingPeriodFiscalYearSelect
+            v-model="fiscalYear"
             label="Fiscal year"
             single-line
             hide-details
             density="compact"
+            clearable
+            clear-icon="mdi-restore"
+            @click:clear="fiscalYear = CURRENT_FISCAL_YEAR"
           />
         </v-col>
         <v-col
@@ -34,24 +37,32 @@
       <v-btn
         color="primary"
         :to="{
-          name: 'administration/funding-periods/FundingPeriodNewPage',
+          name: 'administration/submission-lines/SubmissionLineNewPage',
+          query: newSubmissionLineQuery,
         }"
       >
         <v-icon class="mr-3">mdi-plus</v-icon>
-        New Fiscal Year
+        New Submission Line
       </v-btn>
     </template>
 
     <FundingSubmissionLinesDataTableServer
       :where="fundingSubmissionLinesWhere"
       :filters="fundingSubmissionLinesFilters"
+      :waiting="isWaitingForFiscalYear"
     />
   </HeaderActionsCard>
 </template>
 <script setup lang="ts">
 import { ref, computed } from "vue"
+import { useRouteQuery } from "@vueuse/router"
+import { isEmpty, isNil } from "lodash"
 
-import getCurrentFiscalYearSlug from "@/utils/get-current-fiscal-year-slug"
+import {
+  getCurrentFiscalYearSlug,
+  normalizeFiscalYearToLongForm,
+  normalizeFiscalYearToShortForm,
+} from "@/utils/fiscal-year"
 
 import useBreadcrumbs from "@/use/use-breadcrumbs"
 import {
@@ -60,19 +71,36 @@ import {
 } from "@/use/use-funding-submission-lines"
 
 import HeaderActionsCard from "@/components/common/HeaderActionsCard.vue"
-import FiscalPeriodFiscalYearSelect from "@/components/fiscal-periods/FiscalPeriodFiscalYearSelect.vue"
+import FundingPeriodFiscalYearSelect from "@/components/funding-periods/FundingPeriodFiscalYearSelect.vue"
 import FundingSubmissionLinesDataTableServer from "@/components/funding-submission-lines/FundingSubmissionLinesDataTableServer.vue"
 
 const search = ref("")
-const fiscalYearSlug = ref(getCurrentFiscalYearSlug())
 
-const fiscalYear = computed(() => fiscalYearSlug.value.replace("-", "/"))
+const CURRENT_FISCAL_YEAR = normalizeFiscalYearToLongForm(getCurrentFiscalYearSlug())
+const fiscalYear = useRouteQuery<string | null>("fiscalYear", CURRENT_FISCAL_YEAR)
+
+const fiscalYearLegacy = computed(() => {
+  if (isNil(fiscalYear.value)) return null
+
+  const fiscalYearShort = normalizeFiscalYearToShortForm(fiscalYear.value)
+  return fiscalYearShort.replace("-", "/")
+})
+
+const newSubmissionLineQuery = computed(() => {
+  if (isNil(fiscalYear.value) || fiscalYear.value === CURRENT_FISCAL_YEAR) {
+    return {}
+  }
+
+  return {
+    fiscalYear: fiscalYear.value,
+  }
+})
 
 const fundingSubmissionLinesWhere = computed(() => {
   const where: FundingSubmissionLineWhereOptions = {}
 
-  if (fiscalYear.value) {
-    where.fiscalYear = fiscalYear.value
+  if (fiscalYearLegacy.value) {
+    where.fiscalYear = fiscalYearLegacy.value
   }
 
   return where
@@ -87,6 +115,10 @@ const fundingSubmissionLinesFilters = computed(() => {
 
   return filters
 })
+
+const isWaitingForFiscalYear = computed(
+  () => isNil(fiscalYearLegacy.value) || isEmpty(fiscalYearLegacy.value)
+)
 
 useBreadcrumbs("Submission Lines", [
   {

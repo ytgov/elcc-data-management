@@ -1,12 +1,14 @@
 import { pick } from "lodash"
 
-import { ReplicateEstimatesService } from "@/services/funding-submission-line-jsons"
+import { FundingSubmissionLineJson } from "@/models"
 import {
   centreFactory,
   fundingLineValueFactory,
   fundingSubmissionLineFactory,
   fundingSubmissionLineJsonFactory,
 } from "@/factories"
+
+import ReplicateEstimatesService from "@/services/funding-submission-line-jsons/replicate-estimates-service"
 
 describe("api/src/services/funding-submission-line-jsons/replicate-estimates-service.ts", () => {
   describe("ReplicateEstimatesService", () => {
@@ -18,25 +20,25 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
         const fundingLineValue1 = fundingLineValueFactory.build({
           submissionLineId: submissionLine1.id,
           ...pick(submissionLine1.dataValues, "sectionName", "lineName", "monthlyAmount"),
-          estimatedChildOccupancyRate: 1,
-          actualChildOccupancyRate: 2,
-          estimatedComputedTotal: 3,
-          actualComputedTotal: 4,
+          estimatedChildOccupancyRate: "1",
+          actualChildOccupancyRate: "2",
+          estimatedComputedTotal: "3",
+          actualComputedTotal: "4",
         })
         const fundingLineValue2 = fundingLineValueFactory.build({
           submissionLineId: submissionLine1.id,
           ...pick(submissionLine1.dataValues, "sectionName", "lineName", "monthlyAmount"),
-          estimatedChildOccupancyRate: 0,
-          actualChildOccupancyRate: 0,
-          estimatedComputedTotal: 0,
-          actualComputedTotal: 0,
+          estimatedChildOccupancyRate: "0",
+          actualChildOccupancyRate: "0",
+          estimatedComputedTotal: "0",
+          actualComputedTotal: "0",
         })
         const fundingSubmissionLineJson1 = await fundingSubmissionLineJsonFactory.create({
           centreId: centre1.id,
           fiscalYear: "2023/24",
           dateStart: new Date("2023-04-01T00:00:00Z"),
           dateEnd: new Date("2023-04-30T23:59:59Z"),
-          dateName: "April",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
           lines: [fundingLineValue1],
         })
         const fundingSubmissionLineJson2 = await fundingSubmissionLineJsonFactory.create({
@@ -44,7 +46,7 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
           fiscalYear: "2023/24",
           dateStart: new Date("2023-05-01T00:00:00Z"),
           dateEnd: new Date("2023-05-31T23:59:59Z"),
-          dateName: "May",
+          dateName: FundingSubmissionLineJson.Months.MAY,
           lines: [fundingLineValue2],
         })
 
@@ -56,10 +58,10 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
         expect(fundingSubmissionLineJson2.lines).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              estimatedChildOccupancyRate: 1,
-              actualChildOccupancyRate: 0,
-              estimatedComputedTotal: 3,
-              actualComputedTotal: 0,
+              estimatedChildOccupancyRate: "1",
+              actualChildOccupancyRate: "0",
+              estimatedComputedTotal: "3",
+              actualComputedTotal: "0",
             }),
           ])
         )
@@ -72,25 +74,25 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
         const fundingLineValue1 = fundingLineValueFactory.build({
           submissionLineId: submissionLine1.id,
           ...pick(submissionLine1.dataValues, "sectionName", "lineName", "monthlyAmount"),
-          estimatedChildOccupancyRate: 0,
-          actualChildOccupancyRate: 0,
-          estimatedComputedTotal: 0,
-          actualComputedTotal: 0,
+          estimatedChildOccupancyRate: "0",
+          actualChildOccupancyRate: "0",
+          estimatedComputedTotal: "0",
+          actualComputedTotal: "0",
         })
         const fundingLineValue2 = fundingLineValueFactory.build({
           submissionLineId: submissionLine1.id,
           ...pick(submissionLine1.dataValues, "sectionName", "lineName", "monthlyAmount"),
-          estimatedChildOccupancyRate: 1,
-          actualChildOccupancyRate: 2,
-          estimatedComputedTotal: 3,
-          actualComputedTotal: 4,
+          estimatedChildOccupancyRate: "1",
+          actualChildOccupancyRate: "2",
+          estimatedComputedTotal: "3",
+          actualComputedTotal: "4",
         })
         const fundingSubmissionLineJson1 = await fundingSubmissionLineJsonFactory.create({
           centreId: centre1.id,
           fiscalYear: "2023/24",
           dateStart: new Date("2023-04-01T00:00:00Z"),
           dateEnd: new Date("2023-04-30T23:59:59Z"),
-          dateName: "April",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
           lines: [fundingLineValue1],
         })
         const fundingSubmissionLineJson2 = await fundingSubmissionLineJsonFactory.create({
@@ -98,7 +100,7 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
           fiscalYear: "2023/24",
           dateStart: new Date("2023-05-01T00:00:00Z"),
           dateEnd: new Date("2023-05-31T23:59:59Z"),
-          dateName: "May",
+          dateName: FundingSubmissionLineJson.Months.MAY,
           lines: [fundingLineValue2],
         })
 
@@ -110,10 +112,10 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
         expect(fundingSubmissionLineJson1.lines).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              estimatedChildOccupancyRate: 0,
-              actualChildOccupancyRate: 0,
-              estimatedComputedTotal: 0,
-              actualComputedTotal: 0,
+              estimatedChildOccupancyRate: "0",
+              actualChildOccupancyRate: "0",
+              estimatedComputedTotal: "0",
+              actualComputedTotal: "0",
             }),
           ])
         )
@@ -127,25 +129,25 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
         const fundingLineValue1 = fundingLineValueFactory.build({
           submissionLineId: submissionLine1.id,
           ...pick(submissionLine1.dataValues, "sectionName", "lineName", "monthlyAmount"),
-          estimatedChildOccupancyRate: 1,
-          actualChildOccupancyRate: 2,
-          estimatedComputedTotal: 3,
-          actualComputedTotal: 4,
+          estimatedChildOccupancyRate: "1",
+          actualChildOccupancyRate: "2",
+          estimatedComputedTotal: "3",
+          actualComputedTotal: "4",
         })
         const fundingLineValue2 = fundingLineValueFactory.build({
           submissionLineId: submissionLine1.id,
           ...pick(submissionLine1.dataValues, "sectionName", "lineName", "monthlyAmount"),
-          estimatedChildOccupancyRate: 0,
-          actualChildOccupancyRate: 0,
-          estimatedComputedTotal: 0,
-          actualComputedTotal: 0,
+          estimatedChildOccupancyRate: "0",
+          actualChildOccupancyRate: "0",
+          estimatedComputedTotal: "0",
+          actualComputedTotal: "0",
         })
         const fundingSubmissionLineJson1 = await fundingSubmissionLineJsonFactory.create({
           centreId: centre1.id,
           fiscalYear: "2023/24",
           dateStart: new Date("2023-04-01T00:00:00Z"),
           dateEnd: new Date("2023-04-30T23:59:59Z"),
-          dateName: "April",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
           lines: [fundingLineValue1],
         })
         const fundingSubmissionLineJson2 = await fundingSubmissionLineJsonFactory.create({
@@ -153,7 +155,7 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
           fiscalYear: "2023/24",
           dateStart: new Date("2023-05-01T00:00:00Z"),
           dateEnd: new Date("2023-05-31T23:59:59Z"),
-          dateName: "May",
+          dateName: FundingSubmissionLineJson.Months.MAY,
           lines: [fundingLineValue2],
         })
 
@@ -165,10 +167,10 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
         expect(fundingSubmissionLineJson2.lines).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              estimatedChildOccupancyRate: 0,
-              actualChildOccupancyRate: 0,
-              estimatedComputedTotal: 0,
-              actualComputedTotal: 0,
+              estimatedChildOccupancyRate: "0",
+              actualChildOccupancyRate: "0",
+              estimatedComputedTotal: "0",
+              actualComputedTotal: "0",
             }),
           ])
         )
@@ -181,25 +183,25 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
         const fundingLineValue1 = fundingLineValueFactory.build({
           submissionLineId: submissionLine1.id,
           ...pick(submissionLine1.dataValues, "sectionName", "lineName", "monthlyAmount"),
-          estimatedChildOccupancyRate: 1,
-          actualChildOccupancyRate: 2,
-          estimatedComputedTotal: 3,
-          actualComputedTotal: 4,
+          estimatedChildOccupancyRate: "1",
+          actualChildOccupancyRate: "2",
+          estimatedComputedTotal: "3",
+          actualComputedTotal: "4",
         })
         const fundingLineValue2 = fundingLineValueFactory.build({
           submissionLineId: submissionLine1.id,
           ...pick(submissionLine1.dataValues, "sectionName", "lineName", "monthlyAmount"),
-          estimatedChildOccupancyRate: 0,
-          actualChildOccupancyRate: 0,
-          estimatedComputedTotal: 0,
-          actualComputedTotal: 0,
+          estimatedChildOccupancyRate: "0",
+          actualChildOccupancyRate: "0",
+          estimatedComputedTotal: "0",
+          actualComputedTotal: "0",
         })
         const fundingSubmissionLineJson1 = await fundingSubmissionLineJsonFactory.create({
           centreId: centre1.id,
           fiscalYear: "2023/24",
           dateStart: new Date("2023-04-01T00:00:00Z"),
           dateEnd: new Date("2023-04-30T23:59:59Z"),
-          dateName: "April",
+          dateName: FundingSubmissionLineJson.Months.APRIL,
           lines: [fundingLineValue1],
         })
         const fundingSubmissionLineJson2 = await fundingSubmissionLineJsonFactory.create({
@@ -207,7 +209,7 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
           fiscalYear: "2024/25",
           dateStart: new Date("2024-05-01T00:00:00Z"),
           dateEnd: new Date("2024-05-31T23:59:59Z"),
-          dateName: "May",
+          dateName: FundingSubmissionLineJson.Months.MAY,
           lines: [fundingLineValue2],
         })
 
@@ -219,10 +221,10 @@ describe("api/src/services/funding-submission-line-jsons/replicate-estimates-ser
         expect(fundingSubmissionLineJson2.lines).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              estimatedChildOccupancyRate: 0,
-              actualChildOccupancyRate: 0,
-              estimatedComputedTotal: 0,
-              actualComputedTotal: 0,
+              estimatedChildOccupancyRate: "0",
+              actualChildOccupancyRate: "0",
+              estimatedComputedTotal: "0",
+              actualComputedTotal: "0",
             }),
           ])
         )

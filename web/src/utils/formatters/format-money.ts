@@ -1,27 +1,20 @@
-import { isNil } from "lodash"
+import Big from "big.js"
 
-export function centsToDollars(value: number | undefined) {
-  if (isNil(value)) {
-    return 0
-  }
-
-  return value / 100
-}
-
-export function dollarsToCents(value: number | undefined) {
-  if (isNil(value)) {
-    return 0
-  }
-
-  return value * 100
-}
-
+// TODO: rename to formatCurrency
 export function formatMoney(
-  input: number | undefined,
+  input: number | string | Big | undefined,
   options: Intl.NumberFormatOptions & {
     locales?: string | string[] | undefined
   } = {}
-) {
+): string {
+  if (input === Infinity || input === -Infinity) {
+    throw new Error("Infinity and -Infinity are not supported.")
+  }
+
+  if (Object.is(input, -0) || Number.isNaN(input) || input === undefined) {
+    return "0"
+  }
+
   const locales = options.locales || "en-CA"
   delete options.locales
 
@@ -35,15 +28,14 @@ export function formatMoney(
     //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
   })
 
-  if (input === Infinity || input === -Infinity) {
-    throw new Error("Infinity and -Infinity are not supported.")
+  let inputAsNumber: number
+  if (typeof input === "string") {
+    inputAsNumber = Number(input)
+  } else if (input instanceof Big) {
+    inputAsNumber = input.toNumber()
+  } else {
+    inputAsNumber = input
   }
 
-  if (Object.is(input, -0) || Number.isNaN(input) || input === undefined) {
-    return formatter.format(0)
-  }
-
-  return formatter.format(input)
+  return formatter.format(inputAsNumber)
 }
-
-export default formatMoney

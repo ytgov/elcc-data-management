@@ -55,7 +55,7 @@ class DevHelper
   end
 
   def up(*args, **kwargs)
-    compose(*%w[up --remove-orphans], *args, **kwargs)
+    compose(*%w[up --remove-orphans --force-recreate], *args, **kwargs)
   end
 
   def down(*args, **kwargs)

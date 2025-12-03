@@ -10,6 +10,7 @@ import {
   Attribute,
   AutoIncrement,
   Default,
+  HasMany,
   NotNull,
   PrimaryKey,
   Table,
@@ -19,6 +20,7 @@ import {
 import { isEmpty, isNil } from "lodash"
 
 import BaseModel from "@/models/base-model"
+import FundingReconciliation from "@/models/funding-reconciliation"
 
 // TODO: standardize to snake_case
 export enum UserStatus {
@@ -128,6 +130,14 @@ export class User extends BaseModel<InferAttributes<User>, InferCreationAttribut
   get isSystemAdmin(): NonAttribute<boolean> {
     return this.roles.includes(UserRoles.SYSTEM_ADMINISTRATOR)
   }
+
+  @HasMany(() => FundingReconciliation, {
+    foreignKey: "finalizedById",
+    inverse: {
+      as: "finalizedBy",
+    },
+  })
+  declare finalizedReconciliations?: NonAttribute<FundingReconciliation[]>
 
   static establishScopes() {
     this.addSearchScope(["firstName", "lastName", "email"])

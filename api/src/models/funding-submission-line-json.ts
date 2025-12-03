@@ -15,11 +15,31 @@ import {
   NotNull,
   PrimaryKey,
   Table,
+  ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
+
+import { isValidFiscalYearLegacy } from "@/models/validators"
 
 import BaseModel from "@/models/base-model"
 import Centre from "@/models/centre"
 import FundingLineValue from "@/models/funding-line-value"
+
+export enum FundingSubmissionLineJsonMonths {
+  APRIL = "April",
+  MAY = "May",
+  JUNE = "June",
+  JULY = "July",
+  AUGUST = "August",
+  SEPTEMBER = "September",
+  OCTOBER = "October",
+  NOVEMBER = "November",
+  DECEMBER = "December",
+  JANUARY = "January",
+  FEBRUARY = "February",
+  MARCH = "March",
+}
+
+const FUNDING_SUBMISSION_LINE_JSON_MONTHS = Object.values(FundingSubmissionLineJsonMonths)
 
 // TODO: consider renaming this to MonthlyWorksheet?
 // TODO: link this model to a fiscal period, and remove fiscalYear, dateName, dateStart, and dateEnd
@@ -30,6 +50,8 @@ export class FundingSubmissionLineJson extends BaseModel<
   InferAttributes<FundingSubmissionLineJson>,
   InferCreationAttributes<FundingSubmissionLineJson>
 > {
+  static readonly Months = FundingSubmissionLineJsonMonths
+
   @Attribute(DataTypes.INTEGER)
   @PrimaryKey
   @AutoIncrement
@@ -39,13 +61,23 @@ export class FundingSubmissionLineJson extends BaseModel<
   @NotNull
   declare centreId: number
 
+  // TODO: normalize to url safe long-form fiscal year 2023-2024
   @Attribute(DataTypes.STRING(10))
   @NotNull
+  @ValidateAttribute({
+    isValidFiscalYearLegacy,
+  })
   declare fiscalYear: string
 
   @Attribute(DataTypes.STRING(100))
   @NotNull
-  declare dateName: string
+  @ValidateAttribute({
+    isIn: {
+      args: [FUNDING_SUBMISSION_LINE_JSON_MONTHS],
+      msg: `Month must be one of: ${FUNDING_SUBMISSION_LINE_JSON_MONTHS.join(", ")}`,
+    },
+  })
+  declare dateName: FundingSubmissionLineJsonMonths
 
   @Attribute(DataTypes.DATE)
   @NotNull
@@ -111,7 +143,7 @@ export class FundingSubmissionLineJson extends BaseModel<
                   JSON_VALUE(
                     json_array_element.value,
                     '$.actualChildOccupancyRate'
-                  ) AS int
+                  ) AS decimal(10,2)
                 ),
                 0
               )

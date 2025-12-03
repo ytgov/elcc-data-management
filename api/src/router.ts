@@ -10,12 +10,7 @@ import { UnauthorizedError } from "express-jwt"
 
 import { GIT_COMMIT_HASH, RELEASE_TAG } from "@/config"
 import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
-import {
-  centreRouter,
-  fundingPeriodRouter,
-  migrationRouter,
-  submissionLineRouter,
-} from "@/routes"
+import { centreRouter, fundingPeriodRouter, submissionLineRouter } from "@/routes"
 
 import {
   CentresController,
@@ -24,8 +19,12 @@ import {
   EmployeeWageTiersController,
   FiscalPeriodsController,
   FundingPeriodsController,
+  FundingReconciliationAdjustmentsController,
+  FundingReconciliations,
+  FundingReconciliationsController,
   FundingSubmissionLineJsons,
   FundingSubmissionLineJsonsController,
+  FundingSubmissionLines,
   FundingSubmissionLinesController,
   PaymentsController,
   UsersController,
@@ -43,7 +42,6 @@ router.route("/_status").get((_req: Request, res: Response) => {
 })
 
 // TODO: replace legacy routes with newer style
-router.use("/api/migrate", migrationRouter)
 router.use("/api/centre", checkJwt, autheticateAndLoadUser, centreRouter)
 router.use("/api/funding-period", fundingPeriodRouter)
 router.use("/api/submission-line", submissionLineRouter)
@@ -81,6 +79,29 @@ router
   .delete(FundingPeriodsController.destroy)
 
 router
+  .route("/api/funding-reconciliations")
+  .get(FundingReconciliationsController.index)
+  .post(FundingReconciliationsController.create)
+router
+  .route("/api/funding-reconciliations/:fundingReconciliationId")
+  .get(FundingReconciliationsController.show)
+  .patch(FundingReconciliationsController.update)
+  .delete(FundingReconciliationsController.destroy)
+router
+  .route("/api/funding-reconciliations/:fundingReconciliationId/refresh")
+  .post(FundingReconciliations.RefreshController.create)
+
+router
+  .route("/api/funding-reconciliation-adjustments")
+  .get(FundingReconciliationAdjustmentsController.index)
+  .post(FundingReconciliationAdjustmentsController.create)
+router
+  .route("/api/funding-reconciliation-adjustments/:fundingReconciliationAdjustmentId")
+  .get(FundingReconciliationAdjustmentsController.show)
+  .patch(FundingReconciliationAdjustmentsController.update)
+  .delete(FundingReconciliationAdjustmentsController.destroy)
+
+router
   .route("/api/funding-submission-line-jsons")
   .get(FundingSubmissionLineJsonsController.index)
   .post(FundingSubmissionLineJsonsController.create)
@@ -97,6 +118,9 @@ router
   .route("/api/funding-submission-lines")
   .get(FundingSubmissionLinesController.index)
   .post(FundingSubmissionLinesController.create)
+router
+  .route("/api/funding-submission-lines/section-names")
+  .get(FundingSubmissionLines.SectionNamesController.index)
 router
   .route("/api/funding-submission-lines/:fundingSubmissionLineId")
   .get(FundingSubmissionLinesController.show)

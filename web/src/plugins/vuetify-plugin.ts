@@ -57,29 +57,6 @@ export default createVuetify({
     global: {
       ripple: true,
     },
-    VDateInput: {
-      variant: "outlined",
-      density: "comfortable",
-      color: "primary",
-      prependIcon: "",
-      appendInnerIcon: "mdi-calendar",
-      inputFormat: "yyyy-mm-dd",
-    },
-    VTextField: {
-      variant: "outlined",
-      density: "comfortable",
-      color: "primary",
-    },
-    VTextarea: {
-      variant: "outlined",
-      density: "comfortable",
-      color: "primary",
-    },
-    VSelect: {
-      variant: "outlined",
-      density: "comfortable",
-      color: "primary",
-    },
     VAutocomplete: {
       variant: "outlined",
       density: "comfortable",
@@ -90,6 +67,39 @@ export default createVuetify({
     },
     VCard: {
       elevation: 3,
+      VCardActions: {
+        VBtn: {
+          variant: "elevated",
+        },
+      },
+    },
+    VCombobox: {
+      variant: "outlined",
+      density: "comfortable",
+      color: "primary",
+    },
+    VDateInput: {
+      variant: "outlined",
+      density: "comfortable",
+      color: "primary",
+      prependIcon: "",
+      appendInnerIcon: "mdi-calendar",
+      inputFormat: "yyyy-mm-dd",
+    },
+    VSelect: {
+      variant: "outlined",
+      density: "comfortable",
+      color: "primary",
+    },
+    VTextField: {
+      variant: "outlined",
+      density: "comfortable",
+      color: "primary",
+    },
+    VTextarea: {
+      variant: "outlined",
+      density: "comfortable",
+      color: "primary",
     },
   },
 })

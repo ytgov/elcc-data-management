@@ -19,6 +19,7 @@ This file follows the format from https://agents.md/ for AI agent documentation.
   - [Composables: Singular vs Plural](#composables-singular-vs-plural)
   - [Component Architecture](#component-architecture)
   - [Component Naming and Location](#component-naming-and-location)
+  - [Route and File Organization](#route-and-file-organization)
   - [Decimal Type Handling](#decimal-type-handling)
 - [Backend Patterns](#backend-patterns)
   - [Controller Structure](#controller-structure)
@@ -27,7 +28,20 @@ This file follows the format from https://agents.md/ for AI agent documentation.
   - [Serializers](#serializers)
 - [Testing Conventions](#testing-conventions)
   - [Test Describe Blocks](#test-describe-blocks)
+  - [Test Structure (AAA Pattern)](#test-structure-aaa-pattern)
 - [Authentication and Authorization](#authentication-and-authorization)
+- [Changelog Management](#changelog-management)
+- [Pull Request Documentation](#pull-request-documentation)
+
+---
+
+## Development Approach
+
+**Pattern Learning:** Study existing code before implementing new features. Find similar functionality and adapt established patterns rather than reinventing approaches. When uncertain, choose the simplest approach that follows existing code structure.
+
+**Progressive Enhancement:** Build minimal working solutions first, then improve iteratively. Document uncertainties and future simplification opportunities. Start with working solutions, then enhance based on feedback and requirements.
+
+**Pattern Discovery:** Use git to identify emerging patterns by examining recently added files: `git log --since="3 months ago" --diff-filter=A --name-only --pretty=format: | sort | uniq -c | sort -nr`
 
 ---
 
@@ -136,10 +150,31 @@ docker compose -f docker-compose.development.yaml up --remove-orphans --build
 
 ### General Principles
 
-1. **Expanded, linear code over terse/functional**
+1. **Descriptive naming**
+   - Functions: `standardizeHexPattern` over `expandHex`
+   - Variables: `employeeBenefitsByMonth` over `benefits`
+   - Constants: Hoist magic numbers with descriptive names
+   - **Concise function naming**: Remove redundant context when clear from caller (e.g., `calculateEmployeeBenefitCost` over `calculateEmployeeBenefitMonthlyCost`)
+   - **Simplified parameter types**: Use minimal types needed, avoid unnecessary complexity
+   - **Direct parameter naming**: Use simple names without redundant context
+   - **Minimal parameter passing**: Pass only specific data needed, not entire objects (e.g., `fiscalPeriodId: number` over `fiscalPeriod: FiscalPeriod`)
+
+2. **No abbreviations**
+   - Variables: `migration` not `mig`
+   - SQL tables: `employee_benefits` not `emp_ben`
+   - Function parameters: `fiscalPeriod` not `fp`
+
+3. **Self-documenting code**
+   - Remove extraneous comments when code structure and naming are self-documenting
+   - Trust clear variable names and logic to provide clarity over explanatory comments
+   - Only retain comments that explain non-obvious business logic or complex reasoning
+   - **Prefer informative variable names over comments**: Choose descriptive names that make code self-documenting
+   - Reference: https://www.rubytapas.com/2016/06/13/episode-418/no-comment/
+
+4. **Expanded, linear code over terse/functional**
    - Prefer one thing per line
 
-2. **Guard clauses with blank lines**
+5. **Guard clauses with blank lines**
 
    ```typescript
    if (isNil(value)) return
@@ -147,33 +182,84 @@ docker compose -f docker-compose.development.yaml up --remove-orphans --build
    // Continue with main logic
    ```
 
-3. **No abbreviations**
-   - Variables: `migration` not `mig`
-   - SQL tables: `employee_benefits` not `emp_ben`
-   - Function parameters: `fiscalPeriod` not `fp`
-
-4. **Descriptive naming**
-   - Functions: `standardizeHexPattern` over `expandHex`
-   - Variables: `employeeBenefitsByMonth` over `benefits`
-   - Constants: Hoist magic numbers with descriptive names
-
-5. **File organization**
-   ```typescript
-   // Types
-   // Constants
-   // Props/Component setup
-   // Computed values
-   // Methods/Functions
-   // Lifecycle hooks
-   ```
-
-6. **No emojis in code or text files**
+6. **No emojis in code and commit message format**
    - Avoid using emojis in source code, documentation files, and configuration files
-   - Exception: Git commit messages use GitHub-style emojis (e.g., :hammer:, :lock:, :recycle:)
+   - **Git commit messages** use GitHub-style emojis with specific format:
+
+     ```
+     :emoji: concise description
+
+     [optional] Why? Why I made the changes
+     ```
+
+   - **Common emojis**: `:hammer:` (refactoring), `:lock:` (security), `:recycle:` (cleanup), `:sparkles:` (new features), `:bug:` (bug fixes), `:docs:` (documentation), `:truck:` (move files), `:butterfly:` (database/table changes), `:pencil:` (typos/comments), `:fire:` (remove features), `:beetle:` (fix attempts), `:tophat:` (GitHub workflow), `:white_check_mark:` (passing tests), `:heavy_check_mark:` (passing tests), `:construction:` (work in progress), `:x:` (failing tests), `:mute:` (suppress warnings/logging), `:heavy_plus_sign:` (add dependencies), `:gear:` (configuration), `:factory:` (test factories), `:heavy_minus_sign:` (remove dependencies), `:refactor:` (refactoring), `:zap:` (performance), `:art:` (formatting/styling), `:loud_sound:` (logging)
+   - **Guidelines**: Keep first line concise (50 chars or less), use present tense, add "Why?" section for complex changes needing context
+
+7. **Import Organization and Formatting**
+   - **Import grouping strategy** (conceptual distance approach):
+     1. Foreign/third party imports (lodash, @sequelize/core, etc.) - most distant
+     2. Standard library imports - medium distance
+     3. Local application/library specific imports (models, policies, services, serializers) - closest
+   - **Blank lines between groups** as required by PEP 8
+   - **One import per line**: `import fs from "fs"` `import path from "path"` not `import fs, path from "fs"`
+   - **Exception**: Multiple imports from same module: `import { readFile, writeFile } from "fs/promises"`
+   - **Import placement**: Always at top of file, after comments/docstrings, before globals
+   - **Remove unused imports**: Keep import sections clean
+   - Reference: https://peps.python.org/pep-0008/#imports (modified for conceptual distance)
+
+### Model Organization
+
+#### Structure
+
+- **Section order**: Fields → Helpers → Associations → Static methods
+- **Helpers section**: Use dedicated "// Helpers" comment for computed properties and helper methods
+- **Getter over method**: Use getters for computed properties that don't take parameters
+- **NonAttribute typing**: Use `NonAttribute<T>` for computed properties that aren't database fields
+- **CreationOptional typing**: Use `CreationOptional<T>` only for actual database fields with defaults
+
+#### Enum Patterns
+
+- **Static enum access**: Add `static readonly Statuses = FundingReconciliationStatuses` to models for convenient access
+- **Plural enum naming**: Use plural forms for enum names (e.g., `FundingReconciliationStatuses` not `Status`)
+- **Export enum arrays**: `FUNDING_RECONCILIATION_STATUSES = Object.values(FundingReconciliationStatuses)`
+- **Dynamic validation**: Use template literals with enum arrays: `Status must be one of: ${FUNDING_RECONCILIATION_STATUSES.join(", ")}`
+- **Import reduction**: Consumers only need to import the model, not both model and enum
+
+#### Typing Rules
+
+- **CreationOptional Rule**: Use `CreationOptional` only for non-nullable fields with database defaults
+- **Nullable fields**: Type as `Type | null` without `CreationOptional`
+- **Required fields**: Don't use `CreationOptional` when they must be provided during creation
+- **Database defaults**: `CreationOptional` tells TypeScript the database will provide the value
+- **Examples**:
+  - `timestampField: CreationOptional<Date>` (non-nullable with database default)
+  - `optionalField: Type | null` (truly nullable, no CreationOptional)
+  - `requiredField: Type` (required, no CreationOptional)
 
 ---
 
 ## Frontend Patterns
+
+### Component Architecture
+
+- **Dedicated pages over dialogs**: Prefer dedicated pages for complex interactions instead of dialogs
+  - Better mobile support and flexibility
+  - More scalable for complex forms and data display
+  - Follow established admin page patterns
+- **Shared components**: Create reusable components for common UI elements (e.g., fiscal year selectors)
+- **Component standardization**: Align similar pages with consistent patterns and structure
+
+### Component Structure
+
+- **Vue component organization**:
+  ```typescript
+  // Types
+  // Constants
+  // Props/Component setup
+  // Computed values
+  // Methods/Functions
+  // Lifecycle hooks
+  ```
 
 ### Composables: Singular vs Plural
 
@@ -186,45 +272,44 @@ For single-record CRUD operations identified by ID.
 **Pattern:**
 
 ```typescript
-// web/src/use/use-employee-benefit.ts
+// web/src/use/use-user.ts
 import { type Ref, reactive, toRefs, unref, watch } from "vue"
 import { isNil } from "lodash"
-import employeeBenefitsApi, {
-  type EmployeeBenefitAsShow,
-  type EmployeeBenefitPolicy,
-} from "@/api/employee-benefits-api"
 
-export { type EmployeeBenefitAsShow }
+import usersApi, { UserRoles, type UserAsShow, type UserPolicy } from "@/api/users-api"
 
-export function useEmployeeBenefit(id: Ref<number | null | undefined>) {
+export { UserRoles, type UserAsShow, type UserPolicy }
+
+export function useUser(userId: Ref<number | null | undefined>) {
   const state = reactive<{
-    employeeBenefit: EmployeeBenefitAsShow | null
-    policy: EmployeeBenefitPolicy | null
+    user: UserAsShow | null
+    policy: UserPolicy | null
     isLoading: boolean
     isErrored: boolean
   }>({
-    employeeBenefit: null,
+    user: null,
     policy: null,
     isLoading: false,
     isErrored: false,
   })
 
-  async function fetch(): Promise<EmployeeBenefitAsShow> {
-    const staticId = unref(id)
+  async function fetch(): Promise<UserAsShow> {
+    const staticUserId = unref(userId)
 
-    if (isNil(staticId)) {
-      throw new Error("id is required")
+    if (isNil(staticUserId)) {
+      throw new Error("userId is required")
     }
 
     state.isLoading = true
+
     try {
-      const { employeeBenefit, policy } = await employeeBenefitsApi.get(staticId)
+      const { user, policy } = await usersApi.get(staticUserId)
       state.isErrored = false
-      state.employeeBenefit = employeeBenefit
+      state.user = user
       state.policy = policy
-      return employeeBenefit
+      return user
     } catch (error) {
-      console.error("Failed to fetch employee benefit:", error)
+      console.error(`Failed to fetch user: ${error}`, { error })
       state.isErrored = true
       throw error
     } finally {
@@ -232,27 +317,27 @@ export function useEmployeeBenefit(id: Ref<number | null | undefined>) {
     }
   }
 
-  async function save(): Promise<EmployeeBenefitAsShow> {
-    if (isNil(state.employeeBenefit)) {
-      throw new Error("Employee benefit is required")
+  async function save(): Promise<UserAsShow> {
+    const staticUserId = unref(userId)
+
+    if (isNil(staticUserId)) {
+      throw new Error("userId is required")
     }
 
-    if (isNil(state.employeeBenefit.id)) {
-      throw new Error("Employee benefit must have an id")
+    if (isNil(state.user)) {
+      throw new Error("user is required")
     }
 
     state.isLoading = true
+
     try {
-      const { employeeBenefit, policy } = await employeeBenefitsApi.update(
-        state.employeeBenefit.id,
-        state.employeeBenefit
-      )
+      const { user, policy } = await usersApi.update(staticUserId, state.user)
       state.isErrored = false
-      state.employeeBenefit = employeeBenefit
+      state.user = user
       state.policy = policy
-      return employeeBenefit
+      return user
     } catch (error) {
-      console.error(`Failed to save employee benefit: ${error}`, { error })
+      console.error(`Failed to save user: ${error}`, { error })
       state.isErrored = true
       throw error
     } finally {
@@ -261,9 +346,9 @@ export function useEmployeeBenefit(id: Ref<number | null | undefined>) {
   }
 
   watch(
-    () => unref(id),
-    async (newId) => {
-      if (isNil(newId)) return
+    () => unref(userId),
+    async (newUserId) => {
+      if (isNil(newUserId)) return
 
       await fetch()
     },
@@ -278,7 +363,7 @@ export function useEmployeeBenefit(id: Ref<number | null | undefined>) {
   }
 }
 
-export default useEmployeeBenefit
+export default useUser
 ```
 
 **Key characteristics:**
@@ -394,6 +479,10 @@ Handle all possible component states explicitly rather than implicitly.
 
 ### Component Naming and Location
 
+- **Component standardization**: Align similar pages with consistent patterns and structure
+- **Shared components**: Create reusable components for common UI elements (e.g., fiscal year selectors)
+- **Vuetify global defaults**: Use framework global defaults instead of custom styling for consistency and reduced maintenance
+
 **Pattern:** `components/{model-plural}/{ModelSingularOrPlural}[Modifier]{VuetifyComponent}.vue`
 
 The component name uses singular or plural based on whether it interacts with one entity or multiple entities. An optional modifier describes the action or purpose (Edit, Manage, etc.). The component type is the outermost Vuetify component used in the template.
@@ -427,17 +516,124 @@ components/
   - `Card` - `v-card`
   - `Form` - `v-form`
 
-### Decimal Type Handling
+### Route and File Organization
 
-**Problem:** SQL DECIMAL types are serialized as strings to preserve precision.
+**Core Principle:** Organize routes and files by domain, with predictable patterns between route names and file paths.
 
-**Pattern:** Use `big.js` for precise decimal arithmetic. Convert strings to Big for calculations, then back to strings for storage. For simple display or non-critical calculations, converting to `Number()` is acceptable.
+#### Route Naming Pattern
 
-**Key principles:**
+Use `{domain}/{resource}/{PageName}` format for route names:
 
-- Backend serializes DECIMAL as `string` to preserve precision
-- Frontend types should reflect this: `amount: string` not `amount: number`
-- Use `big.js` for arithmetic to maintain precision
+- `administration/submission-lines/SubmissionLineNewPage`
+- `administration/funding-periods/FundingPeriodEditPage`
+
+This makes it mechanical to locate the file from the route name.
+
+#### File Organization Pattern
+
+Group by domain, then resource:
+
+```
+pages/
+  administration/
+    AdministrationSubmissionLinesPage.vue      # List page at /administration/submission-lines
+    submission-lines/
+      SubmissionLineNewPage.vue                # New page at /administration/submission-lines/new
+    funding-periods/
+      FundingPeriodEditPage.vue                # Edit page at /administration/funding-periods/:id/edit
+```
+
+#### Route Example
+
+```ts
+// web/src/routes/administration-routes.ts
+{
+  path: "administration/submission-lines/new",
+  name: "administration/submission-lines/SubmissionLineNewPage",
+  component: () => import("@/pages/administration/submission-lines/SubmissionLineNewPage.vue"),
+}
+```
+
+**Pattern:** The route name mirrors the file path under `pages/`.
+
+### Financial Precision
+
+**Principle:** Financial calculations must minimize rounding errors and be reproducible. Precision loss from floating-point arithmetic must be avoided in intermediate calculations.
+
+**Why it matters:**
+- Floating-point arithmetic introduces unpredictable rounding (0.1 + 0.2 ≠ 0.3 in JavaScript)
+- Small errors compound across hundreds of records and fiscal periods
+- Financial reports should reconcile with source data
+- Audit requirements demand reproducible, explainable calculations
+- Rounding should be explicit and controlled, not a side effect of arithmetic
+
+**Current implementation:** The system uses fixed-precision decimal types for storage and arbitrary-precision arithmetic for calculations. Financial values are never stored or calculated using JavaScript's native `Number` type.
+
+#### Storage
+
+Financial data uses SQL DECIMAL types with sufficient precision:
+
+- **Money fields**: `DECIMAL(15,4)` - currency amounts
+- **Rate fields**: `DECIMAL(10,4)` - hourly wages, unit rates
+- **Percentage fields**: `DECIMAL(5,2)` - cost caps, rates
+- **Hours/quantities**: `DECIMAL(10,2)` - time tracking, quantities
+
+Database values serialize as strings to preserve precision during JSON transport.
+
+#### Type Definitions
+
+TypeScript types reflect the string serialization:
+
+```typescript
+@Attribute(DataTypes.DECIMAL(15, 4))
+@NotNull
+declare amount: string
+
+@Attribute(DataTypes.DECIMAL(5, 2))
+@NotNull
+declare costCapPercentage: string
+```
+
+#### Arithmetic
+
+All financial calculations use `big.js` for arbitrary-precision arithmetic:
+
+**Backend:**
+
+```typescript
+import Big from "big.js"
+import sumByDecimal from "@/utils/sum-by-decimal"
+
+// Operations return strings
+const total = Big(amount1).plus(amount2).toFixed(4)
+const result = Big(monthlyAmount).mul(rate).toFixed(4)
+
+// Utilities for common operations
+const sum = sumByDecimal(items, "amount").toFixed(4)
+```
+
+**Frontend:**
+
+```typescript
+import Big from "big.js"
+import { formatMoney } from "@/utils/formatters"
+import sumByDecimal from "@/utils/sum-by-decimal"
+
+// Calculations maintain precision
+const total = Big(line.monthlyAmount).mul(rate).toFixed(4)
+const sum = sumByDecimal(items.value, "amount").toFixed(4)
+
+// Display formatting accepts strings or Big instances
+const formatted = formatMoney(total)
+```
+
+#### Rules
+
+- Never use JavaScript arithmetic operators (`+`, `-`, `*`, `/`) on financial values
+- All financial values are strings in TypeScript, never `number`
+- Test data must use string literals: `"100.50"` not `100.50`
+- Use `.toFixed(4)` for money, `.toFixed(2)` for percentages/hours
+- Financial calculations must be reproducible and minimize precision loss.
 
 ---
 
@@ -748,9 +944,13 @@ export class CreateService extends BaseService {
       grossPayrollMonthlyActual,
     })
 
-    // TODO: log current user action
-
-    return employeeBenefit
+    return employeeBenefit.reload({
+      include: [
+        {
+          association: "someAssociation", // Reload with associations if needed for serialization
+        },
+      ],
+    })
   }
 }
 
@@ -789,12 +989,19 @@ export default UpdateService
 
 **Key patterns:**
 
-- Extends `BaseService` which provides static `perform()` method
-- Uses Sequelize `CreationAttributes` and `Attributes` types
+- Extends `BaseService` with constructor-based dependency injection
+- Uses Sequelize `CreationAttributes` and `Attributes` types with specific type aliases
 - Destructures required vs optional attributes
 - Inline validation with clear error messages
 - Optionally accepts `_currentUser` for audit logging
-- Call static `perform()` method with constructor arguments (e.g., `CreateService.perform(attributes)`)
+- Call static service methods: `CreateService.perform(attributes)` and `UpdateService.perform(record, attributes)`
+- Controllers focus on authorization and coordination, not business logic
+
+**Service Principles:**
+
+- Services have single responsibilities - don't bloat create/update services
+- Complex business logic should be in dedicated services
+- **Minimal data loading**: Only load associations that serializers actually need
 
 **Service naming:**
 
@@ -810,46 +1017,131 @@ Example: A `CreateService` for fiscal periods creates 12 records (one for each m
 
 **Pattern:** Control exactly which attributes are exposed to the API.
 
+#### Directory Structure
+
+Each model gets its own serializer directory with an `index.ts` that exports types and serializers with short aliases:
+
+```
+serializers/
+├── index.ts                          # Main entry point with namespace exports
+├── funding-reconciliations/
+│   ├── index.ts                      # Directory exports with aliases
+│   ├── index-serializer.ts           # List view serializer
+│   └── show-serializer.ts            # Detail view serializer
+└── funding-reconciliation-adjustments/
+    ├── index.ts
+    └── reference-serializer.ts       # Lightweight view for inclusion in parents
+```
+
+#### Export Pattern
+
+**Directory index.ts** exports both types and serializers with short aliases:
+
 ```typescript
-// api/src/serializers/employee-benefits/show-serializer.ts
-import { pick } from "lodash"
+// api/src/serializers/funding-reconciliations/index.ts
+export { type FundingReconciliationAsIndex as AsIndex, IndexSerializer } from "./index-serializer"
+export { type FundingReconciliationAsShow as AsShow, ShowSerializer } from "./show-serializer"
+```
 
-import { EmployeeBenefit } from "@/models"
+**Main serializers/index.ts** uses namespace exports:
+
+```typescript
+// api/src/serializers/index.ts
+export * as FundingReconciliations from "./funding-reconciliations"
+export * as FundingReconciliationAdjustments from "./funding-reconciliation-adjustments"
+```
+
+#### Type Naming Convention
+
+- **Full form** (in serializer files): `ModelAsFormat` (e.g., `FundingReconciliationAsIndex`, `FundingReconciliationAsShow`, `FundingReconciliationAdjustmentAsReference`)
+- **Short alias** (in directory index.ts): `AsFormat` (e.g., `AsIndex`, `AsShow`, `AsReference`)
+
+Format suffixes:
+
+- `AsIndex` - List/table views with minimal attributes
+- `AsShow` - Detail views with full attributes and associations
+- `AsReference` - Lightweight views for inclusion in parent serializers
+
+#### Usage Pattern
+
+Import through the main index and access via namespace:
+
+```typescript
+import { FundingReconciliations, FundingReconciliationAdjustments } from "@/serializers"
+
+// Serializer usage
+const fundingReconciliationSerialized =
+  FundingReconciliations.ShowSerializer.perform(fundingReconciliation)
+const fundingReconciliationAdjustmentsSerialized =
+  FundingReconciliationAdjustments.ReferenceSerializer.perform(fundingReconciliationAdjustments)
+```
+
+#### Association Validation
+
+Explicitly check for required associations with descriptive errors:
+
+```typescript
+const { adjustments } = this.record
+if (isUndefined(adjustments)) {
+  throw new Error("Expected adjustments association to be preloaded.")
+}
+```
+
+#### Serializer Implementation
+
+```typescript
+// api/src/serializers/funding-reconciliations/show-serializer.ts
+import { isUndefined, pick } from "lodash"
+
+import { FundingReconciliation } from "@/models"
 import BaseSerializer from "@/serializers/base-serializer"
+import { FundingReconciliationAdjustments } from "@/serializers"
 
-export type EmployeeBenefitAsShow = Pick<
-  EmployeeBenefit,
+export type FundingReconciliationAsShow = Pick<
+  FundingReconciliation,
   | "id"
   | "centreId"
-  | "fiscalPeriodId"
-  | "grossPayrollMonthlyActual"
-  | "grossPayrollMonthlyEstimated"
-  | "costCapPercentage"
-  | "employeeCostActual"
-  | "employeeCostEstimated"
-  | "employerCostActual"
-  | "employerCostEstimated"
+  | "fundingPeriodId"
+  | "status"
+  | "fundingReceivedTotalAmount"
+  | "eligibleExpensesTotalAmount"
+  | "payrollAdjustmentsTotalAmount"
+  | "finalBalanceAmount"
+  | "notes"
+  | "finalizedAt"
+  | "finalizedById"
   | "createdAt"
   | "updatedAt"
->
+> & {
+  adjustments: FundingReconciliationAdjustments.AsReference[]
+}
 
-export class ShowSerializer extends BaseSerializer<EmployeeBenefit> {
-  perform(): EmployeeBenefitAsShow {
+export class ShowSerializer extends BaseSerializer<FundingReconciliation> {
+  perform() {
+    const { adjustments } = this.record
+    if (isUndefined(adjustments)) {
+      throw new Error("Expected adjustments association to be preloaded.")
+    }
+
+    const adjustmentsSerialized =
+      FundingReconciliationAdjustments.ReferenceSerializer.perform(adjustments)
     return {
       ...pick(this.record, [
         "id",
         "centreId",
-        "fiscalPeriodId",
-        "grossPayrollMonthlyActual",
-        "grossPayrollMonthlyEstimated",
-        "costCapPercentage",
-        "employeeCostActual",
-        "employeeCostEstimated",
-        "employerCostActual",
-        "employerCostEstimated",
+        "fundingPeriodId",
+        "status",
+        "fundingReceivedTotalAmount",
+        "eligibleExpensesTotalAmount",
+        "payrollAdjustmentsTotalAmount",
+        "finalBalanceAmount",
+        "notes",
+        "finalizedAt",
+        "finalizedById",
         "createdAt",
         "updatedAt",
       ]),
+      adjustments: adjustmentsSerialized,
     }
   }
 }
@@ -862,8 +1154,8 @@ export default ShowSerializer
 - Extends `BaseSerializer` which provides static `perform()` for single records or arrays
 - Access record via `this.record` (provided by BaseSerializer)
 - Use lodash `pick()` to select attributes by name
-- Type-safe serialization with explicit return type
-- Separate serializers for different contexts (Show vs Index)
+- Separate serializers for different contexts (Index, Show, Reference)
+- Namespace pattern provides better IDE autocomplete and prevents naming conflicts
 
 ---
 
@@ -913,6 +1205,7 @@ describe("api/src/models/funding-period.ts", () => {
 ```
 
 **Rationale:**
+
 - First describe references the source file path for easy navigation from test output
 - Second describe groups tests by class/module name
 - Third describe identifies the method/action being tested with format `#methodName -> details`
@@ -959,8 +1252,40 @@ expect(response.body.user).toMatchObject({ id: user.id, email: user.email })
 ```
 
 **Rationale:**
+
 - One expect per test makes failures easier to diagnose and tests more focused
 - Multi-line formatting is more readable and follows the principle of one thing per line
+
+### Test Structure (AAA Pattern)
+
+**Pattern:** Use explicit `// Arrange`, `// Act`, `// Assert` comments to clearly delineate test sections.
+
+```typescript
+test("when there are payments, updates funding reconciliation amounts", async () => {
+  // Arrange
+  const centre = await centreFactory.create()
+  const fundingPeriod = await fundingPeriodFactory.create({
+    fiscalYear: "2025-2026",
+  })
+  const fundingReconciliation = await fundingReconciliationFactory.create({
+    centreId: centre.id,
+    fundingPeriodId: fundingPeriod.id,
+  })
+
+  // Act
+  await RefreshService.perform(fundingReconciliation)
+
+  // Assert
+  await fundingReconciliation.reload()
+  expect(fundingReconciliation.fundingReceivedTotalAmount).toBe("150.0000")
+})
+```
+
+**Rationale:**
+
+- Comments serve as visual separators making tests easier to scan
+- Clearly documents the test's structure and intent
+- Consistent structure across all tests in the codebase
 
 ---
 
@@ -1017,3 +1342,149 @@ These patterns ensure:
 - **Developer experience** with clear conventions
 
 When in doubt, follow these patterns. When extending the codebase, maintain these conventions.
+
+---
+
+## Changelog Management
+
+### Architecture
+
+- Maintain a **single canonical `CHANGELOG.md` file in the origin repository**.
+- Track **upstream history starting from `v2024.10.5.1`** using version sections:
+  - `## [vYYYY.MM.DD.x] - YYYY-MM-DD`
+- Use **`## [Unreleased]` for origin-only work**:
+  - Describes changes on `origin/main` **since the latest upstream release tag**.
+  - Do not create extra version sections for origin-only tags; move changes into a versioned section only when there is a corresponding upstream release.
+- Keep `CHANGELOG.md` in **reverse chronological order** with `Unreleased` at the top.
+
+### Versioning Scheme
+
+- The changelog format is based on **Keep a Changelog** (https://keepachangelog.com/en/1.0.0/).
+- Release tags and version headings use a **time-based version format**, not semantic versioning:
+  - `vYYYY.MM.DD.i` (for example `v2025.11.25.1`).
+  - These tags are generated by the `.github/workflows/docker-publish.yml` workflow using `tag_template: "yyyy.mm.dd.i"`.
+- Changelog sections should match these time-based tags so that `## [vYYYY.MM.DD.x] - YYYY-MM-DD` aligns with the GitHub release and Docker image tags.
+
+### Format and Content
+
+- Follow **Keep a Changelog** structure:
+  - `## [Unreleased]`
+  - `## [version] - date`
+  - Section headings:
+    - `### Added`
+    - `### Changed`
+    - `### Deprecated`
+    - `### Fixed`
+    - `### Removed`
+    - `### Security`
+- Focus on **user-impacting and product-owner-relevant changes**:
+  - Group low-level commits into a few high-level bullets.
+  - Use a single bullet such as "Developer improvements to tests, migrations, and logging" for large batches of internal changes.
+  - Avoid commit-log style listings and internal-only implementation details.
+- Include short **"Why?" explanations** for major technical changes:
+  - Framework upgrades (for example Sequelize 7, Node 22).
+  - New subsystems (for example funding reconciliations).
+  - Schema changes and migrations.
+- Use **clear, non-abbreviated language**:
+  - Describe features in domain terms (for example "funding reconciliation feature", "user administration improvements").
+  - Avoid table or variable abbreviations in entries.
+
+### Origin vs Upstream Responsibilities
+
+- **Upstream releases** define the official version numbers recorded in `CHANGELOG.md`.
+- **Origin-only changes** always live under `Unreleased`:
+  - Never create a version heading for an origin-only release.
+  - Non-upstream work stays in `Unreleased` until it has been deployed as part of an upstream release.
+- When an upstream release lands:
+  - Move the relevant `Unreleased` bullets into a new version section for that upstream tag.
+  - Update the `Unreleased` heading line to reference the new version (`Changes since vYYYY.MM.DD.x that will be included in the next release.`).
+
+### Release Workflow
+
+1. **Before tagging an upstream-aligned release**
+   - Review `Unreleased` and group items into user-facing themes.
+   - Remove overly detailed technical notes that only matter to developers.
+   - Ensure breaking changes, migrations, and security improvements are clearly called out.
+2. **At release time**
+   - Add a new version section: `## [vYYYY.MM.DD.x] - YYYY-MM-DD`.
+   - Move curated `Unreleased` bullets into the new section under the appropriate headings.
+   - Optionally add a short "Highlights" subsection with 3–5 key bullets.
+   - Reset `Unreleased` to reference the new version in its "Changes since …" line and leave it otherwise empty.
+
+### Per-PR Expectations
+
+- For any pull request that changes **user-visible behavior** or **database schema**:
+  - Add at least one bullet to `## [Unreleased]` under the correct heading.
+  - Write entries in user-facing language (what changed and why), not internal class or file names.
+  - Add a brief "Why?" for new subsystems or migration-relevant changes.
+- Pure refactors and test-only changes **may be omitted per PR** and summarized later as a single "developer improvements" bullet during release preparation.
+
+### Automation Hints
+
+- Git commit messages already use **GitHub-style emojis**; these can be used to draft changelog entries:
+  - `:sparkles:` → Added
+  - `:bug:` / `:beetle:` → Fixed
+  - `:recycle:` / `:hammer:` → Changed (refactor or structural change)
+  - `:fire:` → Removed
+  - `:lock:` → Security
+- A helper script can:
+  - Scan `git log` since the last upstream tag.
+  - Group commits by emoji into provisional sections (`Added`, `Changed`, `Fixed`, and so on).
+  - Output a **draft Unreleased block** that is then manually curated to remove noise and rephrase entries as user-focused bullets.
+
+---
+
+## Pull Request Documentation
+
+### Structure
+
+Pull requests follow the standard template defined in [`.github/pull_request_template.md`](./.github/pull_request_template.md).
+
+### Implementation Section
+
+**Pattern:** Use a numbered list describing high-level technical changes organized by layer or concern.
+
+**Good implementation entries:**
+
+```markdown
+1. Create database migrations to convert money fields to DECIMAL types:
+   - Migrate employee benefits from DECIMAL(10,2) to DECIMAL(15,4)
+   - Migrate payments from INTEGER (cents) to DECIMAL(15,4) (dollars)
+2. Update model definitions to match migrations:
+   - Change DataTypes from FLOAT/INTEGER to DECIMAL
+   - Change TypeScript types from `number` to `string`
+3. Add Big.js utilities for precise decimal arithmetic:
+   - Create sumByDecimal utility in both API and web
+   - Update formatMoney to accept Big type
+```
+
+**Key principles:**
+
+- Focus on **what changed** at an architectural level, not implementation details
+- Group related changes under common themes (migrations, models, utilities, etc.)
+- Use sub-bullets for specificity when a change has multiple parts
+- Mention new patterns or utilities introduced
+- Reference specific technologies or libraries when relevant (Big.js, Sequelize, etc.)
+- Order by dependency: migrations → models → services → components
+- Avoid file paths unless necessary for clarity
+
+### Testing Instructions
+
+**Pattern:** Provide step-by-step verification that covers the main user-facing changes.
+
+**Standard baseline:**
+
+```markdown
+1. Run the test suite via `dev test` (or `dev test_api`)
+2. Boot the app via `dev up`
+3. Check that the app compiles and you can log in at http://localhost:8080
+4. [Feature-specific testing steps]
+```
+
+**Feature-specific steps should:**
+
+- Use imperative mood ("Navigate to...", "Verify that...", "Check that...")
+- Cover the primary user workflows affected by changes
+- Test both happy path and edge cases when relevant
+- Reference specific URLs or UI elements to click
+- Verify data persistence when applicable

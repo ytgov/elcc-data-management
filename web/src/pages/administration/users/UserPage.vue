@@ -16,6 +16,15 @@
       >
         Edit
       </v-btn>
+      <v-btn
+        v-if="policy?.destroy"
+        class="mt-2 mt-md-0 ml-md-2"
+        color="error"
+        :loading="isDeleting"
+        @click="deleteUser(userIdAsNumber)"
+      >
+        Delete
+      </v-btn>
     </template>
 
     <v-row>
@@ -66,10 +75,14 @@
     <h3 class="mb-4">Permissions</h3>
     <v-row>
       <v-col cols="12">
-        <UserRolesChips
-          v-if="!isEmpty(user.roles)"
-          :roles="user.roles"
-        />
+        <template v-if="!isEmpty(user.roles)">
+          <UserRoleChip
+            v-for="role in user.roles"
+            :key="role"
+            class="ma-1"
+            :role="role"
+          />
+        </template>
         <p
           v-else
           class="text-body-2 text-medium-emphasis"
@@ -82,16 +95,22 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, ref } from "vue"
+import { useRouter } from "vue-router"
 import { isEmpty, isNil } from "lodash"
+
+import blockedToTrueConfirm from "@/utils/blocked-to-true-confirm"
+
+import usersApi from "@/api/users-api"
 
 import useBreadcrumbs from "@/use/use-breadcrumbs"
 import useUser, { UserRoles } from "@/use/use-user"
+import useSnack from "@/use/use-snack"
 
 import DescriptionElement from "@/components/common/DescriptionElement.vue"
 import HeaderActionsCard from "@/components/common/HeaderActionsCard.vue"
 import PageLoader from "@/components/common/PageLoader.vue"
-import UserRolesChips from "@/components/users/UserRolesChips.vue"
+import UserRoleChip from "@/components/users/UserRoleChip.vue"
 
 const props = defineProps<{
   userId: string
@@ -99,8 +118,30 @@ const props = defineProps<{
 
 const userIdAsNumber = computed(() => parseInt(props.userId))
 
-const { user } = useUser(userIdAsNumber)
+const { user, policy } = useUser(userIdAsNumber)
 const isSystemAdmin = computed(() => user.value?.roles.includes(UserRoles.SYSTEM_ADMINISTRATOR))
+
+const isDeleting = ref(false)
+const snack = useSnack()
+const router = useRouter()
+
+async function deleteUser(userId: number) {
+  if (!blockedToTrueConfirm("Are you sure you want to remove this user?")) return
+
+  isDeleting.value = true
+  try {
+    await usersApi.delete(userId)
+    snack.success("User deleted.")
+    return router.push({
+      name: "administration/UsersPage",
+    })
+  } catch (error) {
+    console.error(`Failed to delete user: ${error}`, { error })
+    snack.error(`Failed to delete user: ${error}`)
+  } finally {
+    isDeleting.value = false
+  }
+}
 
 const title = computed(() => user.value?.displayName || "User")
 const displayName = computed(() => user.value?.displayName || "Details")

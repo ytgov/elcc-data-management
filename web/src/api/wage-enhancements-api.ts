@@ -1,25 +1,20 @@
 import http from "@/api/http-client"
 
-import { type Centre } from "./centres-api"
-import { type EmployeeWageTier } from "./employee-wage-tiers-api"
-
 export type WageEnhancement = {
   id: number
-  centreId: Centre["id"]
-  employeeWageTierId: EmployeeWageTier["id"]
+  centreId: number
+  employeeWageTierId: number
   employeeName: string
-  hoursEstimated: number
-  hoursActual: number
-  createdAt: Date
-  updatedAt: Date
+  hoursEstimated: string
+  hoursActual: string
+  createdAt: string
+  updatedAt: string
 }
 
 export type Params = {
   where?: {
-    centreId?: WageEnhancement["centreId"]
-    employeeWageTierId?:
-      | WageEnhancement["employeeWageTierId"]
-      | WageEnhancement["employeeWageTierId"][]
+    centreId?: number | number[]
+    employeeWageTierId?: number | number[]
   }
 }
 

@@ -15,7 +15,9 @@ export class UpdateService extends BaseService {
 
   async perform(): Promise<Payment> {
     await this.payment.update(this.attributes)
-    return this.payment
+    return this.payment.reload({
+      include: ["fiscalPeriod"],
+    })
   }
 }
 

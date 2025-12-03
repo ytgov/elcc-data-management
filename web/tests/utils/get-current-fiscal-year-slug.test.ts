@@ -1,4 +1,4 @@
-import getCurrentFiscalYearSlug from "@/utils/get-current-fiscal-year-slug"
+import { getCurrentFiscalYearSlug } from "@/utils/fiscal-year"
 
 describe("web/src/utils/get-current-fiscal-year-slug.ts", () => {
   describe("getCurrentFiscalYearSlug", () => {

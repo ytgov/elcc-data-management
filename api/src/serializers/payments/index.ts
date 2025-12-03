@@ -1,2 +1,2 @@
-export { IndexSerializer } from "./index-serializer"
-export { ShowSerializer } from "./show-serializer"
+export { IndexSerializer, type PaymentAsIndex } from "./index-serializer"
+export { ShowSerializer, type PaymentAsShow } from "./show-serializer"

@@ -22,6 +22,8 @@ import BaseModel from "@/models/base-model"
 import Centre from "@/models/centre"
 import FiscalPeriod from "@/models/fiscal-period"
 
+export const EMPLOYEE_BENEFIT_DEFAULT_COST_CAP_PERCENTAGE = "0.09"
+
 @Table({
   paranoid: false,
 })
@@ -29,6 +31,8 @@ export class EmployeeBenefit extends BaseModel<
   InferAttributes<EmployeeBenefit>,
   InferCreationAttributes<EmployeeBenefit>
 > {
+  static readonly DEFAULT_COST_CAP_PERCENTAGE = EMPLOYEE_BENEFIT_DEFAULT_COST_CAP_PERCENTAGE
+
   @Attribute(DataTypes.INTEGER)
   @PrimaryKey
   @AutoIncrement
@@ -44,33 +48,33 @@ export class EmployeeBenefit extends BaseModel<
   @EmployeeBenefitsCenterIdFiscalPeriodIdUniqueIndex
   declare fiscalPeriodId: number
 
-  @Attribute(DataTypes.DECIMAL(10, 2))
+  @Attribute(DataTypes.DECIMAL(15, 4))
   @NotNull
-  declare grossPayrollMonthlyActual: number
+  declare grossPayrollMonthlyActual: string
 
-  @Attribute(DataTypes.DECIMAL(10, 2))
+  @Attribute(DataTypes.DECIMAL(15, 4))
   @NotNull
-  declare grossPayrollMonthlyEstimated: number
+  declare grossPayrollMonthlyEstimated: string
 
   @Attribute(DataTypes.DECIMAL(5, 2))
   @NotNull
-  declare costCapPercentage: number
+  declare costCapPercentage: string
 
-  @Attribute(DataTypes.DECIMAL(10, 2))
+  @Attribute(DataTypes.DECIMAL(15, 4))
   @NotNull
-  declare employeeCostActual: number
+  declare employeeCostActual: string
 
-  @Attribute(DataTypes.DECIMAL(10, 2))
+  @Attribute(DataTypes.DECIMAL(15, 4))
   @NotNull
-  declare employeeCostEstimated: number
+  declare employeeCostEstimated: string
 
-  @Attribute(DataTypes.DECIMAL(10, 2))
+  @Attribute(DataTypes.DECIMAL(15, 4))
   @NotNull
-  declare employerCostActual: number
+  declare employerCostActual: string
 
-  @Attribute(DataTypes.DECIMAL(10, 2))
+  @Attribute(DataTypes.DECIMAL(15, 4))
   @NotNull
-  declare employerCostEstimated: number
+  declare employerCostEstimated: string
 
   @Attribute(DataTypes.DATE)
   @NotNull

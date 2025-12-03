@@ -5,6 +5,7 @@ describe("api/tests/models/fiscal-period.test.ts", () => {
     describe("#fiscalYear -> validation", () => {
       test("when fiscal year has valid format and sequence, validation succeeds", async () => {
         const fiscalPeriod = FiscalPeriod.build({
+          fundingPeriodId: -1,
           fiscalYear: "2023-24",
           month: FiscalPeriod.Months.APRIL,
           dateStart: new Date("2023-04-01T00:00:00Z"),
@@ -25,6 +26,7 @@ describe("api/tests/models/fiscal-period.test.ts", () => {
         "when fiscal year $invalidFiscalYear has invalid format, it fails with format message",
         async (invalidFiscalYear) => {
           const fiscalPeriod = FiscalPeriod.build({
+            fundingPeriodId: -1,
             fiscalYear: invalidFiscalYear,
             month: FiscalPeriod.Months.APRIL,
             dateStart: new Date("2023-04-01T00:00:00Z"),
@@ -71,6 +73,7 @@ describe("api/tests/models/fiscal-period.test.ts", () => {
         "when fiscal year $value has valid format but invalid sequence, it fails with sequence message",
         async ({ value, expected, dateStart, dateEnd }) => {
           const fiscalPeriod = FiscalPeriod.build({
+            fundingPeriodId: -1,
             fiscalYear: value,
             month: FiscalPeriod.Months.APRIL,
             dateStart: new Date(dateStart),

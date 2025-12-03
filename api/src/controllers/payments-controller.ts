@@ -21,6 +21,7 @@ export class PaymentsController extends BaseController<Payment> {
         order,
         limit: this.pagination.limit,
         offset: this.pagination.offset,
+        include: ["fiscalPeriod"],
       })
       const serializedPayments = IndexSerializer.perform(payments)
       return this.response.json({
@@ -146,7 +147,9 @@ export class PaymentsController extends BaseController<Payment> {
   }
 
   private loadPayment() {
-    return Payment.findByPk(this.params.paymentId)
+    return Payment.findByPk(this.params.paymentId, {
+      include: ["fiscalPeriod"],
+    })
   }
 
   private buildPolicy(payment: Payment = Payment.build()) {

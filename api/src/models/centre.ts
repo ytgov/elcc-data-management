@@ -19,6 +19,7 @@ import {
 
 import BaseModel from "@/models/base-model"
 import EmployeeBenefit from "@/models/employee-benefit"
+import FundingReconciliation from "@/models/funding-reconciliation"
 import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
 import Payment from "@/models/payment"
 import WageEnhancement from "@/models/wage-enhancement"
@@ -171,6 +172,14 @@ export class Centre extends BaseModel<InferAttributes<Centre>, InferCreationAttr
     },
   })
   declare wageEnhancements?: NonAttribute<WageEnhancement[]>
+
+  @HasMany(() => FundingReconciliation, {
+    foreignKey: "centreId",
+    inverse: {
+      as: "centre",
+    },
+  })
+  declare fundingReconciliations?: NonAttribute<FundingReconciliation[]>
 
   static establishScopes() {
     // add as needed

@@ -12,7 +12,10 @@ import {
   NotNull,
   PrimaryKey,
   Table,
+  ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
+
+import { isValidFiscalYearLegacy } from "@/models/validators"
 
 import BaseModel from "@/models/base-model"
 
@@ -28,8 +31,12 @@ export class FundingSubmissionLine extends BaseModel<
   @AutoIncrement
   declare id: CreationOptional<number>
 
+  // TODO: replace with foreign key to FundingPeriod model.
   @Attribute(DataTypes.STRING(10))
   @NotNull
+  @ValidateAttribute({
+    isValidFiscalYearLegacy,
+  })
   declare fiscalYear: string
 
   @Attribute(DataTypes.STRING(200))
@@ -46,10 +53,9 @@ export class FundingSubmissionLine extends BaseModel<
   @Attribute(DataTypes.INTEGER)
   declare toAge: number | null
 
-  // TODO: migrate column to DataTypes.DECIMAL(19, 4), see https://github.com/icefoganalytics/elcc-data-management/issues/33
-  @Attribute(DataTypes.FLOAT)
+  @Attribute(DataTypes.DECIMAL(15, 4))
   @NotNull
-  declare monthlyAmount: number
+  declare monthlyAmount: string
 
   @Attribute(DataTypes.DATE)
   @NotNull

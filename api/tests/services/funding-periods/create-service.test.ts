@@ -1,4 +1,10 @@
-import { EmployeeBenefit, EmployeeWageTier, FiscalPeriod } from "@/models"
+import {
+  EmployeeBenefit,
+  EmployeeWageTier,
+  FiscalPeriod,
+  FundingReconciliation,
+  FundingReconciliationAdjustment,
+} from "@/models"
 
 import { centreFactory } from "@/factories"
 
@@ -169,48 +175,49 @@ describe("api/src/services/funding-periods/create-service.ts", () => {
           ],
           order: [["tierLevel", "ASC"]],
         })
+
         expect(employeeWageTiersForApril).toEqual([
           expect.objectContaining({
             fiscalPeriodId: expect.any(Number),
             tierLevel: 0,
             tierLabel: "Level 0",
-            wageRatePerHour: 0,
+            wageRatePerHour: "0",
           }),
           expect.objectContaining({
             fiscalPeriodId: expect.any(Number),
             tierLevel: 1,
             tierLabel: "Level 1",
-            wageRatePerHour: 4.12,
+            wageRatePerHour: "4.12",
           }),
           expect.objectContaining({
             fiscalPeriodId: expect.any(Number),
             tierLevel: 2,
             tierLabel: "Level 1a",
-            wageRatePerHour: 6.01,
+            wageRatePerHour: "6.01",
           }),
           expect.objectContaining({
             fiscalPeriodId: expect.any(Number),
             tierLevel: 3,
             tierLabel: "Level 2",
-            wageRatePerHour: 7.44,
+            wageRatePerHour: "7.44",
           }),
           expect.objectContaining({
             fiscalPeriodId: expect.any(Number),
             tierLevel: 4,
             tierLabel: "Level 2a",
-            wageRatePerHour: 9.96,
+            wageRatePerHour: "9.96",
           }),
           expect.objectContaining({
             fiscalPeriodId: expect.any(Number),
             tierLevel: 5,
             tierLabel: "Level 3 Exemption",
-            wageRatePerHour: 12.31,
+            wageRatePerHour: "12.31",
           }),
           expect.objectContaining({
             fiscalPeriodId: expect.any(Number),
             tierLevel: 6,
             tierLabel: "ECE Level 3",
-            wageRatePerHour: 15.31,
+            wageRatePerHour: "15.31",
           }),
         ])
       })
@@ -266,7 +273,7 @@ describe("api/src/services/funding-periods/create-service.ts", () => {
             fiscalPeriodId: expect.any(Number),
             grossPayrollMonthlyActual: "0",
             grossPayrollMonthlyEstimated: "0",
-            costCapPercentage: "0",
+            costCapPercentage: "0.09",
             employeeCostActual: "0",
             employeeCostEstimated: "0",
             employerCostActual: "0",
@@ -290,6 +297,163 @@ describe("api/src/services/funding-periods/create-service.ts", () => {
         // Assert
         const employeeBenefitsCount = await EmployeeBenefit.count()
         expect(employeeBenefitsCount).toEqual(0)
+      })
+
+      test("when creating a funding period, creates funding reconciliations for all centres", async () => {
+        // Arrange
+        await centreFactory.createList(3)
+
+        const attributes = {
+          fiscalYear: "2030-2031",
+          fromDate: new Date("2030-04-01"),
+          toDate: new Date("2031-03-31"),
+          title: "Test Funding Period with Reconciliations",
+        }
+
+        // Act
+        const fundingPeriod = await CreateService.perform(attributes)
+
+        // Assert
+        const fundingReconciliationsCount = await FundingReconciliation.count({
+          where: { fundingPeriodId: fundingPeriod.id },
+        })
+        expect(fundingReconciliationsCount).toEqual(3)
+      })
+
+      test("when creating a funding period, creates funding reconciliations with default zero values", async () => {
+        // Arrange
+        const centre = await centreFactory.create()
+
+        const attributes = {
+          fiscalYear: "2031-2032",
+          fromDate: new Date("2031-04-01"),
+          toDate: new Date("2032-03-31"),
+          title: "Test Funding Period Reconciliation Defaults",
+        }
+
+        // Act
+        const fundingPeriod = await CreateService.perform(attributes)
+
+        // Assert
+        const fundingReconciliation = await FundingReconciliation.findOne({
+          where: {
+            centreId: centre.id,
+            fundingPeriodId: fundingPeriod.id,
+          },
+        })
+        expect(fundingReconciliation).toMatchObject({
+          centreId: centre.id,
+          fundingPeriodId: fundingPeriod.id,
+          status: "draft",
+          fundingReceivedTotalAmount: "0",
+          eligibleExpensesTotalAmount: "0",
+          payrollAdjustmentsTotalAmount: "0",
+          finalBalanceAmount: "0",
+        })
+      })
+
+      test("when creating a funding period, creates funding reconciliation adjustments for all reconciliations and fiscal periods", async () => {
+        // Arrange
+        await centreFactory.createList(2)
+
+        const attributes = {
+          fiscalYear: "2032-2033",
+          fromDate: new Date("2032-04-01"),
+          toDate: new Date("2033-03-31"),
+          title: "Test Funding Period with Adjustments",
+        }
+
+        // Act
+        const fundingPeriod = await CreateService.perform(attributes)
+
+        // Assert
+        const fundingReconciliationAdjustmentsCount = await FundingReconciliationAdjustment.count({
+          include: [
+            {
+              association: "fundingReconciliation",
+              where: {
+                fundingPeriodId: fundingPeriod.id,
+              },
+            },
+          ],
+        })
+        expect(fundingReconciliationAdjustmentsCount).toEqual(24) // 2 centres × 12 fiscal periods = 24 adjustments
+      })
+
+      test("when creating a funding period, creates funding reconciliation adjustments with default zero values", async () => {
+        // Arrange
+        const centre = await centreFactory.create()
+
+        const attributes = {
+          fiscalYear: "2033-2034",
+          fromDate: new Date("2033-04-01"),
+          toDate: new Date("2034-03-31"),
+          title: "Test Funding Period Adjustment Defaults",
+        }
+
+        // Act
+        const fundingPeriod = await CreateService.perform(attributes)
+
+        // Assert
+        const fundingReconciliationAdjustment = await FundingReconciliationAdjustment.findOne({
+          include: [
+            {
+              association: "fundingReconciliation",
+              where: {
+                centreId: centre.id,
+              },
+              include: [
+                {
+                  association: "fundingPeriod",
+                  where: {
+                    id: fundingPeriod.id,
+                  },
+                },
+              ],
+            },
+          ],
+          rejectOnEmpty: true,
+        })
+        expect(fundingReconciliationAdjustment).toMatchObject({
+          fundingReceivedPeriodAmount: "0",
+          eligibleExpensesPeriodAmount: "0",
+          payrollAdjustmentsPeriodAmount: "0",
+          cumulativeBalanceAmount: "0",
+        })
+      })
+
+      test("when creating a funding period with no centres, creates no funding reconciliations", async () => {
+        // Arrange
+        const attributes = {
+          fiscalYear: "2034-2035",
+          fromDate: new Date("2034-04-01"),
+          toDate: new Date("2035-03-31"),
+          title: "Test Funding Period No Centres Reconciliations",
+        }
+
+        // Act
+        await CreateService.perform(attributes)
+
+        // Assert
+        const fundingReconciliationsCount = await FundingReconciliation.count()
+        expect(fundingReconciliationsCount).toEqual(0)
+      })
+
+      test("when creating a funding period with no centres, creates no funding reconciliation adjustments", async () => {
+        // Arrange
+        const attributes = {
+          fiscalYear: "2034-2035",
+          fromDate: new Date("2034-04-01"),
+          toDate: new Date("2035-03-31"),
+          title: "Test Funding Period No Centres Adjustments",
+        }
+
+        // Act
+        await CreateService.perform(attributes)
+
+        // Assert
+        const fundingReconciliationAdjustmentsCount = await FundingReconciliationAdjustment.count()
+        expect(fundingReconciliationAdjustmentsCount).toEqual(0)
       })
     })
   })

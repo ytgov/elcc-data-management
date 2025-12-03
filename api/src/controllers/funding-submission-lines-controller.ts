@@ -3,7 +3,7 @@ import { isNil } from "lodash"
 import logger from "@/utils/logger"
 import { FundingSubmissionLine } from "@/models"
 import { FundingSubmissionLinePolicy } from "@/policies"
-import { CreateService, UpdateService } from "@/services/funding-submission-lines"
+import { CreateService, DestroyService, UpdateService } from "@/services/funding-submission-lines"
 import { IndexSerializer, ShowSerializer } from "@/serializers/funding-submission-lines"
 import BaseController from "@/controllers/base-controller"
 
@@ -145,7 +145,7 @@ export class FundingSubmissionLinesController extends BaseController<FundingSubm
         })
       }
 
-      await fundingSubmissionLine.destroy()
+      await DestroyService.perform(fundingSubmissionLine)
       return this.response.status(204).send()
     } catch (error) {
       logger.error(`Error deleting funding submission line: ${error}`, { error })

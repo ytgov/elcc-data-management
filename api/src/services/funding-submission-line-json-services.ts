@@ -1,8 +1,8 @@
 import { cloneDeep } from "lodash"
 import moment from "moment"
 
-import { FundingSubmissionLine, FundingSubmissionLineJson } from "@/models"
-import { FundingLineValue } from "@/models"
+import { FundingLineValue, FundingSubmissionLine, FundingSubmissionLineJson } from "@/models"
+import { FundingSubmissionLineJsonMonths } from "@/models/funding-submission-line-json"
 
 export class FundingSubmissionLineJsonServices {
   static async bulkCreate(centreId: number, fiscalYear: string) {
@@ -25,10 +25,10 @@ export class FundingSubmissionLineJsonServices {
         sectionName: templateLine.sectionName,
         lineName: templateLine.lineName,
         monthlyAmount: templateLine.monthlyAmount,
-        estimatedChildOccupancyRate: 0,
-        actualChildOccupancyRate: 0,
-        estimatedComputedTotal: 0,
-        actualComputedTotal: 0,
+        estimatedChildOccupancyRate: "0",
+        actualChildOccupancyRate: "0",
+        estimatedComputedTotal: "0",
+        actualComputedTotal: "0",
       })
     })
 
@@ -42,7 +42,7 @@ export class FundingSubmissionLineJsonServices {
       bulkAttributes.push({
         centreId,
         fiscalYear,
-        dateName,
+        dateName: dateName as FundingSubmissionLineJsonMonths,
         dateStart: dateStart.toDate(),
         dateEnd: dateEnd.toDate(),
         values: JSON.stringify(lines),

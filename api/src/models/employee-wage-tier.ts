@@ -30,13 +30,13 @@ export type EmployeeWageTierDefault = Pick<
 
 // TODO: make these end user editable, or clone forward when creating?
 export const EMPLOYEE_WAGE_TIER_DEFAULTS: ReadonlyArray<EmployeeWageTierDefault> = Object.freeze([
-  { tierLevel: 0, tierLabel: "Level 0", wageRatePerHour: 0 },
-  { tierLevel: 1, tierLabel: "Level 1", wageRatePerHour: 4.12 },
-  { tierLevel: 2, tierLabel: "Level 1a", wageRatePerHour: 6.01 },
-  { tierLevel: 3, tierLabel: "Level 2", wageRatePerHour: 7.44 },
-  { tierLevel: 4, tierLabel: "Level 2a", wageRatePerHour: 9.96 },
-  { tierLevel: 5, tierLabel: "Level 3 Exemption", wageRatePerHour: 12.31 },
-  { tierLevel: 6, tierLabel: "ECE Level 3", wageRatePerHour: 15.31 },
+  { tierLevel: 0, tierLabel: "Level 0", wageRatePerHour: "0" },
+  { tierLevel: 1, tierLabel: "Level 1", wageRatePerHour: "4.12" },
+  { tierLevel: 2, tierLabel: "Level 1a", wageRatePerHour: "6.01" },
+  { tierLevel: 3, tierLabel: "Level 2", wageRatePerHour: "7.44" },
+  { tierLevel: 4, tierLabel: "Level 2a", wageRatePerHour: "9.96" },
+  { tierLevel: 5, tierLabel: "Level 3 Exemption", wageRatePerHour: "12.31" },
+  { tierLevel: 6, tierLabel: "ECE Level 3", wageRatePerHour: "15.31" },
 ])
 
 @Table({
@@ -65,9 +65,9 @@ export class EmployeeWageTier extends BaseModel<
   @NotNull
   declare tierLabel: string
 
-  @Attribute(DataTypes.FLOAT)
+  @Attribute(DataTypes.DECIMAL(10, 4))
   @NotNull
-  declare wageRatePerHour: number
+  declare wageRatePerHour: string
 
   @Attribute(DataTypes.DATE)
   @NotNull

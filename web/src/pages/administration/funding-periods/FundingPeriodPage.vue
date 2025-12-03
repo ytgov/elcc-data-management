@@ -19,6 +19,15 @@
       >
         Edit
       </v-btn>
+      <v-btn
+        v-if="policy?.destroy"
+        class="mt-2 mt-md-0 ml-md-2"
+        color="error"
+        :loading="isDeleting"
+        @click="deleteFundingPeriod(fundingPeriodIdAsNumber)"
+      >
+        Delete
+      </v-btn>
     </template>
 
     <v-row>
@@ -67,11 +76,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, ref } from "vue"
+import { useRouter } from "vue-router"
 import { isNil } from "lodash"
+
+import blockedToTrueConfirm from "@/utils/blocked-to-true-confirm"
+
+import fundingPeriodsApi from "@/api/funding-periods-api"
 
 import useBreadcrumbs from "@/use/use-breadcrumbs"
 import useFundingPeriod from "@/use/use-funding-period"
+import useSnack from "@/use/use-snack"
 
 import { formatDate } from "@/utils/formatters"
 
@@ -84,7 +99,29 @@ const props = defineProps<{
 
 const fundingPeriodIdAsNumber = computed(() => parseInt(props.fundingPeriodId))
 
-const { fundingPeriod } = useFundingPeriod(fundingPeriodIdAsNumber)
+const { fundingPeriod, policy } = useFundingPeriod(fundingPeriodIdAsNumber)
+
+const isDeleting = ref(false)
+const snack = useSnack()
+const router = useRouter()
+
+async function deleteFundingPeriod(fundingPeriodId: number) {
+  if (!blockedToTrueConfirm("Are you sure you want to remove this funding period?")) return
+
+  isDeleting.value = true
+  try {
+    await fundingPeriodsApi.delete(fundingPeriodId)
+    snack.success("Funding period deleted.")
+    return router.push({
+      name: "administration/FundingPeriodsPage",
+    })
+  } catch (error) {
+    console.error(`Failed to delete funding period: ${error}`, { error })
+    snack.error(`Failed to delete funding period: ${error}`)
+  } finally {
+    isDeleting.value = false
+  }
+}
 
 const title = computed(() => fundingPeriod.value?.title || "Funding Period")
 const fundingPeriodTitle = computed(() => fundingPeriod.value?.title || "Details")
