@@ -22,6 +22,8 @@ This file follows the format from https://agents.md/ for AI agent documentation.
   - [Route and File Organization](#route-and-file-organization)
   - [Decimal Type Handling](#decimal-type-handling)
 - [Backend Patterns](#backend-patterns)
+  - [Model Organization](#model-organization)
+    - [Soft Delete (Paranoid Mode)](#soft-delete-paranoid-mode)
   - [Controller Structure](#controller-structure)
   - [Policy Authorization](#policy-authorization)
   - [Service Layer](#service-layer)
@@ -206,35 +208,6 @@ docker compose -f docker-compose.development.yaml up --remove-orphans --build
    - **Import placement**: Always at top of file, after comments/docstrings, before globals
    - **Remove unused imports**: Keep import sections clean
    - Reference: https://peps.python.org/pep-0008/#imports (modified for conceptual distance)
-
-### Model Organization
-
-#### Structure
-
-- **Section order**: Fields → Helpers → Associations → Static methods
-- **Helpers section**: Use dedicated "// Helpers" comment for computed properties and helper methods
-- **Getter over method**: Use getters for computed properties that don't take parameters
-- **NonAttribute typing**: Use `NonAttribute<T>` for computed properties that aren't database fields
-- **CreationOptional typing**: Use `CreationOptional<T>` only for actual database fields with defaults
-
-#### Enum Patterns
-
-- **Static enum access**: Add `static readonly Statuses = FundingReconciliationStatuses` to models for convenient access
-- **Plural enum naming**: Use plural forms for enum names (e.g., `FundingReconciliationStatuses` not `Status`)
-- **Export enum arrays**: `FUNDING_RECONCILIATION_STATUSES = Object.values(FundingReconciliationStatuses)`
-- **Dynamic validation**: Use template literals with enum arrays: `Status must be one of: ${FUNDING_RECONCILIATION_STATUSES.join(", ")}`
-- **Import reduction**: Consumers only need to import the model, not both model and enum
-
-#### Typing Rules
-
-- **CreationOptional Rule**: Use `CreationOptional` only for non-nullable fields with database defaults
-- **Nullable fields**: Type as `Type | null` without `CreationOptional`
-- **Required fields**: Don't use `CreationOptional` when they must be provided during creation
-- **Database defaults**: `CreationOptional` tells TypeScript the database will provide the value
-- **Examples**:
-  - `timestampField: CreationOptional<Date>` (non-nullable with database default)
-  - `optionalField: Type | null` (truly nullable, no CreationOptional)
-  - `requiredField: Type` (required, no CreationOptional)
 
 ---
 
@@ -561,6 +534,7 @@ pages/
 **Principle:** Financial calculations must minimize rounding errors and be reproducible. Precision loss from floating-point arithmetic must be avoided in intermediate calculations.
 
 **Why it matters:**
+
 - Floating-point arithmetic introduces unpredictable rounding (0.1 + 0.2 ≠ 0.3 in JavaScript)
 - Small errors compound across hundreds of records and fiscal periods
 - Financial reports should reconcile with source data
@@ -638,6 +612,110 @@ const formatted = formatMoney(total)
 ---
 
 ## Backend Patterns
+
+### Model Organization
+
+#### Structure
+
+- **Section order**: Fields → Helpers → Associations → Static methods
+- **Helpers section**: Use dedicated "// Helpers" comment for computed properties and helper methods
+- **Getter over method**: Use getters for computed properties that don't take parameters
+- **NonAttribute typing**: Use `NonAttribute<T>` for computed properties that aren't database fields
+- **CreationOptional typing**: Use `CreationOptional<T>` only for actual database fields with defaults
+
+#### Enum Patterns
+
+- **Static enum access**: Add `static readonly Statuses = FundingReconciliationStatuses` to models for convenient access
+- **Plural enum naming**: Use plural forms for enum names (e.g., `FundingReconciliationStatuses` not `Status`)
+- **Export enum arrays**: `FUNDING_RECONCILIATION_STATUSES = Object.values(FundingReconciliationStatuses)`
+- **Dynamic validation**: Use template literals with enum arrays: `Status must be one of: ${FUNDING_RECONCILIATION_STATUSES.join(", ")}`
+- **Import reduction**: Consumers only need to import the model, not both model and enum
+
+#### Typing Rules
+
+- **CreationOptional Rule**: Use `CreationOptional` only for non-nullable fields with database defaults
+- **Nullable fields**: Type as `Type | null` without `CreationOptional`
+- **Required fields**: Don't use `CreationOptional` when they must be provided during creation
+- **Database defaults**: `CreationOptional` tells TypeScript the database will provide the value
+- **Examples**:
+  - `timestampField: CreationOptional<Date>` (non-nullable with database default)
+  - `optionalField: Type | null` (truly nullable, no CreationOptional)
+  - `requiredField: Type` (required, no CreationOptional)
+
+#### Soft Delete (Paranoid Mode)
+
+**Pattern:** Sequelize paranoid mode is enabled globally by default in `db-client.ts`. All models automatically support soft deletes.
+
+**Model Configuration:**
+
+```typescript
+// No @Table decorator needed - paranoid: true is the global default
+export class MyModel extends BaseModel<...> {
+  // Standard fields...
+
+  @Attribute(DataTypes.DATE)
+  declare deletedAt: CreationOptional<Date | null>  // Required for paranoid mode
+}
+
+// Only override if you explicitly DON'T want soft deletes:
+// @Table({ paranoid: false })
+```
+
+**Migration Configuration:**
+
+```typescript
+await queryInterface.createTable("my_table", {
+  // ... other fields
+  deleted_at: {
+    type: "datetime2",
+    allowNull: true, // Must be nullable
+  },
+})
+```
+
+**Unique Index Configuration:**
+
+Unique indexes must exclude soft-deleted records to allow re-creating previously deleted records.
+
+**Index Decorator (in model):**
+
+```typescript
+export const MyUniqueIndex = createIndexDecorator("my-unique-index", {
+  unique: true,
+  name: "unique_my_table_on_field1_field2", // Must match migration name
+  where: {
+    deletedAt: null, // camelCase - matches model property
+  },
+  msg: "A record with these values already exists", // User-friendly error message
+})
+```
+
+**Migration Index:**
+
+```typescript
+await queryInterface.addIndex("my_table", ["field1", "field2"], {
+  name: "unique_my_table_on_field1_field2", // Must match decorator name
+  unique: true,
+  where: {
+    deleted_at: null, // snake_case - matches database column
+  },
+})
+```
+
+**Key Requirements:**
+
+- Model decorator: Not needed (paranoid is globally enabled by default in `db-client.ts`)
+- Model field: `deletedAt: CreationOptional<Date | null>` (required)
+- Migration column: `deleted_at datetime2 NULL` (required)
+- Unique index decorator: `where: { deletedAt: null }` (camelCase) (required)
+- Unique index migration: `where: { deleted_at: null }` (snake_case) (required)
+- Index name must match exactly between decorator and migration
+- Include descriptive `msg` field in index decorator for validation errors
+
+**Case Convention:**
+
+- Models/decorators: camelCase (`deletedAt`)
+- Migrations/database: snake_case (`deleted_at`)
 
 ### Controller Structure
 
