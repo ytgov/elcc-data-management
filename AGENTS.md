@@ -24,6 +24,7 @@ This file follows the format from https://agents.md/ for AI agent documentation.
 - [Backend Patterns](#backend-patterns)
   - [Model Organization](#model-organization)
     - [Soft Delete (Paranoid Mode)](#soft-delete-paranoid-mode)
+  - [Seed File Patterns](#seed-file-patterns)
   - [Controller Structure](#controller-structure)
   - [Policy Authorization](#policy-authorization)
   - [Service Layer](#service-layer)
@@ -716,6 +717,36 @@ await queryInterface.addIndex("my_table", ["field1", "field2"], {
 
 - Models/decorators: camelCase (`deletedAt`)
 - Migrations/database: snake_case (`deleted_at`)
+
+### Seed File Patterns
+
+**Memory-Efficient Iteration:** When a seed needs to walk every row of a model, prefer `Model.findEach()` over loading everything into memory.
+
+```typescript
+// Preferred: streaming iteration over large tables
+await FiscalPeriod.findEach(async (fiscalPeriod) => {
+  await Centre.findEach(async (centre) => {
+    // Create or update data for this (fiscalPeriod, centre) pair
+  })
+})
+```
+
+**Other iteration patterns (besides `findEach()`):**
+
+- **Static in-memory lists:** For small literal arrays you define inside the seed (for example `centresAttributes` in `api/src/db/templates/sample-seed.ts`), iterate the array directly with `for...of`.
+- **Small filtered subsets:** When you need a bounded subset from the database and know the result set is small, use `Model.findAll({ where: ... })` and a `for...of` loop.
+
+**Idempotent Pattern:** Check for existing records before creating to ensure seeds can be run multiple times safely.
+
+```typescript
+const existingRecord = await Model.findOne({
+  where: { uniqueField: value },
+})
+
+if (isNil(existingRecord)) {
+  await Model.create(attributes)
+}
+```
 
 ### Controller Structure
 
