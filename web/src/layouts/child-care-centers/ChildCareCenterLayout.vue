@@ -23,7 +23,7 @@
           color="yg-blue-light"
           class="mt-4"
         >
-          <v-card-title style="background-color: #0097a968">Latest Enrollment</v-card-title>
+          <v-card-title>Latest Enrollment</v-card-title>
           <v-divider></v-divider>
           <v-card-text class="pt-3">
             <FundingLineValuesEnrollmentChart
