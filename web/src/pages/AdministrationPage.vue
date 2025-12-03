@@ -1,6 +1,9 @@
 <template>
   <v-row>
-    <v-col>
+    <v-col
+      cols="12"
+      md="4"
+    >
       <v-card
         :loading="isLoadingUsers"
         :to="{
@@ -23,7 +26,10 @@
         </v-card-text>
       </v-card>
     </v-col>
-    <v-col>
+    <v-col
+      cols="12"
+      md="4"
+    >
       <v-card
         :loading="isLoadingFundingPeriods"
         :to="{
@@ -46,7 +52,10 @@
         </v-card-text>
       </v-card>
     </v-col>
-    <v-col>
+    <v-col
+      cols="12"
+      md="4"
+    >
       <v-card
         :loading="isLoadingFundingSubmissionLines"
         :to="{
