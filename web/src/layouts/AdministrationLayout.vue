@@ -10,11 +10,13 @@
         fluid
         class="h-100"
       >
-        <h2 class="text-h3 mt-3">{{ title }}</h2>
         <ExactingBreadcrumbs
-          class="pl-0 pt-2 mb-1"
+          class="pl-4 mb-2 mt-n3 mx-n4 text-body-1 font-weight-bold"
+          bg-color="yg-moss"
+          color="white"
           :items="breadcrumbs"
         />
+        <h2 class="text-h3 mb-4">{{ title }}</h2>
 
         <!-- Show menu button visible on smaller screens -->
         <v-btn
