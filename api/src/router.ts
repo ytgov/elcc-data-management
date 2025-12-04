@@ -22,6 +22,7 @@ import {
   FundingReconciliationAdjustmentsController,
   FundingReconciliations,
   FundingReconciliationsController,
+  FundingRegionsController,
   FundingSubmissionLineJsons,
   FundingSubmissionLineJsonsController,
   FundingSubmissionLines,
@@ -100,6 +101,16 @@ router
   .get(FundingReconciliationAdjustmentsController.show)
   .patch(FundingReconciliationAdjustmentsController.update)
   .delete(FundingReconciliationAdjustmentsController.destroy)
+
+router
+  .route("/api/funding-regions")
+  .get(FundingRegionsController.index)
+  .post(FundingRegionsController.create)
+router
+  .route("/api/funding-regions/:fundingRegionId")
+  .get(FundingRegionsController.show)
+  .patch(FundingRegionsController.update)
+  .delete(FundingRegionsController.destroy)
 
 router
   .route("/api/funding-submission-line-jsons")
