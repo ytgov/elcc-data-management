@@ -9,6 +9,7 @@ import FiscalPeriod from "@/models/fiscal-period"
 import FundingPeriod from "@/models/funding-period"
 import FundingReconciliation from "@/models/funding-reconciliation"
 import FundingReconciliationAdjustment from "@/models/funding-reconciliation-adjustment"
+import FundingRegion from "@/models/funding-region"
 import FundingSubmissionLine from "@/models/funding-submission-line"
 import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
 import Log from "@/models/log"
@@ -24,6 +25,7 @@ db.addModels([
   FundingPeriod,
   FundingReconciliation,
   FundingReconciliationAdjustment,
+  FundingRegion,
   FundingSubmissionLine,
   FundingSubmissionLineJson,
   Log,
@@ -39,6 +41,7 @@ FiscalPeriod.establishScopes()
 FundingPeriod.establishScopes()
 FundingReconciliation.establishScopes()
 FundingReconciliationAdjustment.establishScopes()
+FundingRegion.establishScopes()
 FundingSubmissionLine.establishScopes()
 FundingSubmissionLineJson.establishScopes()
 Log.establishScopes()
@@ -54,6 +57,7 @@ export {
   FundingPeriod,
   FundingReconciliation,
   FundingReconciliationAdjustment,
+  FundingRegion,
   FundingSubmissionLine,
   FundingSubmissionLineJson,
   Log,
