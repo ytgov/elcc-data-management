@@ -13,6 +13,7 @@ import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 import { centreRouter, fundingPeriodRouter, submissionLineRouter } from "@/routes"
 
 import {
+  BuildingExpenseCategoriesController,
   CentresController,
   CurrentUserController,
   EmployeeBenefitsController,
@@ -78,6 +79,16 @@ router
   .get(FundingPeriodsController.show)
   .patch(FundingPeriodsController.update)
   .delete(FundingPeriodsController.destroy)
+
+router
+  .route("/api/building-expense-categories")
+  .get(BuildingExpenseCategoriesController.index)
+  .post(BuildingExpenseCategoriesController.create)
+router
+  .route("/api/building-expense-categories/:buildingExpenseCategoryId")
+  .get(BuildingExpenseCategoriesController.show)
+  .patch(BuildingExpenseCategoriesController.update)
+  .delete(BuildingExpenseCategoriesController.destroy)
 
 router
   .route("/api/funding-reconciliations")

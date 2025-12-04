@@ -1,3 +1,4 @@
+export { BuildingExpenseCategoryPolicy } from "./building-expense-category-policy"
 export { EmployeeBenefitPolicy } from "./employee-benefit-policy"
 export { FundingPeriodPolicy } from "./funding-period-policy"
 export { FundingReconciliationPolicy } from "./funding-reconciliation-policy"
