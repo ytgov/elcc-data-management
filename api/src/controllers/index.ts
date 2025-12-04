@@ -1,4 +1,5 @@
 export { BuildingExpenseCategoriesController } from "./building-expense-categories-controller"
+export { BuildingExpensesController } from "./building-expenses-controller"
 export { CentresController } from "./centres-controller"
 export { CurrentUserController } from "./current-user-controller"
 export { EmployeeBenefitsController } from "./employee-benefits-controller"

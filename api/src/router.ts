@@ -14,6 +14,7 @@ import { centreRouter, fundingPeriodRouter, submissionLineRouter } from "@/route
 
 import {
   BuildingExpenseCategoriesController,
+  BuildingExpensesController,
   CentresController,
   CurrentUserController,
   EmployeeBenefitsController,
@@ -89,6 +90,16 @@ router
   .get(BuildingExpenseCategoriesController.show)
   .patch(BuildingExpenseCategoriesController.update)
   .delete(BuildingExpenseCategoriesController.destroy)
+
+router
+  .route("/api/building-expenses")
+  .get(BuildingExpensesController.index)
+  .post(BuildingExpensesController.create)
+router
+  .route("/api/building-expenses/:buildingExpenseId")
+  .get(BuildingExpensesController.show)
+  .patch(BuildingExpensesController.update)
+  .delete(BuildingExpensesController.destroy)
 
 router
   .route("/api/funding-reconciliations")

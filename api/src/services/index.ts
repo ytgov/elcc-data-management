@@ -5,6 +5,7 @@ export * from "@/services/log-services"
 
 // Bundled exports
 export * as BuildingExpenseCategories from "./building-expense-categories"
+export * as BuildingExpenses from "./building-expenses"
 export * as Centres from "./centres"
 export * as EmployeeBenefits from "./employee-benefits"
 export * as FundingPeriods from "./funding-periods"
