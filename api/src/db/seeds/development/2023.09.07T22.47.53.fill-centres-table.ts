@@ -14,6 +14,7 @@ export async function up() {
       status: "Up to date",
       hotMeal: true,
       licensedFor: 19,
+      buildingUsagePercent: "100.00",
       lastSubmission: new Date("2019-01-01"),
     },
     {
@@ -25,6 +26,7 @@ export async function up() {
       status: "Up to date",
       hotMeal: true,
       licensedFor: 25,
+      buildingUsagePercent: "100.00",
       lastSubmission: new Date("2019-01-01"),
     },
   ]
