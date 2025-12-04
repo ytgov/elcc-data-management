@@ -130,6 +130,10 @@ export class Centre extends BaseModel<InferAttributes<Centre>, InferCreationAttr
   @Attribute(DataTypes.DATEONLY)
   declare lastSubmission: Date | null
 
+  @Attribute(DataTypes.DECIMAL(5, 2))
+  @Default("100.00")
+  declare buildingUsagePercent: CreationOptional<string>
+
   @Attribute(DataTypes.DATE)
   @NotNull
   @Default(sql.fn("getdate"))
