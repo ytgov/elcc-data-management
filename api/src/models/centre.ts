@@ -18,6 +18,7 @@ import {
 } from "@sequelize/core/decorators-legacy"
 
 import BaseModel from "@/models/base-model"
+import BuildingExpense from "@/models/building-expense"
 import EmployeeBenefit from "@/models/employee-benefit"
 import FundingReconciliation from "@/models/funding-reconciliation"
 import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
@@ -145,6 +146,14 @@ export class Centre extends BaseModel<InferAttributes<Centre>, InferCreationAttr
   declare updatedAt: CreationOptional<Date>
 
   // Associations
+  @HasMany(() => BuildingExpense, {
+    foreignKey: "centreId",
+    inverse: {
+      as: "centre",
+    },
+  })
+  declare buildingExpenses?: NonAttribute<BuildingExpense[]>
+
   @HasMany(() => EmployeeBenefit, {
     foreignKey: "centreId",
     inverse: {

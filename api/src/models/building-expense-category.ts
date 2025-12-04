@@ -19,6 +19,7 @@ import {
 import { BuildingExpenseCategoriesFundingRegionIdCategoryNameUniqueIndex } from "@/models/indexes"
 
 import BaseModel from "@/models/base-model"
+import BuildingExpense from "@/models/building-expense"
 import FundingRegion from "@/models/funding-region"
 
 export class BuildingExpenseCategory extends BaseModel<
@@ -65,6 +66,14 @@ export class BuildingExpenseCategory extends BaseModel<
     },
   })
   declare fundingRegion?: NonAttribute<FundingRegion>
+
+  @HasMany(() => BuildingExpense, {
+    foreignKey: "buildingExpenseCategoryId",
+    inverse: {
+      as: "buildingExpenseCategory",
+    },
+  })
+  declare buildingExpenses?: NonAttribute<BuildingExpense[]>
 
   static establishScopes() {
     this.addSearchScope(["categoryName"])

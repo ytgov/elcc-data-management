@@ -1,4 +1,5 @@
 export { BuildingExpenseCategoriesFundingRegionIdCategoryNameUniqueIndex } from "./building-expense-categories-funding-region-id-category-name-unique-index"
+export { BuildingExpensesCentreIdFiscalPeriodIdCategoryIdUniqueIndex } from "./building-expenses-centre-id-fiscal-period-id-category-id-unique-index"
 export { EmployeeBenefitsCenterIdFiscalPeriodIdUniqueIndex } from "./employee-benefits-center-id-fiscal-period-id-unique-index"
 export { EmployeeWageTiersFiscalPeriodIdTierLevelUniqueIndex } from "./employee-wage-tiers-fiscal-period-id-tier-level-unique-index"
 export { FiscalPeriodsFundingPeriodIdFiscalYearMonthUniqueIndex } from "./fiscal-periods-fiscal-year-month-unique-index"
