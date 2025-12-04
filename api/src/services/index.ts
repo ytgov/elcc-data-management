@@ -4,6 +4,7 @@ export * from "@/services/funding-submission-line-services"
 export * from "@/services/log-services"
 
 // Bundled exports
+export * as Centres from "./centres"
 export * as EmployeeBenefits from "./employee-benefits"
 export * as FundingPeriods from "./funding-periods"
 export * as FundingReconciliationAdjustments from "./funding-reconciliation-adjustments"
