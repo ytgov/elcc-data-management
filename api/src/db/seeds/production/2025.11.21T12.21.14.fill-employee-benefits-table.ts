@@ -1,6 +1,5 @@
-import { isNil } from "lodash"
-
 import { Centre, EmployeeBenefit, FiscalPeriod } from "@/models"
+import { isNil } from "lodash"
 
 export async function up() {
   await FiscalPeriod.findEach(async (fiscalPeriod) => {

@@ -63,7 +63,7 @@ const options = computed(() => ({
   stroke: {
     show: false,
   },
-  colors: ["#0094A9", "#002EB7", "#FFAE00", "#FF7A00", "#04DDFB", "#A65000", "#1851FC"],
+  colors: ["#D81B60", "#002EB7", "#FFAE00", "#FF7A00", "#00A0C6", "#A65000", "#1851FC"],
   labels: lineNames.value,
   tooltip: {
     theme: "light",
@@ -72,7 +72,9 @@ const options = computed(() => ({
 }))
 
 const actualChildOccupancyRates = computed(() => {
-  return latestFundingLineValuesForSection.value.map((line) => line.actualChildOccupancyRate)
+  return latestFundingLineValuesForSection.value.map((line) =>
+    Number(line.actualChildOccupancyRate)
+  )
 })
 
 const hasActualChildOccupancyRates = computed(() =>
