@@ -2,7 +2,7 @@
 
 ## Production - building locally
 
-1. Create an `api/.env.production` file from the `api/.env.sample` file and fill with the appropriate mathcing the local development config with some minor changes.
+1. Create an `api/.env.production` file from the `api/.env.sample` file and fill with the appropriate matching the local development config with some minor changes.
 
    ```bash
    VUE_APP_FRONTEND_URL=http://localhost:8080
@@ -49,7 +49,7 @@
 
 The `dev` command vastly simplifies development using docker compose. It requires `ruby`, though `direnv` and `asdf` will make it easier to use.
 
-Its more or less simply a wrapper around docker compose will the ability to quickly add custom helpers.
+It's more or less simply a wrapper around docker compose with the ability to quickly add custom helpers.
 
 All commands are just strings joined together, so it's easy to add new commmands. `dev` prints out each command that it runs, so that you can run the command manually to debug it, or just so you learn some docker compose while using it.
 
