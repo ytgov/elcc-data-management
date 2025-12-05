@@ -11,13 +11,13 @@
         v-if="!isRowEditing(index)"
         :ref="itemRef"
         class="cursor-pointer"
-        @click="startEditingRow(index, 'estimated')"
+        @click="startEditingRow(index, 'estimatedCost')"
       >
         <td>{{ item.buildingExpenseCategoryId }}</td>
-        <td @click.capture.stop="startEditingRow(index, 'estimated')">
+        <td @click.capture.stop="startEditingRow(index, 'estimatedCost')">
           {{ formatMoney(item.estimatedCost) }}
         </td>
-        <td @click.capture.stop="startEditingRow(index, 'actual')">
+        <td @click.capture.stop="startEditingRow(index, 'actualCost')">
           {{ formatMoney(item.actualCost) }}
         </td>
         <td>{{ formatMoney(item.totalCost) }}</td>
@@ -34,7 +34,7 @@
             :ref="(el) => setEstimatedCostField(index, el)"
             v-model="item.estimatedCost"
             hide-details
-            @keydown="handleKeyboardNavigation($event, index, 'estimated')"
+            @keydown="handleKeyboardNavigation($event, index, 'estimatedCost')"
           />
         </td>
         <td>
@@ -42,7 +42,7 @@
             :ref="(el) => setActualCostField(index, el)"
             v-model="item.actualCost"
             hide-details
-            @keydown="handleKeyboardNavigation($event, index, 'actual')"
+            @keydown="handleKeyboardNavigation($event, index, 'actualCost')"
           />
         </td>
         <td>{{ formatMoney(item.totalCost) }}</td>
@@ -85,7 +85,7 @@ const buildingExpensesQuery = computed<BuildingExpenseQueryOptions>(() => {
 
 const { buildingExpenses, isLoading } = useBuildingExpenses(buildingExpensesQuery)
 
-type ColumnName = "estimated" | "actual"
+type FieldName = "estimatedCost" | "actualCost"
 
 const headers = [
   {
@@ -117,11 +117,6 @@ function setActualCostField(index: number, el: unknown) {
   actualCostFieldRefs.value[index] = el as HTMLInputElement | null
 }
 
-const fieldsByColumnName: Record<ColumnName, typeof estimatedCostFieldRefs> = {
-  estimated: estimatedCostFieldRefs,
-  actual: actualCostFieldRefs,
-}
-
 const lastSavedCostsById = ref<Record<number, { estimatedCost: string; actualCost: string }>>({})
 const isRowSavingById = ref<Record<number, boolean>>({})
 
@@ -131,7 +126,7 @@ function isRowEditing(rowIndex: number): boolean {
   return editingRowIndex.value === rowIndex
 }
 
-async function startEditingRow(rowIndex: number, columnName: ColumnName) {
+async function startEditingRow(rowIndex: number, fieldName: FieldName) {
   if (isRowEditing(rowIndex)) return
 
   const buildingExpense = buildingExpenses.value[rowIndex]
@@ -155,29 +150,29 @@ async function startEditingRow(rowIndex: number, columnName: ColumnName) {
 
   await nextTick()
 
-  focusOnField(rowIndex, columnName)
+  focusOnField(rowIndex, fieldName)
 }
 
-function handleKeyboardNavigation(event: KeyboardEvent, rowIndex: number, columnName: ColumnName) {
+function handleKeyboardNavigation(event: KeyboardEvent, rowIndex: number, fieldName: FieldName) {
   if (event.key === "Enter" || event.key === "ArrowDown") {
     event.preventDefault()
-    goToNextRow(rowIndex, columnName)
+    goToNextRow(rowIndex, fieldName)
   } else if (event.key === "ArrowUp") {
     event.preventDefault()
-    goToPreviousRow(rowIndex, columnName)
+    goToPreviousRow(rowIndex, fieldName)
   } else if (event.key === "ArrowRight") {
     event.preventDefault()
-    goToNextColumn(rowIndex, columnName)
+    goToNextColumn(rowIndex, fieldName)
   } else if (event.key === "ArrowLeft") {
     event.preventDefault()
-    goToPreviousColumn(rowIndex, columnName)
+    goToPreviousColumn(rowIndex, fieldName)
   } else if (event.key === "Tab") {
     event.preventDefault()
 
     if (event.shiftKey) {
-      goToPreviousColumn(rowIndex, columnName)
+      goToPreviousColumn(rowIndex, fieldName)
     } else {
-      goToNextColumn(rowIndex, columnName)
+      goToNextColumn(rowIndex, fieldName)
     }
   } else if (event.key === "Escape") {
     event.preventDefault()
@@ -185,22 +180,22 @@ function handleKeyboardNavigation(event: KeyboardEvent, rowIndex: number, column
   }
 }
 
-function goToNextColumn(rowIndex: number, columnName: ColumnName) {
-  if (columnName === "estimated") {
-    focusOnField(rowIndex, "actual")
+function goToNextColumn(rowIndex: number, fieldName: FieldName) {
+  if (fieldName === "estimatedCost") {
+    focusOnField(rowIndex, "actualCost")
     return
   }
 
-  goToNextRow(rowIndex, "estimated")
+  goToNextRow(rowIndex, "estimatedCost")
 }
 
-function goToPreviousColumn(rowIndex: number, columnName: ColumnName) {
-  if (columnName === "actual") {
-    focusOnField(rowIndex, "estimated")
+function goToPreviousColumn(rowIndex: number, fieldName: FieldName) {
+  if (fieldName === "actualCost") {
+    focusOnField(rowIndex, "estimatedCost")
     return
   }
 
-  goToPreviousRow(rowIndex, "actual")
+  goToPreviousRow(rowIndex, "actualCost")
 }
 
 function saveAndExitEditMode(rowIndex: number) {
@@ -257,7 +252,7 @@ function extractElement(
   return null
 }
 
-function goToNextRow(rowIndex: number, columnName: ColumnName) {
+function goToNextRow(rowIndex: number, fieldName: FieldName) {
   saveRowIfDirty(rowIndex)
 
   const nextIndex = rowIndex + 1
@@ -267,10 +262,10 @@ function goToNextRow(rowIndex: number, columnName: ColumnName) {
     return
   }
 
-  startEditingRow(nextIndex, columnName)
+  startEditingRow(nextIndex, fieldName)
 }
 
-function goToPreviousRow(rowIndex: number, columnName: ColumnName) {
+function goToPreviousRow(rowIndex: number, fieldName: FieldName) {
   saveRowIfDirty(rowIndex)
 
   if (rowIndex <= 0) {
@@ -280,12 +275,19 @@ function goToPreviousRow(rowIndex: number, columnName: ColumnName) {
 
   const previousIndex = rowIndex - 1
 
-  startEditingRow(previousIndex, columnName)
+  startEditingRow(previousIndex, fieldName)
 }
 
-function focusOnField(rowIndex: number, columnName: ColumnName) {
-  const fields = fieldsByColumnName[columnName].value
-  const field = fields[rowIndex]
+function focusOnField(rowIndex: number, fieldName: FieldName) {
+  let fieldRefs: Record<number, HTMLInputElement | null> = {}
+
+  if (fieldName === "estimatedCost") {
+    fieldRefs = estimatedCostFieldRefs.value
+  } else if (fieldName === "actualCost") {
+    fieldRefs = actualCostFieldRefs.value
+  }
+
+  const field = fieldRefs[rowIndex]
 
   if (isNil(field)) {
     return
@@ -317,9 +319,7 @@ function cancelEditingRow(rowIndex: number) {
 async function saveRowIfDirty(rowIndex: number) {
   const buildingExpense = buildingExpenses.value[rowIndex]
 
-  if (isNil(buildingExpense)) {
-    return
-  }
+  if (isNil(buildingExpense)) return
 
   const lastSavedCosts = lastSavedCostsById.value[buildingExpense.id] ?? {
     estimatedCost: buildingExpense.estimatedCost,
@@ -329,13 +329,8 @@ async function saveRowIfDirty(rowIndex: number) {
   const hasEstimatedCostChanged = buildingExpense.estimatedCost !== lastSavedCosts.estimatedCost
   const hasActualCostChanged = buildingExpense.actualCost !== lastSavedCosts.actualCost
 
-  if (!hasEstimatedCostChanged && !hasActualCostChanged) {
-    return
-  }
-
-  if (isRowSavingById.value[buildingExpense.id] === true) {
-    return
-  }
+  if (!hasEstimatedCostChanged && !hasActualCostChanged) return
+  if (isRowSavingById.value[buildingExpense.id] === true) return
 
   isRowSavingById.value[buildingExpense.id] = true
 
@@ -353,6 +348,7 @@ async function saveRowIfDirty(rowIndex: number) {
 
     buildingExpense.estimatedCost = updatedBuildingExpense.estimatedCost
     buildingExpense.actualCost = updatedBuildingExpense.actualCost
+    buildingExpense.totalCost = updatedBuildingExpense.totalCost
 
     lastSavedCostsById.value[buildingExpense.id] = {
       estimatedCost: updatedBuildingExpense.estimatedCost,
@@ -369,15 +365,10 @@ async function saveRowIfDirty(rowIndex: number) {
 }
 
 function normalizeDecimalString(value: string): string {
-  if (isEmpty(value)) {
-    return "0.0000"
-  }
+  if (isEmpty(value)) return "0.0000"
 
   const numericValue = Number(value)
-
-  if (Number.isNaN(numericValue)) {
-    return "0.0000"
-  }
+  if (Number.isNaN(numericValue)) return "0.0000"
 
   return numericValue.toFixed(4)
 }
