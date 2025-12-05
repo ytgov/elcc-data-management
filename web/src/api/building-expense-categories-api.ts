@@ -21,6 +21,8 @@ export type BuildingExpenseCategoryAsShow = BuildingExpenseCategory
 
 export type BuildingExpenseCategoryAsIndex = BuildingExpenseCategory
 
+export type BuildingExpenseCategoryAsReference = BuildingExpenseCategory
+
 export type BuildingExpenseCategoryWhereOptions = WhereOptions<
   BuildingExpenseCategory,
   "id" | "fundingRegionId" | "categoryName"

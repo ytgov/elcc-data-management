@@ -13,7 +13,9 @@
         class="cursor-pointer"
         @click="startEditingRow(index, 'estimatedCost')"
       >
-        <td>{{ item.buildingExpenseCategoryId }}</td>
+        <td>
+          <BuildingExpenseCategoryAttributesChip :building-expense-category="item.category" />
+        </td>
         <td @click.capture.stop="startEditingRow(index, 'estimatedCost')">
           {{ formatMoney(item.estimatedCost) }}
         </td>
@@ -28,7 +30,9 @@
         class="cursor-pointer"
         @focusout="saveAndExitEditMode(index)"
       >
-        <td>{{ item.buildingExpenseCategoryId }}</td>
+        <td>
+          <BuildingExpenseCategoryAttributesChip :building-expense-category="item.category" />
+        </td>
         <td>
           <v-text-field
             :ref="(el) => setEstimatedCostField(index, el)"
@@ -64,6 +68,8 @@ import useBuildingExpenses, {
   type BuildingExpenseQueryOptions,
 } from "@/use/use-building-expenses"
 import useSnack from "@/use/use-snack"
+
+import BuildingExpenseCategoryAttributesChip from "@/components/building-expense-categories/BuildingExpenseCategoryAttributesChip.vue"
 
 const props = withDefaults(
   defineProps<{
