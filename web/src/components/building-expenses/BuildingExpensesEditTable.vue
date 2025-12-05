@@ -3,7 +3,7 @@
     :headers="headers"
     :items="buildingExpenses"
     :loading="isLoading"
-    height="600"
+    height="630"
     fixed-footer
     disable-sort
   >
@@ -56,8 +56,8 @@
       </tr>
     </template>
     <template #tfoot>
-      <tfoot class="bg-grey-lighten-3 font-weight-medium">
-        <tr>
+      <tfoot>
+        <tr class="bg-grey-lighten-3 font-weight-medium">
           <td>SECTION TOTAL</td>
           <td></td>
           <td>{{ formatMoney(totalEstimatedCost) }}</td>
