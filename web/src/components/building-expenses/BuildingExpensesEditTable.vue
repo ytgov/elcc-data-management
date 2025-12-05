@@ -179,6 +179,9 @@ function handleKeyboardNavigation(event: KeyboardEvent, rowIndex: number, column
     } else {
       goToNextColumn(rowIndex, columnName)
     }
+  } else if (event.key === "Escape") {
+    event.preventDefault()
+    cancelEditingRow(rowIndex)
   }
 }
 
@@ -293,6 +296,23 @@ function focusOnField(rowIndex: number, columnName: ColumnName) {
 }
 
 const snack = useSnack()
+
+function cancelEditingRow(rowIndex: number) {
+  const buildingExpense = buildingExpenses.value[rowIndex]
+
+  if (isNil(buildingExpense)) {
+    return
+  }
+
+  const lastSavedCosts = lastSavedCostsById.value[buildingExpense.id]
+
+  if (!isNil(lastSavedCosts)) {
+    buildingExpense.estimatedCost = lastSavedCosts.estimatedCost
+    buildingExpense.actualCost = lastSavedCosts.actualCost
+  }
+
+  editingRowIndex.value = null
+}
 
 async function saveRowIfDirty(rowIndex: number) {
   const buildingExpense = buildingExpenses.value[rowIndex]
