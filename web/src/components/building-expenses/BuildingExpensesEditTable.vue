@@ -4,6 +4,7 @@
     :items="buildingExpenses"
     :loading="isLoading"
     height="600"
+    fixed-footer
     disable-sort
   >
     <template #item="{ index, item, itemRef }">
@@ -54,6 +55,17 @@
         <td>{{ formatMoney(item.totalCost) }}</td>
       </tr>
     </template>
+    <template #tfoot>
+      <tfoot class="bg-grey-lighten-3 font-weight-medium">
+        <tr>
+          <td>SECTION TOTAL</td>
+          <td></td>
+          <td>{{ formatMoney(totalEstimatedCost) }}</td>
+          <td>{{ formatMoney(totalActualCost) }}</td>
+          <td>{{ formatMoney(totalCost) }}</td>
+        </tr>
+      </tfoot>
+    </template>
   </v-data-table-virtual>
 </template>
 
@@ -62,6 +74,7 @@ import { computed, nextTick, ref, type ComponentPublicInstance } from "vue"
 import { isEmpty, isNil } from "lodash"
 
 import { formatMoney } from "@/utils/formatters"
+import sumByDecimal from "@/utils/sum-by-decimal"
 
 import buildingExpensesApi from "@/api/building-expenses-api"
 import useBuildingExpenses, {
@@ -117,6 +130,18 @@ const headers = [
     key: "totalCost",
   },
 ]
+
+const totalEstimatedCost = computed(() => {
+  return sumByDecimal(buildingExpenses.value, "estimatedCost").toFixed(4)
+})
+
+const totalActualCost = computed(() => {
+  return sumByDecimal(buildingExpenses.value, "actualCost").toFixed(4)
+})
+
+const totalCost = computed(() => {
+  return sumByDecimal(buildingExpenses.value, "totalCost").toFixed(4)
+})
 
 const estimatedCostFieldRefs = ref<Record<number, HTMLInputElement | null>>({})
 const actualCostFieldRefs = ref<Record<number, HTMLInputElement | null>>({})
