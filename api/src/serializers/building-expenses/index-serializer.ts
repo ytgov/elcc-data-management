@@ -1,7 +1,8 @@
-import { pick } from "lodash"
+import { isUndefined, pick } from "lodash"
 
 import { BuildingExpense } from "@/models"
 import BaseSerializer from "@/serializers/base-serializer"
+import { BuildingExpenseCategories } from "@/serializers"
 
 export type BuildingExpenseAsIndex = Pick<
   BuildingExpense,
@@ -17,24 +18,36 @@ export type BuildingExpenseAsIndex = Pick<
   | "notes"
   | "createdAt"
   | "updatedAt"
->
+> & {
+  category: BuildingExpenseCategories.AsReference
+}
 
 export class IndexSerializer extends BaseSerializer<BuildingExpense> {
   perform(): BuildingExpenseAsIndex {
-    return pick(this.record, [
-      "id",
-      "centreId",
-      "fiscalPeriodId",
-      "buildingExpenseCategoryId",
-      "subsidyRate",
-      "buildingUsagePercent",
-      "estimatedCost",
-      "actualCost",
-      "totalCost",
-      "notes",
-      "createdAt",
-      "updatedAt",
-    ])
+    const { category } = this.record
+    if (isUndefined(category)) {
+      throw new Error("Expected category association to be preloaded.")
+    }
+
+    const categorySerialized = BuildingExpenseCategories.ReferenceSerializer.perform(category)
+
+    return {
+      ...pick(this.record, [
+        "id",
+        "centreId",
+        "fiscalPeriodId",
+        "buildingExpenseCategoryId",
+        "subsidyRate",
+        "buildingUsagePercent",
+        "estimatedCost",
+        "actualCost",
+        "totalCost",
+        "notes",
+        "createdAt",
+        "updatedAt",
+      ]),
+      category: categorySerialized,
+    }
   }
 }
 

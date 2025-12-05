@@ -21,6 +21,7 @@ export class BuildingExpensesController extends BaseController<BuildingExpense> 
         order,
         limit: this.pagination.limit,
         offset: this.pagination.offset,
+        include: ["category"],
       })
       const serializedBuildingExpenses = IndexSerializer.perform(buildingExpenses)
       return this.response.json({

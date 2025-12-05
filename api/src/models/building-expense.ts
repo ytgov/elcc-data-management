@@ -104,11 +104,11 @@ export class BuildingExpense extends BaseModel<
   @BelongsTo(() => BuildingExpenseCategory, {
     foreignKey: "buildingExpenseCategoryId",
     inverse: {
-      as: "buildingExpenses",
+      as: "expenses",
       type: "hasMany",
     },
   })
-  declare buildingExpenseCategory?: NonAttribute<BuildingExpenseCategory>
+  declare category?: NonAttribute<BuildingExpenseCategory>
 
   static establishScopes() {
     // add as needed

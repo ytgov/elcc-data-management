@@ -70,10 +70,10 @@ export class BuildingExpenseCategory extends BaseModel<
   @HasMany(() => BuildingExpense, {
     foreignKey: "buildingExpenseCategoryId",
     inverse: {
-      as: "buildingExpenseCategory",
+      as: "category",
     },
   })
-  declare buildingExpenses?: NonAttribute<BuildingExpense[]>
+  declare expenses?: NonAttribute<BuildingExpense[]>
 
   static establishScopes() {
     this.addSearchScope(["categoryName"])
