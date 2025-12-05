@@ -235,6 +235,49 @@ docker compose -f docker-compose.development.yaml up --remove-orphans --build
   // Lifecycle hooks
   ```
 
+### Event Handler Naming
+
+**Pattern:** Name functions based on what they do, not where they're called from.
+
+```vue
+<template>
+  <!-- Good: Action-based naming -->
+  <tr @click="startEditingRow(index, 'estimated')">
+    <input
+      @blur="saveAndExitEditMode()"
+      @keydown="handleKeyboardNavigation($event)"
+    />
+
+    <!-- Bad: Generic event-based naming -->
+  </tr>
+
+  <tr @click="onRowClick(index)">
+    <input
+      @blur="onInputBlur()"
+      @keydown="onKeyDown($event)"
+    />
+  </tr>
+</template>
+
+<script setup>
+function onRowClick(index) {
+  startEditingRow(index)
+}
+function onInputBlur() {
+  saveChanges()
+}
+function onKeyDown(event) {
+  handleNavigation(event)
+}
+</script>
+```
+
+**Key principles:**
+
+- Avoid generic wrappers like `onClick`, `onSubmit`, `handleClick`, `onBlur`
+- Call action functions directly from event handlers
+- Function names should describe the action being performed, not the event that triggered it
+
 ### Composables: Singular vs Plural
 
 Follow the **singular/plural pattern** for data operations:
