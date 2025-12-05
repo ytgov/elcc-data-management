@@ -191,18 +191,34 @@ async function startEditingRow(rowIndex: number, fieldName: FieldName) {
 }
 
 function handleKeyboardNavigation(event: KeyboardEvent, rowIndex: number, fieldName: FieldName) {
-  if (event.key === "Enter" || event.key === "ArrowDown") {
+  const input = event.target as HTMLInputElement | null
+  const isTextFullySelected =
+    input?.selectionStart === 0 && input?.selectionEnd === input?.value.length
+
+  if (event.key === "Enter" && !event.shiftKey) {
     event.preventDefault()
     goToNextRow(rowIndex, fieldName)
+  } else if (event.key === "Enter" && event.shiftKey) {
+    event.preventDefault()
+    goToPreviousRow(rowIndex, fieldName)
   } else if (event.key === "ArrowUp") {
     event.preventDefault()
     goToPreviousRow(rowIndex, fieldName)
-  } else if (event.key === "ArrowRight") {
+  } else if (event.key === "ArrowDown") {
     event.preventDefault()
-    goToNextColumn(rowIndex, fieldName)
-  } else if (event.key === "ArrowLeft") {
+    goToNextRow(rowIndex, fieldName)
+  } else if (event.key === "ArrowLeft" && isTextFullySelected) {
+    event.preventDefault()
+    input?.setSelectionRange(0, 0)
+  } else if (event.key === "ArrowLeft" && input?.selectionStart === 0) {
     event.preventDefault()
     goToPreviousColumn(rowIndex, fieldName)
+  } else if (event.key === "ArrowRight" && isTextFullySelected) {
+    event.preventDefault()
+    input?.setSelectionRange(input.value.length, input.value.length)
+  } else if (event.key === "ArrowRight" && input?.selectionEnd === input?.value.length) {
+    event.preventDefault()
+    goToNextColumn(rowIndex, fieldName)
   } else if (event.key === "Tab") {
     event.preventDefault()
 
