@@ -19,24 +19,39 @@
       >Add worksheets for {{ fiscalYear }}</v-btn
     >
   </div>
-  <FundingSubmissionLineJsonEditSheet
-    v-else
-    :funding-submission-line-json-id="fundingSubmissionLineJsonId"
-    class="ma-4"
-    @update:funding-submission-line-json="emit('update:fundingSubmissionLineJson', $event)"
-  />
+  <div v-else>
+    <FundingSubmissionLineJsonEditSheet
+      :funding-submission-line-json-id="fundingSubmissionLineJsonId"
+      class="ma-4"
+      @update:funding-submission-line-json="emit('update:fundingSubmissionLineJson', $event)"
+    />
+
+    <v-skeleton-loader
+      v-if="isNil(fiscalPeriodId)"
+      type="table"
+    />
+    <div
+      v-else
+      class="ma-4 mt-8"
+    >
+      <h3 class="section-header">Building Expenses</h3>
+
+      <BuildingExpensesEditTable :where="buildingExpenseWhere" />
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref } from "vue"
-import { isEmpty, upperFirst } from "lodash"
+import { isEmpty, isNil, upperFirst } from "lodash"
 
 import centresApi from "@/api/centres-api"
-import { FiscalPeriodMonths } from "@/api/fiscal-periods-api"
+import useFiscalPeriods, { FiscalPeriodMonths } from "@/use/use-fiscal-periods"
 import { useNotificationStore } from "@/store/NotificationStore"
 import useFundingSubmissionLineJsons from "@/use/use-funding-submission-line-jsons"
 
 import FundingSubmissionLineJsonEditSheet from "@/components/funding-submission-line-jsons/FundingSubmissionLineJsonEditSheet.vue"
+import BuildingExpensesEditTable from "@/components/building-expenses/BuildingExpensesEditTable.vue"
 
 const notificationStore = useNotificationStore()
 
@@ -69,6 +84,25 @@ const {
 const fundingSubmissionLineJson = computed(() => fundingSubmissionLineJsons.value[0])
 const fundingSubmissionLineJsonId = computed(() => fundingSubmissionLineJson.value?.id)
 
+const fiscalPeriodsQuery = computed(() => {
+  return {
+    where: {
+      fiscalYear: props.fiscalYearSlug,
+      month: props.month,
+    },
+    perPage: 1,
+  }
+})
+
+const { fiscalPeriods } = useFiscalPeriods(fiscalPeriodsQuery)
+const fiscalPeriod = computed(() => fiscalPeriods.value[0])
+const fiscalPeriodId = computed(() => fiscalPeriod.value?.id)
+
+const buildingExpenseWhere = computed(() => ({
+  centreId: props.centreId,
+  fiscalPeriodId: fiscalPeriodId.value,
+}))
+
 const isInitializing = ref(false)
 
 async function initializeWorksheetsForFiscalYear() {
@@ -86,4 +120,14 @@ async function initializeWorksheetsForFiscalYear() {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.section-header {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  margin-left: -8px;
+  padding: 8px;
+  font-weight: 400;
+  background-color: rgb(var(--v-theme-primary));
+  border-radius: 4px;
+}
+</style>
