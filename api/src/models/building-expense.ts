@@ -9,11 +9,13 @@ import {
 import {
   Attribute,
   AutoIncrement,
+  BeforeSave,
   BelongsTo,
   Default,
   NotNull,
   PrimaryKey,
 } from "@sequelize/core/decorators-legacy"
+import Big from "big.js"
 
 import { BuildingExpensesCentreIdFiscalPeriodIdCategoryIdUniqueIndex } from "@/models/indexes"
 
@@ -81,6 +83,19 @@ export class BuildingExpense extends BaseModel<
 
   @Attribute(DataTypes.DATE)
   declare deletedAt: Date | null
+
+  // Hooks
+  @BeforeSave
+  static updateTotalCost(buildingExpense: BuildingExpense) {
+    const actualCostAsBig = new Big(buildingExpense.actualCost || "0")
+    const subsidyRateAsBig = new Big(buildingExpense.subsidyRate || "0")
+    const buildingUsagePercentAsBig = new Big(buildingExpense.buildingUsagePercent || "0")
+
+    const buildingUsageRatio = buildingUsagePercentAsBig.div(100)
+    const totalCostAsBig = actualCostAsBig.times(subsidyRateAsBig).times(buildingUsageRatio)
+
+    buildingExpense.totalCost = totalCostAsBig.toFixed(4)
+  }
 
   // Associations
   @BelongsTo(() => Centre, {
