@@ -26,7 +26,7 @@
     "vue-currency-input": "^3.0.5",
     "vue-router": "^4.2.5",
     "vue3-apexcharts": "^1.4.1",
-    "vuetify": "^3.9.7"
+    "vuetify": "^3.11.2"
   },
   "devDependencies": {
     "@types/big.js": "^6.2.2",
