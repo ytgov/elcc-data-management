@@ -16,6 +16,7 @@
         <td>
           <BuildingExpenseCategoryAttributesChip :building-expense-category="item.category" />
         </td>
+        <td>{{ item.subsidyRate }}</td>
         <td @click.capture.stop="startEditingRow(index, 'estimatedCost')">
           {{ formatMoney(item.estimatedCost) }}
         </td>
@@ -33,6 +34,7 @@
         <td>
           <BuildingExpenseCategoryAttributesChip :building-expense-category="item.category" />
         </td>
+        <td>{{ item.subsidyRate }}</td>
         <td>
           <v-text-field
             :ref="(el) => setEstimatedCostField(index, el)"
@@ -97,6 +99,10 @@ const headers = [
   {
     title: "Category",
     key: "buildingExpenseCategoryId",
+  },
+  {
+    title: "Subsidy Rate / $",
+    key: "subsidyRate",
   },
   {
     title: "Estimated Cost",
