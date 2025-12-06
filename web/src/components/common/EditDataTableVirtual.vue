@@ -52,7 +52,6 @@
             @keydown="navigateOnKeydown($event, headerKey, index)"
           >
             <slot
-              :key="`${itemsVersion}-${headerKey}-${index}`"
               :name="`item.${headerKey}.edit`"
               :item="cloneDeep(item)"
               :index="index"
@@ -98,7 +97,7 @@
     ColumnKey extends string
   "
 >
-import { computed, nextTick, ref, watch } from "vue"
+import { computed, nextTick, ref } from "vue"
 import cloneDeep from "lodash/cloneDeep"
 import { isNil } from "lodash"
 
@@ -130,16 +129,6 @@ const columnsAsAlphaIndexMap = computed(() => {
 })
 
 const editingRowIndex = ref<number | null>(null)
-
-const itemsVersion = ref<number>(0)
-
-watch(
-  () => props.items,
-  () => {
-    itemsVersion.value += 1
-  },
-  { deep: true }
-)
 
 const inputElementRefsByAlphaNumericIndex = ref<Record<string, InputComponents | null>>({})
 

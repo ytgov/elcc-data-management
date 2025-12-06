@@ -7,7 +7,7 @@
     height="630"
     fixed-footer
     disable-sort
-    @cancel="restoreRow"
+    @cancel="restoreBuildingExpense"
   >
     <template #item.buildingExpenseCategoryId="{ item }">
       <BuildingExpenseCategoryAttributesChip :building-expense-category="item.category" />
@@ -29,7 +29,7 @@
       <v-text-field
         v-model="item.estimatedCost"
         hide-details
-        @change="saveRowIfDirty(item)"
+        @change="saveBuildingExpenseIfDirty(item)"
       />
     </template>
 
@@ -37,7 +37,7 @@
       <v-text-field
         v-model="item.actualCost"
         hide-details
-        @change="saveRowIfDirty(item)"
+        @change="saveBuildingExpenseIfDirty(item)"
       />
     </template>
 
@@ -144,7 +144,7 @@ const isRowSavingById = ref<Record<number, boolean>>({})
 
 const snack = useSnack()
 
-async function saveRowIfDirty(buildingExpense: BuildingExpense) {
+async function saveBuildingExpenseIfDirty(buildingExpense: BuildingExpense) {
   const currentBuildingExpense = buildingExpensesById.value[buildingExpense.id]
   if (JSON.stringify(currentBuildingExpense) === JSON.stringify(buildingExpense)) return
 
@@ -173,7 +173,7 @@ async function saveRowIfDirty(buildingExpense: BuildingExpense) {
   }
 }
 
-function restoreRow(buildingExpense: BuildingExpense) {
+function restoreBuildingExpense(buildingExpense: BuildingExpense) {
   const oldBuildingExpense = buildingExpensesById.value[buildingExpense.id]
   if (isNil(oldBuildingExpense)) return
 
