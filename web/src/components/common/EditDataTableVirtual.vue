@@ -49,7 +49,6 @@
           <td
             v-if="isEditableColumn(headerKey)"
             :ref="(element: unknown) => registerInputElement(headerKey, index, element)"
-            @focusin="setActiveCell(headerKey, index)"
             @keydown="navigateOnKeydown($event, headerKey, index)"
           >
             <slot
@@ -122,7 +121,6 @@ watchEffect(() => {
   itemClones.value = cloneDeep(props.items)
 })
 
-const activeColumnIndex = ref<ColumnKey | null>(null)
 const activeRowIndex = ref<number | null>(null)
 
 const inputElementRefsByAlphaNumericIndex = ref<Record<string, InputComponents | null>>({})
@@ -133,11 +131,6 @@ function isEditableColumn(columnKey: string | undefined): columnKey is ColumnKey
 
 function isEditingRow(rowIndex: number): boolean {
   return activeRowIndex.value === rowIndex
-}
-
-function setActiveCell(columnKey: ColumnKey, rowIndex: number): void {
-  activeColumnIndex.value = columnKey
-  activeRowIndex.value = rowIndex
 }
 
 function getInputElementBy(columnKey: ColumnKey, rowIndex: number): InputComponents | null {
@@ -151,7 +144,6 @@ function getInputElementBy(columnKey: ColumnKey, rowIndex: number): InputCompone
 async function startEditingRow(rowIndex: number, columnKey: ColumnKey): Promise<void> {
   if (isEditingRow(rowIndex)) return
 
-  activeColumnIndex.value = columnKey
   activeRowIndex.value = rowIndex
 
   await nextTick()
@@ -164,13 +156,13 @@ function emitInputAndCancel() {
 
   emitUpdateCell(activeRowIndex.value)
 
-  resetActiveCell()
+  resetActiveRow()
 }
 
 function resetAndCancel(): void {
   itemClones.value = cloneDeep(props.items)
 
-  resetActiveCell()
+  resetActiveRow()
 
   emit("cancel")
 }
@@ -243,7 +235,7 @@ async function goToNextRow(rowIndex: number, columnKey: ColumnKey): Promise<void
 
   const nextRowIndex = rowIndex + 1
   if (nextRowIndex >= props.items.length) {
-    activeRowIndex.value = null
+    resetActiveRow()
     return
   }
 
@@ -254,7 +246,7 @@ async function goToPreviousRow(rowIndex: number, columnKey: ColumnKey): Promise<
   emitUpdateCell(rowIndex)
 
   if (rowIndex <= 0) {
-    activeRowIndex.value = null
+    resetActiveRow()
     return
   }
 
@@ -274,7 +266,6 @@ function goToNextColumn(rowIndex: number, columnKey: ColumnKey): void {
 
   const nextColumnKey = props.editableColumns[nextColumnIndex]
   if (nextColumnKey) {
-    activeColumnIndex.value = nextColumnKey
     focusOnField(nextColumnKey, rowIndex)
   }
 }
@@ -295,7 +286,6 @@ function goToPreviousColumn(rowIndex: number, columnKey: ColumnKey): void {
 
   const previousColumnKey = props.editableColumns[previousColumnIndex]
   if (previousColumnKey) {
-    activeColumnIndex.value = previousColumnKey
     focusOnField(previousColumnKey, rowIndex)
   }
 }
@@ -307,8 +297,7 @@ function emitUpdateCell(rowIndex: number): void {
   emit("update:cell", item as Item)
 }
 
-function resetActiveCell() {
-  activeColumnIndex.value = null
+function resetActiveRow() {
   activeRowIndex.value = null
 }
 </script>
