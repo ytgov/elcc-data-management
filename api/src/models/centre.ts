@@ -38,6 +38,7 @@ export enum CentreStatuses {
   UP_TO_DATE = "Up to date",
 }
 
+// TODO: split this table into buildings, and companies
 @Table({
   paranoid: false,
 })
