@@ -30,26 +30,39 @@
       v-if="isNil(fiscalPeriodId)"
       type="table"
     />
-    <div
+    <section
       v-else
       class="ma-4 mt-8"
     >
-      <h3 class="section-header">Building Expenses</h3>
+      <h3 class="d-flex justify-space-between align-center section-header">
+        Building Expenses
+
+        <v-icon
+          title="Show keyboard shortcuts"
+          class="included"
+          @click="showKeyboardShortcutsModal"
+        >
+          mdi-keyboard
+        </v-icon>
+      </h3>
 
       <BuildingExpensesEditTable :where="buildingExpenseWhere" />
-    </div>
+    </section>
+    <KeyboardShortcutsModal ref="keyboardShortcutsModal" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue"
+import { computed, ref, useTemplateRef } from "vue"
 import { isEmpty, isNil, upperFirst } from "lodash"
+import { useHotkey } from "vuetify"
 
 import centresApi from "@/api/centres-api"
 import useFiscalPeriods, { FiscalPeriodMonths } from "@/use/use-fiscal-periods"
 import useFundingSubmissionLineJsons from "@/use/use-funding-submission-line-jsons"
 import useSnack from "@/use/use-snack"
 
+import KeyboardShortcutsModal from "@/components/common/KeyboardShortcutsModal.vue"
 import FundingSubmissionLineJsonEditSheet from "@/components/funding-submission-line-jsons/FundingSubmissionLineJsonEditSheet.vue"
 import BuildingExpensesEditTable from "@/components/building-expenses/BuildingExpensesEditTable.vue"
 
@@ -113,6 +126,14 @@ async function initializeWorksheetsForFiscalYear() {
   } finally {
     isInitializing.value = false
   }
+}
+
+const keyboardShortcutsModal = useTemplateRef("keyboardShortcutsModal")
+
+useHotkey("shift+?", showKeyboardShortcutsModal)
+
+function showKeyboardShortcutsModal() {
+  keyboardShortcutsModal.value?.open()
 }
 </script>
 
