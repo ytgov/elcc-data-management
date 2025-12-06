@@ -3,6 +3,8 @@ import { isNil } from "lodash"
 import { DateTime } from "luxon"
 
 import db, {
+  BuildingExpense,
+  BuildingExpenseCategory,
   Centre,
   EmployeeBenefit,
   EmployeeWageTier,
@@ -66,6 +68,7 @@ export class CreateService extends BaseService {
       )
       await this.createEmployeeWageTiers(fundingPeriodFiscalYear)
       await this.createEmployeeBenefits(fundingPeriodFiscalYear)
+      await this.createBuildingExpenses(fundingPeriodFiscalYear)
       await this.createFundingSubmissionLines(fundingPeriod)
       await this.createFundingReconciliations(fundingPeriod)
       await this.createFundingReconciliationAdjustments(fundingPeriod)
@@ -158,10 +161,50 @@ export class CreateService extends BaseService {
     }
   }
 
+  private async createBuildingExpenses(fiscalYear: string) {
+    const shortFiscalYear = FiscalPeriod.toShortFiscalYearFormat(fiscalYear)
+
+    const fiscalPeriods = await FiscalPeriod.findAll({
+      where: { fiscalYear: shortFiscalYear },
+    })
+
+    const buildingExpenseCategories = await BuildingExpenseCategory.findAll()
+
+    let buildingExpensesAttributes: CreationAttributes<BuildingExpense>[] = []
+    const BATCH_SIZE = 1000
+
+    await Centre.findEach(async (centre) => {
+      for (const fiscalPeriod of fiscalPeriods) {
+        for (const category of buildingExpenseCategories) {
+          buildingExpensesAttributes.push({
+            centreId: centre.id,
+            fiscalPeriodId: fiscalPeriod.id,
+            buildingExpenseCategoryId: category.id,
+            subsidyRate: category.subsidyRate,
+            buildingUsagePercent: "0",
+            estimatedCost: "0",
+            actualCost: "0",
+            totalCost: "0",
+          })
+
+          if (buildingExpensesAttributes.length >= BATCH_SIZE) {
+            await BuildingExpense.bulkCreate(buildingExpensesAttributes)
+            buildingExpensesAttributes = []
+          }
+        }
+      }
+    })
+
+    if (buildingExpensesAttributes.length > 0) {
+      await BuildingExpense.bulkCreate(buildingExpensesAttributes)
+    }
+  }
+
   private async createFundingSubmissionLines(_fundingPeriod: FundingPeriod) {
     // TODO: Implement funding submission lines creation
     // This would create the default funding submission lines for the created funding period
     // See api/src/db/seeds/development/2023.12.12T00.25.25.fill-funding-submission-lines-table.ts
+    // Maybe ? FundingSubmissionLineJsonServices.bulkCreate(centerId, fiscalYear)
   }
 
   private async createFundingReconciliations(fundingPeriod: FundingPeriod) {
