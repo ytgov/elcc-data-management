@@ -1,60 +1,46 @@
 <template>
-  <v-data-table-virtual
+  <EditDataTableVirtual
     :headers="headers"
     :items="buildingExpenses"
     :loading="isLoading"
+    :editable-columns="['estimatedCost', 'actualCost']"
     height="630"
     fixed-footer
     disable-sort
+    @cancel="restoreRow"
   >
-    <template #item="{ index, item, itemRef }">
-      <tr
-        v-if="!isRowEditing(index)"
-        :ref="itemRef"
-        class="cursor-pointer"
-        @click="startEditingRow(index, 'estimatedCost')"
-      >
-        <td>
-          <BuildingExpenseCategoryAttributesChip :building-expense-category="item.category" />
-        </td>
-        <td>{{ item.subsidyRate }}</td>
-        <td @click.capture.stop="startEditingRow(index, 'estimatedCost')">
-          {{ formatMoney(item.estimatedCost) }}
-        </td>
-        <td @click.capture.stop="startEditingRow(index, 'actualCost')">
-          {{ formatMoney(item.actualCost) }}
-        </td>
-        <td>{{ formatMoney(item.totalCost) }}</td>
-      </tr>
-      <tr
-        v-else
-        :ref="itemRef"
-        class="cursor-pointer"
-        @focusout="saveAndExitEditMode(index)"
-      >
-        <td>
-          <BuildingExpenseCategoryAttributesChip :building-expense-category="item.category" />
-        </td>
-        <td>{{ item.subsidyRate }}</td>
-        <td>
-          <v-text-field
-            :ref="(el) => setEstimatedCostField(index, el)"
-            v-model="item.estimatedCost"
-            hide-details
-            @keydown="handleKeyboardNavigation($event, index, 'estimatedCost')"
-          />
-        </td>
-        <td>
-          <v-text-field
-            :ref="(el) => setActualCostField(index, el)"
-            v-model="item.actualCost"
-            hide-details
-            @keydown="handleKeyboardNavigation($event, index, 'actualCost')"
-          />
-        </td>
-        <td>{{ formatMoney(item.totalCost) }}</td>
-      </tr>
+    <template #item.buildingExpenseCategoryId="{ item }">
+      <BuildingExpenseCategoryAttributesChip :building-expense-category="item.category" />
     </template>
+
+    <template #item.estimatedCost="{ item }">
+      {{ formatMoney(item.estimatedCost) }}
+    </template>
+
+    <template #item.actualCost="{ item }">
+      {{ formatMoney(item.actualCost) }}
+    </template>
+
+    <template #item.totalCost="{ item }">
+      {{ formatMoney(item.totalCost) }}
+    </template>
+
+    <template #item.estimatedCost.edit="{ item }">
+      <v-text-field
+        v-model="item.estimatedCost"
+        hide-details
+        @change="saveRowIfDirty(item)"
+      />
+    </template>
+
+    <template #item.actualCost.edit="{ item }">
+      <v-text-field
+        v-model="item.actualCost"
+        hide-details
+        @change="saveRowIfDirty(item)"
+      />
+    </template>
+
     <template #tfoot>
       <tfoot>
         <tr class="bg-grey-lighten-3 font-weight-medium">
@@ -66,17 +52,20 @@
         </tr>
       </tfoot>
     </template>
-  </v-data-table-virtual>
+  </EditDataTableVirtual>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, type ComponentPublicInstance } from "vue"
-import { isEmpty, isNil } from "lodash"
+import { computed, ref } from "vue"
+import { isNil, keyBy, pick } from "lodash"
 
 import { formatMoney } from "@/utils/formatters"
 import sumByDecimal from "@/utils/sum-by-decimal"
 
-import buildingExpensesApi from "@/api/building-expenses-api"
+import buildingExpensesApi, {
+  BuildingExpenseAsIndex,
+  type BuildingExpense,
+} from "@/api/building-expenses-api"
 import useBuildingExpenses, {
   type BuildingExpenseFiltersOptions,
   type BuildingExpenseWhereOptions,
@@ -84,6 +73,7 @@ import useBuildingExpenses, {
 } from "@/use/use-building-expenses"
 import useSnack from "@/use/use-snack"
 
+import EditDataTableVirtual from "@/components/common/EditDataTableVirtual.vue"
 import BuildingExpenseCategoryAttributesChip from "@/components/building-expense-categories/BuildingExpenseCategoryAttributesChip.vue"
 
 const props = withDefaults(
@@ -105,8 +95,6 @@ const buildingExpensesQuery = computed<BuildingExpenseQueryOptions>(() => {
 })
 
 const { buildingExpenses, isLoading } = useBuildingExpenses(buildingExpensesQuery)
-
-type FieldName = "estimatedCost" | "actualCost"
 
 const headers = [
   {
@@ -143,272 +131,40 @@ const totalCost = computed(() => {
   return sumByDecimal(buildingExpenses.value, "totalCost").toFixed(4)
 })
 
-const estimatedCostFieldRefs = ref<Record<number, HTMLInputElement | null>>({})
-const actualCostFieldRefs = ref<Record<number, HTMLInputElement | null>>({})
+const buildingExpensesById = computed<Record<number, BuildingExpenseAsIndex>>(() =>
+  keyBy(buildingExpenses.value, "id")
+)
+const buildingExpenseIdToIndex = computed<Record<number, number>>(() =>
+  Object.fromEntries(
+    buildingExpenses.value.map((buildingExpense, index) => [buildingExpense.id, index])
+  )
+)
 
-function setEstimatedCostField(index: number, el: unknown) {
-  estimatedCostFieldRefs.value[index] = el as HTMLInputElement | null
-}
-
-function setActualCostField(index: number, el: unknown) {
-  actualCostFieldRefs.value[index] = el as HTMLInputElement | null
-}
-
-const lastSavedCostsById = ref<Record<number, { estimatedCost: string; actualCost: string }>>({})
 const isRowSavingById = ref<Record<number, boolean>>({})
-
-const editingRowIndex = ref<number | null>(null)
-
-function isRowEditing(rowIndex: number): boolean {
-  return editingRowIndex.value === rowIndex
-}
-
-async function startEditingRow(rowIndex: number, fieldName: FieldName) {
-  if (isRowEditing(rowIndex)) return
-
-  const buildingExpense = buildingExpenses.value[rowIndex]
-
-  if (isNil(buildingExpense)) return
-
-  const previousSavedCosts = lastSavedCostsById.value[buildingExpense.id]
-
-  if (isNil(previousSavedCosts)) {
-    lastSavedCostsById.value[buildingExpense.id] = {
-      estimatedCost: buildingExpense.estimatedCost,
-      actualCost: buildingExpense.actualCost,
-    }
-  }
-
-  if (!isNil(editingRowIndex.value) && editingRowIndex.value !== rowIndex) {
-    saveRowIfDirty(editingRowIndex.value)
-  }
-
-  editingRowIndex.value = rowIndex
-
-  await nextTick()
-
-  focusOnField(rowIndex, fieldName)
-}
-
-function handleKeyboardNavigation(event: KeyboardEvent, rowIndex: number, fieldName: FieldName) {
-  const input = event.target as HTMLInputElement | null
-  const isTextFullySelected =
-    input?.selectionStart === 0 && input?.selectionEnd === input?.value.length
-
-  if (event.key === "Enter" && !event.shiftKey) {
-    event.preventDefault()
-    goToNextRow(rowIndex, fieldName)
-  } else if (event.key === "Enter" && event.shiftKey) {
-    event.preventDefault()
-    goToPreviousRow(rowIndex, fieldName)
-  } else if (event.key === "ArrowUp") {
-    event.preventDefault()
-    goToPreviousRow(rowIndex, fieldName)
-  } else if (event.key === "ArrowDown") {
-    event.preventDefault()
-    goToNextRow(rowIndex, fieldName)
-  } else if (event.key === "ArrowLeft" && isTextFullySelected) {
-    event.preventDefault()
-    input?.setSelectionRange(0, 0)
-  } else if (event.key === "ArrowLeft" && input?.selectionStart === 0) {
-    event.preventDefault()
-    goToPreviousColumn(rowIndex, fieldName)
-  } else if (event.key === "ArrowRight" && isTextFullySelected) {
-    event.preventDefault()
-    input?.setSelectionRange(input.value.length, input.value.length)
-  } else if (event.key === "ArrowRight" && input?.selectionEnd === input?.value.length) {
-    event.preventDefault()
-    goToNextColumn(rowIndex, fieldName)
-  } else if (event.key === "Tab") {
-    event.preventDefault()
-
-    if (event.shiftKey) {
-      goToPreviousColumn(rowIndex, fieldName)
-    } else {
-      goToNextColumn(rowIndex, fieldName)
-    }
-  } else if (event.key === "Escape") {
-    event.preventDefault()
-    cancelEditingRow(rowIndex)
-  }
-}
-
-function goToNextColumn(rowIndex: number, fieldName: FieldName) {
-  if (fieldName === "estimatedCost") {
-    focusOnField(rowIndex, "actualCost")
-    return
-  }
-
-  goToNextRow(rowIndex, "estimatedCost")
-}
-
-function goToPreviousColumn(rowIndex: number, fieldName: FieldName) {
-  if (fieldName === "actualCost") {
-    focusOnField(rowIndex, "estimatedCost")
-    return
-  }
-
-  goToPreviousRow(rowIndex, "actualCost")
-}
-
-function saveAndExitEditMode(rowIndex: number) {
-  window.setTimeout(() => {
-    if (!isRowEditing(rowIndex)) return
-    if (isRowFocused(rowIndex)) return
-
-    saveRowIfDirty(rowIndex)
-    editingRowIndex.value = null
-  }, 0)
-}
-
-function isRowFocused(rowIndex: number): boolean {
-  const activeElement = document.activeElement
-
-  if (isNil(activeElement)) {
-    return false
-  }
-
-  const estimatedField = estimatedCostFieldRefs.value[rowIndex]
-  const actualField = actualCostFieldRefs.value[rowIndex]
-
-  const estimatedRoot = extractElement(estimatedField)
-  const actualRoot = extractElement(actualField)
-
-  if (estimatedRoot?.contains(activeElement)) {
-    return true
-  }
-
-  if (actualRoot?.contains(activeElement)) {
-    return true
-  }
-
-  return false
-}
-
-function extractElement(
-  field: HTMLInputElement | ComponentPublicInstance | null
-): HTMLElement | null {
-  if (isNil(field)) {
-    return null
-  }
-
-  if (field instanceof HTMLElement) {
-    return field
-  }
-
-  const componentRoot = (field as ComponentPublicInstance).$el
-
-  if (componentRoot instanceof HTMLElement) {
-    return componentRoot
-  }
-
-  return null
-}
-
-function goToNextRow(rowIndex: number, fieldName: FieldName) {
-  saveRowIfDirty(rowIndex)
-
-  const nextIndex = rowIndex + 1
-
-  if (nextIndex >= buildingExpenses.value.length) {
-    editingRowIndex.value = null
-    return
-  }
-
-  startEditingRow(nextIndex, fieldName)
-}
-
-function goToPreviousRow(rowIndex: number, fieldName: FieldName) {
-  saveRowIfDirty(rowIndex)
-
-  if (rowIndex <= 0) {
-    editingRowIndex.value = null
-    return
-  }
-
-  const previousIndex = rowIndex - 1
-
-  startEditingRow(previousIndex, fieldName)
-}
-
-function focusOnField(rowIndex: number, fieldName: FieldName) {
-  let fieldRefs: Record<number, HTMLInputElement | null> = {}
-
-  if (fieldName === "estimatedCost") {
-    fieldRefs = estimatedCostFieldRefs.value
-  } else if (fieldName === "actualCost") {
-    fieldRefs = actualCostFieldRefs.value
-  }
-
-  const field = fieldRefs[rowIndex]
-
-  if (isNil(field)) {
-    return
-  }
-
-  field.focus()
-  field.select()
-}
 
 const snack = useSnack()
 
-function cancelEditingRow(rowIndex: number) {
-  const buildingExpense = buildingExpenses.value[rowIndex]
-
-  if (isNil(buildingExpense)) {
-    return
-  }
-
-  const lastSavedCosts = lastSavedCostsById.value[buildingExpense.id]
-
-  if (!isNil(lastSavedCosts)) {
-    buildingExpense.estimatedCost = lastSavedCosts.estimatedCost
-    buildingExpense.actualCost = lastSavedCosts.actualCost
-  }
-
-  editingRowIndex.value = null
-}
-
-async function saveRowIfDirty(rowIndex: number) {
-  const buildingExpense = buildingExpenses.value[rowIndex]
-
-  if (isNil(buildingExpense)) return
-
-  const lastSavedCosts = lastSavedCostsById.value[buildingExpense.id] ?? {
-    estimatedCost: buildingExpense.estimatedCost,
-    actualCost: buildingExpense.actualCost,
-  }
-
-  const hasEstimatedCostChanged = buildingExpense.estimatedCost !== lastSavedCosts.estimatedCost
-  const hasActualCostChanged = buildingExpense.actualCost !== lastSavedCosts.actualCost
-
-  if (!hasEstimatedCostChanged && !hasActualCostChanged) return
-  if (isRowSavingById.value[buildingExpense.id] === true) return
+async function saveRowIfDirty(buildingExpense: BuildingExpense) {
+  const currentBuildingExpense = buildingExpensesById.value[buildingExpense.id]
+  if (JSON.stringify(currentBuildingExpense) === JSON.stringify(buildingExpense)) return
 
   isRowSavingById.value[buildingExpense.id] = true
-
-  const estimatedCost = normalizeDecimalString(buildingExpense.estimatedCost)
-  const actualCost = normalizeDecimalString(buildingExpense.actualCost)
-
   try {
+    const buildingExpenseAttributes = pick(buildingExpense, ["estimatedCost", "actualCost"])
     const { buildingExpense: updatedBuildingExpense } = await buildingExpensesApi.update(
       buildingExpense.id,
-      {
-        estimatedCost,
-        actualCost,
-      }
+      buildingExpenseAttributes
     )
 
-    buildingExpense.estimatedCost = updatedBuildingExpense.estimatedCost
-    buildingExpense.actualCost = updatedBuildingExpense.actualCost
-    buildingExpense.totalCost = updatedBuildingExpense.totalCost
+    const buildingExpenseIndex = buildingExpenseIdToIndex.value[buildingExpense.id]
+    if (isNil(buildingExpenseIndex)) return
 
-    lastSavedCostsById.value[buildingExpense.id] = {
-      estimatedCost: updatedBuildingExpense.estimatedCost,
-      actualCost: updatedBuildingExpense.actualCost,
-    }
+    buildingExpenses.value.splice(buildingExpenseIndex, 1, {
+      ...currentBuildingExpense,
+      ...updatedBuildingExpense,
+    })
 
-    snack.success("Building expense saved")
+    snack.success("Building expense saved!")
   } catch (error) {
     console.error(`Failed to save building expense: ${error}`, { error })
     snack.error(`Failed to save building expense: ${error}`)
@@ -417,12 +173,11 @@ async function saveRowIfDirty(rowIndex: number) {
   }
 }
 
-function normalizeDecimalString(value: string): string {
-  if (isEmpty(value)) return "0.0000"
+function restoreRow(buildingExpense: BuildingExpense) {
+  const oldBuildingExpense = buildingExpensesById.value[buildingExpense.id]
+  if (isNil(oldBuildingExpense)) return
 
-  const numericValue = Number(value)
-  if (Number.isNaN(numericValue)) return "0.0000"
-
-  return numericValue.toFixed(4)
+  buildingExpense.estimatedCost = oldBuildingExpense.estimatedCost
+  buildingExpense.actualCost = oldBuildingExpense.actualCost
 }
 </script>
