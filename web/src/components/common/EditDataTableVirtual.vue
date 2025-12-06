@@ -48,7 +48,7 @@
         >
           <td
             v-if="isEditableColumn(headerKey)"
-            :ref="(element: unknown) => setFieldRef(headerKey, index, element)"
+            :ref="(element: unknown) => registerInputElement(headerKey, index, element)"
             @keydown="navigateOnKeydown($event, headerKey, index)"
           >
             <slot
@@ -98,11 +98,15 @@
     ColumnKey extends string
   "
 >
-import { type ComponentPublicInstance, computed, nextTick, ref, watch } from "vue"
+import { computed, nextTick, ref, watch } from "vue"
 import cloneDeep from "lodash/cloneDeep"
 import { isNil } from "lodash"
 
 import convertIndexToAlphaIndex from "@/utils/convert-index-to-alpha-index"
+
+type InputComponents = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+
+const INPUT_COMPONENTS = Object.freeze(["input", "textarea", "select"])
 
 const props = defineProps<{
   headers: Header[]
@@ -137,10 +141,20 @@ watch(
   { deep: true }
 )
 
-const fieldRefs = ref<Record<string, HTMLElement | null>>({})
+const inputElementRefsByAlphaNumericIndex = ref<Record<string, InputComponents | null>>({})
 
 function isRowEditing(rowIndex: number): boolean {
   return editingRowIndex.value === rowIndex
+}
+
+function getInputElementBy(columnKey: ColumnKey, rowIndex: number): InputComponents | null {
+  const columnAlphaIndex = columnsAsAlphaIndexMap.value[columnKey]
+  const cellKey = `${columnAlphaIndex}${rowIndex}`
+
+  const inputElement = inputElementRefsByAlphaNumericIndex.value[cellKey]
+  if (isNil(inputElement)) return null
+
+  return inputElement
 }
 
 async function startEditingRow(rowIndex: number, columnKey: ColumnKey): Promise<void> {
@@ -176,14 +190,10 @@ function isRowFocused(rowIndex: number): boolean {
   if (isNil(activeElement)) return false
 
   for (const columnKey of props.editableColumns) {
-    const columnAlphaIndex = columnsAsAlphaIndexMap.value[columnKey]
-    const cellKey = `${columnAlphaIndex}${rowIndex}`
-    const tdElement = fieldRefs.value[cellKey]
-    if (isNil(tdElement)) return false
+    const fieldElement = getInputElementBy(columnKey, rowIndex)
+    if (isNil(fieldElement)) return false
 
-    const element = extractElement(tdElement)
-
-    if (element?.contains(activeElement)) {
+    if (fieldElement.contains(activeElement)) {
       return true
     }
   }
@@ -191,39 +201,27 @@ function isRowFocused(rowIndex: number): boolean {
   return false
 }
 
-function extractElement(field: HTMLElement | ComponentPublicInstance | null): HTMLElement | null {
-  if (isNil(field)) return null
-  if (field instanceof HTMLElement) return field
+function registerInputElement(columnKey: ColumnKey, rowIndex: number, element: unknown): void {
+  if (!(element instanceof HTMLElement)) return
 
-  const componentRoot = (field as ComponentPublicInstance).$el
-  return componentRoot instanceof HTMLElement ? componentRoot : null
-}
+  const input = element.querySelector<HTMLInputElement>(INPUT_COMPONENTS.join(", "))
+  if (isNil(input)) return
 
-function setFieldRef(columnKey: ColumnKey, rowIndex: number, element: unknown): void {
   const columnAlphaIndex = columnsAsAlphaIndexMap.value[columnKey]
   const cellKey = `${columnAlphaIndex}${rowIndex}`
-  if (element instanceof HTMLElement) {
-    fieldRefs.value[cellKey] = element
-  }
+
+  inputElementRefsByAlphaNumericIndex.value[cellKey] = input
 }
 
 function focusOnField(columnKey: ColumnKey, rowIndex: number): void {
-  const columnAlphaIndex = columnsAsAlphaIndexMap.value[columnKey]
-  const cellKey = `${columnAlphaIndex}${rowIndex}`
-  const tdElement = fieldRefs.value[cellKey]
-  if (isNil(tdElement)) return
+  const inputElement = getInputElementBy(columnKey, rowIndex)
+  if (isNil(inputElement)) return
 
-  const element = extractElement(tdElement)
-  if (!element) return
+  inputElement.focus()
 
-  const input = element.querySelector<HTMLInputElement>("input, textarea, select")
-  if (isNil(input)) {
-    console.warn("Input element not found!")
-    return
-  }
+  if (inputElement instanceof HTMLSelectElement) return
 
-  input.focus()
-  input.select()
+  inputElement.select()
 }
 
 function navigateOnKeydown(event: KeyboardEvent, columnKey: ColumnKey, rowIndex: number): void {
