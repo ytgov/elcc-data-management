@@ -18,14 +18,13 @@
       ></slot>
     </template>
     <template #item.firstName="{ item }"> {{ item.firstName }} {{ item.lastName }} </template>
-    <template #item.isAdmin="{ value }">
-      <v-chip
-        v-if="value"
-        color="yg-moss"
-        size="small"
-        >Admin</v-chip
-      >
-      <span v-else>&mdash;</span>
+    <template #item.roles="{ value: roles }">
+      <UserRoleChip
+        v-for="role in roles"
+        :key="role"
+        class="ma-1"
+        :role="role"
+      />
     </template>
     <template #item.actions="{ item }">
       <v-btn
@@ -59,6 +58,8 @@ import useUsers, {
   type UserWhereOptions,
 } from "@/use/use-users"
 
+import UserRoleChip from "@/components/users/UserRoleChip.vue"
+
 const props = withDefaults(
   defineProps<{
     filters?: UserFiltersOptions
@@ -90,8 +91,8 @@ const headers = computed(() => [
     key: "status",
   },
   {
-    title: "Admin",
-    key: "isAdmin",
+    title: "Roles",
+    key: "roles",
     align: "center" as const,
   },
   {
