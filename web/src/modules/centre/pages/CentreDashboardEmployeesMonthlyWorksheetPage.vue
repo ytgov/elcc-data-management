@@ -35,7 +35,7 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col>
+      <v-col tag="section">
         <h3 class="mt-4 mb-2 ml-n2 pa-2 rounded bg-primary-lighten-2">Employee Benefits</h3>
 
         <v-alert
@@ -58,7 +58,7 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col>
+      <v-col tag="section">
         <h3 class="d-flex justify-space-between mt-4 mb-2 ml-n2 pa-2 rounded bg-primary-lighten-2">
           Wage Enhancements
 
