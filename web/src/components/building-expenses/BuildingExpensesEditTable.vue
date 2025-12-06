@@ -7,6 +7,7 @@
     height="630"
     fixed-footer
     disable-sort
+    @update:cell="saveBuildingExpenseIfDirty"
     @cancel="restoreBuildingExpense"
   >
     <template #item.buildingExpenseCategoryId="{ item }">
@@ -29,7 +30,6 @@
       <v-text-field
         v-model="item.estimatedCost"
         hide-details
-        @change="saveBuildingExpenseIfDirty(item)"
       />
     </template>
 
@@ -37,7 +37,6 @@
       <v-text-field
         v-model="item.actualCost"
         hide-details
-        @change="saveBuildingExpenseIfDirty(item)"
       />
     </template>
 

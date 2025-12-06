@@ -5,7 +5,7 @@
   >
     <template #item="{ index, item, itemRef }">
       <tr
-        v-if="!isRowEditing(index)"
+        v-if="!isEditingRow(index)"
         :ref="itemRef"
         class="cursor-pointer"
         @click="startEditingRow(index, editableColumns[0])"
@@ -40,7 +40,7 @@
       <tr
         v-else
         :ref="itemRef"
-        @focusout="saveAndExitEditMode(index)"
+        @focusout="exitEditMode(index)"
       >
         <template
           v-for="{ key: headerKey } in headers"
@@ -114,8 +114,13 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
+  "update:cell": [item: Item]
   cancel: [item: Item]
 }>()
+
+function isEditableColumn(columnKey: string | undefined): columnKey is ColumnKey {
+  return props.editableColumns.includes(columnKey as ColumnKey)
+}
 
 const columnsAsAlphaIndexMap = computed(() => {
   const initialMap: Record<string, string> = {}
@@ -132,7 +137,7 @@ const editingRowIndex = ref<number | null>(null)
 
 const inputElementRefsByAlphaNumericIndex = ref<Record<string, InputComponents | null>>({})
 
-function isRowEditing(rowIndex: number): boolean {
+function isEditingRow(rowIndex: number): boolean {
   return editingRowIndex.value === rowIndex
 }
 
@@ -147,7 +152,7 @@ function getInputElementBy(columnKey: ColumnKey, rowIndex: number): InputCompone
 }
 
 async function startEditingRow(rowIndex: number, columnKey: ColumnKey): Promise<void> {
-  if (isRowEditing(rowIndex)) return
+  if (isEditingRow(rowIndex)) return
 
   editingRowIndex.value = rowIndex
 
@@ -165,9 +170,9 @@ function cancelEditingRow(rowIndex: number): void {
   editingRowIndex.value = null
 }
 
-function saveAndExitEditMode(rowIndex: number): void {
+function exitEditMode(rowIndex: number): void {
   window.setTimeout(() => {
-    if (!isRowEditing(rowIndex)) return
+    if (!isEditingRow(rowIndex)) return
     if (isRowFocused(rowIndex)) return
 
     editingRowIndex.value = null
@@ -256,6 +261,8 @@ function navigateOnKeydown(event: KeyboardEvent, columnKey: ColumnKey, rowIndex:
 }
 
 async function goToNextRow(rowIndex: number, columnKey: ColumnKey): Promise<void> {
+  emitItemUpdates(columnKey, rowIndex)
+
   const nextRowIndex = rowIndex + 1
   if (nextRowIndex >= props.items.length) {
     editingRowIndex.value = null
@@ -266,6 +273,8 @@ async function goToNextRow(rowIndex: number, columnKey: ColumnKey): Promise<void
 }
 
 async function goToPreviousRow(rowIndex: number, columnKey: ColumnKey): Promise<void> {
+  emitItemUpdates(columnKey, rowIndex)
+
   if (rowIndex <= 0) {
     editingRowIndex.value = null
     return
@@ -275,6 +284,8 @@ async function goToPreviousRow(rowIndex: number, columnKey: ColumnKey): Promise<
 }
 
 function goToNextColumn(rowIndex: number, columnKey: ColumnKey): void {
+  emitItemUpdates(columnKey, rowIndex)
+
   const columnIndex = props.editableColumns.indexOf(columnKey)
   const nextColumnIndex = columnIndex + 1
 
@@ -290,6 +301,8 @@ function goToNextColumn(rowIndex: number, columnKey: ColumnKey): void {
 }
 
 function goToPreviousColumn(rowIndex: number, columnKey: ColumnKey): void {
+  emitItemUpdates(columnKey, rowIndex)
+
   const columnIndex = props.editableColumns.indexOf(columnKey)
   const previousColumnIndex = columnIndex - 1
 
@@ -307,7 +320,17 @@ function goToPreviousColumn(rowIndex: number, columnKey: ColumnKey): void {
   }
 }
 
-function isEditableColumn(columnKey: string | undefined): columnKey is ColumnKey {
-  return props.editableColumns.includes(columnKey as ColumnKey)
+function emitItemUpdates(columnKey: ColumnKey, rowIndex: number): void {
+  const item = props.items[rowIndex]
+  if (isNil(item)) return
+
+  const inputElement = getInputElementBy(columnKey, rowIndex)
+  if (isNil(inputElement)) return
+
+  const updatedItem = {
+    ...item,
+    [columnKey]: inputElement.value,
+  }
+  emit("update:cell", updatedItem)
 }
 </script>
