@@ -1,6 +1,7 @@
 <template>
   <v-data-table-virtual
-    :items="items"
+    v-click-outside="emitInputAndCancel"
+    :items="itemClones"
     :headers="headers"
   >
     <template #item="{ index, item, itemRef }">
@@ -40,7 +41,6 @@
       <tr
         v-else
         :ref="itemRef"
-        @focusout="exitEditMode(index)"
       >
         <template
           v-for="{ key: headerKey } in headers"
@@ -49,15 +49,16 @@
           <td
             v-if="isEditableColumn(headerKey)"
             :ref="(element: unknown) => registerInputElement(headerKey, index, element)"
+            @focusin="setActiveCell(headerKey, index)"
             @keydown="navigateOnKeydown($event, headerKey, index)"
           >
             <slot
               :name="`item.${headerKey}.edit`"
-              :item="cloneDeep(item)"
+              :item="item"
               :index="index"
             >
               <v-text-field
-                :model-value="item[headerKey]"
+                v-model="item[headerKey]"
                 hide-details
               />
             </slot>
@@ -97,11 +98,8 @@
     ColumnKey extends string
   "
 >
-import { computed, nextTick, ref } from "vue"
-import cloneDeep from "lodash/cloneDeep"
-import { isNil } from "lodash"
-
-import convertIndexToAlphaIndex from "@/utils/convert-index-to-alpha-index"
+import { nextTick, ref, watchEffect } from "vue"
+import { cloneDeep, isNil } from "lodash"
 
 type InputComponents = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
 
@@ -115,36 +113,35 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   "update:cell": [item: Item]
-  cancel: [item: Item]
+  cancel: [void]
 }>()
+
+const itemClones = ref<Item[]>([])
+
+watchEffect(() => {
+  itemClones.value = cloneDeep(props.items)
+})
+
+const activeColumnIndex = ref<ColumnKey | null>(null)
+const activeRowIndex = ref<number | null>(null)
+
+const inputElementRefsByAlphaNumericIndex = ref<Record<string, InputComponents | null>>({})
 
 function isEditableColumn(columnKey: string | undefined): columnKey is ColumnKey {
   return props.editableColumns.includes(columnKey as ColumnKey)
 }
 
-const columnsAsAlphaIndexMap = computed(() => {
-  const initialMap: Record<string, string> = {}
-  return props.editableColumns.reduce<Record<ColumnKey, string>>(
-    (labelsByColumnKey, columnKey, index) => {
-      labelsByColumnKey[columnKey] = convertIndexToAlphaIndex(index)
-      return labelsByColumnKey
-    },
-    initialMap
-  )
-})
-
-const editingRowIndex = ref<number | null>(null)
-
-const inputElementRefsByAlphaNumericIndex = ref<Record<string, InputComponents | null>>({})
-
 function isEditingRow(rowIndex: number): boolean {
-  return editingRowIndex.value === rowIndex
+  return activeRowIndex.value === rowIndex
+}
+
+function setActiveCell(columnKey: ColumnKey, rowIndex: number): void {
+  activeColumnIndex.value = columnKey
+  activeRowIndex.value = rowIndex
 }
 
 function getInputElementBy(columnKey: ColumnKey, rowIndex: number): InputComponents | null {
-  const columnAlphaIndex = columnsAsAlphaIndexMap.value[columnKey]
-  const cellKey = `${columnAlphaIndex}${rowIndex}`
-
+  const cellKey = `${columnKey}:${rowIndex}`
   const inputElement = inputElementRefsByAlphaNumericIndex.value[cellKey]
   if (isNil(inputElement)) return null
 
@@ -154,45 +151,28 @@ function getInputElementBy(columnKey: ColumnKey, rowIndex: number): InputCompone
 async function startEditingRow(rowIndex: number, columnKey: ColumnKey): Promise<void> {
   if (isEditingRow(rowIndex)) return
 
-  editingRowIndex.value = rowIndex
+  activeColumnIndex.value = columnKey
+  activeRowIndex.value = rowIndex
 
   await nextTick()
 
   focusOnField(columnKey, rowIndex)
 }
 
-function cancelEditingRow(rowIndex: number): void {
-  const row = props.items[rowIndex]
-  if (row) {
-    emit("cancel", row)
-  }
+function emitInputAndCancel() {
+  if (isNil(activeRowIndex.value)) return
 
-  editingRowIndex.value = null
+  emitUpdateCell(activeRowIndex.value)
+
+  resetActiveCell()
 }
 
-function exitEditMode(rowIndex: number): void {
-  window.setTimeout(() => {
-    if (!isEditingRow(rowIndex)) return
-    if (isRowFocused(rowIndex)) return
+function resetAndCancel(): void {
+  itemClones.value = cloneDeep(props.items)
 
-    editingRowIndex.value = null
-  }, 0)
-}
+  resetActiveCell()
 
-function isRowFocused(rowIndex: number): boolean {
-  const activeElement = document.activeElement
-  if (isNil(activeElement)) return false
-
-  for (const columnKey of props.editableColumns) {
-    const fieldElement = getInputElementBy(columnKey, rowIndex)
-    if (isNil(fieldElement)) return false
-
-    if (fieldElement.contains(activeElement)) {
-      return true
-    }
-  }
-
-  return false
+  emit("cancel")
 }
 
 function registerInputElement(columnKey: ColumnKey, rowIndex: number, element: unknown): void {
@@ -201,9 +181,7 @@ function registerInputElement(columnKey: ColumnKey, rowIndex: number, element: u
   const input = element.querySelector<HTMLInputElement>(INPUT_COMPONENTS.join(", "))
   if (isNil(input)) return
 
-  const columnAlphaIndex = columnsAsAlphaIndexMap.value[columnKey]
-  const cellKey = `${columnAlphaIndex}${rowIndex}`
-
+  const cellKey = `${columnKey}:${rowIndex}`
   inputElementRefsByAlphaNumericIndex.value[cellKey] = input
 }
 
@@ -256,16 +234,16 @@ function navigateOnKeydown(event: KeyboardEvent, columnKey: ColumnKey, rowIndex:
     }
   } else if (event.key === "Escape") {
     event.preventDefault()
-    cancelEditingRow(rowIndex)
+    resetAndCancel()
   }
 }
 
 async function goToNextRow(rowIndex: number, columnKey: ColumnKey): Promise<void> {
-  emitItemUpdates(columnKey, rowIndex)
+  emitUpdateCell(rowIndex)
 
   const nextRowIndex = rowIndex + 1
   if (nextRowIndex >= props.items.length) {
-    editingRowIndex.value = null
+    activeRowIndex.value = null
     return
   }
 
@@ -273,10 +251,10 @@ async function goToNextRow(rowIndex: number, columnKey: ColumnKey): Promise<void
 }
 
 async function goToPreviousRow(rowIndex: number, columnKey: ColumnKey): Promise<void> {
-  emitItemUpdates(columnKey, rowIndex)
+  emitUpdateCell(rowIndex)
 
   if (rowIndex <= 0) {
-    editingRowIndex.value = null
+    activeRowIndex.value = null
     return
   }
 
@@ -284,7 +262,7 @@ async function goToPreviousRow(rowIndex: number, columnKey: ColumnKey): Promise<
 }
 
 function goToNextColumn(rowIndex: number, columnKey: ColumnKey): void {
-  emitItemUpdates(columnKey, rowIndex)
+  emitUpdateCell(rowIndex)
 
   const columnIndex = props.editableColumns.indexOf(columnKey)
   const nextColumnIndex = columnIndex + 1
@@ -296,12 +274,13 @@ function goToNextColumn(rowIndex: number, columnKey: ColumnKey): void {
 
   const nextColumnKey = props.editableColumns[nextColumnIndex]
   if (nextColumnKey) {
+    activeColumnIndex.value = nextColumnKey
     focusOnField(nextColumnKey, rowIndex)
   }
 }
 
 function goToPreviousColumn(rowIndex: number, columnKey: ColumnKey): void {
-  emitItemUpdates(columnKey, rowIndex)
+  emitUpdateCell(rowIndex)
 
   const columnIndex = props.editableColumns.indexOf(columnKey)
   const previousColumnIndex = columnIndex - 1
@@ -316,21 +295,20 @@ function goToPreviousColumn(rowIndex: number, columnKey: ColumnKey): void {
 
   const previousColumnKey = props.editableColumns[previousColumnIndex]
   if (previousColumnKey) {
+    activeColumnIndex.value = previousColumnKey
     focusOnField(previousColumnKey, rowIndex)
   }
 }
 
-function emitItemUpdates(columnKey: ColumnKey, rowIndex: number): void {
-  const item = props.items[rowIndex]
+function emitUpdateCell(rowIndex: number): void {
+  const item = itemClones.value[rowIndex]
   if (isNil(item)) return
 
-  const inputElement = getInputElementBy(columnKey, rowIndex)
-  if (isNil(inputElement)) return
+  emit("update:cell", item as Item)
+}
 
-  const updatedItem = {
-    ...item,
-    [columnKey]: inputElement.value,
-  }
-  emit("update:cell", updatedItem)
+function resetActiveCell() {
+  activeColumnIndex.value = null
+  activeRowIndex.value = null
 }
 </script>

@@ -8,7 +8,6 @@
     fixed-footer
     disable-sort
     @update:cell="saveBuildingExpenseIfDirty"
-    @cancel="restoreBuildingExpense"
   >
     <template #item.buildingExpenseCategoryId="{ item }">
       <BuildingExpenseCategoryAttributesChip :building-expense-category="item.category" />
@@ -170,13 +169,5 @@ async function saveBuildingExpenseIfDirty(buildingExpense: BuildingExpense) {
   } finally {
     isRowSavingById.value[buildingExpense.id] = false
   }
-}
-
-function restoreBuildingExpense(buildingExpense: BuildingExpense) {
-  const oldBuildingExpense = buildingExpensesById.value[buildingExpense.id]
-  if (isNil(oldBuildingExpense)) return
-
-  buildingExpense.estimatedCost = oldBuildingExpense.estimatedCost
-  buildingExpense.actualCost = oldBuildingExpense.actualCost
 }
 </script>
