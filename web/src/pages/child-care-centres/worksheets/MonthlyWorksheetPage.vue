@@ -47,13 +47,11 @@ import { isEmpty, isNil, upperFirst } from "lodash"
 
 import centresApi from "@/api/centres-api"
 import useFiscalPeriods, { FiscalPeriodMonths } from "@/use/use-fiscal-periods"
-import { useNotificationStore } from "@/store/NotificationStore"
 import useFundingSubmissionLineJsons from "@/use/use-funding-submission-line-jsons"
+import useSnack from "@/use/use-snack"
 
 import FundingSubmissionLineJsonEditSheet from "@/components/funding-submission-line-jsons/FundingSubmissionLineJsonEditSheet.vue"
 import BuildingExpensesEditTable from "@/components/building-expenses/BuildingExpensesEditTable.vue"
-
-const notificationStore = useNotificationStore()
 
 const props = defineProps<{
   centreId: number
@@ -104,15 +102,13 @@ const buildingExpenseWhere = computed(() => ({
 }))
 
 const isInitializing = ref(false)
+const snack = useSnack()
 
 async function initializeWorksheetsForFiscalYear() {
   isInitializing.value = true
   try {
     await centresApi.fiscalYear.create(props.centreId, fiscalYear.value)
-    notificationStore.notify({
-      text: "Fiscal year added",
-      variant: "success",
-    })
+    snack.success("Fiscal year added!")
     await refreshFundingSubmissionLineJsons()
   } finally {
     isInitializing.value = false
