@@ -34,7 +34,9 @@
       v-else
       class="ma-4 mt-8"
     >
-      <h3 class="d-flex justify-space-between align-center section-header">
+      <h3
+        class="d-flex justify-space-between align-center mt-4 mb-2 ml-n2 pa-2 rounded bg-primary-lighten-2"
+      >
         Building Expenses
 
         <v-icon
@@ -136,15 +138,3 @@ function showKeyboardShortcutsModal() {
   keyboardShortcutsModal.value?.open()
 }
 </script>
-
-<style scoped>
-.section-header {
-  margin-top: 16px;
-  margin-bottom: 8px;
-  margin-left: -8px;
-  padding: 8px;
-  font-weight: 400;
-  background-color: rgb(var(--v-theme-primary));
-  border-radius: 4px;
-}
-</style>
