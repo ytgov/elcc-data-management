@@ -1,22 +1,17 @@
 import { type CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
-import { DateTime } from "luxon"
 
-import db, {
-  BuildingExpense,
-  BuildingExpenseCategory,
-  Centre,
-  EmployeeBenefit,
-  EmployeeWageTier,
-  FiscalPeriod,
-  FundingPeriod,
-  FundingReconciliation,
-  FundingReconciliationAdjustment,
-} from "@/models"
-import { FiscalPeriodMonths } from "@/models/fiscal-period"
-import { EMPLOYEE_WAGE_TIER_DEFAULTS } from "@/models/employee-wage-tier"
-import { FundingReconciliationStatuses } from "@/models/funding-reconciliation"
+import db, { FundingPeriod } from "@/models"
 import BaseService from "@/services/base-service"
+import {
+  BuildingExpenses,
+  EmployeeBenefits,
+  EmployeeWageTiers,
+  FiscalPeriods,
+  FundingReconciliationAdjustments,
+  FundingReconciliations,
+} from "@/services"
+
 
 export type FundingPeriodCreationAttributes = Partial<CreationAttributes<FundingPeriod>>
 
@@ -53,22 +48,10 @@ export class CreateService extends BaseService {
         title,
       })
 
-      const {
-        id: fundingPeriodId,
-        fromDate: fundingPeriodFromDate,
-        toDate: fundingPeriodToDate,
-        fiscalYear: fundingPeriodFiscalYear,
-      } = fundingPeriod
-
-      await this.createFiscalPeriods(
-        fundingPeriodId,
-        fundingPeriodFiscalYear,
-        fundingPeriodFromDate,
-        fundingPeriodToDate
-      )
-      await this.createEmployeeWageTiers(fundingPeriodFiscalYear)
-      await this.createEmployeeBenefits(fundingPeriodFiscalYear)
-      await this.createBuildingExpenses(fundingPeriodFiscalYear)
+      await this.createFiscalPeriods(fundingPeriod)
+      await this.createEmployeeWageTiers(fundingPeriod)
+      await this.createEmployeeBenefits(fundingPeriod)
+      await this.createBuildingExpenses(fundingPeriod)
       await this.createFundingSubmissionLines(fundingPeriod)
       await this.createFundingReconciliations(fundingPeriod)
       await this.createFundingReconciliationAdjustments(fundingPeriod)
@@ -77,127 +60,20 @@ export class CreateService extends BaseService {
     })
   }
 
-  private async createFiscalPeriods(
-    fundingPeriodId: number,
-    fiscalYearLong: string,
-    fromDate: Date,
-    toDate: Date
-  ) {
-    const fiscalYearShort = FiscalPeriod.toShortFiscalYearFormat(fiscalYearLong)
-
-    let currentDate = DateTime.fromJSDate(fromDate)
-    const toDateDateTime = DateTime.fromJSDate(toDate)
-    const fiscalPeriodsAttributes: CreationAttributes<FiscalPeriod>[] = []
-
-    while (currentDate <= toDateDateTime) {
-      const dateStart = currentDate.startOf("month")
-      const dateEnd = currentDate.endOf("month").set({ millisecond: 0 })
-      const dateName = dateStart.toFormat("MMMM").toLowerCase()
-
-      fiscalPeriodsAttributes.push({
-        fundingPeriodId,
-        fiscalYear: fiscalYearShort,
-        month: dateName as FiscalPeriodMonths,
-        dateStart: dateStart.toJSDate(),
-        dateEnd: dateEnd.toJSDate(),
-      })
-
-      currentDate = currentDate.plus({ months: 1 })
-    }
-
-    await FiscalPeriod.bulkCreate(fiscalPeriodsAttributes)
+  private async createFiscalPeriods(fundingPeriod: FundingPeriod) {
+    await FiscalPeriods.BulkCreateForService.perform(fundingPeriod)
   }
 
-  private async createEmployeeWageTiers(fiscalYear: string) {
-    const shortFiscalYear = FiscalPeriod.toShortFiscalYearFormat(fiscalYear)
-
-    const fiscalPeriods = await FiscalPeriod.findAll({
-      where: { fiscalYear: shortFiscalYear },
-    })
-
-    const employeeWageTiersAttributes = fiscalPeriods.flatMap((fiscalPeriod) =>
-      EMPLOYEE_WAGE_TIER_DEFAULTS.map((employeeWageTier) => ({
-        fiscalPeriodId: fiscalPeriod.id,
-        ...employeeWageTier,
-      }))
-    )
-
-    await EmployeeWageTier.bulkCreate(employeeWageTiersAttributes)
+  private async createEmployeeWageTiers(fundingPeriod: FundingPeriod) {
+    await EmployeeWageTiers.BulkCreateForService.perform(fundingPeriod)
   }
 
-  private async createEmployeeBenefits(fiscalYear: string) {
-    const shortFiscalYear = FiscalPeriod.toShortFiscalYearFormat(fiscalYear)
-
-    const fiscalPeriods = await FiscalPeriod.findAll({
-      where: { fiscalYear: shortFiscalYear },
-    })
-
-    let employeeBenefitsAttributes: CreationAttributes<EmployeeBenefit>[] = []
-    const BATCH_SIZE = 1000
-
-    await Centre.findEach(async (centre) => {
-      for (const fiscalPeriod of fiscalPeriods) {
-        employeeBenefitsAttributes.push({
-          centreId: centre.id,
-          fiscalPeriodId: fiscalPeriod.id,
-          grossPayrollMonthlyActual: "0",
-          grossPayrollMonthlyEstimated: "0",
-          costCapPercentage: EmployeeBenefit.DEFAULT_COST_CAP_PERCENTAGE,
-          employeeCostActual: "0",
-          employeeCostEstimated: "0",
-          employerCostActual: "0",
-          employerCostEstimated: "0",
-        })
-
-        if (employeeBenefitsAttributes.length >= BATCH_SIZE) {
-          await EmployeeBenefit.bulkCreate(employeeBenefitsAttributes)
-          employeeBenefitsAttributes = []
-        }
-      }
-    })
-
-    if (employeeBenefitsAttributes.length > 0) {
-      await EmployeeBenefit.bulkCreate(employeeBenefitsAttributes)
-    }
+  private async createEmployeeBenefits(fundingPeriod: FundingPeriod) {
+    await EmployeeBenefits.BulkCreateForService.perform(fundingPeriod)
   }
 
-  private async createBuildingExpenses(fiscalYear: string) {
-    const shortFiscalYear = FiscalPeriod.toShortFiscalYearFormat(fiscalYear)
-
-    const fiscalPeriods = await FiscalPeriod.findAll({
-      where: { fiscalYear: shortFiscalYear },
-    })
-
-    const buildingExpenseCategories = await BuildingExpenseCategory.findAll()
-
-    let buildingExpensesAttributes: CreationAttributes<BuildingExpense>[] = []
-    const BATCH_SIZE = 1000
-
-    await Centre.findEach(async (centre) => {
-      for (const fiscalPeriod of fiscalPeriods) {
-        for (const category of buildingExpenseCategories) {
-          buildingExpensesAttributes.push({
-            centreId: centre.id,
-            fiscalPeriodId: fiscalPeriod.id,
-            buildingExpenseCategoryId: category.id,
-            subsidyRate: category.subsidyRate,
-            buildingUsagePercent: "0",
-            estimatedCost: "0",
-            actualCost: "0",
-            totalCost: "0",
-          })
-
-          if (buildingExpensesAttributes.length >= BATCH_SIZE) {
-            await BuildingExpense.bulkCreate(buildingExpensesAttributes)
-            buildingExpensesAttributes = []
-          }
-        }
-      }
-    })
-
-    if (buildingExpensesAttributes.length > 0) {
-      await BuildingExpense.bulkCreate(buildingExpensesAttributes)
-    }
+  private async createBuildingExpenses(fundingPeriod: FundingPeriod) {
+    await BuildingExpenses.BulkCreateForService.perform(fundingPeriod)
   }
 
   private async createFundingSubmissionLines(_fundingPeriod: FundingPeriod) {
@@ -208,65 +84,11 @@ export class CreateService extends BaseService {
   }
 
   private async createFundingReconciliations(fundingPeriod: FundingPeriod) {
-    let fundingReconciliationsAttributes: CreationAttributes<FundingReconciliation>[] = []
-    const BATCH_SIZE = 1000
-
-    await Centre.findEach(async (centre) => {
-      fundingReconciliationsAttributes.push({
-        centreId: centre.id,
-        fundingPeriodId: fundingPeriod.id,
-        status: FundingReconciliationStatuses.DRAFT,
-        fundingReceivedTotalAmount: "0",
-        eligibleExpensesTotalAmount: "0",
-        payrollAdjustmentsTotalAmount: "0",
-        finalBalanceAmount: "0",
-      })
-
-      if (fundingReconciliationsAttributes.length >= BATCH_SIZE) {
-        await FundingReconciliation.bulkCreate(fundingReconciliationsAttributes)
-        fundingReconciliationsAttributes = []
-      }
-    })
-
-    if (fundingReconciliationsAttributes.length > 0) {
-      await FundingReconciliation.bulkCreate(fundingReconciliationsAttributes)
-    }
+    await FundingReconciliations.BulkCreateForService.perform(fundingPeriod)
   }
 
   private async createFundingReconciliationAdjustments(fundingPeriod: FundingPeriod) {
-    const shortFiscalYear = FiscalPeriod.toShortFiscalYearFormat(fundingPeriod.fiscalYear)
-
-    const fiscalPeriods = await FiscalPeriod.findAll({
-      where: { fiscalYear: shortFiscalYear },
-    })
-
-    let adjustmentsAttributes: CreationAttributes<FundingReconciliationAdjustment>[] = []
-    const BATCH_SIZE = 1000
-
-    await FundingReconciliation.findEach(
-      { where: { fundingPeriodId: fundingPeriod.id } },
-      async (fundingReconciliation) => {
-        for (const fiscalPeriod of fiscalPeriods) {
-          adjustmentsAttributes.push({
-            fundingReconciliationId: fundingReconciliation.id,
-            fiscalPeriodId: fiscalPeriod.id,
-            fundingReceivedPeriodAmount: "0",
-            eligibleExpensesPeriodAmount: "0",
-            payrollAdjustmentsPeriodAmount: "0",
-            cumulativeBalanceAmount: "0",
-          })
-
-          if (adjustmentsAttributes.length >= BATCH_SIZE) {
-            await FundingReconciliationAdjustment.bulkCreate(adjustmentsAttributes)
-            adjustmentsAttributes = []
-          }
-        }
-      }
-    )
-
-    if (adjustmentsAttributes.length > 0) {
-      await FundingReconciliationAdjustment.bulkCreate(adjustmentsAttributes)
-    }
+    await FundingReconciliationAdjustments.BulkCreateForService.perform(fundingPeriod)
   }
 }
 
