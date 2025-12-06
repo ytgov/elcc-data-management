@@ -190,7 +190,7 @@ function goToPreviousSection(sectionIndex: number, columnName: ColumnNames) {
 const keyboardShortcutsModal = ref<InstanceType<typeof KeyboardShortcutsModal> | null>(null)
 
 function activateKeyboardShortcutsModalIfCorrectEvent(event: KeyboardEvent) {
-  if (event.ctrlKey && event.key === "/") {
+  if (event.shiftKey && event.key === "?") {
     showKeyboardShortcutsModal()
   }
 }
