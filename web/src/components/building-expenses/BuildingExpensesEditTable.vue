@@ -2,7 +2,7 @@
   <EditDataTableVirtual
     :headers="headers"
     :items="buildingExpenses"
-    :loading="isLoading"
+    :loading="isLoading || isSaving"
     :editable-columns="['estimatedCost', 'actualCost']"
     height="630"
     fixed-footer
@@ -138,7 +138,7 @@ const buildingExpenseIdToIndex = computed<Record<number, number>>(() =>
   )
 )
 
-const isRowSavingById = ref<Record<number, boolean>>({})
+const isSaving = ref(false)
 
 const snack = useSnack()
 
@@ -146,7 +146,7 @@ async function saveBuildingExpenseIfDirty(buildingExpense: BuildingExpense) {
   const currentBuildingExpense = buildingExpensesById.value[buildingExpense.id]
   if (JSON.stringify(currentBuildingExpense) === JSON.stringify(buildingExpense)) return
 
-  isRowSavingById.value[buildingExpense.id] = true
+  isSaving.value = true
   try {
     const buildingExpenseAttributes = pick(buildingExpense, ["estimatedCost", "actualCost"])
     const { buildingExpense: updatedBuildingExpense } = await buildingExpensesApi.update(
@@ -167,7 +167,7 @@ async function saveBuildingExpenseIfDirty(buildingExpense: BuildingExpense) {
     console.error(`Failed to save building expense: ${error}`, { error })
     snack.error(`Failed to save building expense: ${error}`)
   } finally {
-    isRowSavingById.value[buildingExpense.id] = false
+    isSaving.value = false
   }
 }
 </script>
