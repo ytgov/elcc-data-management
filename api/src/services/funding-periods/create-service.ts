@@ -10,8 +10,9 @@ import {
   FiscalPeriods,
   FundingReconciliationAdjustments,
   FundingReconciliations,
+  FundingSubmissionLineJsons,
+  FundingSubmissionLines,
 } from "@/services"
-
 
 export type FundingPeriodCreationAttributes = Partial<CreationAttributes<FundingPeriod>>
 
@@ -53,6 +54,7 @@ export class CreateService extends BaseService {
       await this.createEmployeeBenefits(fundingPeriod)
       await this.createBuildingExpenses(fundingPeriod)
       await this.createFundingSubmissionLines(fundingPeriod)
+      await this.createFundingSubmissionLineJsons(fundingPeriod)
       await this.createFundingReconciliations(fundingPeriod)
       await this.createFundingReconciliationAdjustments(fundingPeriod)
 
@@ -76,11 +78,12 @@ export class CreateService extends BaseService {
     await BuildingExpenses.BulkCreateForService.perform(fundingPeriod)
   }
 
-  private async createFundingSubmissionLines(_fundingPeriod: FundingPeriod) {
-    // TODO: Implement funding submission lines creation
-    // This would create the default funding submission lines for the created funding period
-    // See api/src/db/seeds/development/2023.12.12T00.25.25.fill-funding-submission-lines-table.ts
-    // Maybe ? FundingSubmissionLineJsonServices.bulkCreate(centerId, fiscalYear)
+  private async createFundingSubmissionLines(fundingPeriod: FundingPeriod) {
+    await FundingSubmissionLines.BulkCreateForService.perform(fundingPeriod)
+  }
+
+  private async createFundingSubmissionLineJsons(fundingPeriod: FundingPeriod) {
+    await FundingSubmissionLineJsons.BulkCreateForService.perform(fundingPeriod)
   }
 
   private async createFundingReconciliations(fundingPeriod: FundingPeriod) {
