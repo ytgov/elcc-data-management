@@ -31,14 +31,9 @@ export class EnsureDependenciesController extends BaseController {
         })
       }
 
-      const fundingSubmissionLineJsons = await EnsureDependenciesService.perform(
-        centre,
-        fundingPeriod
-      )
+      await EnsureDependenciesService.perform(centre, fundingPeriod)
 
-      return this.response.status(201).json({
-        fundingSubmissionLineJsons,
-      })
+      return this.response.status(201).send()
     } catch (error) {
       logger.error(`Error ensuring centre funding period dependencies: ${error}`, { error })
 

@@ -59,7 +59,7 @@ import { computed, ref, useTemplateRef } from "vue"
 import { isEmpty, isNil, upperFirst } from "lodash"
 import { useHotkey } from "vuetify"
 
-import centresApi from "@/api/centres-api"
+import api from "@/api"
 import useFiscalPeriods, { FiscalPeriodMonths } from "@/use/use-fiscal-periods"
 import useFundingSubmissionLineJsons from "@/use/use-funding-submission-line-jsons"
 import useSnack from "@/use/use-snack"
@@ -106,10 +106,10 @@ const fiscalPeriodsQuery = computed(() => {
     perPage: 1,
   }
 })
-
 const { fiscalPeriods } = useFiscalPeriods(fiscalPeriodsQuery)
 const fiscalPeriod = computed(() => fiscalPeriods.value[0])
 const fiscalPeriodId = computed(() => fiscalPeriod.value?.id)
+const fundingPeriodId = computed(() => fiscalPeriod.value?.fundingPeriodId)
 
 const buildingExpenseWhere = computed(() => ({
   centreId: props.centreId,
@@ -120,11 +120,21 @@ const isInitializing = ref(false)
 const snack = useSnack()
 
 async function initializeWorksheetsForFiscalYear() {
+  if (isNil(fundingPeriodId.value)) {
+    throw new Error("Could not determine funding period id.")
+  }
+
   isInitializing.value = true
   try {
-    await centresApi.fiscalYear.create(props.centreId, fiscalYear.value)
-    snack.success("Fiscal year added!")
+    await api.centres.fundingPeriods.ensureDependenciesApi.create(
+      props.centreId,
+      fundingPeriodId.value
+    )
+    snack.success("Worksheets initialized for fiscal year!")
     await refreshFundingSubmissionLineJsons()
+  } catch (error) {
+    console.error("Failed to initialize worksheets for fiscal year:", error)
+    snack.error(`Failed to initialize worksheets: ${error}`)
   } finally {
     isInitializing.value = false
   }

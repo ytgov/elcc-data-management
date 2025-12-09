@@ -14,6 +14,10 @@ export class EnsureDependenciesService extends BaseService {
   }
 
   async perform() {
+    await this.ensureFundingSubmissionLineJsons()
+  }
+
+  private async ensureFundingSubmissionLineJsons() {
     const { fiscalYear: fundingPeriodFiscalYear } = this.fundingPeriod
     const fiscalYearLegacy = FundingSubmissionLine.toLegacyFiscalYearFormat(fundingPeriodFiscalYear)
 
@@ -66,14 +70,6 @@ export class EnsureDependenciesService extends BaseService {
     })
 
     await FundingSubmissionLineJson.bulkCreate(fundingSubmissionLineJsonAttributes)
-
-    return FundingSubmissionLineJson.findAll({
-      where: {
-        centreId: this.centre.id,
-        fiscalYear: fiscalYearLegacy,
-      },
-      order: ["dateStart"],
-    })
   }
 }
 

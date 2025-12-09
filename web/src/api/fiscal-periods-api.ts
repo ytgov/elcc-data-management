@@ -19,6 +19,7 @@ export enum FiscalPeriodMonths {
 
 export type FiscalPeriod = {
   id: number
+  fundingPeriodId: number
   fiscalYear: string
   month: FiscalPeriodMonths
   dateStart: string

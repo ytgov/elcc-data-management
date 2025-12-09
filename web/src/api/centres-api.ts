@@ -1,7 +1,5 @@
 import http from "@/api/http-client"
 
-import { FundingSubmissionLineJson } from "./funding-submission-line-jsons-api"
-
 // Keep in sync with api/src/models/centre.ts
 export enum CentreRegions {
   WHITEHORSE = "whitehorse",
@@ -50,13 +48,6 @@ export const centresApi = {
   async update(centreId: number, attributes: Partial<Centre>): Promise<{ centre: Centre }> {
     const { data } = await http.patch(`/api/centres/${centreId}`, attributes)
     return data
-  },
-  fiscalYear: {
-    // TODO: normalize this route return type and format
-    async create(centerId: number, fiscalYear: string): Promise<FundingSubmissionLineJson[]> {
-      const { data } = await http.post(`/api/centre/${centerId}/fiscal-year`, { fiscalYear })
-      return data.data
-    },
   },
 }
 
