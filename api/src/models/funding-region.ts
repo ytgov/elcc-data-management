@@ -5,11 +5,13 @@ import {
   type CreationOptional,
   type InferAttributes,
   type InferCreationAttributes,
+  type NonAttribute,
 } from "@sequelize/core"
 import {
   Attribute,
   AutoIncrement,
   Default,
+  HasMany,
   NotNull,
   PrimaryKey,
 } from "@sequelize/core/decorators-legacy"
@@ -17,6 +19,7 @@ import {
 import { FundingRegionsRegionUniqueIndex } from "@/models/indexes"
 
 import BaseModel from "@/models/base-model"
+import Centre from "@/models/centre"
 
 export class FundingRegion extends BaseModel<
   InferAttributes<FundingRegion>,
@@ -48,6 +51,15 @@ export class FundingRegion extends BaseModel<
 
   @Attribute(DataTypes.DATE)
   declare deletedAt: Date | null
+
+  // Associations
+  @HasMany(() => Centre, {
+    foreignKey: "fundingRegionId",
+    inverse: {
+      as: "fundingRegion",
+    },
+  })
+  declare centres?: NonAttribute<Centre[]>
 
   static establishScopes() {
     this.addSearchScope(["region"])

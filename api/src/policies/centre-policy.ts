@@ -32,7 +32,6 @@ export class CentrePolicy extends PolicyFactory(Centre) {
       "name",
       "license",
       "community",
-      "region",
       "isFirstNationProgram",
       "status",
       "hotMeal",
@@ -43,7 +42,7 @@ export class CentrePolicy extends PolicyFactory(Centre) {
   }
 
   permittedAttributesForCreate(): Path[] {
-    return this.permittedAttributes()
+    return ["fundingRegionId", ...this.permittedAttributes()]
   }
 
   static policyScope(_user: User): FindOptions<Attributes<Centre>> {

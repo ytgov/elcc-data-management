@@ -6,10 +6,10 @@ import BaseSerializer from "@/serializers/base-serializer"
 export type CentreAsShow = Pick<
   Centre,
   | "id"
+  | "fundingRegionId"
   | "name"
   | "license"
   | "community"
-  | "region"
   | "isFirstNationProgram"
   | "status"
   | "hotMeal"
@@ -24,10 +24,10 @@ export class ShowSerializer extends BaseSerializer<Centre> {
   perform(): CentreAsShow {
     return pick(this.record, [
       "id",
+      "fundingRegionId",
       "name",
       "license",
       "community",
-      "region",
       "isFirstNationProgram",
       "status",
       "hotMeal",

@@ -49,21 +49,19 @@ export class EnsureDependenciesService extends BaseService {
     })
     if (existingBuildingExpenseCount > 0) return
 
-    const { region, buildingUsagePercent } = this.centre
+    const { fundingRegionId } = this.centre
     const buildingExpenseCategories = await BuildingExpenseCategory.findAll({
-      include: [
-        {
-          association: "fundingRegion",
-          where: {
-            region,
-          },
-        },
-      ],
+      where: {
+        fundingRegionId,
+      },
     })
     if (buildingExpenseCategories.length === 0) {
-      throw new Error(`No building expense categories found for Centre region="${region}"`)
+      throw new Error(
+        `No building expense categories found for Centre fundingRegionId="${fundingRegionId}"`
+      )
     }
 
+    const { buildingUsagePercent } = this.centre
     const buildingExpensesAttributes: CreationAttributes<BuildingExpense>[] = []
     for (const fiscalPeriodId of fiscalPeriodIds) {
       for (const category of buildingExpenseCategories) {
