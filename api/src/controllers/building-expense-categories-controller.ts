@@ -16,7 +16,10 @@ export class BuildingExpenseCategoriesController extends BaseController<Building
     try {
       const where = this.buildWhere()
       const scopes = this.buildFilterScopes()
-      const order = this.buildOrder([["categoryName", "ASC"]])
+      const order = this.buildOrder([
+        ["fundingRegion", "region", "ASC"],
+        ["categoryName", "ASC"],
+      ])
       const scopedBuildingExpenseCategories = BuildingExpenseCategoryPolicy.applyScope(
         scopes,
         this.currentUser
