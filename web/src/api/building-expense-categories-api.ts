@@ -30,6 +30,7 @@ export type BuildingExpenseCategoryWhereOptions = WhereOptions<
 
 export type BuildingExpenseCategoryFiltersOptions = FiltersOptions<{
   search: string
+  excludingIds: number[]
 }>
 
 export type BuildingExpenseCategoryQueryOptions = QueryOptions<

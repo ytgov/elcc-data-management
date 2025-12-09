@@ -75,6 +75,38 @@ const routes = [
         props: true,
       },
       {
+        path: "administration/building-expense-categories",
+        name: "administration/BuildingExpenseCategoriesPage",
+        component: () =>
+          import("@/pages/administration/AdministrationBuildingExpenseCategoriesPage.vue"),
+      },
+      {
+        path: "administration/building-expense-categories/new",
+        name: "administration/building-expense-categories/BuildingExpenseCategoryNewPage",
+        component: () =>
+          import(
+            "@/pages/administration/building-expense-categories/BuildingExpenseCategoryNewPage.vue"
+          ),
+      },
+      {
+        path: "administration/building-expense-categories/:buildingExpenseCategoryId",
+        name: "administration/building-expense-categories/BuildingExpenseCategoryPage",
+        component: () =>
+          import(
+            "@/pages/administration/building-expense-categories/BuildingExpenseCategoryPage.vue"
+          ),
+        props: true,
+      },
+      {
+        path: "administration/building-expense-categories/:buildingExpenseCategoryId/edit",
+        name: "administration/building-expense-categories/BuildingExpenseCategoryEditPage",
+        component: () =>
+          import(
+            "@/pages/administration/building-expense-categories/BuildingExpenseCategoryEditPage.vue"
+          ),
+        props: true,
+      },
+      {
         path: "administration/submission-lines",
         name: "administration/AdministrationSubmissionLinesPage",
         component: () => import("@/pages/administration/AdministrationSubmissionLinesPage.vue"),

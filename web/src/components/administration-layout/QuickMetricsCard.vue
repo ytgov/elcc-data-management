@@ -32,6 +32,7 @@ import { useRouter } from "vue-router"
 
 import useFundingPeriods from "@/use/use-funding-periods"
 import useFundingRegions from "@/use/use-funding-regions"
+import useBuildingExpenseCategories from "@/use/use-building-expense-categories"
 import useFundingSubmissionLines from "@/use/use-funding-submission-lines"
 import useUsers from "@/use/use-users"
 
@@ -52,6 +53,15 @@ const items = computed<QuickMetricsTableItem[]>(() => [
     actions: {
       to: {
         name: "administration/UsersPage",
+      },
+    },
+  },
+  {
+    title: "Building Expense Categories",
+    count: totalCountBuildingExpenseCategories.value,
+    actions: {
+      to: {
+        name: "administration/BuildingExpenseCategoriesPage",
       },
     },
   },
@@ -94,10 +104,13 @@ function goToResourcePage(_event: unknown, { item }: QuickMetricsTableRow) {
   router.push(item.actions.to)
 }
 
-const usersQuery = computed(() => ({
+const buildingExpenseCategoriesQuery = computed(() => ({
   perPage: 1,
 }))
-const { totalCount: totalCountUsers, isLoading: isLoadingUsers } = useUsers(usersQuery)
+const {
+  totalCount: totalCountBuildingExpenseCategories,
+  isLoading: isLoadingBuildingExpenseCategories,
+} = useBuildingExpenseCategories(buildingExpenseCategoriesQuery)
 
 const fundingPeriodsQuery = computed(() => ({
   perPage: 1,
@@ -117,12 +130,18 @@ const fundingSubmissionLinesQuery = computed(() => ({
 const { totalCount: totalCountFundingSubmissionLines, isLoading: isLoadingFundingSubmissionLines } =
   useFundingSubmissionLines(fundingSubmissionLinesQuery)
 
+const usersQuery = computed(() => ({
+  perPage: 1,
+}))
+const { totalCount: totalCountUsers, isLoading: isLoadingUsers } = useUsers(usersQuery)
+
 const isLoading = computed(() => {
   return (
-    isLoadingUsers.value ||
+    isLoadingBuildingExpenseCategories.value ||
     isLoadingFundingPeriods.value ||
     isLoadingFundingRegions.value ||
-    isLoadingFundingSubmissionLines.value
+    isLoadingFundingSubmissionLines.value ||
+    isLoadingUsers.value
   )
 })
 </script>

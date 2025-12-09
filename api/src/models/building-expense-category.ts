@@ -1,5 +1,6 @@
 import {
   DataTypes,
+  Op,
   sql,
   type CreationOptional,
   type InferAttributes,
@@ -77,6 +78,16 @@ export class BuildingExpenseCategory extends BaseModel<
 
   static establishScopes() {
     this.addSearchScope(["categoryName"])
+
+    this.addScope("excludingIds", (buildingExpenseCategoryIds: string[]) => {
+      return {
+        where: {
+          id: {
+            [Op.notIn]: buildingExpenseCategoryIds,
+          },
+        },
+      }
+    })
   }
 }
 

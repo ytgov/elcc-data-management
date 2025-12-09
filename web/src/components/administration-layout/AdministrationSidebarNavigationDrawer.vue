@@ -52,6 +52,16 @@
       </v-list-item>
       <v-list-item
         :to="{
+          name: 'administration/BuildingExpenseCategoriesPage',
+        }"
+        prepend-icon="mdi-office-building"
+        exact
+        :active="isActiveByRoutePathStartsWith('/administration/building-expense-categories')"
+      >
+        Building Expense Categories
+      </v-list-item>
+      <v-list-item
+        :to="{
           name: 'administration/AdministrationSubmissionLinesPage',
         }"
         prepend-icon="mdi-format-list-bulleted"
