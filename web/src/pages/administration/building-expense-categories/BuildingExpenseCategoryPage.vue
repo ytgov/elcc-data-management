@@ -30,11 +30,21 @@
       </v-btn>
     </template>
 
-    <!-- TODO: add funding region chip display -->
     <v-row>
       <v-col
         cols="12"
-        md="6"
+        md="4"
+      >
+        <DescriptionElement
+          label="Funding Region"
+          vertical
+        >
+          <FundingRegionChip :funding-region-id="buildingExpenseCategory.fundingRegionId" />
+        </DescriptionElement>
+      </v-col>
+      <v-col
+        cols="12"
+        md="4"
       >
         <DescriptionElement
           label="Category name"
@@ -44,7 +54,7 @@
       </v-col>
       <v-col
         cols="12"
-        md="6"
+        md="4"
       >
         <DescriptionElement
           label="Subsidy Rate"
@@ -53,9 +63,11 @@
           {{ Big(buildingExpenseCategory.subsidyRate).mul(100).toFixed(0) }} cents / $
         </DescriptionElement>
       </v-col>
+    </v-row>
+    <v-row>
       <v-col
         cols="12"
-        md="6"
+        md="4"
       >
         <DescriptionElement
           label="Created At"
@@ -65,7 +77,7 @@
       </v-col>
       <v-col
         cols="12"
-        md="6"
+        md="8"
       >
         <DescriptionElement
           label="Updated At"
@@ -83,8 +95,8 @@ import { useRouter } from "vue-router"
 import { isNil } from "lodash"
 import Big from "big.js"
 
-import blockedToTrueConfirm from "@/utils/blocked-to-true-confirm"
 import { formatDate } from "@/utils/formatters"
+import blockedToTrueConfirm from "@/utils/blocked-to-true-confirm"
 
 import buildingExpenseCategoriesApi from "@/api/building-expense-categories-api"
 
@@ -94,6 +106,7 @@ import useSnack from "@/use/use-snack"
 
 import DescriptionElement from "@/components/common/DescriptionElement.vue"
 import HeaderActionsCard from "@/components/common/HeaderActionsCard.vue"
+import FundingRegionChip from "@/components/funding-regions/FundingRegionChip.vue"
 
 const props = defineProps<{
   buildingExpenseCategoryId: string
