@@ -53,6 +53,28 @@ const routes = [
         props: true,
       },
       {
+        path: "administration/funding-regions",
+        name: "administration/FundingRegionsPage",
+        component: () => import("@/pages/administration/AdministrationFundingRegionsPage.vue"),
+      },
+      {
+        path: "administration/funding-regions/new",
+        name: "administration/funding-regions/FundingRegionNewPage",
+        component: () => import("@/pages/administration/funding-regions/FundingRegionNewPage.vue"),
+      },
+      {
+        path: "administration/funding-regions/:fundingRegionId",
+        name: "administration/funding-regions/FundingRegionPage",
+        component: () => import("@/pages/administration/funding-regions/FundingRegionPage.vue"),
+        props: true,
+      },
+      {
+        path: "administration/funding-regions/:fundingRegionId/edit",
+        name: "administration/funding-regions/FundingRegionEditPage",
+        component: () => import("@/pages/administration/funding-regions/FundingRegionEditPage.vue"),
+        props: true,
+      },
+      {
         path: "administration/submission-lines",
         name: "administration/AdministrationSubmissionLinesPage",
         component: () => import("@/pages/administration/AdministrationSubmissionLinesPage.vue"),

@@ -42,6 +42,16 @@
       </v-list-item>
       <v-list-item
         :to="{
+          name: 'administration/FundingRegionsPage',
+        }"
+        prepend-icon="mdi-map-marker-radius"
+        exact
+        :active="isActiveByRoutePathStartsWith('/administration/funding-regions')"
+      >
+        Funding Regions
+      </v-list-item>
+      <v-list-item
+        :to="{
           name: 'administration/AdministrationSubmissionLinesPage',
         }"
         prepend-icon="mdi-format-list-bulleted"

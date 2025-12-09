@@ -1,5 +1,6 @@
 import {
   DataTypes,
+  Op,
   sql,
   type CreationOptional,
   type InferAttributes,
@@ -50,6 +51,16 @@ export class FundingRegion extends BaseModel<
 
   static establishScopes() {
     this.addSearchScope(["region"])
+
+    this.addScope("excludingIds", (fundingRegionIds: string[]) => {
+      return {
+        where: {
+          id: {
+            [Op.notIn]: fundingRegionIds,
+          },
+        },
+      }
+    })
   }
 }
 

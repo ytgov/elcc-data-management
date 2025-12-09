@@ -31,6 +31,7 @@ import { computed } from "vue"
 import { useRouter } from "vue-router"
 
 import useFundingPeriods from "@/use/use-funding-periods"
+import useFundingRegions from "@/use/use-funding-regions"
 import useFundingSubmissionLines from "@/use/use-funding-submission-lines"
 import useUsers from "@/use/use-users"
 
@@ -60,6 +61,15 @@ const items = computed<QuickMetricsTableItem[]>(() => [
     actions: {
       to: {
         name: "administration/FundingPeriodsPage",
+      },
+    },
+  },
+  {
+    title: "Funding Regions",
+    count: totalCountFundingRegions.value,
+    actions: {
+      to: {
+        name: "administration/FundingRegionsPage",
       },
     },
   },
@@ -95,6 +105,12 @@ const fundingPeriodsQuery = computed(() => ({
 const { totalCount: totalCountFundingPeriods, isLoading: isLoadingFundingPeriods } =
   useFundingPeriods(fundingPeriodsQuery)
 
+const fundingRegionsQuery = computed(() => ({
+  perPage: 1,
+}))
+const { totalCount: totalCountFundingRegions, isLoading: isLoadingFundingRegions } =
+  useFundingRegions(fundingRegionsQuery)
+
 const fundingSubmissionLinesQuery = computed(() => ({
   perPage: 1,
 }))
@@ -103,7 +119,10 @@ const { totalCount: totalCountFundingSubmissionLines, isLoading: isLoadingFundin
 
 const isLoading = computed(() => {
   return (
-    isLoadingUsers.value || isLoadingFundingPeriods.value || isLoadingFundingSubmissionLines.value
+    isLoadingUsers.value ||
+    isLoadingFundingPeriods.value ||
+    isLoadingFundingRegions.value ||
+    isLoadingFundingSubmissionLines.value
   )
 })
 </script>
