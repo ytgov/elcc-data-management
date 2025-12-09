@@ -2,7 +2,6 @@ import { type CreationAttributes } from "@sequelize/core"
 import { DateTime } from "luxon"
 
 import { Centre, FundingSubmissionLine, FundingSubmissionLineJson } from "@/models"
-import { FundingSubmissionLineJsonMonths } from "@/models/funding-submission-line-json"
 import FundingPeriod from "@/models/funding-period"
 import BaseService from "@/services/base-service"
 
@@ -45,7 +44,7 @@ export class BulkCreateForService extends BaseService {
       while (currentDate <= toDateDateTime) {
         const dateStart = currentDate.startOf("month")
         const dateEnd = currentDate.endOf("month").set({ millisecond: 0 })
-        const dateName = dateStart.toFormat("MMMM") as FundingSubmissionLineJsonMonths
+        const dateName = FundingSubmissionLineJson.asFundingSubmissionLineJsonMonth(dateStart)
 
         bulkAttributes.push({
           centreId: centre.id,

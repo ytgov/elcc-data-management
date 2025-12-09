@@ -121,11 +121,21 @@ export class FiscalPeriod extends BaseModel<
     })
   }
 
-  static asFiscalPeriodMonth(date: DateTime): FiscalPeriodMonths {
-    const month = date.toFormat("MMMM").toLowerCase()
-    FiscalPeriod.assertIsValidMonth(month)
+  static asFiscalPeriodMonth(date: DateTime | Date | string): FiscalPeriodMonths {
+    let monthAsString: string
 
-    return month
+    if (date instanceof DateTime) {
+      monthAsString = date.toFormat("MMMM").toLowerCase()
+    } else if (date instanceof Date) {
+      const dateAsDateTime = DateTime.fromJSDate(date)
+      monthAsString = dateAsDateTime.toFormat("MMMM").toLowerCase()
+    } else {
+      monthAsString = date.toLowerCase()
+    }
+
+    FiscalPeriod.assertIsValidMonth(monthAsString)
+
+    return monthAsString
   }
 
   static assertIsValidMonth(value: string): asserts value is FiscalPeriodMonths {
