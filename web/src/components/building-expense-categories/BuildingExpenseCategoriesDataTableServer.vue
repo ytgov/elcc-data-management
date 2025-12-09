@@ -7,14 +7,17 @@
     :items="buildingExpenseCategories"
     :items-length="totalCount"
     :loading="isLoading || waiting"
-    density="comfortable"
     class="row-clickable"
+    density="comfortable"
+    multi-sort
     @dblclick:row="
       (_event: unknown, { item }: BuildingExpenseCategoryTableRow) =>
         goToBuildingExpenseCategoryPage(item.id)
     "
   >
-    <!-- TODO: add funding region chip column -->
+    <template #item.fundingRegion.region="{ item }">
+      <FundingRegionAttributesChip :funding-region="item.fundingRegion" />
+    </template>
     <template #item.categoryName="{ item }">
       {{ item.categoryName }}
     </template>
@@ -60,6 +63,8 @@ import useBuildingExpenseCategories, {
   type BuildingExpenseCategoryWhereOptions,
 } from "@/use/use-building-expense-categories"
 
+import FundingRegionAttributesChip from "@/components/funding-regions/FundingRegionAttributesChip.vue"
+
 const props = withDefaults(
   defineProps<{
     filters?: BuildingExpenseCategoryFiltersOptions
@@ -76,6 +81,10 @@ const props = withDefaults(
 )
 
 const headers = computed(() => [
+  {
+    title: "Funding Region",
+    key: "fundingRegion.region",
+  },
   {
     title: "Category name",
     key: "categoryName",
@@ -106,6 +115,10 @@ const perPage = useRouteQuery<string | undefined, number | undefined>(
   }
 )
 const sortBy = useVuetifySortByToSafeRouteQuery(`sortBy${props.routeQuerySuffix}`, [
+  {
+    key: "fundingRegion.region",
+    order: "asc",
+  },
   {
     key: "categoryName",
     order: "asc",
