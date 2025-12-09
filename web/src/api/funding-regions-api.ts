@@ -25,7 +25,7 @@ export type FundingRegionAsReference = FundingRegion
 export type FundingRegionWhereOptions = WhereOptions<FundingRegion, "id" | "region">
 
 export type FundingRegionFiltersOptions = FiltersOptions<{
-  search: string
+  search: string | string[]
   excludingIds: number[]
 }>
 

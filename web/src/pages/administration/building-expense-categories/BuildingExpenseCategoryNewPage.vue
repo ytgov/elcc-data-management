@@ -4,7 +4,15 @@
     title="New Building Expense Category"
     @submit.prevent="createBuildingExpenseCategory"
   >
-    <!-- TODO: add ability to select funding region -->
+    <v-row>
+      <v-col cols="12">
+        <FundingRegionAutocomplete
+          v-model="buildingExpenseCategoryAttributes.fundingRegionId"
+          :rules="[required]"
+        />
+      </v-col>
+    </v-row>
+
     <v-row>
       <v-col cols="12">
         <BuildingExpenseCategoryCategoryNameUniqueTextField
@@ -65,6 +73,7 @@ import useSnack from "@/use/use-snack"
 
 import CurrencyInput from "@/components/CurrencyInput.vue"
 import BuildingExpenseCategoryCategoryNameUniqueTextField from "@/components/building-expense-categories/BuildingExpenseCategoryCategoryNameUniqueTextField.vue"
+import FundingRegionAutocomplete from "@/components/funding-regions/FundingRegionAutocomplete.vue"
 import HeaderActionsFormCard from "@/components/common/HeaderActionsFormCard.vue"
 
 const buildingExpenseCategoryAttributes = ref<Partial<BuildingExpenseCategory>>({
