@@ -8,7 +8,7 @@ import { nestedSaveAndAssociateIfNew } from "@/factories/helpers"
 import fundingRegionFactory from "@/factories/funding-region-factory"
 
 export const buildingExpenseCategoryFactory = Factory.define<BuildingExpenseCategory>(
-  ({ associations, params, onCreate }) => {
+  ({ sequence, params, associations, onCreate }) => {
     onCreate(async (buildingExpenseCategory) => {
       try {
         await nestedSaveAndAssociateIfNew(buildingExpenseCategory)
@@ -44,7 +44,7 @@ export const buildingExpenseCategoryFactory = Factory.define<BuildingExpenseCate
         "Janitorial",
         "Cleaning Supplies",
         "Minor Repairs",
-      ])
+      ]) + `-${sequence}`
 
     const subsidyRate = faker.finance.amount({ min: 0.01, max: 0.5, dec: 4 })
 

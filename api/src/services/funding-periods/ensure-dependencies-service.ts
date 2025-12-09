@@ -1,6 +1,14 @@
 import { type CreationAttributes } from "@sequelize/core"
 
-import { Centre, FundingPeriod, FundingSubmissionLine, FundingSubmissionLineJson } from "@/models"
+import {
+  BuildingExpense,
+  BuildingExpenseCategory,
+  Centre,
+  FiscalPeriod,
+  FundingPeriod,
+  FundingSubmissionLine,
+  FundingSubmissionLineJson,
+} from "@/models"
 
 import BaseService from "@/services/base-service"
 
@@ -14,7 +22,65 @@ export class EnsureDependenciesService extends BaseService {
   }
 
   async perform() {
+    await this.ensureBuildingExpenses()
     await this.ensureFundingSubmissionLineJsons()
+  }
+
+  private async ensureBuildingExpenses() {
+    const { fiscalYear: fundingPeriodFiscalYear } = this.fundingPeriod
+    const shortFiscalYear = FiscalPeriod.toShortFiscalYearFormat(fundingPeriodFiscalYear)
+
+    const fiscalPeriods = await FiscalPeriod.findAll({
+      attributes: ["id"],
+      where: {
+        fiscalYear: shortFiscalYear,
+      },
+    })
+    if (fiscalPeriods.length === 0) {
+      throw new Error(`No fiscal periods found for fiscal year: ${shortFiscalYear}`)
+    }
+
+    const fiscalPeriodIds = fiscalPeriods.map(({ id }) => id)
+    const existingBuildingExpenseCount = await BuildingExpense.count({
+      where: {
+        centreId: this.centre.id,
+        fiscalPeriodId: fiscalPeriodIds,
+      },
+    })
+    if (existingBuildingExpenseCount > 0) return
+
+    const { region, buildingUsagePercent } = this.centre
+    const buildingExpenseCategories = await BuildingExpenseCategory.findAll({
+      include: [
+        {
+          association: "fundingRegion",
+          where: {
+            region,
+          },
+        },
+      ],
+    })
+    if (buildingExpenseCategories.length === 0) {
+      throw new Error(`No building expense categories found for Centre region="${region}"`)
+    }
+
+    const buildingExpensesAttributes: CreationAttributes<BuildingExpense>[] = []
+    for (const fiscalPeriodId of fiscalPeriodIds) {
+      for (const category of buildingExpenseCategories) {
+        buildingExpensesAttributes.push({
+          centreId: this.centre.id,
+          fiscalPeriodId: fiscalPeriodId,
+          buildingExpenseCategoryId: category.id,
+          subsidyRate: category.subsidyRate,
+          buildingUsagePercent,
+          estimatedCost: "0",
+          actualCost: "0",
+          totalCost: "0",
+        })
+      }
+    }
+
+    await BuildingExpense.bulkCreate(buildingExpensesAttributes)
   }
 
   private async ensureFundingSubmissionLineJsons() {
@@ -27,11 +93,7 @@ export class EnsureDependenciesService extends BaseService {
         fiscalYear: fiscalYearLegacy,
       },
     })
-    if (fundingSubmissionLineJsonCount > 0) {
-      throw new Error(
-        `Funding submission line JSON records already exist for centre id ${this.centre.id} and fiscal year ${fiscalYearLegacy}`
-      )
-    }
+    if (fundingSubmissionLineJsonCount > 0) return
 
     const fundingSubmissionLines = await FundingSubmissionLine.findAll({
       where: {
