@@ -4,7 +4,7 @@ import { isNil } from "lodash"
 import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 import { RequireAdmin } from "@/middleware"
 import { Centre, FundingSubmissionLineJson, User } from "@/models"
-import { CentreServices, FundingSubmissionLineJsonServices } from "@/services"
+import { CentreServices } from "@/services"
 
 import { FundingSubmissionLineJsonSerializer } from "@/serializers"
 
@@ -88,19 +88,6 @@ centreRouter.put("/:id/worksheet/:worksheetId", async (req: Request, res: Respon
     .update({ values })
     .then((updatedSheet) => {
       return res.json({ data: updatedSheet })
-    })
-    .catch((error) => {
-      return res.status(422).json({ message: error.message })
-    })
-})
-
-centreRouter.post("/:id/fiscal-year", async (req: Request, res: Response) => {
-  const centerId = parseInt(req.params.id)
-  const { fiscalYear } = req.body
-
-  return FundingSubmissionLineJsonServices.bulkCreate(centerId, fiscalYear)
-    .then((fundingSubmissionLineJsons) => {
-      return res.json({ data: fundingSubmissionLineJsons })
     })
     .catch((error) => {
       return res.status(422).json({ message: error.message })

@@ -15,6 +15,7 @@ import { centreRouter, fundingPeriodRouter, submissionLineRouter } from "@/route
 import {
   BuildingExpenseCategoriesController,
   BuildingExpensesController,
+  Centres,
   CentresController,
   CurrentUserController,
   EmployeeBenefitsController,
@@ -56,6 +57,9 @@ router.route("/api/current-user").get(CurrentUserController.show)
 
 router.route("/api/centres").post(CentresController.create)
 router.route("/api/centres/:centreId").patch(CentresController.update)
+router
+  .route("/api/centres/:centreId/funding-periods/:fundingPeriodId/ensure-dependencies")
+  .post(Centres.FundingPeriods.EnsureDependenciesController.create)
 
 router
   .route("/api/employee-benefits")
