@@ -59,6 +59,7 @@ export class BuildingExpenseCategory extends BaseModel<
   @Attribute(DataTypes.DATE)
   declare deletedAt: Date | null
 
+  // Associations
   @BelongsTo(() => FundingRegion, {
     foreignKey: "fundingRegionId",
     inverse: {

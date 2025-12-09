@@ -29,8 +29,6 @@ export class BuildingExpensePolicy extends PolicyFactory(BuildingExpense) {
 
   permittedAttributes(): Path[] {
     return [
-      "subsidyRate",
-      "buildingUsagePercent",
       "estimatedCost",
       "actualCost",
       "totalCost",

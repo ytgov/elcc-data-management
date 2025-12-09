@@ -9,6 +9,7 @@ export type BuildingExpenseAsShow = Pick<
   | "centreId"
   | "fiscalPeriodId"
   | "buildingExpenseCategoryId"
+  | "fundingRegionSnapshot"
   | "subsidyRate"
   | "buildingUsagePercent"
   | "estimatedCost"
@@ -26,6 +27,7 @@ export class ShowSerializer extends BaseSerializer<BuildingExpense> {
       "centreId",
       "fiscalPeriodId",
       "buildingExpenseCategoryId",
+      "fundingRegionSnapshot",
       "subsidyRate",
       "buildingUsagePercent",
       "estimatedCost",

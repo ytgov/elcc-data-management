@@ -1,7 +1,7 @@
 import { type CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
 
-import { BuildingExpense, User } from "@/models"
+import { BuildingExpense, BuildingExpenseCategory, Centre, FundingRegion, User } from "@/models"
 import BaseService from "@/services/base-service"
 
 export type BuildingExpenseCreationAttributes = Partial<CreationAttributes<BuildingExpense>>
@@ -19,8 +19,6 @@ export class CreateService extends BaseService {
       centreId,
       fiscalPeriodId,
       buildingExpenseCategoryId,
-      subsidyRate,
-      buildingUsagePercent,
       estimatedCost,
       actualCost,
       totalCost,
@@ -39,14 +37,6 @@ export class CreateService extends BaseService {
       throw new Error("Building expense category ID is required")
     }
 
-    if (isNil(subsidyRate)) {
-      throw new Error("Subsidy rate is required")
-    }
-
-    if (isNil(buildingUsagePercent)) {
-      throw new Error("Building usage percent is required")
-    }
-
     if (isNil(estimatedCost)) {
       throw new Error("Estimated cost is required")
     }
@@ -59,11 +49,16 @@ export class CreateService extends BaseService {
       throw new Error("Total cost is required")
     }
 
+    const fundingRegionSnapshot = await this.determineFundingRegion(buildingExpenseCategoryId)
+    const buildingUsagePercent = await this.determineBuildingUsagePercent(centreId)
+    const subsidyRate = await this.determineSubsidyRate(buildingExpenseCategoryId)
+
     const buildingExpense = await BuildingExpense.create({
       ...optionalAttributes,
       centreId,
       fiscalPeriodId,
       buildingExpenseCategoryId,
+      fundingRegionSnapshot,
       subsidyRate,
       buildingUsagePercent,
       estimatedCost,
@@ -72,6 +67,42 @@ export class CreateService extends BaseService {
     })
 
     return buildingExpense
+  }
+
+  private async determineFundingRegion(buildingExpenseCategoryId: number): Promise<string> {
+    const fundingRegion = await FundingRegion.findOne({
+      attributes: ["region"],
+      include: [
+        {
+          association: "buildingExpenseCategories",
+          where: {
+            id: buildingExpenseCategoryId,
+          },
+        },
+      ],
+      rejectOnEmpty: true,
+    })
+    const { region } = fundingRegion
+    return region
+  }
+
+  private async determineBuildingUsagePercent(centreId: number): Promise<string> {
+    const centre = await Centre.findByPk(centreId, {
+      attributes: ["buildingUsagePercent"],
+      rejectOnEmpty: true,
+    })
+
+    const { buildingUsagePercent } = centre
+    return buildingUsagePercent
+  }
+
+  private async determineSubsidyRate(buildingExpenseCategoryId: number): Promise<string> {
+    const category = await BuildingExpenseCategory.findByPk(buildingExpenseCategoryId, {
+      attributes: ["subsidyRate"],
+      rejectOnEmpty: true,
+    })
+    const { subsidyRate } = category
+    return subsidyRate
   }
 }
 

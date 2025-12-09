@@ -43,10 +43,15 @@ export class BuildingExpense extends BaseModel<
   @BuildingExpensesCentreIdFiscalPeriodIdCategoryIdUniqueIndex
   declare fiscalPeriodId: number
 
+  // TODO: update this field to just be `categoryId`
   @Attribute(DataTypes.INTEGER)
   @NotNull
   @BuildingExpensesCentreIdFiscalPeriodIdCategoryIdUniqueIndex
   declare buildingExpenseCategoryId: number
+
+  @Attribute(DataTypes.STRING(100))
+  @NotNull
+  declare fundingRegionSnapshot: string
 
   @Attribute(DataTypes.DECIMAL(5, 4))
   @NotNull
