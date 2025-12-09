@@ -1,4 +1,5 @@
 import { type CreationAttributes } from "@sequelize/core"
+import { isUndefined } from "lodash"
 
 import {
   BuildingExpense,
@@ -51,6 +52,7 @@ export class EnsureDependenciesService extends BaseService {
 
     const { fundingRegionId } = this.centre
     const buildingExpenseCategories = await BuildingExpenseCategory.findAll({
+      include: ["fundingRegion"],
       where: {
         fundingRegionId,
       },
@@ -64,12 +66,21 @@ export class EnsureDependenciesService extends BaseService {
     const { buildingUsagePercent } = this.centre
     const buildingExpensesAttributes: CreationAttributes<BuildingExpense>[] = []
     for (const fiscalPeriodId of fiscalPeriodIds) {
-      for (const category of buildingExpenseCategories) {
+      for (const buildingExpenseCategory of buildingExpenseCategories) {
+        const { subsidyRate, fundingRegion } = buildingExpenseCategory
+
+        if (isUndefined(fundingRegion)) {
+          throw new Error("Expected fundingRegion association to be pre-loaded")
+        }
+
+        const { region: fundingRegionSnapshot } = fundingRegion
+
         buildingExpensesAttributes.push({
           centreId: this.centre.id,
           fiscalPeriodId: fiscalPeriodId,
-          buildingExpenseCategoryId: category.id,
-          subsidyRate: category.subsidyRate,
+          buildingExpenseCategoryId: buildingExpenseCategory.id,
+          fundingRegionSnapshot,
+          subsidyRate,
           buildingUsagePercent,
           estimatedCost: "0",
           actualCost: "0",
