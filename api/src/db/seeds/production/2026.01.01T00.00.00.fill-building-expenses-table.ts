@@ -23,7 +23,7 @@ export async function up() {
         await Centre.findEach(
           {
             where: {
-              region: fundingRegion.region,
+              fundingRegionId: fundingRegion.id,
             },
           },
           async (centre) => {
@@ -41,6 +41,7 @@ export async function up() {
                   centreId: centre.id,
                   fiscalPeriodId: fiscalPeriod.id,
                   buildingExpenseCategoryId: buildingExpenseCategory.id,
+                  fundingRegionSnapshot: fundingRegion.region,
                   subsidyRate: buildingExpenseCategory.subsidyRate,
                   buildingUsagePercent: centre.buildingUsagePercent,
                   estimatedCost: "0.0000",

@@ -5,8 +5,8 @@ import { FundingRegion } from "@/models"
 
 export async function up() {
   const fundingRegionsAttributes: CreationAttributes<FundingRegion>[] = [
-    { region: "whitehorse", subsidyRate: "0.3700" },
-    { region: "communities", subsidyRate: "0.3700" },
+    { region: "Whitehorse", subsidyRate: "0.3700" },
+    { region: "Communities", subsidyRate: "0.3700" },
   ]
 
   for (const fundingRegionAttributes of fundingRegionsAttributes) {

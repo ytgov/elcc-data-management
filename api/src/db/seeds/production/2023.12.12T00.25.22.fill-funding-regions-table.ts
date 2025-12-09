@@ -4,12 +4,9 @@ import { isNil } from "lodash"
 import { FundingRegion } from "@/models"
 
 export async function up() {
-  const existingFundingRegionCount = await FundingRegion.count()
-  if (existingFundingRegionCount > 0) return
-
   const fundingRegionsAttributes: CreationAttributes<FundingRegion>[] = [
-    { region: "whitehorse", subsidyRate: "0.3700" },
-    { region: "communities", subsidyRate: "0.3700" },
+    { region: "Whitehorse", subsidyRate: "0.3700" },
+    { region: "Communities", subsidyRate: "0.3700" },
   ]
 
   for (const fundingRegionAttributes of fundingRegionsAttributes) {
