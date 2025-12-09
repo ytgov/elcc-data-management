@@ -5,6 +5,7 @@ import {
   type QueryOptions,
   type WhereOptions,
 } from "@/api/base-api"
+import { type FundingRegionAsReference } from "@/api/funding-regions-api"
 
 export type BuildingExpenseCategory = {
   id: number
@@ -19,7 +20,9 @@ export type BuildingExpenseCategoryPolicy = Policy
 
 export type BuildingExpenseCategoryAsShow = BuildingExpenseCategory
 
-export type BuildingExpenseCategoryAsIndex = BuildingExpenseCategory
+export type BuildingExpenseCategoryAsIndex = BuildingExpenseCategory & {
+  fundingRegion: FundingRegionAsReference
+}
 
 export type BuildingExpenseCategoryAsReference = BuildingExpenseCategory
 

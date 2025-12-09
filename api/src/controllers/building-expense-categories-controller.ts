@@ -25,6 +25,7 @@ export class BuildingExpenseCategoriesController extends BaseController<Building
       const totalCount = await scopedBuildingExpenseCategories.count({ where })
       const buildingExpenseCategories = await scopedBuildingExpenseCategories.findAll({
         where,
+        include: ["fundingRegion"],
         order,
         limit: this.pagination.limit,
         offset: this.pagination.offset,
