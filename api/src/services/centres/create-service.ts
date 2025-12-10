@@ -86,11 +86,11 @@ export class CreateService extends BaseService {
   }
 
   private async ensureChildEntitiesForCentre(centre: Centre) {
-    await EmployeeBenefits.BulkCreateForCentreService.perform(centre)
-    await BuildingExpenses.BulkCreateForCentreService.perform(centre)
-    await FundingSubmissionLineJsons.BulkCreateForCentreService.perform(centre)
-    await FundingReconciliations.BulkCreateForCentreService.perform(centre)
-    await FundingReconciliationAdjustments.BulkCreateForCentreService.perform(centre)
+    await EmployeeBenefits.BulkEnsureForCentreService.perform(centre)
+    await BuildingExpenses.BulkEnsureForCentreService.perform(centre)
+    await FundingSubmissionLineJsons.BulkEnsureForCentreService.perform(centre)
+    await FundingReconciliations.BulkEnsureForCentreService.perform(centre)
+    await FundingReconciliationAdjustments.BulkEnsureForCentreService.perform(centre)
   }
 
   private async logCentreCreation(centre: Centre, currentUser: User) {
