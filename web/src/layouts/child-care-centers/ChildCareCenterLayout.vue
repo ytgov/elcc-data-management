@@ -126,15 +126,15 @@ const fiscalYearLegacy = computed(() => props.fiscalYearSlug?.replace("-", "/"))
 onMounted(async () => {
   if (isEmpty(props.fiscalYearSlug)) {
     const currentFiscalYearSlug = getCurrentFiscalYearSlug()
-    updateFiscalYearAndRedirect(currentFiscalYearSlug)
+    updateFiscalYearAndRedirect(currentFiscalYearSlug, "replace")
   }
 })
 
 const route = useRoute()
 const router = useRouter()
 
-function updateFiscalYearAndRedirect(value: string) {
-  router.push({
+function updateFiscalYearAndRedirect(value: string, redirectType: "replace" | "push" = "push") {
+  router[redirectType]({
     name: route.name || "child-care-centers/ChildCareCenterRedirect",
     params: {
       ...route.params,
