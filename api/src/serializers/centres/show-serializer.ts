@@ -16,6 +16,18 @@ export type CentreAsShow = Pick<
   | "licensedFor"
   | "buildingUsagePercent"
   | "lastSubmission"
+  | "licenseHolderName"
+  | "contactName"
+  | "physicalAddress"
+  | "mailingAddress"
+  | "email"
+  | "altEmail"
+  | "phoneNumber"
+  | "altPhoneNumber"
+  | "faxNumber"
+  | "vendorIdentifier"
+  | "inspectorName"
+  | "neighborhood"
   | "createdAt"
   | "updatedAt"
 >
@@ -34,6 +46,18 @@ export class ShowSerializer extends BaseSerializer<Centre> {
       "licensedFor",
       "buildingUsagePercent",
       "lastSubmission",
+      "licenseHolderName",
+      "contactName",
+      "physicalAddress",
+      "mailingAddress",
+      "email",
+      "altEmail",
+      "phoneNumber",
+      "altPhoneNumber",
+      "faxNumber",
+      "vendorIdentifier",
+      "inspectorName",
+      "neighborhood",
       "createdAt",
       "updatedAt",
     ])

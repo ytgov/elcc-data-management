@@ -1,10 +1,10 @@
 import http from "@/api/http-client"
-
-// Keep in sync with api/src/models/centre.ts
-export enum CentreRegions {
-  WHITEHORSE = "whitehorse",
-  COMMUNITIES = "communities",
-}
+import {
+  type FiltersOptions,
+  type Policy,
+  type QueryOptions,
+  type WhereOptions,
+} from "@/api/base-api"
 
 export enum CentreStatuses {
   ACTIVE = "Active",
@@ -12,41 +12,101 @@ export enum CentreStatuses {
   UP_TO_DATE = "Up to date",
 }
 
-// TODO: separate new Centre from existing Centre typing
+// Keep in sync with api/src/models/centre.ts
 export type Centre = {
-  id?: number
+  id: number
+  fundingRegionId: number
   name: string
   community: string
-  isFirstNationProgram: boolean
-  region: string
   status: string
-  license?: string | null
-  hotMeal?: boolean | null
-  licensedFor?: number | null // licensed for xx number of children
-  licenseHolderName?: string | null
-  contactName?: string | null
-  physicalAddress?: string | null
-  mailingAddress?: string | null
-  email?: string | null
-  altEmail?: string | null
-  phoneNumber?: string | null
-  altPhoneNumber?: string | null
-  faxNumber?: string | null
-  vendorIdentifier?: string | null
-  inspectorName?: string | null
-  neighborhood?: string | null
-  lastSubmission?: string | null // stringified DateOnly
-  createdAt?: string // stringified DateTime
-  updatedAt?: string // stringified DateTime
+  isFirstNationProgram: boolean
+  license: string | null
+  hotMeal: boolean | null
+  licensedFor: number | null
+  licenseHolderName: string | null
+  contactName: string | null
+  physicalAddress: string | null
+  mailingAddress: string | null
+  email: string | null
+  altEmail: string | null
+  phoneNumber: string | null
+  altPhoneNumber: string | null
+  faxNumber: string | null
+  vendorIdentifier: string | null
+  inspectorName: string | null
+  neighborhood: string | null
+  lastSubmission: string | null
+  buildingUsagePercent: string
+  createdAt: string
+  updatedAt: string
 }
 
+export type CentreAsShow = Centre
+
+export type CentreAsIndex = Pick<
+  Centre,
+  | "id"
+  | "fundingRegionId"
+  | "name"
+  | "license"
+  | "community"
+  | "isFirstNationProgram"
+  | "status"
+  | "hotMeal"
+  | "licensedFor"
+  | "buildingUsagePercent"
+  | "lastSubmission"
+  | "createdAt"
+  | "updatedAt"
+>
+
+export type CentrePolicy = Policy
+
+export type CentreWhereOptions = WhereOptions<
+  Centre,
+  "fundingRegionId" | "status" | "isFirstNationProgram" | "hotMeal"
+>
+
+export type CentreFiltersOptions = FiltersOptions<{
+  search: string | string[]
+}>
+
+export type CentreQueryOptions = QueryOptions<CentreWhereOptions, CentreFiltersOptions>
+
 export const centresApi = {
-  async create(attributes: Partial<Centre>): Promise<{ centre: Centre }> {
+  async list(params: CentreQueryOptions = {}): Promise<{
+    centres: CentreAsIndex[]
+    totalCount: number
+  }> {
+    const { data } = await http.get("/api/centres", { params })
+    return data
+  },
+  async get(centreId: number): Promise<{
+    centre: CentreAsShow
+    policy: CentrePolicy
+  }> {
+    const { data } = await http.get(`/api/centres/${centreId}`)
+    return data
+  },
+  async create(attributes: Partial<Centre>): Promise<{
+    centre: CentreAsShow
+    policy: CentrePolicy
+  }> {
     const { data } = await http.post("/api/centres", attributes)
     return data
   },
-  async update(centreId: number, attributes: Partial<Centre>): Promise<{ centre: Centre }> {
+  async update(
+    centreId: number,
+    attributes: Partial<Centre>
+  ): Promise<{
+    centre: CentreAsShow
+    policy: CentrePolicy
+  }> {
     const { data } = await http.patch(`/api/centres/${centreId}`, attributes)
+    return data
+  },
+  async delete(centreId: number): Promise<void> {
+    const { data } = await http.delete(`/api/centres/${centreId}`)
     return data
   },
 }

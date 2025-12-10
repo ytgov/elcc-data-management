@@ -55,8 +55,13 @@ router.use("/api", checkJwt, autheticateAndLoadUser)
 
 router.route("/api/current-user").get(CurrentUserController.show)
 
-router.route("/api/centres").post(CentresController.create)
-router.route("/api/centres/:centreId").patch(CentresController.update)
+router.route("/api/centres").get(CentresController.index).post(CentresController.create)
+router
+  .route("/api/centres/:centreId")
+  .get(CentresController.show)
+  .patch(CentresController.update)
+  .delete(CentresController.destroy)
+
 router
   .route("/api/centres/:centreId/funding-periods/:fundingPeriodId/ensure-dependencies")
   .post(Centres.FundingPeriods.EnsureDependenciesController.create)

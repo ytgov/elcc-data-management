@@ -19,7 +19,7 @@
   >
     <template #chip="{ props: chipProps, item: { raw: result } }">
       <FundingRegionAttributesChip
-        v-if="!isNil(result)"
+        v-if="!isNil(result) && !isNumber(result)"
         v-bind="chipProps"
         :funding-region="result"
       />
@@ -67,7 +67,7 @@ export {
 
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
-import { debounce, isEmpty, isNil, omit, startCase, uniqBy } from "lodash"
+import { debounce, isEmpty, isNil, isNumber, omit, startCase, uniqBy } from "lodash"
 
 import useFundingRegion from "@/use/use-funding-region"
 import useFundingRegions, {

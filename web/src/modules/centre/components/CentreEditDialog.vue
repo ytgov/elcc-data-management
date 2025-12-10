@@ -74,8 +74,8 @@
             density="comfortable"
             required
           />
-          <CentreRegionSelect
-            v-model="centre.region"
+          <FundingRegionAutocomplete
+            v-model="centre.fundingRegionId"
             label="Region *"
             maxlength="100"
             :rules="[required]"
@@ -196,7 +196,7 @@ import centresApi from "@/api/centres-api"
 import { Centre, useCentreStore } from "@/modules/centre/store"
 import { useNotificationStore } from "@/store/NotificationStore"
 
-import CentreRegionSelect from "@/modules/centre/components/CentreRegionSelect.vue"
+import FundingRegionAutocomplete from "@/components/funding-regions/FundingRegionAutocomplete.vue"
 
 const emit = defineEmits(["saved"])
 
