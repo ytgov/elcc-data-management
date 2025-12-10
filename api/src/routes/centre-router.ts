@@ -4,10 +4,11 @@ import { isNil } from "lodash"
 import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 import { RequireAdmin } from "@/middleware"
 import { Centre, FundingSubmissionLineJson, User } from "@/models"
-import { CentreServices } from "@/services"
+import { Centres } from "@/services"
 
 import { FundingSubmissionLineJsonSerializer } from "@/serializers"
 
+/** @deprecated - prefer api/src/controllers/centres-controller.ts*/
 export const centreRouter = express.Router()
 centreRouter.use(checkJwt)
 centreRouter.use(autheticateAndLoadUser)
@@ -31,7 +32,7 @@ centreRouter.post("/", RequireAdmin, async (req: Request, res: Response) => {
   }
 
   try {
-    const centre = await CentreServices.create(req.body, { currentUser: req.user })
+    const centre = await Centres.CreateService.perform(req.body, req.user)
     return res.json({ data: centre })
   } catch (err) {
     return res.status(500).json({ message: err })
@@ -109,7 +110,7 @@ centreRouter.put("/:id", RequireAdmin, async (req: Request, res: Response) => {
     return res.status(404).json({ message: `Could not find Centre with id=${id}` })
   }
 
-  return CentreServices.update(centre, req.body, { currentUser: req.user })
+  return Centres.UpdateService.perform(centre, req.body, req.user)
     .then((updatedCentre) => {
       return res.json({ data: updatedCentre })
     })

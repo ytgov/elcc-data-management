@@ -1,27 +1,33 @@
-import {
+import db, {
   BuildingExpense,
   Centre,
   EmployeeBenefit,
   FundingReconciliation,
   FundingSubmissionLineJson,
+  Log,
   Payment,
   User,
   WageEnhancement,
 } from "@/models"
 import BaseService from "@/services/base-service"
+import LogServices from "@/services/log-services"
 
 export class DestroyService extends BaseService {
   constructor(
     private centre: Centre,
-    private _currentUser: User
+    private currentUser: User
   ) {
     super()
   }
 
   async perform(): Promise<void> {
-    await this.assertNoDependentEntitiesExist()
+    await db.transaction(async () => {
+      await this.assertNoDependentEntitiesExist()
 
-    await this.centre.destroy()
+      await this.centre.destroy()
+
+      await this.logCentreDestruction(this.centre, this.currentUser)
+    })
   }
 
   private async assertNoDependentEntitiesExist() {
@@ -103,6 +109,15 @@ export class DestroyService extends BaseService {
     if (fundingReconciliationCount > 0) {
       throw new Error("Centre with funding reconciliations cannot be deleted")
     }
+  }
+
+  private async logCentreDestruction(centre: Centre, currentUser: User) {
+    // TODO: update log services to newer service pattern.
+    await LogServices.create({
+      model: centre,
+      currentUser,
+      operation: Log.OperationTypes.DELETE,
+    })
   }
 }
 

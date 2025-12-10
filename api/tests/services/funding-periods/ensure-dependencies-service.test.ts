@@ -1,4 +1,4 @@
-import { BuildingExpense, Centre, FiscalPeriod, FundingSubmissionLineJson } from "@/models"
+import { BuildingExpense, FiscalPeriod, FundingSubmissionLineJson } from "@/models"
 import { FundingSubmissionLineJsonMonths } from "@/models/funding-submission-line-json"
 import {
   buildingExpenseCategoryFactory,
@@ -18,8 +18,9 @@ describe("api/src/services/funding-periods/ensure-dependencies-service.ts", () =
     describe("#perform", () => {
       test("when funding period spans full year, and there are funding submission lines, creates funding submission line json records for each month", async () => {
         // Arrange
+        const fundingRegion = await fundingRegionFactory.create()
         const centre = await centreFactory.create({
-          region: Centre.Regions.WHITEHORSE,
+          fundingRegionId: fundingRegion.id,
         })
         const fundingPeriod = await fundingPeriodFactory.create({
           fiscalYear: "2024-2025",
@@ -35,9 +36,6 @@ describe("api/src/services/funding-periods/ensure-dependencies-service.ts", () =
         })
         await fundingSubmissionLineFactory.createList(3, {
           fiscalYear: "2024/25",
-        })
-        const fundingRegion = await fundingRegionFactory.create({
-          region: Centre.Regions.WHITEHORSE,
         })
         await buildingExpenseCategoryFactory.create({
           fundingRegionId: fundingRegion.id,
@@ -116,8 +114,9 @@ describe("api/src/services/funding-periods/ensure-dependencies-service.ts", () =
 
       test("when ensuring dependencies, templates default zero values for each funding submission line", async () => {
         // Arrange
+        const fundingRegion = await fundingRegionFactory.create()
         const centre = await centreFactory.create({
-          region: Centre.Regions.WHITEHORSE,
+          fundingRegionId: fundingRegion.id,
         })
         const fundingPeriod = await fundingPeriodFactory.create({
           fiscalYear: "2024-2025",
@@ -131,9 +130,6 @@ describe("api/src/services/funding-periods/ensure-dependencies-service.ts", () =
         await buildingExpenseCategoryFactory.create()
         await fundingSubmissionLineFactory.createList(3, {
           fiscalYear: "2024/25",
-        })
-        const fundingRegion = await fundingRegionFactory.create({
-          region: Centre.Regions.WHITEHORSE,
         })
         await buildingExpenseCategoryFactory.create({
           fundingRegionId: fundingRegion.id,
@@ -171,8 +167,9 @@ describe("api/src/services/funding-periods/ensure-dependencies-service.ts", () =
 
       test("when funding submission line json records already exist for the centre and fiscal year, does not create duplicates", async () => {
         // Arrange
+        const fundingRegion = await fundingRegionFactory.create()
         const centre = await centreFactory.create({
-          region: Centre.Regions.WHITEHORSE,
+          fundingRegionId: fundingRegion.id,
         })
         const fundingPeriod = await fundingPeriodFactory.create({
           fiscalYear: "2024-2025",
@@ -196,9 +193,6 @@ describe("api/src/services/funding-periods/ensure-dependencies-service.ts", () =
           values: JSON.stringify([]),
         })
 
-        const fundingRegion = await fundingRegionFactory.create({
-          region: Centre.Regions.WHITEHORSE,
-        })
         await buildingExpenseCategoryFactory.create({
           fundingRegionId: fundingRegion.id,
         })
@@ -217,8 +211,9 @@ describe("api/src/services/funding-periods/ensure-dependencies-service.ts", () =
 
       test("when there are no funding submission lines for the fiscal year, throws an error", async () => {
         // Arrange
+        const fundingRegion = await fundingRegionFactory.create()
         const centre = await centreFactory.create({
-          region: Centre.Regions.WHITEHORSE,
+          fundingRegionId: fundingRegion.id,
         })
         const fundingPeriod = await fundingPeriodFactory.create({
           fiscalYear: "2024-2025",
@@ -228,9 +223,6 @@ describe("api/src/services/funding-periods/ensure-dependencies-service.ts", () =
         await fiscalPeriodFactory.create({
           fundingPeriodId: fundingPeriod.id,
           fiscalYear: "2024-25",
-        })
-        const fundingRegion = await fundingRegionFactory.create({
-          region: Centre.Regions.WHITEHORSE,
         })
         await buildingExpenseCategoryFactory.create({
           fundingRegionId: fundingRegion.id,
@@ -244,8 +236,9 @@ describe("api/src/services/funding-periods/ensure-dependencies-service.ts", () =
 
       test("creates building expenses for the centre for all fiscal periods and categories", async () => {
         // Arrange
+        const fundingRegion = await fundingRegionFactory.create()
         const centre = await centreFactory.create({
-          region: Centre.Regions.WHITEHORSE,
+          fundingRegionId: fundingRegion.id,
         })
         const fundingPeriod = await fundingPeriodFactory.create({
           fiscalYear: "2024-2025",
@@ -260,9 +253,6 @@ describe("api/src/services/funding-periods/ensure-dependencies-service.ts", () =
           fiscalYear: "2024/25",
         })
 
-        const fundingRegion = await fundingRegionFactory.create({
-          region: Centre.Regions.WHITEHORSE,
-        })
         const buildingExpenseCategory1 = await buildingExpenseCategoryFactory.create({
           fundingRegionId: fundingRegion.id,
         })
@@ -309,8 +299,9 @@ describe("api/src/services/funding-periods/ensure-dependencies-service.ts", () =
 
       test("when building expenses already exist for the centre and fiscal year, does not create duplicates", async () => {
         // Arrange
+        const fundingRegion = await fundingRegionFactory.create()
         const centre = await centreFactory.create({
-          region: Centre.Regions.WHITEHORSE,
+          fundingRegionId: fundingRegion.id,
         })
         const fundingPeriod = await fundingPeriodFactory.create({
           fiscalYear: "2024-2025",
@@ -325,9 +316,6 @@ describe("api/src/services/funding-periods/ensure-dependencies-service.ts", () =
           fiscalYear: "2024/25",
         })
 
-        const fundingRegion = await fundingRegionFactory.create({
-          region: Centre.Regions.WHITEHORSE,
-        })
         const buildingExpenseCategory = await buildingExpenseCategoryFactory.create({
           fundingRegionId: fundingRegion.id,
         })

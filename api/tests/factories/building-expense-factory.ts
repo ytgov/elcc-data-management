@@ -41,6 +41,9 @@ export const buildingExpenseFactory = Factory.define<BuildingExpense>(
         id: params.buildingExpenseCategoryId,
       })
 
+    const fundingRegionSnapshot =
+      params.fundingRegionSnapshot ?? category.fundingRegion?.region ?? faker.location.country()
+
     const subsidyRate = faker.finance.amount({ min: 0.01, max: 0.5, dec: 4 })
     const buildingUsagePercent = faker.finance.amount({ min: 0, max: 100, dec: 2 })
     const estimatedCost = faker.finance.amount({ min: 100, max: 10000, dec: 4 })
@@ -51,6 +54,7 @@ export const buildingExpenseFactory = Factory.define<BuildingExpense>(
       centreId: centre.id,
       fiscalPeriodId: fiscalPeriod.id,
       buildingExpenseCategoryId: category.id,
+      fundingRegionSnapshot,
       subsidyRate,
       buildingUsagePercent,
       estimatedCost,
