@@ -1390,7 +1390,52 @@ test("creates a new user", async () => {
 })
 ```
 
-**Pattern 2:** Use multi-line formatting for object matchers, with one property per line.
+**Pattern 2:** Keep assertions simple. Avoid loops, complex logic, and nested expects, and always check against concrete values. Avoid `where` clauses inside expectations; each test has a clean database state, so you should assert against the full set of records.
+
+```typescript
+// Correct - simple assertion with concrete value
+test("when creating employee benefits for a centre, creates employee benefits for all fiscal periods", async () => {
+  // Arrange
+  const centre = await centreFactory.create()
+
+  // Act
+  await BulkCreateService.perform(centre)
+
+  // Assert
+  const employeeBenefitsCount = await EmployeeBenefit.count({
+    centreId: centre.id,
+  })
+  expect(employeeBenefitsCount).toEqual(12)
+})
+
+// Incorrect - comparing two dynamic values (false positive if both are 0)
+test("when creating centre, creates employee benefits for all fiscal periods", async () => {
+  const centre = await centreFactory.create()
+  await BulkCreateService.perform(centre)
+
+  const employeeBenefits = await EmployeeBenefit.findAll({
+    where: { centreId: centre.id },
+  })
+  const fiscalPeriodsCount = await FiscalPeriod.count()
+  expect(employeeBenefits.length).toEqual(fiscalPeriodsCount) // ❌ Passes if both are 0
+})
+
+// Incorrect - loop with multiple assertions
+test("when creating employee benefits, initializes all costs to zero", async () => {
+  const centre = await centreFactory.create()
+  await BulkCreateService.perform(centre)
+
+  const employeeBenefits = await EmployeeBenefit.findAll({
+    where: { centreId: centre.id },
+  })
+  for (const employeeBenefit of employeeBenefits) {
+    expect(employeeBenefit.actualCost).toEqual("0")
+    expect(employeeBenefit.estimatedCost).toEqual("0")
+  }
+})
+```
+
+**Pattern 3:** Use multi-line formatting for object matchers, with one property per line.
 
 ```typescript
 // Correct - multi-line with one property per line
@@ -1406,6 +1451,7 @@ expect(response.body.user).toMatchObject({ id: user.id, email: user.email })
 **Rationale:**
 
 - One expect per test makes failures easier to diagnose and tests more focused
+- Simple assertions are easier to understand and maintain
 - Multi-line formatting is more readable and follows the principle of one thing per line
 
 ### Test Structure (AAA Pattern)
