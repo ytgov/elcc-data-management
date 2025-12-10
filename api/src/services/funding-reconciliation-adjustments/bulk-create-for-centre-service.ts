@@ -7,6 +7,7 @@ import {
   FundingReconciliationAdjustment,
 } from "@/models"
 import BaseService from "@/services/base-service"
+import { isUndefined } from "lodash"
 
 export class BulkCreateForCentreService extends BaseService {
   constructor(private centre: Centre) {
@@ -22,23 +23,36 @@ export class BulkCreateForCentreService extends BaseService {
         where: {
           centreId: this.centre.id,
         },
+        include: ["fundingPeriod"],
       },
       async (fundingReconciliation) => {
-        await FiscalPeriod.findEach(async (fiscalPeriod) => {
-          adjustmentsAttributes.push({
-            fundingReconciliationId: fundingReconciliation.id,
-            fiscalPeriodId: fiscalPeriod.id,
-            fundingReceivedPeriodAmount: "0",
-            eligibleExpensesPeriodAmount: "0",
-            payrollAdjustmentsPeriodAmount: "0",
-            cumulativeBalanceAmount: "0",
-          })
+        const { fundingPeriod } = fundingReconciliation
+        if (isUndefined(fundingPeriod)) {
+          throw new Error("Expected funding period association to be preloaded")
+        }
 
-          if (adjustmentsAttributes.length >= BATCH_SIZE) {
-            await FundingReconciliationAdjustment.bulkCreate(adjustmentsAttributes)
-            adjustmentsAttributes = []
+        await FiscalPeriod.findEach(
+          {
+            where: {
+              fundingPeriodId: fundingPeriod.id,
+            },
+          },
+          async (fiscalPeriod) => {
+            adjustmentsAttributes.push({
+              fundingReconciliationId: fundingReconciliation.id,
+              fiscalPeriodId: fiscalPeriod.id,
+              fundingReceivedPeriodAmount: "0",
+              eligibleExpensesPeriodAmount: "0",
+              payrollAdjustmentsPeriodAmount: "0",
+              cumulativeBalanceAmount: "0",
+            })
+
+            if (adjustmentsAttributes.length >= BATCH_SIZE) {
+              await FundingReconciliationAdjustment.bulkCreate(adjustmentsAttributes)
+              adjustmentsAttributes = []
+            }
           }
-        })
+        )
       }
     )
 
