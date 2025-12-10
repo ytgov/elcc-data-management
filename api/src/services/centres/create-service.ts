@@ -4,6 +4,17 @@ import { isNil } from "lodash"
 import db, { Centre, Log, User } from "@/models"
 import BaseService from "@/services/base-service"
 import LogServices from "@/services/log-services"
+import {
+  BuildingExpenses,
+  EmployeeBenefits,
+  EmployeeWageTiers,
+  FiscalPeriods,
+  FundingPeriods,
+  FundingReconciliationAdjustments,
+  FundingReconciliations,
+  FundingSubmissionLineJsons,
+  FundingSubmissionLines,
+} from "@/services"
 
 export type CentreCreationAttributes = Partial<CreationAttributes<Centre>>
 
@@ -59,10 +70,27 @@ export class CreateService extends BaseService {
         status: statusOrFallback,
       })
 
+      await this.ensureCurrentFiscalAndBaseEntities()
+      await this.ensureChildEntitiesForCentre(centre)
       await this.logCentreCreation(centre, this.currentUser)
 
       return centre
     })
+  }
+
+  private async ensureCurrentFiscalAndBaseEntities() {
+    const fundingPeriod = await FundingPeriods.EnsureCurrentService.perform()
+    await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+    await EmployeeWageTiers.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+    await FundingSubmissionLines.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+  }
+
+  private async ensureChildEntitiesForCentre(centre: Centre) {
+    await EmployeeBenefits.BulkCreateForCentreService.perform(centre)
+    await BuildingExpenses.BulkCreateForCentreService.perform(centre)
+    await FundingSubmissionLineJsons.BulkCreateForCentreService.perform(centre)
+    await FundingReconciliations.BulkCreateForCentreService.perform(centre)
+    await FundingReconciliationAdjustments.BulkCreateForCentreService.perform(centre)
   }
 
   private async logCentreCreation(centre: Centre, currentUser: User) {

@@ -1,3 +1,4 @@
 // Special actions
-export { ReplicateEstimatesService } from "./replicate-estimates-service"
+export { BulkCreateForCentreService } from "./bulk-create-for-centre-service"
 export { BulkCreateForFundingPeriodService } from "./bulk-create-for-funding-period-service"
+export { ReplicateEstimatesService } from "./replicate-estimates-service"
