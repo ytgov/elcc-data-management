@@ -32,6 +32,27 @@
       </v-list-item>
       <v-list-item
         :to="{
+          name: 'administration/BuildingExpenseCategoriesPage',
+        }"
+        prepend-icon="mdi-office-building"
+        exact
+        :active="isActiveByRoutePathStartsWith('/administration/building-expense-categories')"
+      >
+        Building Expense Categories
+      </v-list-item>
+      <v-list-item
+        :to="{
+          name: 'administration/CentresPage',
+        }"
+        prepend-icon="mdi-office-building-marker"
+        exact
+        :active="isActiveByRoutePathStartsWith('/administration/centres')"
+      >
+        Centres
+      </v-list-item>
+
+      <v-list-item
+        :to="{
           name: 'administration/FundingPeriodsPage',
         }"
         prepend-icon="mdi-calendar-clock"
@@ -49,16 +70,6 @@
         :active="isActiveByRoutePathStartsWith('/administration/funding-regions')"
       >
         Funding Regions
-      </v-list-item>
-      <v-list-item
-        :to="{
-          name: 'administration/BuildingExpenseCategoriesPage',
-        }"
-        prepend-icon="mdi-office-building"
-        exact
-        :active="isActiveByRoutePathStartsWith('/administration/building-expense-categories')"
-      >
-        Building Expense Categories
       </v-list-item>
       <v-list-item
         :to="{

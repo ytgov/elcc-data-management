@@ -30,9 +30,10 @@
 import { computed } from "vue"
 import { useRouter } from "vue-router"
 
+import useBuildingExpenseCategories from "@/use/use-building-expense-categories"
+import useCentres from "@/use/use-centres"
 import useFundingPeriods from "@/use/use-funding-periods"
 import useFundingRegions from "@/use/use-funding-regions"
-import useBuildingExpenseCategories from "@/use/use-building-expense-categories"
 import useFundingSubmissionLines from "@/use/use-funding-submission-lines"
 import useUsers from "@/use/use-users"
 
@@ -62,6 +63,15 @@ const items = computed<QuickMetricsTableItem[]>(() => [
     actions: {
       to: {
         name: "administration/BuildingExpenseCategoriesPage",
+      },
+    },
+  },
+  {
+    title: "Centres",
+    count: totalCountCentres.value,
+    actions: {
+      to: {
+        name: "administration/CentresPage",
       },
     },
   },
@@ -112,6 +122,11 @@ const {
   isLoading: isLoadingBuildingExpenseCategories,
 } = useBuildingExpenseCategories(buildingExpenseCategoriesQuery)
 
+const centresQuery = computed(() => ({
+  perPage: 1,
+}))
+const { totalCount: totalCountCentres, isLoading: isLoadingCentres } = useCentres(centresQuery)
+
 const fundingPeriodsQuery = computed(() => ({
   perPage: 1,
 }))
@@ -138,6 +153,7 @@ const { totalCount: totalCountUsers, isLoading: isLoadingUsers } = useUsers(user
 const isLoading = computed(() => {
   return (
     isLoadingBuildingExpenseCategories.value ||
+    isLoadingCentres.value ||
     isLoadingFundingPeriods.value ||
     isLoadingFundingRegions.value ||
     isLoadingFundingSubmissionLines.value ||

@@ -107,6 +107,11 @@ const routes = [
         props: true,
       },
       {
+        path: "administration/centres",
+        name: "administration/CentresPage",
+        component: () => import("@/pages/administration/AdministrationCentresPage.vue"),
+      },
+      {
         path: "administration/submission-lines",
         name: "administration/AdministrationSubmissionLinesPage",
         component: () => import("@/pages/administration/AdministrationSubmissionLinesPage.vue"),
