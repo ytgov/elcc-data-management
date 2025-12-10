@@ -162,7 +162,9 @@ const breadcrumbs = computed(() => {
   return [
     {
       title: "Child Care Centres",
-      to: "/child-care-centres",
+      to: {
+        name: "ChildCareCentresPage",
+      },
     },
     {
       title: selectedCentre.value?.name || "loading ...",

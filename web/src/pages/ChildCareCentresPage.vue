@@ -208,7 +208,9 @@ function openCentreCreateDialog() {
 const breadcrumbs = [
   {
     title: "Child Care Centres",
-    to: "/child-care-centres",
+    to: {
+      name: "ChildCareCentresPage",
+    },
   },
 ]
 useBreadcrumbs("Child Care Centres", breadcrumbs)
