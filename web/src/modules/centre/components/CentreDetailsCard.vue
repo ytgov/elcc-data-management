@@ -41,7 +41,10 @@
       </v-list>
     </v-card-text>
 
-    <CentreEditDialog ref="centerEditDialog" />
+    <CentreEditDialog
+      ref="centerEditDialog"
+      @saved="refreshAndEmit"
+    />
   </v-card>
 </template>
 
@@ -58,8 +61,12 @@ const props = defineProps<{
   centreId: number
 }>()
 
+const emit = defineEmits<{
+  saved: [centreId: number]
+}>()
+
 const { centreId } = toRefs(props)
-const { centre } = useCentre(centreId)
+const { centre, refresh } = useCentre(centreId)
 
 const centreDetails = computed<
   {
@@ -110,5 +117,10 @@ const centerEditDialog = useTemplateRef("centerEditDialog")
 
 function showCentreEditDialog() {
   centerEditDialog.value?.open(props.centreId)
+}
+
+function refreshAndEmit() {
+  refresh()
+  emit("saved", props.centreId)
 }
 </script>

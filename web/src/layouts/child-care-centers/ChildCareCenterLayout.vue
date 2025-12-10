@@ -1,23 +1,25 @@
 <template>
   <div>
-    <div class="float-right">
-      <FiscalPeriodFiscalYearSelect
-        :model-value="fiscalYear"
-        label="Fiscal year"
-        class="float-right"
-        style="width: 200px"
-        variant="outlined"
-        density="compact"
-        @update:model-value="updateFiscalYearAndRedirect"
-      />
-    </div>
+    <FiscalPeriodFiscalYearSelect
+      :model-value="fiscalYearLegacy"
+      label="Fiscal year"
+      class="float-right mt-n10"
+      style="width: 200px"
+      variant="outlined"
+      density="compact"
+      hide-details
+      @update:model-value="updateFiscalYearAndRedirect"
+    />
 
-    <v-row style="clear: both">
+    <v-row>
       <v-col
         cols="12"
         md="4"
       >
-        <CentreDetailsCard :centre-id="centreIdAsNumber" />
+        <CentreDetailsCard
+          :centre-id="centreIdAsNumber"
+          @saved="refresh"
+        />
         <v-card
           elevation="3"
           color="yg-blue-light"
@@ -94,14 +96,13 @@
 </template>
 
 <script setup lang="ts">
-import { isNil, isEmpty } from "lodash"
+import { isEmpty } from "lodash"
 import { useRoute, useRouter } from "vue-router"
-import { computed, onMounted, onUnmounted, useTemplateRef } from "vue"
-import { storeToRefs } from "pinia"
+import { computed, onMounted, useTemplateRef } from "vue"
 
 import { getCurrentFiscalYearSlug } from "@/utils/fiscal-year"
-import { useCentreStore } from "@/modules/centre/store"
 import useBreadcrumbs from "@/use/use-breadcrumbs"
+import useCentre from "@/use/use-centre"
 
 import FiscalPeriodFiscalYearSelect from "@/components/fiscal-periods/FiscalPeriodFiscalYearSelect.vue"
 import FundingLineValuesEnrollmentChart from "@/components/funding-line-values/FundingLineValuesEnrollmentChart.vue"
@@ -118,39 +119,30 @@ const props = withDefaults(
 )
 
 const centreIdAsNumber = computed(() => parseInt(props.centreId))
+const { centre, refresh } = useCentre(centreIdAsNumber)
 
-const store = useCentreStore()
-const route = useRoute()
-const router = useRouter()
-const { selectedCentre } = storeToRefs(store)
-
-const fiscalYear = computed(() => {
-  return props.fiscalYearSlug.replace("-", "/")
-})
-
-function updateFiscalYearAndRedirect(value: string) {
-  router.push({
-    name: route.name || "child-care-centers/ChildCareCenterRedirect",
-    params: { ...route.params, fiscalYearSlug: value.replace("/", "-") },
-    query: route.query,
-  })
-}
+const fiscalYearLegacy = computed(() => props.fiscalYearSlug?.replace("-", "/"))
 
 onMounted(async () => {
   if (isEmpty(props.fiscalYearSlug)) {
     const currentFiscalYearSlug = getCurrentFiscalYearSlug()
     updateFiscalYearAndRedirect(currentFiscalYearSlug)
   }
-
-  const centre = await store.selectCentreById(centreIdAsNumber.value)
-  if (isNil(centre)) {
-    throw new Error(`Could not load centre from id=${centreIdAsNumber.value}`)
-  }
 })
 
-onUnmounted(() => {
-  store.unselectCentre()
-})
+const route = useRoute()
+const router = useRouter()
+
+function updateFiscalYearAndRedirect(value: string) {
+  router.push({
+    name: route.name || "child-care-centers/ChildCareCenterRedirect",
+    params: {
+      ...route.params,
+      fiscalYearSlug: value.replace("/", "-"),
+    },
+    query: route.query,
+  })
+}
 
 const fundingLineValuesEnrollmentChartRef = useTemplateRef("fundingLineValuesEnrollmentChartRef")
 
@@ -158,6 +150,7 @@ function refreshFundingLineValuesEnrollmentChart() {
   fundingLineValuesEnrollmentChartRef.value?.refresh()
 }
 
+const title = computed(() => centre.value?.name || "loading ...")
 const breadcrumbs = computed(() => {
   return [
     {
@@ -167,7 +160,7 @@ const breadcrumbs = computed(() => {
       },
     },
     {
-      title: selectedCentre.value?.name || "loading ...",
+      title: centre.value?.name || "loading ...",
       to: {
         name: "child-care-centers/ChildCareCenterRedirect",
         params: {
@@ -178,5 +171,5 @@ const breadcrumbs = computed(() => {
   ]
 })
 
-useBreadcrumbs(() => selectedCentre.value?.name || "loading ...", breadcrumbs)
+useBreadcrumbs(title, breadcrumbs)
 </script>

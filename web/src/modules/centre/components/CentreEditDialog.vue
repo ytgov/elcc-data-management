@@ -4,6 +4,7 @@
     persistent
     max-width="500"
     @keydown.esc="close"
+    @input="closeIfFalse"
   >
     <v-form
       ref="form"
@@ -25,8 +26,8 @@
           >
         </v-toolbar>
         <v-skeleton-loader
-          v-if="isNil(centre)"
-          type="card"
+          v-if="isNil(centre) || isNil(centreId)"
+          type="card@3"
         />
         <v-card-text v-else>
           <v-text-field
@@ -200,7 +201,7 @@ const centreId = useRouteQuery<string | null, number | null>("showCentreEdit", n
   transform: integerTransformer,
 })
 
-const { centre, isLoading, save } = useCentre(centreId)
+const { centre, isLoading, save, refresh } = useCentre(centreId)
 
 const form = useTemplateRef("form")
 const isValid = ref(false)
@@ -239,15 +240,15 @@ async function updateAndClose() {
 const showDialog = ref(false)
 
 watch(
-  centreId,
+  () => centreId.value,
   (newCentreId) => {
     if (isNil(newCentreId)) {
       showDialog.value = false
       form.value?.resetValidation()
       centre.value = null
     } else {
-      centre.value = null
       showDialog.value = true
+      refresh()
     }
   },
   {
@@ -262,6 +263,12 @@ function open(newCentreId: number) {
 
 function close() {
   centreId.value = null
+}
+
+function closeIfFalse(value: boolean | null) {
+  if (value !== false) return
+
+  close()
 }
 
 defineExpose({
