@@ -79,15 +79,6 @@
             density="comfortable"
             required
           />
-          <FundingRegionAutocomplete
-            v-model="centre.fundingRegionId"
-            label="Region *"
-            maxlength="100"
-            :rules="[required]"
-            variant="outlined"
-            density="comfortable"
-            required
-          />
           <v-text-field
             v-model="centre.licenseHolderName"
             label="License Holder Name"
@@ -200,8 +191,6 @@ import { required } from "@/utils/validators"
 
 import useCentre from "@/use/use-centre"
 import useSnack from "@/use/use-snack"
-
-import FundingRegionAutocomplete from "@/components/funding-regions/FundingRegionAutocomplete.vue"
 
 const emit = defineEmits<{
   saved: [centreId: number]
