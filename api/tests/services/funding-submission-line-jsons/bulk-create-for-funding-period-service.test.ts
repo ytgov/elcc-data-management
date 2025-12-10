@@ -1,10 +1,10 @@
 import { FundingSubmissionLineJson } from "@/models"
 import { centreFactory, fundingPeriodFactory, fundingSubmissionLineFactory } from "@/factories"
 
-import BulkCreateForService from "@/services/funding-submission-line-jsons/bulk-create-for-service"
+import BulkCreateForFundingPeriodService from "@/services/funding-submission-line-jsons/bulk-create-for-funding-period-service"
 
-describe("api/src/services/funding-submission-line-jsons/bulk-create-for-service.ts", () => {
-  describe("BulkCreateForService", () => {
+describe("api/src/services/funding-submission-line-jsons/bulk-create-for-funding-period-service.ts", () => {
+  describe("BulkCreateForFundingPeriodService", () => {
     describe("#perform", () => {
       test("when funding period has centres and submission lines, creates funding submission line jsons for all centres and months", async () => {
         // Arrange
@@ -19,7 +19,7 @@ describe("api/src/services/funding-submission-line-jsons/bulk-create-for-service
         })
 
         // Act
-        await BulkCreateForService.perform(fundingPeriod)
+        await BulkCreateForFundingPeriodService.perform(fundingPeriod)
 
         // Assert
         const fundingSubmissionLineJsonsCount = await FundingSubmissionLineJson.count()
@@ -38,7 +38,7 @@ describe("api/src/services/funding-submission-line-jsons/bulk-create-for-service
         })
 
         // Act
-        await BulkCreateForService.perform(fundingPeriod)
+        await BulkCreateForFundingPeriodService.perform(fundingPeriod)
 
         // Assert
         const fundingSubmissionLineJsonsCount = await FundingSubmissionLineJson.count()
@@ -55,7 +55,7 @@ describe("api/src/services/funding-submission-line-jsons/bulk-create-for-service
         })
 
         // Act & Assert
-        await expect(BulkCreateForService.perform(fundingPeriod)).rejects.toThrow(
+        await expect(BulkCreateForFundingPeriodService.perform(fundingPeriod)).rejects.toThrow(
           "No funding submission lines to template from found for the given fiscal year: 2024/25"
         )
       })
@@ -73,7 +73,7 @@ describe("api/src/services/funding-submission-line-jsons/bulk-create-for-service
         })
 
         // Act
-        await BulkCreateForService.perform(fundingPeriod)
+        await BulkCreateForFundingPeriodService.perform(fundingPeriod)
 
         // Assert
         const fundingSubmissionLineJson = await FundingSubmissionLineJson.findOne({
@@ -101,7 +101,7 @@ describe("api/src/services/funding-submission-line-jsons/bulk-create-for-service
         })
 
         // Act
-        await BulkCreateForService.perform(fundingPeriod)
+        await BulkCreateForFundingPeriodService.perform(fundingPeriod)
 
         // Assert
         const aprilRecord = await FundingSubmissionLineJson.findOne({
@@ -134,7 +134,7 @@ describe("api/src/services/funding-submission-line-jsons/bulk-create-for-service
         })
 
         // Act
-        await BulkCreateForService.perform(fundingPeriod)
+        await BulkCreateForFundingPeriodService.perform(fundingPeriod)
 
         // Assert
         const marchRecord = await FundingSubmissionLineJson.findOne({
@@ -170,7 +170,7 @@ describe("api/src/services/funding-submission-line-jsons/bulk-create-for-service
         })
 
         // Act
-        await BulkCreateForService.perform(fundingPeriod)
+        await BulkCreateForFundingPeriodService.perform(fundingPeriod)
 
         // Assert
         const fundingSubmissionLineJson = await FundingSubmissionLineJson.findOne({
@@ -207,7 +207,7 @@ describe("api/src/services/funding-submission-line-jsons/bulk-create-for-service
         })
 
         // Act
-        await BulkCreateForService.perform(fundingPeriod)
+        await BulkCreateForFundingPeriodService.perform(fundingPeriod)
 
         // Assert
         const fundingSubmissionLineJson = await FundingSubmissionLineJson.findOne({

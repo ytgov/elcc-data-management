@@ -5,7 +5,7 @@ import { Centre, FundingSubmissionLine, FundingSubmissionLineJson } from "@/mode
 import FundingPeriod from "@/models/funding-period"
 import BaseService from "@/services/base-service"
 
-export class BulkCreateForService extends BaseService {
+export class BulkCreateForFundingPeriodService extends BaseService {
   constructor(private fundingPeriod: FundingPeriod) {
     super()
   }
@@ -20,7 +20,9 @@ export class BulkCreateForService extends BaseService {
       },
     })
     if (fundingSubmissionLines.length === 0) {
-      throw new Error(`No funding submission lines to template from found for the given fiscal year: ${fiscalYearLegacy}`)
+      throw new Error(
+        `No funding submission lines to template from found for the given fiscal year: ${fiscalYearLegacy}`
+      )
     }
 
     const defaultLineValues = fundingSubmissionLines.map((fundingSubmissionLine) => ({
@@ -70,4 +72,4 @@ export class BulkCreateForService extends BaseService {
   }
 }
 
-export default BulkCreateForService
+export default BulkCreateForFundingPeriodService

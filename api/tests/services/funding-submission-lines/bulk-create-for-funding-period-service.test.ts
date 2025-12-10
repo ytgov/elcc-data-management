@@ -2,10 +2,10 @@ import { FundingSubmissionLine } from "@/models"
 import FUNDING_SUBMISSION_LINE_DEFAULTS from "@/models/funding-submission-line-defaults"
 import { fundingPeriodFactory, fundingSubmissionLineFactory } from "@/factories"
 
-import BulkCreateForService from "@/services/funding-submission-lines/bulk-create-for-service"
+import BulkCreateForFundingPeriodService from "@/services/funding-submission-lines/bulk-create-for-funding-period-service"
 
-describe("api/src/services/funding-submission-lines/bulk-create-for-service.ts", () => {
-  describe("BulkCreateForService", () => {
+describe("api/src/services/funding-submission-lines/bulk-create-for-funding-period-service.ts", () => {
+  describe("BulkCreateForFundingPeriodService", () => {
     describe("#perform", () => {
       test("when previous fiscal year submission lines exist, creates new lines from previous year template", async () => {
         // Arrange
@@ -26,7 +26,7 @@ describe("api/src/services/funding-submission-lines/bulk-create-for-service.ts",
         })
 
         // Act
-        await BulkCreateForService.perform(fundingPeriod)
+        await BulkCreateForFundingPeriodService.perform(fundingPeriod)
 
         // Assert
         const createdLines = await FundingSubmissionLine.findAll({
@@ -56,7 +56,7 @@ describe("api/src/services/funding-submission-lines/bulk-create-for-service.ts",
         })
 
         // Act
-        await BulkCreateForService.perform(fundingPeriod)
+        await BulkCreateForFundingPeriodService.perform(fundingPeriod)
 
         // Assert
         const createdLines = await FundingSubmissionLine.findAll({
@@ -87,7 +87,7 @@ describe("api/src/services/funding-submission-lines/bulk-create-for-service.ts",
           })
 
         // Act
-        await BulkCreateForService.perform(fundingPeriod)
+        await BulkCreateForFundingPeriodService.perform(fundingPeriod)
 
         // Assert
         const fundingSubmissionLines = await FundingSubmissionLine.findAll({

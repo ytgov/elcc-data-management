@@ -10,7 +10,7 @@ import {
 } from "@/models"
 import BaseService from "@/services/base-service"
 
-export class BulkCreateForService extends BaseService {
+export class BulkCreateForFundingPeriodService extends BaseService {
   constructor(private fundingPeriod: FundingPeriod) {
     super()
   }
@@ -68,4 +68,4 @@ export class BulkCreateForService extends BaseService {
   }
 }
 
-export default BulkCreateForService
+export default BulkCreateForFundingPeriodService
