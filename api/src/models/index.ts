@@ -2,6 +2,8 @@ export { type FundingLineValue } from "@/models/funding-line-value"
 
 import db from "@/db/db-client"
 
+import BuildingExpense from "@/models/building-expense"
+import BuildingExpenseCategory from "@/models/building-expense-category"
 import Centre from "@/models/centre"
 import EmployeeBenefit from "@/models/employee-benefit"
 import EmployeeWageTier from "@/models/employee-wage-tier"
@@ -9,6 +11,7 @@ import FiscalPeriod from "@/models/fiscal-period"
 import FundingPeriod from "@/models/funding-period"
 import FundingReconciliation from "@/models/funding-reconciliation"
 import FundingReconciliationAdjustment from "@/models/funding-reconciliation-adjustment"
+import FundingRegion from "@/models/funding-region"
 import FundingSubmissionLine from "@/models/funding-submission-line"
 import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
 import Log from "@/models/log"
@@ -17,6 +20,8 @@ import User from "@/models/user"
 import WageEnhancement from "@/models/wage-enhancement"
 
 db.addModels([
+  BuildingExpense,
+  BuildingExpenseCategory,
   Centre,
   EmployeeBenefit,
   EmployeeWageTier,
@@ -24,6 +29,7 @@ db.addModels([
   FundingPeriod,
   FundingReconciliation,
   FundingReconciliationAdjustment,
+  FundingRegion,
   FundingSubmissionLine,
   FundingSubmissionLineJson,
   Log,
@@ -32,6 +38,8 @@ db.addModels([
   WageEnhancement,
 ])
 
+BuildingExpense.establishScopes()
+BuildingExpenseCategory.establishScopes()
 Centre.establishScopes()
 EmployeeBenefit.establishScopes()
 EmployeeWageTier.establishScopes()
@@ -39,6 +47,7 @@ FiscalPeriod.establishScopes()
 FundingPeriod.establishScopes()
 FundingReconciliation.establishScopes()
 FundingReconciliationAdjustment.establishScopes()
+FundingRegion.establishScopes()
 FundingSubmissionLine.establishScopes()
 FundingSubmissionLineJson.establishScopes()
 Log.establishScopes()
@@ -47,6 +56,8 @@ User.establishScopes()
 WageEnhancement.establishScopes()
 
 export {
+  BuildingExpense,
+  BuildingExpenseCategory,
   Centre,
   EmployeeBenefit,
   EmployeeWageTier,
@@ -54,6 +65,7 @@ export {
   FundingPeriod,
   FundingReconciliation,
   FundingReconciliationAdjustment,
+  FundingRegion,
   FundingSubmissionLine,
   FundingSubmissionLineJson,
   Log,

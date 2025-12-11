@@ -1,4 +1,4 @@
-import { Model, ModelStatic, Transaction } from "@sequelize/core"
+import { Model, ModelStatic } from "@sequelize/core"
 
 import { Log, User } from "@/models"
 import { LogOperationTypes } from "@/models/log"
@@ -8,30 +8,20 @@ export class LogServices {
     model,
     currentUser,
     operation,
-    transaction,
   }: {
     model: Model
     currentUser: User
     operation: LogOperationTypes
-    transaction: Transaction
   }): Promise<Log> {
     const ModelClass = model.constructor as ModelStatic<Model>
-    const { tableName, primaryKeyAttribute } = ModelClass
+    const { tableName } = ModelClass.modelDefinition.table
 
-    const modelColumnsAttributes = ModelClass.getAttributes()
-    const firstColumnName = Object.keys(modelColumnsAttributes)[0]
-    const primaryKeyName = primaryKeyAttribute || firstColumnName
-    const primaryKeyValue = model.get(primaryKeyName)
-
-    return Log.create(
-      {
-        userEmail: currentUser.email,
-        operation: `${operation} record with ${primaryKeyName}=${primaryKeyValue}`,
-        tableName,
-        data: JSON.stringify(model),
-      },
-      { transaction }
-    )
+    return Log.create({
+      userEmail: currentUser.email,
+      operation,
+      tableName,
+      data: JSON.stringify(model),
+    })
   }
 }
 

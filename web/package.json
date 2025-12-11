@@ -1,14 +1,14 @@
 {
   "name": "elcc-web",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "start": "vite",
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "check-types": "vue-tsc --noEmit"
+    "check-types": "vue-tsc --noEmit -p tests/tsconfig.json"
   },
   "dependencies": {
     "@auth0/auth0-vue": "^2.3.3",
@@ -26,7 +26,7 @@
     "vue-currency-input": "^3.0.5",
     "vue-router": "^4.2.5",
     "vue3-apexcharts": "^1.4.1",
-    "vuetify": "^3.9.7"
+    "vuetify": "^3.11.2"
   },
   "devDependencies": {
     "@types/big.js": "^6.2.2",
@@ -36,11 +36,14 @@
     "@typescript-eslint/eslint-plugin": "8.47.0",
     "@typescript-eslint/parser": "8.47.0",
     "@vitejs/plugin-vue": "^5.2.4",
+    "@vue/test-utils": "^2.4.6",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-vue": "^9.28.0",
+    "jsdom": "^27.2.0",
     "prettier": "^3.6.2",
+    "resize-observer-polyfill": "^1.5.1",
     "typescript": "^5.6.2",
     "vite": "^5.4.20",
     "vite-plugin-vuetify": "^2.1.2",

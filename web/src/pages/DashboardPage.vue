@@ -5,7 +5,9 @@
         <v-card
           elevation="3"
           color="#DC440566"
-          to="/child-care-centres"
+          :to="{
+            name: 'ChildCareCentresPage',
+          }"
         >
           <v-card-text
             style="text-align: right"

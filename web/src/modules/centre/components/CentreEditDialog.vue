@@ -3,6 +3,8 @@
     v-model="showDialog"
     persistent
     max-width="500"
+    @keydown.esc="close"
+    @input="closeIfFalse"
   >
     <v-form
       ref="form"
@@ -23,7 +25,11 @@
             ><v-icon>mdi-close</v-icon></v-btn
           >
         </v-toolbar>
-        <v-card-text>
+        <v-skeleton-loader
+          v-if="isNil(centre) || isNil(centreId)"
+          type="card@3"
+        />
+        <v-card-text v-else>
           <v-text-field
             v-model="centre.name"
             label="Name *"
@@ -69,15 +75,6 @@
             v-model="centre.community"
             label="Community *"
             maxlength="255"
-            :rules="[required]"
-            variant="outlined"
-            density="comfortable"
-            required
-          />
-          <CentreRegionSelect
-            v-model="centre.region"
-            label="Region *"
-            maxlength="100"
             :rules="[required]"
             variant="outlined"
             density="comfortable"
@@ -175,7 +172,6 @@
             type="submit"
             color="primary"
             variant="flat"
-            :disabled="!isValid"
             >Save</v-btn
           >
         </v-card-actions>
@@ -185,102 +181,98 @@
 </template>
 
 <script setup lang="ts">
-import { cloneDeep } from "lodash"
-import { computed, nextTick, ref, watch } from "vue"
-import { useRoute, useRouter } from "vue-router"
+import { nextTick, ref, useTemplateRef, watch } from "vue"
+import { useRouteQuery } from "@vueuse/router"
+import { isNil } from "lodash"
 
 import { type VForm } from "vuetify/components"
 
+import { integerTransformer } from "@/utils/use-route-query-transformers"
 import { required } from "@/utils/validators"
-import centresApi from "@/api/centres-api"
-import { Centre, useCentreStore } from "@/modules/centre/store"
-import { useNotificationStore } from "@/store/NotificationStore"
 
-import CentreRegionSelect from "@/modules/centre/components/CentreRegionSelect.vue"
+import useCentre from "@/use/use-centre"
+import useSnack from "@/use/use-snack"
 
-const emit = defineEmits(["saved"])
+const emit = defineEmits<{
+  saved: [centreId: number]
+}>()
 
-const centreStore = useCentreStore()
-const notificationStore = useNotificationStore()
-const router = useRouter()
-const route = useRoute()
+const centreId = useRouteQuery<string | null, number | null>("showCentreEdit", null, {
+  transform: integerTransformer,
+})
 
-const centre = ref<Partial<Centre>>({})
-const centreId = computed(() => centre.value.id)
+const { centre, isLoading, save, refresh } = useCentre(centreId)
 
-const showDialog = ref(false)
-const form = ref<InstanceType<typeof VForm> | null>(null)
-const isLoading = ref(false)
+const form = useTemplateRef("form")
 const isValid = ref(false)
-
-watch(
-  () => showDialog.value,
-  (value) => {
-    if (value) {
-      if (route.query.showCentreEdit === "true") {
-        return
-      }
-
-      router.push({ query: { showCentreEdit: "true" } })
-    } else {
-      router.push({ query: { showCentreEdit: undefined } })
-    }
-  }
-)
-
-function show(newCentre: Centre) {
-  centre.value = cloneDeep(newCentre)
-  showDialog.value = true
-}
-
-function close() {
-  showDialog.value = false
-  resetCentre()
-  form.value?.resetValidation()
-}
+const snack = useSnack()
 
 async function updateAndClose() {
-  if (!isValid.value) {
-    notificationStore.notify({
-      text: "Please fill out all required fields",
-      color: "error",
-    })
+  if (isNil(form.value)) return
+
+  const { valid } = await form.value.validate()
+  if (!valid) {
+    snack.error("Please fill out all required fields")
     return
   }
 
   isLoading.value = true
   try {
-    if (centreId.value === undefined) {
+    if (isNil(centreId.value)) {
       throw new Error("Centre id could not be found")
     }
 
-    const { centre: newCentre } = await centresApi.update(centreId.value, centre.value)
-    centreStore.selectCentre(newCentre)
+    await save()
 
     await nextTick()
+    emit("saved", centreId.value)
+    snack.success("Centre saved!")
+
     close()
-
-    await nextTick()
-    emit("saved", newCentre.id)
-    notificationStore.notify({
-      text: "Centre saved",
-      color: "success",
-    })
   } catch (error) {
-    notificationStore.notify({
-      text: `Failed to save centre ${error}`,
-      color: "error",
-    })
+    console.error(`Failed to save centre ${error}`, { error })
+    snack.error(`Failed to save centre ${error}`)
   } finally {
     isLoading.value = false
   }
 }
 
-function resetCentre() {
-  centre.value = {}
+const showDialog = ref(false)
+
+watch(
+  () => centreId.value,
+  (newCentreId) => {
+    if (isNil(newCentreId)) {
+      showDialog.value = false
+      form.value?.resetValidation()
+      centre.value = null
+    } else {
+      showDialog.value = true
+      refresh()
+    }
+  },
+  {
+    immediate: true,
+    deep: true,
+  }
+)
+
+function open(newCentreId: number) {
+  centreId.value = newCentreId
+}
+
+function close() {
+  centreId.value = null
+}
+
+function closeIfFalse(value: boolean | null) {
+  if (value !== false) return
+
+  close()
 }
 
 defineExpose({
-  show,
+  open,
+  close,
 })
 </script>

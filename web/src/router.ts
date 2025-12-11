@@ -28,7 +28,8 @@ const routes: RouteRecordRaw[] = [
 
       {
         path: "child-care-centres",
-        component: () => import("@/modules/centre/views/CentreList.vue"),
+        name: "ChildCareCentresPage",
+        component: () => import("@/pages/ChildCareCentresPage.vue"),
       },
       {
         // TODO: replace centerId with a slug using https://github.com/simov/slugify on center name

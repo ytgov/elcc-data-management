@@ -9,6 +9,7 @@ import {
 import {
   Attribute,
   AutoIncrement,
+  BelongsTo,
   Default,
   HasMany,
   NotNull,
@@ -18,17 +19,13 @@ import {
 } from "@sequelize/core/decorators-legacy"
 
 import BaseModel from "@/models/base-model"
+import BuildingExpense from "@/models/building-expense"
 import EmployeeBenefit from "@/models/employee-benefit"
 import FundingReconciliation from "@/models/funding-reconciliation"
+import FundingRegion from "@/models/funding-region"
 import FundingSubmissionLineJson from "@/models/funding-submission-line-json"
 import Payment from "@/models/payment"
 import WageEnhancement from "@/models/wage-enhancement"
-
-// Keep in sync with web/src/api/centres-api.ts
-export enum CentreRegions {
-  WHITEHORSE = "whitehorse",
-  COMMUNITIES = "communities",
-}
 
 // TODO: normalize status to snake_case
 export enum CentreStatuses {
@@ -37,17 +34,21 @@ export enum CentreStatuses {
   UP_TO_DATE = "Up to date",
 }
 
+// TODO: split this table into buildings, and companies
 @Table({
   paranoid: false,
 })
 export class Centre extends BaseModel<InferAttributes<Centre>, InferCreationAttributes<Centre>> {
-  static readonly Regions = CentreRegions
   static readonly Statuses = CentreStatuses
 
   @Attribute(DataTypes.INTEGER)
   @PrimaryKey
   @AutoIncrement
   declare id: CreationOptional<number>
+
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  declare fundingRegionId: number
 
   @Attribute(DataTypes.STRING(200))
   @NotNull
@@ -56,16 +57,6 @@ export class Centre extends BaseModel<InferAttributes<Centre>, InferCreationAttr
   @Attribute(DataTypes.STRING(255))
   @NotNull
   declare community: string
-
-  @Attribute(DataTypes.STRING(100))
-  @NotNull
-  @ValidateAttribute({
-    isIn: {
-      args: [Object.values(CentreRegions)],
-      msg: `Region must be one of: ${Object.values(CentreRegions).join(", ")}`,
-    },
-  })
-  declare region: string
 
   @Attribute(DataTypes.STRING(255))
   @NotNull
@@ -130,6 +121,10 @@ export class Centre extends BaseModel<InferAttributes<Centre>, InferCreationAttr
   @Attribute(DataTypes.DATEONLY)
   declare lastSubmission: Date | null
 
+  @Attribute(DataTypes.DECIMAL(5, 2))
+  @Default("100.00")
+  declare buildingUsagePercent: CreationOptional<string>
+
   @Attribute(DataTypes.DATE)
   @NotNull
   @Default(sql.fn("getdate"))
@@ -141,6 +136,23 @@ export class Centre extends BaseModel<InferAttributes<Centre>, InferCreationAttr
   declare updatedAt: CreationOptional<Date>
 
   // Associations
+  @BelongsTo(() => FundingRegion, {
+    foreignKey: "fundingRegionId",
+    inverse: {
+      as: "centres",
+      type: "hasMany",
+    },
+  })
+  declare fundingRegion?: NonAttribute<FundingRegion>
+
+  @HasMany(() => BuildingExpense, {
+    foreignKey: "centreId",
+    inverse: {
+      as: "centre",
+    },
+  })
+  declare buildingExpenses?: NonAttribute<BuildingExpense[]>
+
   @HasMany(() => EmployeeBenefit, {
     foreignKey: "centreId",
     inverse: {

@@ -73,5 +73,51 @@ describe("api/src/models/funding-period.ts", () => {
         }
       )
     })
+
+    describe(".forEachMonth", () => {
+      test("when funding period spans multiple months, iterates each month with correct date range and month name", () => {
+        // Arrange
+        const fundingPeriod = FundingPeriod.build({
+          fiscalYear: "2024-2025",
+          fromDate: new Date("2024-04-01T00:00:00Z"),
+          toDate: new Date("2024-06-30T23:59:59Z"),
+          title: "Fiscal Year 2024-2025",
+        })
+
+        const months: Array<{
+          dateStart: Date
+          dateEnd: Date
+          monthName: string
+        }> = []
+
+        // Act
+        fundingPeriod.forEachMonth((dateStart, dateEnd, monthName) => {
+          months.push({
+            dateStart,
+            dateEnd,
+            monthName,
+          })
+        })
+
+        // Assert
+        expect(months).toEqual([
+          {
+            dateStart: new Date("2024-04-01T00:00:00.000Z"),
+            dateEnd: new Date("2024-04-30T23:59:59.000Z"),
+            monthName: "april",
+          },
+          {
+            dateStart: new Date("2024-05-01T00:00:00.000Z"),
+            dateEnd: new Date("2024-05-31T23:59:59.000Z"),
+            monthName: "may",
+          },
+          {
+            dateStart: new Date("2024-06-01T00:00:00.000Z"),
+            dateEnd: new Date("2024-06-30T23:59:59.000Z"),
+            monthName: "june",
+          },
+        ])
+      })
+    })
   })
 })

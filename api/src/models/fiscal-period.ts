@@ -23,6 +23,7 @@ import { FiscalPeriodsFundingPeriodIdFiscalYearMonthUniqueIndex } from "@/models
 import { isValidFiscalYearShort } from "@/models/validators"
 
 import BaseModel from "@/models/base-model"
+import BuildingExpense from "@/models/building-expense"
 import EmployeeBenefit from "@/models/employee-benefit"
 import EmployeeWageTier from "@/models/employee-wage-tier"
 import FundingPeriod from "@/models/funding-period"
@@ -120,11 +121,21 @@ export class FiscalPeriod extends BaseModel<
     })
   }
 
-  static asFiscalPeriodMonth(date: DateTime): FiscalPeriodMonths {
-    const month = date.toFormat("MMMM").toLowerCase()
-    FiscalPeriod.assertIsValidMonth(month)
+  static asFiscalPeriodMonth(date: DateTime | Date | string): FiscalPeriodMonths {
+    let monthAsString: string
 
-    return month
+    if (date instanceof DateTime) {
+      monthAsString = date.toFormat("MMMM").toLowerCase()
+    } else if (date instanceof Date) {
+      const dateAsDateTime = DateTime.fromJSDate(date)
+      monthAsString = dateAsDateTime.toFormat("MMMM").toLowerCase()
+    } else {
+      monthAsString = date.toLowerCase()
+    }
+
+    FiscalPeriod.assertIsValidMonth(monthAsString)
+
+    return monthAsString
   }
 
   static assertIsValidMonth(value: string): asserts value is FiscalPeriodMonths {
@@ -142,6 +153,14 @@ export class FiscalPeriod extends BaseModel<
     },
   })
   declare fundingPeriod?: NonAttribute<FundingPeriod>
+
+  @HasMany(() => BuildingExpense, {
+    foreignKey: "fiscalPeriodId",
+    inverse: {
+      as: "buildingExpenses",
+    },
+  })
+  declare buildingExpenses?: NonAttribute<BuildingExpense[]>
 
   @HasMany(() => EmployeeBenefit, {
     foreignKey: "fiscalPeriodId",

@@ -4,6 +4,7 @@ import { faker } from "@faker-js/faker"
 import { Centre } from "@/models"
 import { CentreStatuses } from "@/models/centre"
 import { nestedSaveAndAssociateIfNew } from "@/factories/helpers"
+import fundingRegionFactory from "@/factories/funding-region-factory"
 
 const yukonCommunities = [
   "Carmacks",
@@ -23,32 +24,43 @@ const yukonCommunities = [
   "Champagne",
 ]
 
-export const centreFactory = Factory.define<Centre>(({ sequence, onCreate }) => {
-  onCreate(async (centre) => {
-    try {
-      await nestedSaveAndAssociateIfNew(centre)
-      return centre
-    } catch (error) {
-      console.error(error)
-      throw new Error(
-        `Could not create Centre with attributes: ${JSON.stringify(centre.dataValues, null, 2)}`
-      )
-    }
-  })
+export const centreFactory = Factory.define<Centre>(
+  ({ sequence, params, associations, onCreate }) => {
+    onCreate(async (centre) => {
+      try {
+        await nestedSaveAndAssociateIfNew(centre)
+        return centre
+      } catch (error) {
+        console.error(error)
+        throw new Error(
+          `Could not create Centre with attributes: ${JSON.stringify(centre.dataValues, null, 2)}`
+        )
+      }
+    })
 
-  const name = `${faker.company.name()} Centre ${sequence}`
-  const community = faker.helpers.arrayElement(yukonCommunities)
-  const region = faker.helpers.enumValue(Centre.Regions)
-  const isFirstNationProgram = faker.datatype.boolean({ probability: 0.3 })
-  const status = faker.helpers.objectValue(CentreStatuses)
+    const fundingRegion =
+      associations.fundingRegion ??
+      fundingRegionFactory.build({
+        id: params.fundingRegionId,
+      })
 
-  return Centre.build({
-    name,
-    community,
-    region,
-    isFirstNationProgram,
-    status,
-  })
-})
+    const name = `${faker.company.name()} Centre ${sequence}`
+    const community = faker.helpers.arrayElement(yukonCommunities)
+    const isFirstNationProgram = faker.datatype.boolean({ probability: 0.3 })
+    const status = faker.helpers.objectValue(CentreStatuses)
+
+    const centre = Centre.build({
+      fundingRegionId: fundingRegion.id,
+      name,
+      community,
+      isFirstNationProgram,
+      status,
+    })
+
+    centre.fundingRegion = fundingRegion
+
+    return centre
+  }
+)
 
 export default centreFactory

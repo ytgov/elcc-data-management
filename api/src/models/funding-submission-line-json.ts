@@ -17,6 +17,8 @@ import {
   Table,
   ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
+import { DateTime } from "luxon"
+import { upperFirst } from "lodash"
 
 import { isValidFiscalYearLegacy } from "@/models/validators"
 
@@ -111,6 +113,31 @@ export class FundingSubmissionLineJson extends BaseModel<
   @NotNull
   @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
+
+  // Helpers
+  static asFundingSubmissionLineJsonMonth(
+    date: DateTime | Date | string
+  ): FundingSubmissionLineJsonMonths {
+    let monthName: string
+    if (date instanceof DateTime) {
+      monthName = date.toFormat("MMMM")
+    } else if (date instanceof Date) {
+      const dateAsDateTime = DateTime.fromJSDate(date)
+      monthName = dateAsDateTime.toFormat("MMMM")
+    } else {
+      monthName = upperFirst(date)
+    }
+
+    FundingSubmissionLineJson.assertIsValidMonth(monthName)
+
+    return monthName
+  }
+
+  static assertIsValidMonth(value: string): asserts value is FundingSubmissionLineJsonMonths {
+    if (!FUNDING_SUBMISSION_LINE_JSON_MONTHS.includes(value as FundingSubmissionLineJsonMonths)) {
+      throw new Error(`Invalid funding submission line json month: ${value}`)
+    }
+  }
 
   // Associations
   @BelongsTo(() => Centre, {

@@ -16,33 +16,34 @@
     >
 
     <h2 class="mb-3">{{ dateName }} {{ calendarYear }}</h2>
-    <v-btn
-      v-if="dateName == FIRST_FISCAL_MONTH_NAME"
-      :loading="isReplicatingEstimates"
-      color="yg-sun"
-      class="float-right mb-3"
-      size="small"
-      @click="replicateEstimatesForward"
-    >
-      <v-icon>mdi-content-copy</v-icon> Replicate Estimates
-    </v-btn>
+    <div class="d-flex justify-end">
+      <v-btn
+        v-if="dateName == FIRST_FISCAL_MONTH_NAME"
+        :loading="isReplicatingEstimates"
+        color="yg-sun"
+        size="small"
+        @click="replicateEstimatesForward"
+      >
+        <v-icon>mdi-content-copy</v-icon> Replicate Estimates
+      </v-btn>
+    </div>
 
-    <div
+    <section
       v-for="({ sectionName, lines }, sectionIndex) in sections"
       :key="`${sectionName}-${sectionIndex}`"
-      style="clear: both"
     >
-      <h4 class="d-flex justify-space-between align-center">
+      <h3
+        class="d-flex justify-space-between align-center mt-4 mb-2 ml-n2 pa-2 rounded bg-primary-lighten-2"
+      >
         {{ sectionName }}
 
         <v-icon
           title="Show keyboard shortcuts"
-          class="included"
           @click="showKeyboardShortcutsModal"
         >
           mdi-keyboard
         </v-icon>
-      </h4>
+      </h3>
 
       <FundingSubmissionLineJsonSectionTable
         ref="fundingSubmissionLineJsonSectionTables"
@@ -51,7 +52,7 @@
         @focus-beyond-first-in-column="goToPreviousSection(sectionIndex, $event)"
         @line-changed="propagateUpdatesAsNeeded(sectionIndex, $event)"
       />
-    </div>
+    </section>
     <KeyboardShortcutsModal ref="keyboardShortcutsModal" />
   </v-sheet>
 </template>
@@ -190,7 +191,7 @@ function goToPreviousSection(sectionIndex: number, columnName: ColumnNames) {
 const keyboardShortcutsModal = ref<InstanceType<typeof KeyboardShortcutsModal> | null>(null)
 
 function activateKeyboardShortcutsModalIfCorrectEvent(event: KeyboardEvent) {
-  if (event.ctrlKey && event.key === "/") {
+  if (event.shiftKey && event.key === "?") {
     showKeyboardShortcutsModal()
   }
 }
@@ -201,15 +202,3 @@ function showKeyboardShortcutsModal() {
   keyboardShortcutsModal.value.open()
 }
 </script>
-
-<style scoped>
-h4 {
-  margin-bottom: 10px;
-  font-weight: 400;
-  background-color: #55b6c2;
-  margin-left: -8px;
-  padding: 8px;
-  border-radius: 4px;
-  margin-top: 13px;
-}
-</style>

@@ -16,11 +16,12 @@ import {
   Table,
   ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
+import { DateTime } from "luxon"
 
 import { isValidFiscalYearLong } from "@/models/validators"
 
 import BaseModel from "@/models/base-model"
-import FiscalPeriod from "@/models/fiscal-period"
+import FiscalPeriod, { FiscalPeriodMonths } from "@/models/fiscal-period"
 import FundingReconciliation from "@/models/funding-reconciliation"
 
 /**
@@ -89,6 +90,26 @@ export class FundingPeriod extends BaseModel<
     },
   })
   declare fiscalPeriods?: NonAttribute<FiscalPeriod[]>
+
+  // Helpers
+  forEachMonth(
+    callbackfn: (dateStart: Date, dateEnd: Date, monthName: FiscalPeriodMonths) => void
+  ): void {
+    let currentDate = DateTime.fromJSDate(this.fromDate)
+    const toDateDateTime = DateTime.fromJSDate(this.toDate)
+
+    while (currentDate <= toDateDateTime) {
+      const dateStart = currentDate.startOf("month")
+      const dateEnd = dateStart.endOf("month").set({
+        millisecond: 0,
+      })
+      const monthName = FiscalPeriod.asFiscalPeriodMonth(dateStart)
+
+      callbackfn(dateStart.toJSDate(), dateEnd.toJSDate(), monthName)
+
+      currentDate = currentDate.plus({ months: 1 })
+    }
+  }
 
   static establishScopes() {
     this.addSearchScope(["fiscalYear", "title", "fromDate", "toDate"])

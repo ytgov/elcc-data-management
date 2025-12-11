@@ -35,8 +35,8 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col>
-        <h3 class="section-header">Employee Benefits</h3>
+      <v-col tag="section">
+        <h3 class="mt-4 mb-2 ml-n2 pa-2 rounded bg-primary-lighten-2">Employee Benefits</h3>
 
         <v-alert
           v-if="employeeBenefitNotFound"
@@ -58,8 +58,8 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col>
-        <h3 class="section-header d-flex justify-space-between">
+      <v-col tag="section">
+        <h3 class="d-flex justify-space-between mt-4 mb-2 ml-n2 pa-2 rounded bg-primary-lighten-2">
           Wage Enhancements
 
           <ReplicateEstimatesButton
@@ -120,26 +120,16 @@ const employeeBenefitsQuery = computed(() => ({
     fiscalPeriodId: fiscalPeriodId.value,
   },
 }))
-const {
-  employeeBenefits,
-  isLoading: isLoadingEmployeeBenefits,
-} = useEmployeeBenefits(employeeBenefitsQuery, {
-  skipWatchIf: () => isNil(fiscalPeriodId.value),
-})
+const { employeeBenefits, isLoading: isLoadingEmployeeBenefits } = useEmployeeBenefits(
+  employeeBenefitsQuery,
+  {
+    skipWatchIf: () => isNil(fiscalPeriodId.value),
+  }
+)
 const employeeBenefitId = computed(() => employeeBenefits.value[0]?.id)
 const employeeBenefitNotFound = computed(
   () => !isLoadingEmployeeBenefits.value && isEmpty(employeeBenefits.value)
 )
 </script>
 
-<style scoped>
-.section-header {
-  margin-bottom: 10px;
-  font-weight: 400;
-  background-color: #55b6c2;
-  margin-left: -8px;
-  padding: 8px;
-  border-radius: 4px;
-  margin-top: 13px;
-}
-</style>
+<style scoped></style>
