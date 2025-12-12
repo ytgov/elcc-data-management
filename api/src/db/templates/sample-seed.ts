@@ -1,15 +1,22 @@
 import { CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
 
-import { Centre } from "@/models"
+import { Centre, FundingRegion } from "@/models"
 
 export async function up() {
+  const fundingRegion = await FundingRegion.findOne({
+    where: {
+      region: "Whitehorse",
+    },
+    rejectOnEmpty: true,
+  })
+
   const centresAttributes: CreationAttributes<Centre>[] = [
     {
       name: "Grow with Joy 2nd",
       license: "123",
       community: "Whitehorse",
-      region: Centre.Regions.WHITEHORSE,
+      fundingRegionId: fundingRegion.id,
       isFirstNationProgram: false,
       status: "Up to date",
       hotMeal: true,
@@ -20,7 +27,7 @@ export async function up() {
       name: "Happy Hearts Preschool",
       license: "456",
       community: "Whitehorse",
-      region: Centre.Regions.WHITEHORSE,
+      fundingRegionId: fundingRegion.id,
       isFirstNationProgram: false,
       status: "Up to date",
       hotMeal: true,

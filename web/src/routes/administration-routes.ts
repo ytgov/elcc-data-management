@@ -1,7 +1,7 @@
 const routes = [
   {
     path: "/",
-    component: () => import("@/layouts/DefaultLayout.vue"),
+    component: () => import("@/layouts/AdministrationLayout.vue"),
     children: [
       {
         path: "administration",
@@ -51,6 +51,65 @@ const routes = [
         name: "administration/funding-periods/FundingPeriodEditPage",
         component: () => import("@/pages/administration/funding-periods/FundingPeriodEditPage.vue"),
         props: true,
+      },
+      {
+        path: "administration/funding-regions",
+        name: "administration/FundingRegionsPage",
+        component: () => import("@/pages/administration/AdministrationFundingRegionsPage.vue"),
+      },
+      {
+        path: "administration/funding-regions/new",
+        name: "administration/funding-regions/FundingRegionNewPage",
+        component: () => import("@/pages/administration/funding-regions/FundingRegionNewPage.vue"),
+      },
+      {
+        path: "administration/funding-regions/:fundingRegionId",
+        name: "administration/funding-regions/FundingRegionPage",
+        component: () => import("@/pages/administration/funding-regions/FundingRegionPage.vue"),
+        props: true,
+      },
+      {
+        path: "administration/funding-regions/:fundingRegionId/edit",
+        name: "administration/funding-regions/FundingRegionEditPage",
+        component: () => import("@/pages/administration/funding-regions/FundingRegionEditPage.vue"),
+        props: true,
+      },
+      {
+        path: "administration/building-expense-categories",
+        name: "administration/BuildingExpenseCategoriesPage",
+        component: () =>
+          import("@/pages/administration/AdministrationBuildingExpenseCategoriesPage.vue"),
+      },
+      {
+        path: "administration/building-expense-categories/new",
+        name: "administration/building-expense-categories/BuildingExpenseCategoryNewPage",
+        component: () =>
+          import(
+            "@/pages/administration/building-expense-categories/BuildingExpenseCategoryNewPage.vue"
+          ),
+      },
+      {
+        path: "administration/building-expense-categories/:buildingExpenseCategoryId",
+        name: "administration/building-expense-categories/BuildingExpenseCategoryPage",
+        component: () =>
+          import(
+            "@/pages/administration/building-expense-categories/BuildingExpenseCategoryPage.vue"
+          ),
+        props: true,
+      },
+      {
+        path: "administration/building-expense-categories/:buildingExpenseCategoryId/edit",
+        name: "administration/building-expense-categories/BuildingExpenseCategoryEditPage",
+        component: () =>
+          import(
+            "@/pages/administration/building-expense-categories/BuildingExpenseCategoryEditPage.vue"
+          ),
+        props: true,
+      },
+      {
+        path: "administration/centres",
+        name: "administration/CentresPage",
+        component: () => import("@/pages/administration/AdministrationCentresPage.vue"),
       },
       {
         path: "administration/submission-lines",

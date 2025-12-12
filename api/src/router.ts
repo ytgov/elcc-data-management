@@ -13,6 +13,9 @@ import { checkJwt, autheticateAndLoadUser } from "@/middleware/authz.middleware"
 import { centreRouter, fundingPeriodRouter, submissionLineRouter } from "@/routes"
 
 import {
+  BuildingExpenseCategoriesController,
+  BuildingExpensesController,
+  Centres,
   CentresController,
   CurrentUserController,
   EmployeeBenefitsController,
@@ -22,6 +25,7 @@ import {
   FundingReconciliationAdjustmentsController,
   FundingReconciliations,
   FundingReconciliationsController,
+  FundingRegionsController,
   FundingSubmissionLineJsons,
   FundingSubmissionLineJsonsController,
   FundingSubmissionLines,
@@ -51,8 +55,16 @@ router.use("/api", checkJwt, autheticateAndLoadUser)
 
 router.route("/api/current-user").get(CurrentUserController.show)
 
-router.route("/api/centres").post(CentresController.create)
-router.route("/api/centres/:centreId").patch(CentresController.update)
+router.route("/api/centres").get(CentresController.index).post(CentresController.create)
+router
+  .route("/api/centres/:centreId")
+  .get(CentresController.show)
+  .patch(CentresController.update)
+  .delete(CentresController.destroy)
+
+router
+  .route("/api/centres/:centreId/funding-periods/:fundingPeriodId/ensure-dependencies")
+  .post(Centres.FundingPeriods.EnsureDependenciesController.create)
 
 router
   .route("/api/employee-benefits")
@@ -79,6 +91,26 @@ router
   .delete(FundingPeriodsController.destroy)
 
 router
+  .route("/api/building-expense-categories")
+  .get(BuildingExpenseCategoriesController.index)
+  .post(BuildingExpenseCategoriesController.create)
+router
+  .route("/api/building-expense-categories/:buildingExpenseCategoryId")
+  .get(BuildingExpenseCategoriesController.show)
+  .patch(BuildingExpenseCategoriesController.update)
+  .delete(BuildingExpenseCategoriesController.destroy)
+
+router
+  .route("/api/building-expenses")
+  .get(BuildingExpensesController.index)
+  .post(BuildingExpensesController.create)
+router
+  .route("/api/building-expenses/:buildingExpenseId")
+  .get(BuildingExpensesController.show)
+  .patch(BuildingExpensesController.update)
+  .delete(BuildingExpensesController.destroy)
+
+router
   .route("/api/funding-reconciliations")
   .get(FundingReconciliationsController.index)
   .post(FundingReconciliationsController.create)
@@ -100,6 +132,16 @@ router
   .get(FundingReconciliationAdjustmentsController.show)
   .patch(FundingReconciliationAdjustmentsController.update)
   .delete(FundingReconciliationAdjustmentsController.destroy)
+
+router
+  .route("/api/funding-regions")
+  .get(FundingRegionsController.index)
+  .post(FundingRegionsController.create)
+router
+  .route("/api/funding-regions/:fundingRegionId")
+  .get(FundingRegionsController.show)
+  .patch(FundingRegionsController.update)
+  .delete(FundingRegionsController.destroy)
 
 router
   .route("/api/funding-submission-line-jsons")

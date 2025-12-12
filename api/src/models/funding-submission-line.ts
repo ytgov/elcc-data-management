@@ -67,6 +67,24 @@ export class FundingSubmissionLine extends BaseModel<
   @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
 
+  // Helpers
+
+  /**
+   * Converts fiscal year from FundingPeriod format (YYYY-YYYY) to FundingSubmissionLine format (YYYY/YY)
+   *
+   * @param fiscalYearLong - Fiscal year in long format (e.g., "2023-2024")
+   * @returns Fiscal year in legacy format (e.g., "2023/24")
+   *
+   * @example
+   * FundingSubmissionLine.toLegacyFiscalYearFormat("2023-2024") // returns "2023/24"
+   */
+  static toLegacyFiscalYearFormat(fiscalYearLong: string): string {
+    const shortFormat = fiscalYearLong.replace(/^(\d{4})-(\d{4})$/, (_, startYear, endYear) => {
+      return `${startYear}-${endYear.slice(-2)}`
+    })
+    return shortFormat.replace("-", "/")
+  }
+
   static establishScopes() {
     this.addSearchScope(["fiscalYear", "sectionName", "lineName"])
   }

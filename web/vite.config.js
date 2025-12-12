@@ -1,4 +1,4 @@
-/// <reference types="vitest" />
+/// <reference types="vitest/config" />
 import { fileURLToPath, URL } from "node:url"
 
 // Plugins
@@ -34,6 +34,25 @@ export default defineConfig({
     port: 8080,
   },
   test: {
+    environment: "jsdom",
     globals: true, // https://vitest.dev/config/#globals
+    server: {
+      deps: {
+        inline: ["vuetify"],
+      },
+    },
+    setupFiles: ["./tests/setup.ts"],
+    // Mocking
+    clearMocks: true,
+    mockReset: true,
+    restoreMocks: true,
+    unstubEnvs: true,
+    unstubGlobals: true,
+    // Mock CSS imports
+    css: {
+      modules: {
+        classNameStrategy: "non-scoped",
+      },
+    },
   },
 })

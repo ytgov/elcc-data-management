@@ -1,6 +1,6 @@
 <template>
   <v-skeleton-loader
-    v-if="isEmpty(selectedCentre)"
+    v-if="isEmpty(centre)"
     type="card"
   />
   <v-card
@@ -41,35 +41,33 @@
       </v-list>
     </v-card-text>
 
-    <CentreEditDialog ref="centerEditDialog" />
+    <CentreEditDialog
+      ref="centerEditDialog"
+      @saved="refreshAndEmit"
+    />
   </v-card>
 </template>
 
 <script setup lang="ts">
 import { isEmpty, isNil } from "lodash"
-import { storeToRefs } from "pinia"
-import { computed, ref, watch } from "vue"
+import { computed, toRefs, useTemplateRef } from "vue"
 
 import { FormatDate as formatDate, FormatYesNo as formatYesNo } from "@/utils"
-import { Centre, useCentreStore } from "@/modules/centre/store"
+import useCentre from "@/use/use-centre"
 
 import CentreEditDialog from "@/modules/centre/components/CentreEditDialog.vue"
-import { useRoute } from "vue-router"
 
-type CentreEditDialogInstance = InstanceType<typeof CentreEditDialog> | null
+const props = defineProps<{
+  centreId: number
+}>()
 
-const store = useCentreStore()
+const emit = defineEmits<{
+  saved: [centreId: number]
+}>()
 
-const { selectedCentre } = storeToRefs(store)
-const centerEditDialog = ref<CentreEditDialogInstance>(null)
+const { centreId } = toRefs(props)
+const { centre, refresh } = useCentre(centreId)
 
-const lastSubmission = computed(() => {
-  if (isNil(selectedCentre.value) || isNil(selectedCentre.value?.lastSubmission)) {
-    return "No submision"
-  }
-
-  return formatDate(selectedCentre.value.lastSubmission)
-})
 const centreDetails = computed<
   {
     title: string
@@ -79,22 +77,22 @@ const centreDetails = computed<
 >(() => [
   {
     title: "Licence",
-    value: selectedCentre.value?.license || "",
+    value: centre.value?.license || "",
     icon: "mdi-file-certificate",
   },
   {
     title: "Hot Meal",
-    value: formatYesNo(selectedCentre.value?.hotMeal || false),
+    value: formatYesNo(centre.value?.hotMeal || false),
     icon: "mdi-silverware",
   },
   {
     title: "Licensed For",
-    value: selectedCentre.value?.licensedFor || "",
+    value: centre.value?.licensedFor || "",
     icon: "mdi-account-group",
   },
   {
     title: "Community",
-    value: selectedCentre.value?.community || "",
+    value: centre.value?.community || "",
     icon: "mdi-map",
   },
   {
@@ -103,34 +101,26 @@ const centreDetails = computed<
     icon: "mdi-calendar",
   },
 ])
-
-const route = useRoute()
-
-watch<[Centre | undefined, CentreEditDialogInstance], true>(
-  () => [selectedCentre.value, centerEditDialog.value],
-  ([newSelectedCentre, newCenterEditDialog]) => {
-    if (
-      !isNil(newSelectedCentre) &&
-      !isNil(newCenterEditDialog) &&
-      route.query.showCentreEdit === "true"
-    ) {
-      centerEditDialog.value?.show(newSelectedCentre)
-    }
-  },
-  {
-    immediate: true,
+const lastSubmission = computed(() => {
+  if (isNil(centre.value) || isNil(centre.value?.lastSubmission)) {
+    return "No submision"
   }
-)
+
+  return formatDate(centre.value.lastSubmission)
+})
 
 function isLastRow(index: number) {
   return index === centreDetails.value.length - 1
 }
 
-function showCentreEditDialog() {
-  if (isNil(selectedCentre.value)) {
-    throw new Error("Selected centre is missing")
-  }
+const centerEditDialog = useTemplateRef("centerEditDialog")
 
-  centerEditDialog.value?.show(selectedCentre.value)
+function showCentreEditDialog() {
+  centerEditDialog.value?.open(props.centreId)
+}
+
+function refreshAndEmit() {
+  refresh()
+  emit("saved", props.centreId)
 }
 </script>

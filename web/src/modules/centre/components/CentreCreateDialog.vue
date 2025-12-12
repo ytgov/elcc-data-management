@@ -6,8 +6,7 @@
   >
     <v-form
       ref="form"
-      v-model="isValid"
-      @submit.prevent="createAndClose"
+      @submit.prevent="validateSaveAndClose"
     >
       <v-card :loading="isLoading">
         <v-toolbar
@@ -25,7 +24,7 @@
         </v-toolbar>
         <v-card-text>
           <v-text-field
-            v-model="centre.name"
+            v-model="centreAttributes.name"
             label="Name *"
             maxlength="200"
             :rules="[required]"
@@ -34,39 +33,39 @@
             required
           />
           <v-text-field
-            v-model="centre.license"
+            v-model="centreAttributes.license"
             label="License"
             maxlength="255"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
-            v-model="centre.vendorIdentifier"
+            v-model="centreAttributes.vendorIdentifier"
             label="Vendor ID"
             maxlength="20"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
-            v-model="centre.licensedFor"
+            v-model="centreAttributes.licensedFor"
             label="Licensed for"
             variant="outlined"
             density="comfortable"
           />
           <v-checkbox
-            v-model="centre.isFirstNationProgram"
+            v-model="centreAttributes.isFirstNationProgram"
             label="Program Type (FN/non-FN)"
             variant="outlined"
             density="comfortable"
           />
           <v-checkbox
-            v-model="centre.hotMeal"
+            v-model="centreAttributes.hotMeal"
             label="Hot meal?"
             variant="outlined"
             density="comfortable"
           />
           <v-text-field
-            v-model="centre.community"
+            v-model="centreAttributes.community"
             label="Community *"
             maxlength="255"
             :rules="[required]"
@@ -74,8 +73,8 @@
             density="comfortable"
             required
           />
-          <CentreRegionSelect
-            v-model="centre.region"
+          <FundingRegionAutocomplete
+            v-model="centreAttributes.fundingRegionId"
             label="Region *"
             maxlength="100"
             :rules="[required]"
@@ -98,7 +97,6 @@
             type="submit"
             color="primary"
             variant="flat"
-            :disabled="!isValid"
             >Save</v-btn
           >
         </v-card-actions>
@@ -108,99 +106,107 @@
 </template>
 
 <script setup lang="ts">
-import { cloneDeep, isEmpty } from "lodash"
-import { nextTick, ref, watch } from "vue"
-import { useRoute, useRouter } from "vue-router"
+import { isNil } from "lodash"
+import { computed, nextTick, ref, useTemplateRef, watchEffect } from "vue"
+import { useRouteQuery } from "@vueuse/router"
 
 import { type VForm } from "vuetify/components"
 
+import { booleanTransformer } from "@/utils/use-route-query-transformers"
 import { required } from "@/utils/validators"
-import centresApi from "@/api/centres-api"
-import { Centre, useCentreStore } from "@/modules/centre/store"
-import { useNotificationStore } from "@/store/NotificationStore"
 
-import CentreRegionSelect from "@/modules/centre/components/CentreRegionSelect.vue"
+import centresApi, { CentreStatuses, type Centre } from "@/api/centres-api"
 
-const emit = defineEmits(["saved"])
+import FundingRegionAutocomplete from "@/components/funding-regions/FundingRegionAutocomplete.vue"
+import useSnack from "@/use/use-snack"
+import useFundingRegions from "@/use/use-funding-regions"
 
-const centreStore = useCentreStore()
-const notificationStore = useNotificationStore()
-const router = useRouter()
-const route = useRoute()
+const emit = defineEmits<{
+  created: [centreId: number]
+}>()
 
-const centre = ref<Partial<Centre>>({})
+const showDialog = useRouteQuery<string, boolean>("showCentreCreate", "false", {
+  transform: booleanTransformer,
+})
 
-const showDialog = ref(false)
-const form = ref<InstanceType<typeof VForm> | null>(null)
+const centreAttributes = ref<Partial<Centre>>({
+  fundingRegionId: undefined,
+  community: "Whitehorse",
+  hotMeal: true,
+  isFirstNationProgram: false,
+  license: "",
+  licensedFor: 10,
+  name: "",
+  status: CentreStatuses.ACTIVE,
+})
+
+const fundingRegionsQuery = computed(() => ({
+  where: {
+    region: "Whitehorse",
+  },
+  perPage: 1,
+}))
+const { fundingRegions } = useFundingRegions(fundingRegionsQuery)
+const whitehorseFundingRegion = computed(() => fundingRegions.value[0])
+
+watchEffect(() => {
+  centreAttributes.value.fundingRegionId = whitehorseFundingRegion.value?.id
+})
+
+const form = useTemplateRef("form")
 const isLoading = ref(false)
-const isValid = ref(false)
+const snack = useSnack()
 
-watch(
-  () => showDialog.value,
-  (value) => {
-    if (value) {
-      if (route.query.showCentreCreate === "true") {
-        return
-      }
+async function validateSaveAndClose() {
+  if (isNil(form.value)) return
 
-      router.push({ query: { showCentreCreate: "true" } })
-    } else {
-      router.push({ query: { showCentreCreate: undefined } })
-    }
-  }
-)
-
-function show(newCentre: Centre) {
-  centre.value = cloneDeep(newCentre)
-  showDialog.value = true
-}
-
-function close() {
-  showDialog.value = false
-  resetCentre()
-  form.value?.resetValidation()
-}
-
-async function createAndClose() {
-  if (!isValid.value) {
-    notificationStore.notify({
-      text: "Please fill out all required fields",
-      color: "error",
-    })
+  const { valid } = await form.value.validate()
+  if (!valid) {
+    snack.error("Please fill out all required fields")
     return
   }
 
   isLoading.value = true
   try {
-    if (isEmpty(centre.value)) {
-      throw new Error("Centre needs some data to save!")
-    }
-
-    const { centre: newCentre } = await centresApi.create(centre.value)
-    centreStore.selectCentre(newCentre)
+    const { centre } = await centresApi.create(centreAttributes.value)
     close()
 
     await nextTick()
-    emit("saved", newCentre.id)
-    notificationStore.notify({
-      text: "Centre saved",
-      color: "success",
-    })
+    emit("created", centre.id)
+    snack.success("Centre created!")
   } catch (error) {
-    notificationStore.notify({
-      text: `Failed to save centre ${error}`,
-      color: "error",
-    })
+    console.error(`Failed to create centre ${error}`, { error })
+    snack.error(`Failed to create centre ${error}`)
   } finally {
     isLoading.value = false
   }
 }
 
-function resetCentre() {
-  centre.value = {}
+function reset() {
+  centreAttributes.value = {
+    fundingRegionId: whitehorseFundingRegion.value?.id,
+    community: "Whitehorse",
+    hotMeal: true,
+    isFirstNationProgram: false,
+    license: "",
+    licensedFor: 10,
+    name: "",
+    status: CentreStatuses.ACTIVE,
+  }
+}
+
+function open() {
+  showDialog.value = true
+}
+
+function close() {
+  showDialog.value = false
+  reset()
+  form.value?.resetValidation()
 }
 
 defineExpose({
-  show,
+  open,
+  close,
 })
 </script>
