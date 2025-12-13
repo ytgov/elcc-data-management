@@ -15,12 +15,20 @@ export async function up({ context: queryInterface }: Migration) {
   await queryInterface.sequelize.query(/* sql */ `
     UPDATE payments
     SET
-      fiscal_period_id = fiscal_periods.id
+      fiscal_period_id = matched_fiscal_periods.id
     FROM
-      fiscal_periods
-    WHERE
-      payments.paid_on >= fiscal_periods.date_start
-      AND payments.paid_on < fiscal_periods.date_end
+      payments
+      CROSS APPLY (
+        SELECT
+          TOP 1 fiscal_periods.id
+        FROM
+          fiscal_periods
+        WHERE
+          CAST(payments.paid_on AS date) >= CAST(fiscal_periods.date_start AS date)
+          AND CAST(payments.paid_on AS date) <= CAST(fiscal_periods.date_end AS date)
+        ORDER BY
+          fiscal_periods.date_start ASC
+      ) AS matched_fiscal_periods
   `)
 
   await queryInterface.changeColumn("payments", "fiscal_period_id", {
