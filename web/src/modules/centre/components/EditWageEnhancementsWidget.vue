@@ -1,9 +1,5 @@
 <template>
-  <v-skeleton-loader
-    v-if="isEmpty(employeeWageTiers) || isLoading"
-    type="table"
-  />
-  <v-table v-else>
+  <v-table>
     <thead>
       <tr>
         <th></th>
@@ -243,9 +239,9 @@
   </v-container>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { computed, ref, watch, reactive } from "vue"
-import { groupBy, keyBy, mapValues, isEmpty } from "lodash"
+import { groupBy, keyBy, mapValues } from "lodash"
 import Big from "big.js"
 
 import { formatMoney } from "@/utils/formatters"
@@ -254,9 +250,7 @@ import wageEnhancementsApi, {
   EI_CPP_WCB_RATE,
   type WageEnhancement,
 } from "@/api/wage-enhancements-api"
-import { useNotificationStore } from "@/store/NotificationStore"
-
-const notificationStore = useNotificationStore()
+import useSnack from "@/use/use-snack"
 
 const props = defineProps<{
   centreId: number
@@ -341,6 +335,8 @@ watch(
   { immediate: true }
 )
 
+const snack = useSnack()
+
 async function fetchEmployeeWageTiers() {
   isLoading.value = true
   try {
@@ -352,11 +348,8 @@ async function fetchEmployeeWageTiers() {
     employeeWageTiers.value = newEmployeeWageTiers
     return newEmployeeWageTiers
   } catch (error) {
-    console.error(error)
-    notificationStore.notify({
-      text: `Failed to fetch employee wage tiers: ${error}`,
-      variant: "error",
-    })
+    console.error(`Failed to fetch employee wage tiers: ${error}`, { error })
+    snack.error(`Failed to fetch employee wage tiers: ${error}`)
   } finally {
     isLoading.value = false
   }
@@ -373,11 +366,8 @@ async function fetchWageEnhancements() {
     })
     wageEnhancements.value = newWageEnhancements
   } catch (error) {
-    console.error(error)
-    notificationStore.notify({
-      text: `Failed to fetch wage enhancements: ${error}`,
-      variant: "error",
-    })
+    console.error(`Failed to fetch wage enhancements: ${error}`, { error })
+    snack.error(`Failed to fetch wage enhancements: ${error}`)
   } finally {
     isLoading.value = false
   }
@@ -394,16 +384,10 @@ async function createWageEnhancement(employeeWageTierId: number) {
       hoursActual: "0",
     })
     wageEnhancements.value.push(newWageEnhancement)
-    notificationStore.notify({
-      text: "Wage enhancement created",
-      variant: "success",
-    })
+    snack.success("Wage enhancement created")
   } catch (error) {
-    console.error(error)
-    notificationStore.notify({
-      text: `Failed to create wage enhancement: ${error}`,
-      variant: "error",
-    })
+    console.error(`Failed to create wage enhancement: ${error}`, { error })
+    snack.error(`Failed to create wage enhancement: ${error}`)
   } finally {
     isLoadingByEmployeeWageTierId.set(employeeWageTierId, false)
   }
@@ -426,16 +410,10 @@ async function updateWageEnhancement(
     } else {
       wageEnhancements.value[index] = newWageEnhancement
     }
-    notificationStore.notify({
-      text: "Wage enhancement saved",
-      variant: "success",
-    })
+    snack.success("Wage enhancement saved")
   } catch (error) {
-    console.error(error)
-    notificationStore.notify({
-      text: `Failed to update wage enhancement: ${error}`,
-      variant: "error",
-    })
+    console.error(`Failed to update wage enhancement: ${error}`, { error })
+    snack.error(`Failed to update wage enhancement: ${error}`)
   } finally {
     isLoadingByWageEnhancementId.set(wageEnhancementId, false)
   }
@@ -450,16 +428,10 @@ async function deleteWageEnhancement(wageEnhancementId: number) {
     if (index !== -1) {
       wageEnhancements.value.splice(index, 1)
     }
-    notificationStore.notify({
-      text: "Wage enhancement deleted",
-      variant: "success",
-    })
+    snack.success("Wage enhancement deleted")
   } catch (error) {
-    console.error(error)
-    notificationStore.notify({
-      text: `Failed to delete wage enhancement: ${error}`,
-      variant: "error",
-    })
+    console.error(`Failed to delete wage enhancement: ${error}`, { error })
+    snack.error(`Failed to delete wage enhancement: ${error}`)
   } finally {
     isLoadingByWageEnhancementId.delete(wageEnhancementId)
   }
@@ -472,16 +444,10 @@ async function updateAllWageEnhancements() {
       wageEnhancementsApi.update(id, attributes)
     )
     await Promise.all(updateWageEnhancementPromises)
-    notificationStore.notify({
-      text: "All wage enhancements saved",
-      variant: "success",
-    })
+    snack.success("All wage enhancements saved")
   } catch (error) {
-    console.error(error)
-    notificationStore.notify({
-      text: `Failed to update all wage enhancements: ${error}`,
-      variant: "error",
-    })
+    console.error(`Failed to update all wage enhancements: ${error}`, { error })
+    snack.error(`Failed to update all wage enhancements: ${error}`)
   } finally {
     isLoading.value = false
   }
