@@ -65,7 +65,7 @@ export {
 } from "@/use/use-funding-regions"
 </script>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { computed, ref, watch } from "vue"
 import { debounce, isEmpty, isNil, isNumber, omit, startCase, uniqBy } from "lodash"
 

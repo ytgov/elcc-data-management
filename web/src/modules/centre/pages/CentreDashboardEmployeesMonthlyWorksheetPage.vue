@@ -77,7 +77,7 @@
   </v-container>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { computed } from "vue"
 import { isEmpty, isNil } from "lodash"
 

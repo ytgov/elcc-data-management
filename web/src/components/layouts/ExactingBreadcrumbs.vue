@@ -37,7 +37,7 @@
 export { type Breadcrumb } from "@/use/use-breadcrumbs"
 </script>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { computed } from "vue"
 import { isEmpty } from "lodash"
 

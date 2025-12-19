@@ -172,7 +172,7 @@
   </v-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { useRouteQuery } from "@vueuse/router"
 
 import { booleanTransformer } from "@/utils/use-route-query-transformers"

@@ -40,7 +40,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { isEmpty } from "lodash"
 import { watchEffect, computed } from "vue"
 import { useRoute, useRouter } from "vue-router"
