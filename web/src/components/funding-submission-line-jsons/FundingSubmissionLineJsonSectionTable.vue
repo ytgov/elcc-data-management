@@ -104,7 +104,7 @@
   </table>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { computed, reactive, Ref, ref } from "vue"
 import { isNil } from "lodash"
 import Big from "big.js"

@@ -22,7 +22,7 @@
   </v-snackbar>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { computed, ref, watch } from "vue"
 
 import { useSnack } from "@/use/use-snack"

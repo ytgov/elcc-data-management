@@ -54,7 +54,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { computed, ref, useTemplateRef } from "vue"
 import { isEmpty, isNil, upperFirst } from "lodash"
 import { useHotkey } from "vuetify"
