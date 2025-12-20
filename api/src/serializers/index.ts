@@ -2,7 +2,6 @@ export { EmployeeBenefitSerializer } from "@/serializers/employee-benefit-serial
 export { FundingSubmissionLineJsonSerializer } from "@/serializers/funding-submission-line-json-serializer"
 export { FundingSubmissionLineSerializer } from "@/serializers/funding-submission-line-serializer"
 export { UserSerializer } from "@/serializers/user-serializer"
-export { WageEnhancementSerializer } from "@/serializers/wage-enhancement-serializer"
 
 // Bundled exports
 export * as BuildingExpenseCategories from "./building-expense-categories"
@@ -18,3 +17,4 @@ export * as FundingRegions from "./funding-regions"
 export * as FundingSubmissionLines from "./funding-submission-lines"
 export * as Payments from "./payments"
 export * as Users from "./users"
+export * as WageEnhancements from "./wage-enhancements"

@@ -1,92 +1,163 @@
 import { isNil } from "lodash"
-import { WhereOptions } from "@sequelize/core"
 
-import BaseController from "./base-controller"
-
+import logger from "@/utils/logger"
 import { WageEnhancement } from "@/models"
-import { WageEnhancementSerializer } from "@/serializers"
+import { WageEnhancementPolicy } from "@/policies"
+import { CreateService, UpdateService } from "@/services/wage-enhancements"
+import { IndexSerializer, ShowSerializer } from "@/serializers/wage-enhancements"
+import BaseController from "@/controllers/base-controller"
 
-export class WageEnhancementsController extends BaseController {
+export class WageEnhancementsController extends BaseController<WageEnhancement> {
   async index() {
-    const where = this.query.where as WhereOptions<WageEnhancement>
-    return WageEnhancement.findAll({
-      where,
-    })
-      .then((wageEnhancements) => {
-        const serializedWageEnhancements = WageEnhancementSerializer.asTable(wageEnhancements)
-        return this.response.json({
-          wageEnhancements: serializedWageEnhancements,
-        })
+    try {
+      const where = this.buildWhere()
+      const scopes = this.buildFilterScopes()
+      const order = this.buildOrder()
+      const scopedWageEnhancements = WageEnhancementPolicy.applyScope(scopes, this.currentUser)
+
+      const totalCount = await scopedWageEnhancements.count({ where })
+      const wageEnhancements = await scopedWageEnhancements.findAll({
+        include: ["employeeWageTier"],
+        where,
+        order,
+        limit: this.pagination.limit,
+        offset: this.pagination.offset,
       })
-      .catch((error) => {
-        return this.response
-          .status(400)
-          .json({ message: `Invalid query for wage enhancments: ${error}` })
+      const serializedWageEnhancements = IndexSerializer.perform(wageEnhancements)
+      return this.response.json({
+        wageEnhancements: serializedWageEnhancements,
+        totalCount,
       })
+    } catch (error) {
+      logger.error(`Error fetching wage enhancements: ${error}`, { error })
+      return this.response.status(400).json({
+        message: `Error fetching wage enhancements: ${error}`,
+      })
+    }
   }
 
   async show() {
-    const wageEnhancement = await this.loadWageEnhancement()
-    if (isNil(wageEnhancement))
-      return this.response.status(404).json({ message: "wage enhancment not found." })
+    try {
+      const wageEnhancement = await this.loadWageEnhancement()
+      if (isNil(wageEnhancement)) {
+        return this.response.status(404).json({
+          message: "Wage enhancement not found",
+        })
+      }
 
-    const serializedwageEnhancement = WageEnhancementSerializer.asDetailed(wageEnhancement)
-    return this.response.json({
-      wageEnhancement: serializedwageEnhancement,
-    })
+      const policy = this.buildPolicy(wageEnhancement)
+      if (!policy.show()) {
+        return this.response.status(403).json({
+          message: "You are not authorized to view this wage enhancement",
+        })
+      }
+
+      const serializedWageEnhancement = ShowSerializer.perform(wageEnhancement)
+      return this.response.json({
+        wageEnhancement: serializedWageEnhancement,
+        policy,
+      })
+    } catch (error) {
+      logger.error(`Error fetching wage enhancement: ${error}`, { error })
+      return this.response.status(400).json({
+        message: `Error fetching wage enhancement: ${error}`,
+      })
+    }
   }
 
   async create() {
-    return WageEnhancement.create(this.request.body)
-      .then((wageEnhancement) => {
-        return this.response.status(201).json({ wageEnhancement })
+    try {
+      const policy = this.buildPolicy()
+      if (!policy.create()) {
+        return this.response.status(403).json({
+          message: "You are not authorized to create wage enhancements",
+        })
+      }
+
+      const permittedAttributes = policy.permitAttributesForCreate(this.request.body)
+      const wageEnhancement = await CreateService.perform(permittedAttributes, this.currentUser)
+      const serializedWageEnhancement = ShowSerializer.perform(wageEnhancement)
+      return this.response.status(201).json({
+        wageEnhancement: serializedWageEnhancement,
+        policy,
       })
-      .catch((error) => {
-        return this.response
-          .status(422)
-          .json({ message: `wage enhancment creation failed: ${error}` })
+    } catch (error) {
+      logger.error(`Error creating wage enhancement: ${error}`, { error })
+      return this.response.status(422).json({
+        message: `Error creating wage enhancement: ${error}`,
       })
+    }
   }
 
   async update() {
-    const wageEnhancement = await this.loadWageEnhancement()
-    if (isNil(wageEnhancement))
-      return this.response.status(404).json({ message: "wage enhancment not found." })
-
-    return wageEnhancement
-      .update(this.request.body)
-      .then((wageEnhancement) => {
-        const serializedwageEnhancement = WageEnhancementSerializer.asDetailed(wageEnhancement)
-        return this.response.json({
-          wageEnhancement: serializedwageEnhancement,
+    try {
+      const wageEnhancement = await this.loadWageEnhancement()
+      if (isNil(wageEnhancement)) {
+        return this.response.status(404).json({
+          message: "Wage enhancement not found",
         })
+      }
+
+      const policy = this.buildPolicy(wageEnhancement)
+      if (!policy.update()) {
+        return this.response.status(403).json({
+          message: "You are not authorized to update this wage enhancement",
+        })
+      }
+
+      const permittedAttributes = policy.permitAttributes(this.request.body)
+      const updatedWageEnhancement = await UpdateService.perform(
+        wageEnhancement,
+        permittedAttributes,
+        this.currentUser
+      )
+      const serializedWageEnhancement = ShowSerializer.perform(updatedWageEnhancement)
+      return this.response.json({
+        wageEnhancement: serializedWageEnhancement,
+        policy,
       })
-      .catch((error) => {
-        return this.response
-          .status(422)
-          .json({ message: `wage enhancment update failed: ${error}` })
+    } catch (error) {
+      logger.error(`Error updating wage enhancement: ${error}`, { error })
+      return this.response.status(422).json({
+        message: `Error updating wage enhancement: ${error}`,
       })
+    }
   }
 
   async destroy() {
-    const wageEnhancement = await this.loadWageEnhancement()
-    if (isNil(wageEnhancement))
-      return this.response.status(404).json({ message: "wage enhancment not found." })
+    try {
+      const wageEnhancement = await this.loadWageEnhancement()
+      if (isNil(wageEnhancement)) {
+        return this.response.status(404).json({
+          message: "Wage enhancement not found",
+        })
+      }
 
-    return wageEnhancement
-      .destroy()
-      .then(() => {
-        return this.response.status(204).end()
+      const policy = this.buildPolicy(wageEnhancement)
+      if (!policy.destroy()) {
+        return this.response.status(403).json({
+          message: "You are not authorized to delete this wage enhancement",
+        })
+      }
+
+      await wageEnhancement.destroy()
+      return this.response.status(204).send()
+    } catch (error) {
+      logger.error(`Error deleting wage enhancement: ${error}`, { error })
+      return this.response.status(422).json({
+        message: `Error deleting wage enhancement: ${error}`,
       })
-      .catch((error) => {
-        return this.response
-          .status(422)
-          .json({ message: `wage enhancment deletion failed: ${error}` })
-      })
+    }
   }
 
   private loadWageEnhancement(): Promise<WageEnhancement | null> {
-    return WageEnhancement.findByPk(this.params.wageEnhancementId)
+    return WageEnhancement.findByPk(this.params.wageEnhancementId, {
+      include: ["employeeWageTier"],
+    })
+  }
+
+  private buildPolicy(wageEnhancement: WageEnhancement = WageEnhancement.build()) {
+    return new WageEnhancementPolicy(this.currentUser, wageEnhancement)
   }
 }
 

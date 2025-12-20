@@ -21,12 +21,14 @@ export type EmployeeWageTierAsIndex = EmployeeWageTier
 
 export type EmployeeWageTierAsShow = EmployeeWageTier
 
+export type EmployeeWageTierAsReference = Pick<
+  EmployeeWageTier,
+  "id" | "fiscalPeriodId" | "tierLevel" | "tierLabel" | "wageRatePerHour"
+>
+
 export type EmployeeWageTierPolicy = Policy
 
-export type EmployeeWageTierWhereOptions = WhereOptions<
-  EmployeeWageTier,
-  "fiscalPeriodId"
->
+export type EmployeeWageTierWhereOptions = WhereOptions<EmployeeWageTier, "fiscalPeriodId">
 
 export type EmployeeWageTierFiltersOptions = FiltersOptions
 
