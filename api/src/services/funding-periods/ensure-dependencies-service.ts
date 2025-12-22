@@ -10,8 +10,8 @@ import {
   FundingSubmissionLine,
   FundingSubmissionLineJson,
 } from "@/models"
-
 import BaseService from "@/services/base-service"
+import { FundingSubmissionLines } from "@/services"
 
 // NOTE: this is a shim service until all dependencies are being created by funding-period creation.
 export class EnsureDependenciesService extends BaseService {
@@ -104,16 +104,8 @@ export class EnsureDependenciesService extends BaseService {
     })
     if (fundingSubmissionLineJsonCount > 0) return
 
-    const fundingSubmissionLines = await FundingSubmissionLine.findAll({
-      where: {
-        fiscalYear: fiscalYearLegacy,
-      },
-    })
-    if (fundingSubmissionLines.length === 0) {
-      throw new Error(
-        `No funding submission lines to template from found for the given fiscal year: ${fiscalYearLegacy}`
-      )
-    }
+    const fundingSubmissionLines =
+      await FundingSubmissionLines.BulkEnsureForFundingPeriodService.perform(this.fundingPeriod)
 
     const defaultLineValues = fundingSubmissionLines.map((fundingSubmissionLine) => ({
       submissionLineId: fundingSubmissionLine.id,
