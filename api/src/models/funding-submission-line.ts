@@ -11,7 +11,6 @@ import {
   Default,
   NotNull,
   PrimaryKey,
-  Table,
   ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
 
@@ -19,9 +18,6 @@ import { isValidFiscalYearLegacy } from "@/models/validators"
 
 import BaseModel from "@/models/base-model"
 
-@Table({
-  paranoid: false,
-})
 export class FundingSubmissionLine extends BaseModel<
   InferAttributes<FundingSubmissionLine>,
   InferCreationAttributes<FundingSubmissionLine>
@@ -66,6 +62,9 @@ export class FundingSubmissionLine extends BaseModel<
   @NotNull
   @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  declare deletedAt: Date | null
 
   // Helpers
 

@@ -13,7 +13,6 @@ import {
   HasMany,
   NotNull,
   PrimaryKey,
-  Table,
   ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
 import { DateTime } from "luxon"
@@ -34,9 +33,6 @@ import FundingReconciliation from "@/models/funding-reconciliation"
  *
  * @see FiscalPeriod - The monthly periods that break down this fiscal year
  */
-@Table({
-  paranoid: false,
-})
 export class FundingPeriod extends BaseModel<
   InferAttributes<FundingPeriod>,
   InferCreationAttributes<FundingPeriod>
@@ -74,6 +70,9 @@ export class FundingPeriod extends BaseModel<
   @NotNull
   @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  declare deletedAt: Date | null
 
   @HasMany(() => FundingReconciliation, {
     foreignKey: "fundingPeriodId",

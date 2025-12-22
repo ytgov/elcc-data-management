@@ -1,6 +1,5 @@
 import {
   DataTypes,
-  Model,
   sql,
   type CreationOptional,
   type InferAttributes,
@@ -12,9 +11,10 @@ import {
   Default,
   NotNull,
   PrimaryKey,
-  Table,
   ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
+
+import BaseModel from "@/models/base-model"
 
 export enum LogOperationTypes {
   CREATE = "create",
@@ -22,10 +22,7 @@ export enum LogOperationTypes {
   DELETE = "delete",
 }
 
-@Table({
-  paranoid: false,
-})
-export class Log extends Model<InferAttributes<Log>, InferCreationAttributes<Log>> {
+export class Log extends BaseModel<InferAttributes<Log>, InferCreationAttributes<Log>> {
   static readonly OperationTypes = LogOperationTypes
 
   @Attribute(DataTypes.INTEGER)
@@ -64,6 +61,9 @@ export class Log extends Model<InferAttributes<Log>, InferCreationAttributes<Log
   @NotNull
   @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  declare deletedAt: Date | null
 
   static establishScopes() {
     // add as needed

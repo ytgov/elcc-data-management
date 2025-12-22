@@ -14,7 +14,6 @@ import {
   HasMany,
   NotNull,
   PrimaryKey,
-  Table,
 } from "@sequelize/core/decorators-legacy"
 
 import { EmployeeWageTiersFiscalPeriodIdTierLevelUniqueIndex } from "@/models/indexes"
@@ -39,9 +38,6 @@ export const EMPLOYEE_WAGE_TIER_DEFAULTS: ReadonlyArray<EmployeeWageTierDefault>
   { tierLevel: 6, tierLabel: "ECE Level 3", wageRatePerHour: "15.31" },
 ])
 
-@Table({
-  paranoid: false,
-})
 export class EmployeeWageTier extends BaseModel<
   InferAttributes<EmployeeWageTier>,
   InferCreationAttributes<EmployeeWageTier>
@@ -78,6 +74,9 @@ export class EmployeeWageTier extends BaseModel<
   @NotNull
   @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  declare deletedAt: Date | null
 
   // Associations
   @BelongsTo(() => FiscalPeriod, {

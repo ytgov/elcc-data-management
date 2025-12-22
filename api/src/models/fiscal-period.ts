@@ -14,7 +14,6 @@ import {
   HasMany,
   NotNull,
   PrimaryKey,
-  Table,
   ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
 import { DateTime } from "luxon"
@@ -58,9 +57,6 @@ export const FISCAL_PERIOD_MONTHS = Object.values<string>(FiscalPeriodMonths)
  *
  * @see FundingPeriod - The parent fiscal year that contains these monthly periods
  */
-@Table({
-  paranoid: false,
-})
 export class FiscalPeriod extends BaseModel<
   InferAttributes<FiscalPeriod>,
   InferCreationAttributes<FiscalPeriod>
@@ -113,6 +109,9 @@ export class FiscalPeriod extends BaseModel<
   @NotNull
   @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  declare deletedAt: Date | null
 
   // Helper functions
   static toShortFiscalYearFormat(fiscalYear: string): string {

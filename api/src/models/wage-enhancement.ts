@@ -1,6 +1,5 @@
 import {
   DataTypes,
-  Model,
   sql,
   type CreationOptional,
   type InferAttributes,
@@ -14,9 +13,9 @@ import {
   Default,
   NotNull,
   PrimaryKey,
-  Table,
 } from "@sequelize/core/decorators-legacy"
 
+import BaseModel from "@/models/base-model"
 import Centre from "@/models/centre"
 import EmployeeWageTier from "@/models/employee-wage-tier"
 
@@ -24,10 +23,7 @@ import EmployeeWageTier from "@/models/employee-wage-tier"
 // I think having it changeable on a monthly basis would be sufficient?
 export const EI_CPP_WCB_RATE = 0.14
 
-@Table({
-  paranoid: false,
-})
-export class WageEnhancement extends Model<
+export class WageEnhancement extends BaseModel<
   InferAttributes<WageEnhancement>,
   InferCreationAttributes<WageEnhancement>
 > {
@@ -70,6 +66,9 @@ export class WageEnhancement extends Model<
   @NotNull
   @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  declare deletedAt: Date | null
 
   // Associations
   @BelongsTo(() => Centre, {

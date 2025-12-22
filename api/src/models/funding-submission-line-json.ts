@@ -14,7 +14,6 @@ import {
   Default,
   NotNull,
   PrimaryKey,
-  Table,
   ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
 import { DateTime } from "luxon"
@@ -45,9 +44,6 @@ const FUNDING_SUBMISSION_LINE_JSON_MONTHS = Object.values(FundingSubmissionLineJ
 
 // TODO: consider renaming this to MonthlyWorksheet?
 // TODO: link this model to a fiscal period, and remove fiscalYear, dateName, dateStart, and dateEnd
-@Table({
-  paranoid: false,
-})
 export class FundingSubmissionLineJson extends BaseModel<
   InferAttributes<FundingSubmissionLineJson>,
   InferCreationAttributes<FundingSubmissionLineJson>
@@ -113,6 +109,9 @@ export class FundingSubmissionLineJson extends BaseModel<
   @NotNull
   @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  declare deletedAt: Date | null
 
   // Helpers
   static asFundingSubmissionLineJsonMonth(

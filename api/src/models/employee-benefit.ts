@@ -13,7 +13,6 @@ import {
   Default,
   NotNull,
   PrimaryKey,
-  Table,
 } from "@sequelize/core/decorators-legacy"
 
 import { EmployeeBenefitsCenterIdFiscalPeriodIdUniqueIndex } from "@/models/indexes"
@@ -24,9 +23,6 @@ import FiscalPeriod from "@/models/fiscal-period"
 
 export const EMPLOYEE_BENEFIT_DEFAULT_COST_CAP_PERCENTAGE = "0.09"
 
-@Table({
-  paranoid: false,
-})
 export class EmployeeBenefit extends BaseModel<
   InferAttributes<EmployeeBenefit>,
   InferCreationAttributes<EmployeeBenefit>
@@ -85,6 +81,9 @@ export class EmployeeBenefit extends BaseModel<
   @NotNull
   @Default(sql.fn("getdate"))
   declare updatedAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  declare deletedAt: Date | null
 
   // Associations
   @BelongsTo(() => Centre, {
