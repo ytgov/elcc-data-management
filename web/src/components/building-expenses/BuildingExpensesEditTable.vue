@@ -3,7 +3,7 @@
     :headers="headers"
     :items="buildingExpenses"
     :loading="isLoading || isSaving"
-    :editable-columns="['estimatedCost', 'actualCost']"
+    :editable-columns="['estimatedCost', 'actualCost', 'notes']"
     height="630"
     fixed-footer
     disable-sort
@@ -39,6 +39,14 @@
       />
     </template>
 
+    <template #item.notes.edit="{ item }">
+      <v-textarea
+        v-model="item.notes"
+        hide-details
+        rows="3"
+      />
+    </template>
+
     <template #tfoot>
       <tfoot>
         <tr class="bg-grey-lighten-3 font-weight-medium">
@@ -47,6 +55,7 @@
           <td>{{ formatMoney(totalEstimatedCost) }}</td>
           <td>{{ formatMoney(totalActualCost) }}</td>
           <td>{{ formatMoney(totalCost) }}</td>
+          <td></td>
         </tr>
       </tfoot>
     </template>
@@ -115,6 +124,11 @@ const headers = [
     title: "Total Cost",
     key: "totalCost",
   },
+  {
+    title: "Notes",
+    key: "notes",
+    width: "16rem",
+  },
 ]
 
 const totalEstimatedCost = computed(() => {
@@ -148,7 +162,11 @@ async function saveBuildingExpenseIfDirty(buildingExpense: BuildingExpense) {
 
   isSaving.value = true
   try {
-    const buildingExpenseAttributes = pick(buildingExpense, ["estimatedCost", "actualCost"])
+    const buildingExpenseAttributes = pick(buildingExpense, [
+      "estimatedCost",
+      "actualCost",
+      "notes",
+    ])
     const { buildingExpense: updatedBuildingExpense } = await buildingExpensesApi.update(
       buildingExpense.id,
       buildingExpenseAttributes
