@@ -1,5 +1,5 @@
+import { CreationAttributes, Op } from "@sequelize/core"
 import { isEmpty, isNil } from "lodash"
-import { CreationAttributes } from "@sequelize/core"
 
 import { FundingPeriod, FundingSubmissionLine } from "@/models"
 import FUNDING_SUBMISSION_LINE_DEFAULTS, {
@@ -13,45 +13,46 @@ export class BulkCreateForFundingPeriodService extends BaseService {
     super()
   }
 
-  async perform(): Promise<void> {
+  async perform(): Promise<FundingSubmissionLine[]> {
     const { fiscalYear: fundingPeriodFiscalYear } = this.fundingPeriod
 
     const currentFiscalYearLegacy =
       FundingSubmissionLine.toLegacyFiscalYearFormat(fundingPeriodFiscalYear)
-    const previousFiscalYearLegacy = this.determinePreviousFiscalYearLegacy(currentFiscalYearLegacy)
 
-    const previousFundingSubmissionLines = await FundingSubmissionLine.findAll({
-      where: {
-        fiscalYear: previousFiscalYearLegacy,
-      },
-    })
+    const previousFundingSubmissionLines =
+      await this.findNewestFundingSubmissionLines(currentFiscalYearLegacy)
 
     if (!isEmpty(previousFundingSubmissionLines)) {
-      await this.createFundingSubmissionLinesFromTemplateData(
+      return this.createFundingSubmissionLinesFromTemplateData(
         currentFiscalYearLegacy,
         previousFundingSubmissionLines
       )
-
-      return
     }
 
-    await this.createFundingSubmissionLinesFromTemplateData(
+    return this.createFundingSubmissionLinesFromTemplateData(
       currentFiscalYearLegacy,
       FUNDING_SUBMISSION_LINE_DEFAULTS
     )
   }
 
-  private determinePreviousFiscalYearLegacy(currentFiscalYearLegacy: string): string {
-    const fiscalYearMatch = currentFiscalYearLegacy.match(/^(\d{4})\/\d{2}$/)
-    if (isNil(fiscalYearMatch)) {
-      throw new Error(`Invalid legacy fiscal year format: ${currentFiscalYearLegacy}`)
-    }
+  private async findNewestFundingSubmissionLines(
+    excludeFiscalYearLegacy: string
+  ): Promise<FundingSubmissionLine[]> {
+    const newestFundingSubmissionLine = await FundingSubmissionLine.findOne({
+      where: {
+        fiscalYear: {
+          [Op.ne]: excludeFiscalYearLegacy,
+        },
+      },
+      order: [["fiscalYear", "DESC"]],
+    })
+    if (isNil(newestFundingSubmissionLine)) return []
 
-    const startYear = Number(fiscalYearMatch[1])
-    const previousStartYear = startYear - 1
-    const previousEndYear = startYear
-    const previousEndYearShort = previousEndYear.toString().slice(-2)
-    return [previousStartYear, previousEndYearShort].join("/")
+    return FundingSubmissionLine.findAll({
+      where: {
+        fiscalYear: newestFundingSubmissionLine.fiscalYear,
+      },
+    })
   }
 
   private async createFundingSubmissionLinesFromTemplateData(
@@ -62,7 +63,9 @@ export class BulkCreateForFundingPeriodService extends BaseService {
           "sectionName" | "lineName" | "fromAge" | "toAge" | "monthlyAmount"
         >[]
       | ReadonlyArray<FundingSubmissionLineDefault>
-  ): Promise<void> {
+  ): Promise<FundingSubmissionLine[]> {
+    const fundingSubmissionLines = []
+
     const fundingSubmissionLinesAttributes: CreationAttributes<FundingSubmissionLine>[] =
       templateRows.map((templateRow) => ({
         fiscalYear: currentFiscalYearLegacy,
@@ -74,18 +77,21 @@ export class BulkCreateForFundingPeriodService extends BaseService {
       }))
 
     for (const fundingSubmissionLineAttributes of fundingSubmissionLinesAttributes) {
-      const fundingSubmissionLine = await FundingSubmissionLine.findOne({
+      let fundingSubmissionLine = await FundingSubmissionLine.findOne({
         where: {
           fiscalYear: fundingSubmissionLineAttributes.fiscalYear,
           sectionName: fundingSubmissionLineAttributes.sectionName,
           lineName: fundingSubmissionLineAttributes.lineName,
         },
       })
-
       if (isNil(fundingSubmissionLine)) {
-        await FundingSubmissionLine.create(fundingSubmissionLineAttributes)
+        fundingSubmissionLine = await FundingSubmissionLine.create(fundingSubmissionLineAttributes)
       }
+
+      fundingSubmissionLines.push(fundingSubmissionLine)
     }
+
+    return fundingSubmissionLines
   }
 }
 

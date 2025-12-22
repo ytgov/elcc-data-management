@@ -1,3 +1,5 @@
+import { isEmpty } from "lodash"
+
 import { FundingPeriod, FundingSubmissionLine } from "@/models"
 
 import BaseService from "@/services/base-service"
@@ -8,18 +10,19 @@ export class BulkEnsureForFundingPeriodService extends BaseService {
     super()
   }
 
-  async perform(): Promise<void> {
+  async perform(): Promise<FundingSubmissionLine[]> {
     const { fiscalYear: fundingPeriodFiscalYear } = this.fundingPeriod
     const currentFiscalYearLegacy =
       FundingSubmissionLine.toLegacyFiscalYearFormat(fundingPeriodFiscalYear)
-    const fundingSubmissionLineCount = await FundingSubmissionLine.count({
+
+    const fundingSubmissionLineCount = await FundingSubmissionLine.findAll({
       where: {
         fiscalYear: currentFiscalYearLegacy,
       },
     })
-    if (fundingSubmissionLineCount > 0) return
+    if (!isEmpty(fundingSubmissionLineCount)) return fundingSubmissionLineCount
 
-    await BulkCreateForFundingPeriodService.perform(this.fundingPeriod)
+    return BulkCreateForFundingPeriodService.perform(this.fundingPeriod)
   }
 }
 
