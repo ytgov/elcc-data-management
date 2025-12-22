@@ -10,12 +10,12 @@ export class BulkCreateForCentreService extends BaseService {
   }
 
   async perform(): Promise<void> {
-    await this.ensureFiscalPeriodsForCurrentFundingPeriod()
+    const fiscalPeriods = await this.ensureFiscalPeriodsForCurrentFundingPeriod()
 
     let employeeBenefitsAttributes: CreationAttributes<EmployeeBenefit>[] = []
     const BATCH_SIZE = 1000
 
-    await FiscalPeriod.findEach(async (fiscalPeriod) => {
+    for (const fiscalPeriod of fiscalPeriods) {
       employeeBenefitsAttributes.push({
         centreId: this.centre.id,
         fiscalPeriodId: fiscalPeriod.id,
@@ -32,16 +32,16 @@ export class BulkCreateForCentreService extends BaseService {
         await EmployeeBenefit.bulkCreate(employeeBenefitsAttributes)
         employeeBenefitsAttributes = []
       }
-    })
+    }
 
     if (employeeBenefitsAttributes.length > 0) {
       await EmployeeBenefit.bulkCreate(employeeBenefitsAttributes)
     }
   }
 
-  private async ensureFiscalPeriodsForCurrentFundingPeriod() {
+  private async ensureFiscalPeriodsForCurrentFundingPeriod(): Promise<FiscalPeriod[]> {
     const fundingPeriod = await FundingPeriods.EnsureCurrentService.perform()
-    await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+    return FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
   }
 }
 
