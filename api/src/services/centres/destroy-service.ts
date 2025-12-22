@@ -44,8 +44,6 @@ export class DestroyService extends BaseService {
       where: {
         centreId: this.centre.id,
       },
-      // TODO: remove this once all dependent models support soft deletion.
-      force: true,
     })
   }
 
@@ -86,8 +84,6 @@ export class DestroyService extends BaseService {
       where: {
         centreId: this.centre.id,
       },
-      // TODO: remove this once all dependent models support soft deletion.
-      force: true,
     })
   }
 
