@@ -7,58 +7,40 @@ import {
   FundingReconciliationAdjustment,
 } from "@/models"
 import BaseService from "@/services/base-service"
-import { isUndefined } from "lodash"
+import { FiscalPeriods, FundingPeriods, FundingReconciliations } from "@/services"
 
 export class BulkCreateForCentreService extends BaseService {
   constructor(private centre: Centre) {
     super()
   }
 
-  async perform(): Promise<void> {
-    let adjustmentsAttributes: CreationAttributes<FundingReconciliationAdjustment>[] = []
-    const BATCH_SIZE = 1000
+  async perform(): Promise<FundingReconciliationAdjustment[]> {
+    const fundingReconciliation = await this.ensureFundingReconciliation()
+    const fiscalPeriods = await this.ensureFiscalPeriodsForCurrentFundingPeriod()
 
-    await FundingReconciliation.findEach(
-      {
-        where: {
-          centreId: this.centre.id,
-        },
-        include: ["fundingPeriod"],
-      },
-      async (fundingReconciliation) => {
-        const { fundingPeriod } = fundingReconciliation
-        if (isUndefined(fundingPeriod)) {
-          throw new Error("Expected funding period association to be preloaded")
-        }
+    const fundingReconciliationAdjustmentsAttributes: CreationAttributes<FundingReconciliationAdjustment>[] =
+      fiscalPeriods.map((fiscalPeriod) => ({
+        fundingReconciliationId: fundingReconciliation.id,
+        fiscalPeriodId: fiscalPeriod.id,
+        fundingReceivedPeriodAmount: "0",
+        eligibleExpensesPeriodAmount: "0",
+        payrollAdjustmentsPeriodAmount: "0",
+        cumulativeBalanceAmount: "0",
+      }))
 
-        await FiscalPeriod.findEach(
-          {
-            where: {
-              fundingPeriodId: fundingPeriod.id,
-            },
-          },
-          async (fiscalPeriod) => {
-            adjustmentsAttributes.push({
-              fundingReconciliationId: fundingReconciliation.id,
-              fiscalPeriodId: fiscalPeriod.id,
-              fundingReceivedPeriodAmount: "0",
-              eligibleExpensesPeriodAmount: "0",
-              payrollAdjustmentsPeriodAmount: "0",
-              cumulativeBalanceAmount: "0",
-            })
-
-            if (adjustmentsAttributes.length >= BATCH_SIZE) {
-              await FundingReconciliationAdjustment.bulkCreate(adjustmentsAttributes)
-              adjustmentsAttributes = []
-            }
-          }
-        )
-      }
+    const fundingReconciliationAdjustments = await FundingReconciliationAdjustment.bulkCreate(
+      fundingReconciliationAdjustmentsAttributes
     )
+    return fundingReconciliationAdjustments
+  }
 
-    if (adjustmentsAttributes.length > 0) {
-      await FundingReconciliationAdjustment.bulkCreate(adjustmentsAttributes)
-    }
+  private async ensureFundingReconciliation(): Promise<FundingReconciliation> {
+    return FundingReconciliations.BulkEnsureForCentreService.perform(this.centre)
+  }
+
+  private async ensureFiscalPeriodsForCurrentFundingPeriod(): Promise<FiscalPeriod[]> {
+    const fundingPeriod = await FundingPeriods.EnsureCurrentService.perform()
+    return FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
   }
 }
 

@@ -1,8 +1,7 @@
 import { type CreationAttributes } from "@sequelize/core"
 import { DateTime } from "luxon"
 
-import { Centre, FundingSubmissionLine, FundingSubmissionLineJson } from "@/models"
-import FundingPeriod from "@/models/funding-period"
+import { Centre, FundingPeriod, FundingSubmissionLine, FundingSubmissionLineJson } from "@/models"
 import BaseService from "@/services/base-service"
 
 export class BulkCreateForFundingPeriodService extends BaseService {

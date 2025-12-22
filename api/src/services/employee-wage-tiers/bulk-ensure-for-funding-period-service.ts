@@ -1,3 +1,5 @@
+import { isEmpty } from "lodash"
+
 import { EmployeeWageTier, FundingPeriod } from "@/models"
 import BaseService from "@/services/base-service"
 import BulkCreateForFundingPeriodService from "@/services/employee-wage-tiers/bulk-create-for-funding-period-service"
@@ -7,8 +9,8 @@ export class BulkEnsureForFundingPeriodService extends BaseService {
     super()
   }
 
-  async perform(): Promise<void> {
-    const employeeWageTierCount = await EmployeeWageTier.count({
+  async perform(): Promise<EmployeeWageTier[]> {
+    const employeeWageTiers = await EmployeeWageTier.findAll({
       include: [
         {
           association: "fiscalPeriod",
@@ -18,9 +20,9 @@ export class BulkEnsureForFundingPeriodService extends BaseService {
         },
       ],
     })
-    if (employeeWageTierCount > 0) return
+    if (!isEmpty(employeeWageTiers)) return employeeWageTiers
 
-    await BulkCreateForFundingPeriodService.perform(this.fundingPeriod)
+    return BulkCreateForFundingPeriodService.perform(this.fundingPeriod)
   }
 }
 
