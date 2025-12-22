@@ -63,6 +63,7 @@ services:
       <<: *default-environment
       NODE_ENV: test
       DB_NAME: elcc_test
+      DEFAULT_LOG_LEVEL: "info"
       DB_HEALTH_CHECK_START_PERIOD_SECONDS: 0
     tty: true
     volumes:

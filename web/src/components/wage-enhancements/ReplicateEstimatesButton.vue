@@ -1,6 +1,6 @@
 <template>
   <v-btn
-    :loading="loading || isReplicatingEstimates"
+    :loading="isReplicatingEstimates"
     color="yg-sun"
     size="small"
     @click="replicateEstimatesForward"
@@ -13,25 +13,15 @@
 import { ref } from "vue"
 
 import wageEnhancementsApi from "@/api/wage-enhancements-api"
-import { useNotificationStore } from "@/store/NotificationStore"
+import useSnack from "@/use/use-snack"
 
-const props = defineProps({
-  centreId: {
-    type: Number,
-    required: true,
-  },
-  fiscalPeriodId: {
-    type: Number,
-    required: true,
-  },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-})
+const props = defineProps<{
+  centreId: number
+  fiscalPeriodId: number
+}>()
 
-const notificationStore = useNotificationStore()
 const isReplicatingEstimates = ref(false)
+const snack = useSnack()
 
 async function replicateEstimatesForward() {
   isReplicatingEstimates.value = true
@@ -40,15 +30,10 @@ async function replicateEstimatesForward() {
       centreId: props.centreId,
       fiscalPeriodId: props.fiscalPeriodId,
     })
-    notificationStore.notify({
-      text: "Wage enhancement estimates replicated forward",
-      variant: "success",
-    })
+    snack.success("Wage enhancement estimates replicated forward.")
   } catch (error) {
-    notificationStore.notify({
-      text: `Failed to replicate wage enhancement estimates: ${error}`,
-      variant: "error",
-    })
+    console.error(`Failed to replicate wage enhancement estimates: ${error}`, { error })
+    snack.error(`Failed to replicate wage enhancement estimates: ${error}`)
   } finally {
     isReplicatingEstimates.value = false
   }

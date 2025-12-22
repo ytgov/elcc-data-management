@@ -1,9 +1,5 @@
 <template>
-  <v-skeleton-loader
-    v-if="isEmpty(employeeWageTiers) || isLoading"
-    type="table"
-  />
-  <v-table v-else>
+  <v-table>
     <thead>
       <tr>
         <th></th>
@@ -15,116 +11,15 @@
         <th></th>
       </tr>
     </thead>
+    <WageEnhancementTierTableBody
+      v-for="employeeWageTier in employeeWageTiers"
+      :key="employeeWageTier.id"
+      ref="wageEnhancementTierTableBodies"
+      :centre-id="props.centreId"
+      :employee-wage-tier-id="employeeWageTier.id"
+      @updated="refresh"
+    />
     <tbody>
-      <template
-        v-for="employeeWageTier in employeeWageTiers"
-        :key="`employee-wage-tier-${employeeWageTier.id}`"
-      >
-        <tr class="bg-grey-lighten-2">
-          <td>{{ employeeWageTier.tierLabel }}</td>
-          <td colspan="5"></td>
-          <td class="d-flex justify-end align-center">
-            <v-btn
-              title="Add employee"
-              icon="$plus"
-              density="comfortable"
-              color="yg-blue"
-              :loading="isLoadingByEmployeeWageTierId.get(employeeWageTier.id)"
-              @click="createWageEnhancement(employeeWageTier.id)"
-            ></v-btn>
-          </td>
-        </tr>
-        <tr
-          v-for="wageEnhancement in wageEnhancementsByEmployeeWageTierId[employeeWageTier.id]"
-          :key="`wage-enhancement-${wageEnhancement.id}`"
-        >
-          <td>
-            <v-text-field
-              v-model="wageEnhancement.employeeName"
-              aria-label="Employee Name"
-              density="compact"
-              variant="underlined"
-              hide-details
-            />
-          </td>
-          <td>
-            <v-text-field
-              :model-value="formatMoney(employeeWageTier.wageRatePerHour)"
-              aria-label="Wage Rate Per Hour"
-              color="primary"
-              density="compact"
-              tabindex="-1"
-              variant="plain"
-              hide-details
-              readonly
-            />
-          </td>
-          <td>
-            <v-text-field
-              v-model="wageEnhancement.hoursEstimated"
-              aria-label="Hours Estimated"
-              density="compact"
-              variant="underlined"
-              hide-details
-            />
-          </td>
-          <td>
-            <v-text-field
-              :model-value="formatMoney(wageEnhancementEstimatedTotalById[wageEnhancement.id])"
-              aria-label="Wage Enhancement Total Estimated"
-              color="primary"
-              density="compact"
-              tabindex="-1"
-              variant="plain"
-              hide-details
-              readonly
-            />
-          </td>
-          <td>
-            <v-text-field
-              v-model="wageEnhancement.hoursActual"
-              aria-label="Hours Actual"
-              density="compact"
-              variant="underlined"
-              hide-details
-            />
-          </td>
-          <td>
-            <v-text-field
-              :model-value="formatMoney(wageEnhancementActualTotalById[wageEnhancement.id])"
-              aria-label="Wage Enhancement Total Actual"
-              color="primary"
-              density="compact"
-              tabindex="-1"
-              variant="plain"
-              hide-details
-              readonly
-            />
-          </td>
-          <td class="d-flex justify-end align-center">
-            <v-btn
-              icon="mdi-content-save"
-              title="Save"
-              density="comfortable"
-              variant="text"
-              :loading="isLoadingByWageEnhancementId.get(wageEnhancement.id)"
-              @click="updateWageEnhancement(wageEnhancement.id, wageEnhancement)"
-            >
-            </v-btn>
-            <v-btn
-              icon="mdi-close"
-              title="Delete"
-              class="ml-2"
-              color="error"
-              density="comfortable"
-              variant="text"
-              :loading="isLoadingByWageEnhancementId.get(wageEnhancement.id)"
-              @click="deleteWageEnhancement(wageEnhancement.id)"
-            >
-            </v-btn>
-          </td>
-        </tr>
-      </template>
       <tr class="thin-solid-black-top-border">
         <td colspan="3"></td>
         <td>
@@ -243,245 +138,102 @@
   </v-container>
 </template>
 
-<script lang="ts" setup>
-import { computed, ref, watch, reactive } from "vue"
-import { groupBy, keyBy, mapValues, isEmpty } from "lodash"
+<script setup lang="ts">
+import { computed, ref } from "vue"
+import { isNil, keyBy, mapValues } from "lodash"
 import Big from "big.js"
 
 import { formatMoney } from "@/utils/formatters"
-import employeeWageTiersApi, { type EmployeeWageTier } from "@/api/employee-wage-tiers-api"
-import wageEnhancementsApi, {
-  EI_CPP_WCB_RATE,
-  type WageEnhancement,
-} from "@/api/wage-enhancements-api"
-import { useNotificationStore } from "@/store/NotificationStore"
 
-const notificationStore = useNotificationStore()
+import { MAX_PER_PAGE } from "@/api/base-api"
+import useEmployeeWageTiers from "@/use/use-employee-wage-tiers"
+import useWageEnhancements, { EI_CPP_WCB_RATE } from "@/use/use-wage-enhancements"
+import useSnack from "@/use/use-snack"
+
+import WageEnhancementTierTableBody from "@/components/wage-enhancements/WageEnhancementTierTableBody.vue"
 
 const props = defineProps<{
   centreId: number
   fiscalPeriodId: number
 }>()
 
-const isLoading = ref(true)
-const isLoadingByEmployeeWageTierId = reactive(new Map<number, boolean>())
-const isLoadingByWageEnhancementId = reactive(new Map<number, boolean>())
+const employeeWageTiersQuery = computed(() => ({
+  where: {
+    fiscalPeriodId: props.fiscalPeriodId,
+  },
+}))
 
-const employeeWageTiers = ref<EmployeeWageTier[]>([])
+const { employeeWageTiers, isLoading: isLoadingEmployeeWageTiers } =
+  useEmployeeWageTiers(employeeWageTiersQuery)
 const employeeWageTierIds = computed(() => employeeWageTiers.value.map(({ id }) => id))
 
-const wageEnhancements = ref<WageEnhancement[]>([])
-const wageEnhancementsByEmployeeWageTierId = computed(() =>
-  groupBy(wageEnhancements.value, "employeeWageTierId")
-)
+const wageEnhancementsQuery = computed(() => ({
+  where: {
+    centreId: props.centreId,
+    employeeWageTierId: employeeWageTierIds.value,
+  },
+  perPage: MAX_PER_PAGE, // TODO: push this calculation to the back-end
+}))
+
+const { wageEnhancements, refresh } = useWageEnhancements(wageEnhancementsQuery, {
+  skipWatchIf: () => isLoadingEmployeeWageTiers.value,
+})
+
 const wageRatePerHoursByEmployeeWageTierId = computed(() =>
   mapValues(keyBy(employeeWageTiers.value, "id"), "wageRatePerHour")
 )
-const wageEnhancementEstimatedTotalById = computed(() => {
-  const estimatedTotalById: Record<number, string> = {}
 
-  for (const wageEnhancement of wageEnhancements.value) {
-    const wageRatePerHour =
-      wageRatePerHoursByEmployeeWageTierId.value[wageEnhancement.employeeWageTierId]
-    const total = Big(wageEnhancement.hoursEstimated).mul(wageRatePerHour).toFixed(4)
-    estimatedTotalById[wageEnhancement.id] = total
-  }
-
-  return estimatedTotalById
-})
-const wageEnhancementActualTotalById = computed(() => {
-  const actualTotalById: Record<number, string> = {}
-
-  for (const wageEnhancement of wageEnhancements.value) {
-    const wageRatePerHour =
-      wageRatePerHoursByEmployeeWageTierId.value[wageEnhancement.employeeWageTierId]
-    const total = Big(wageEnhancement.hoursActual).mul(wageRatePerHour).toFixed(4)
-    actualTotalById[wageEnhancement.id] = total
-  }
-
-  return actualTotalById
-})
 const wageEnhancementsEstimatedSubtotal = computed(() =>
   wageEnhancements.value.reduce((total, { hoursEstimated, employeeWageTierId }) => {
     const wageRatePerHour = wageRatePerHoursByEmployeeWageTierId.value[employeeWageTierId]
+    if (isNil(wageRatePerHour)) return total
 
     return Big(total).add(Big(hoursEstimated).mul(Big(wageRatePerHour)))
   }, Big(0))
 )
+
 const wageEnhancementsActualSubtotal = computed(() =>
   wageEnhancements.value.reduce((total, { hoursActual, employeeWageTierId }) => {
     const wageRatePerHour = wageRatePerHoursByEmployeeWageTierId.value[employeeWageTierId]
+    if (isNil(wageRatePerHour)) return total
 
     return Big(total).add(Big(hoursActual).mul(Big(wageRatePerHour)))
   }, Big(0))
 )
+
 const wageEnhancementsEstimatedEiCppWcbTotal = computed(() =>
   wageEnhancementsEstimatedSubtotal.value.mul(Big(EI_CPP_WCB_RATE))
 )
+
 const wageEnhancementsActualEiCppWcbTotal = computed(() =>
   wageEnhancementsActualSubtotal.value.mul(Big(EI_CPP_WCB_RATE))
 )
+
 const wageEnhancementsEstimatedTotal = computed(() =>
   wageEnhancementsEstimatedSubtotal.value.mul(Big(1).plus(Big(EI_CPP_WCB_RATE)))
 )
+
 const wageEnhancementsActualTotal = computed(() =>
   wageEnhancementsActualSubtotal.value.mul(Big(1).plus(Big(EI_CPP_WCB_RATE)))
 )
 
-const eiCppWcbRatePercentage = computed(() => {
-  return Big(EI_CPP_WCB_RATE).mul(Big(100)).toFixed(2)
-})
+const eiCppWcbRatePercentage = computed(() => Big(EI_CPP_WCB_RATE).mul(Big(100)).toFixed(2))
 
-watch(
-  () => props.fiscalPeriodId,
-  async () => {
-    await fetchEmployeeWageTiers()
-    await fetchWageEnhancements()
-  },
-  { immediate: true }
-)
-
-async function fetchEmployeeWageTiers() {
-  isLoading.value = true
-  try {
-    const { employeeWageTiers: newEmployeeWageTiers } = await employeeWageTiersApi.list({
-      where: {
-        fiscalPeriodId: props.fiscalPeriodId,
-      },
-    })
-    employeeWageTiers.value = newEmployeeWageTiers
-    return newEmployeeWageTiers
-  } catch (error) {
-    console.error(error)
-    notificationStore.notify({
-      text: `Failed to fetch employee wage tiers: ${error}`,
-      variant: "error",
-    })
-  } finally {
-    isLoading.value = false
-  }
-}
-
-async function fetchWageEnhancements() {
-  isLoading.value = true
-  try {
-    const { wageEnhancements: newWageEnhancements } = await wageEnhancementsApi.list({
-      where: {
-        centreId: props.centreId,
-        employeeWageTierId: employeeWageTierIds.value,
-      },
-    })
-    wageEnhancements.value = newWageEnhancements
-  } catch (error) {
-    console.error(error)
-    notificationStore.notify({
-      text: `Failed to fetch wage enhancements: ${error}`,
-      variant: "error",
-    })
-  } finally {
-    isLoading.value = false
-  }
-}
-
-async function createWageEnhancement(employeeWageTierId: number) {
-  isLoadingByEmployeeWageTierId.set(employeeWageTierId, true)
-  try {
-    const { wageEnhancement: newWageEnhancement } = await wageEnhancementsApi.create({
-      employeeWageTierId,
-      centreId: props.centreId,
-      employeeName: "",
-      hoursEstimated: "0",
-      hoursActual: "0",
-    })
-    wageEnhancements.value.push(newWageEnhancement)
-    notificationStore.notify({
-      text: "Wage enhancement created",
-      variant: "success",
-    })
-  } catch (error) {
-    console.error(error)
-    notificationStore.notify({
-      text: `Failed to create wage enhancement: ${error}`,
-      variant: "error",
-    })
-  } finally {
-    isLoadingByEmployeeWageTierId.set(employeeWageTierId, false)
-  }
-}
-
-async function updateWageEnhancement(
-  wageEnhancementId: number,
-  attributes: Partial<WageEnhancement>
-) {
-  isLoadingByWageEnhancementId.set(wageEnhancementId, true)
-  try {
-    const { wageEnhancement: newWageEnhancement } = await wageEnhancementsApi.update(
-      wageEnhancementId,
-      attributes
-    )
-
-    const index = wageEnhancements.value.findIndex(({ id }) => id === wageEnhancementId)
-    if (index === -1) {
-      wageEnhancements.value.push(newWageEnhancement)
-    } else {
-      wageEnhancements.value[index] = newWageEnhancement
-    }
-    notificationStore.notify({
-      text: "Wage enhancement saved",
-      variant: "success",
-    })
-  } catch (error) {
-    console.error(error)
-    notificationStore.notify({
-      text: `Failed to update wage enhancement: ${error}`,
-      variant: "error",
-    })
-  } finally {
-    isLoadingByWageEnhancementId.set(wageEnhancementId, false)
-  }
-}
-
-async function deleteWageEnhancement(wageEnhancementId: number) {
-  isLoadingByWageEnhancementId.set(wageEnhancementId, true)
-  try {
-    await wageEnhancementsApi.delete(wageEnhancementId)
-    const index = wageEnhancements.value.findIndex(({ id }) => id === wageEnhancementId)
-
-    if (index !== -1) {
-      wageEnhancements.value.splice(index, 1)
-    }
-    notificationStore.notify({
-      text: "Wage enhancement deleted",
-      variant: "success",
-    })
-  } catch (error) {
-    console.error(error)
-    notificationStore.notify({
-      text: `Failed to delete wage enhancement: ${error}`,
-      variant: "error",
-    })
-  } finally {
-    isLoadingByWageEnhancementId.delete(wageEnhancementId)
-  }
-}
+const isLoading = ref(false)
+const snack = useSnack()
+const wageEnhancementTierTableBodies = ref<InstanceType<typeof WageEnhancementTierTableBody>[]>([])
 
 async function updateAllWageEnhancements() {
   isLoading.value = true
   try {
-    const updateWageEnhancementPromises = wageEnhancements.value.map(({ id, ...attributes }) =>
-      wageEnhancementsApi.update(id, attributes)
+    const updateWageEnhancementPromises = wageEnhancementTierTableBodies.value.map(
+      (wageEnhancementTierTableBody) => wageEnhancementTierTableBody.updateAll()
     )
     await Promise.all(updateWageEnhancementPromises)
-    notificationStore.notify({
-      text: "All wage enhancements saved",
-      variant: "success",
-    })
+    snack.success("All wage enhancements saved")
   } catch (error) {
-    console.error(error)
-    notificationStore.notify({
-      text: `Failed to update all wage enhancements: ${error}`,
-      variant: "error",
-    })
+    console.error(`Failed to update all wage enhancements: ${error}`, { error })
+    snack.error(`Failed to update all wage enhancements: ${error}`)
   } finally {
     isLoading.value = false
   }

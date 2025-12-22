@@ -65,7 +65,6 @@
           <ReplicateEstimatesButton
             :centre-id="props.centreId"
             :fiscal-period-id="fiscalPeriodId"
-            :loading="isLoading"
           />
         </h3>
 
@@ -78,7 +77,7 @@
   </v-container>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { computed } from "vue"
 import { isEmpty, isNil } from "lodash"
 
@@ -103,7 +102,7 @@ const fiscalPeriodsQuery = computed(() => ({
   },
   perPage: 1,
 }))
-const { fiscalPeriods, isLoading } = useFiscalPeriods(fiscalPeriodsQuery)
+const { fiscalPeriods } = useFiscalPeriods(fiscalPeriodsQuery)
 const fiscalPeriod = computed(() => fiscalPeriods.value[0])
 const fiscalPeriodId = computed(() => fiscalPeriod.value?.id)
 const fiscalPeriodFormattedDate = computed(() => {

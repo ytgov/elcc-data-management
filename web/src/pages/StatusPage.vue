@@ -39,7 +39,7 @@
   </v-app>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { onMounted, reactive, ref } from "vue"
 
 import http from "@/api/http-client"

@@ -77,6 +77,9 @@ router
   .delete(EmployeeBenefitsController.destroy)
 
 router.route("/api/employee-wage-tiers").get(EmployeeWageTiersController.index)
+router
+  .route("/api/employee-wage-tiers/:employeeWageTierId")
+  .get(EmployeeWageTiersController.show)
 
 router.route("/api/fiscal-periods").get(FiscalPeriodsController.index)
 
