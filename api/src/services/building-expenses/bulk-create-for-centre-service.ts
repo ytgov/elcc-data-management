@@ -13,6 +13,7 @@ export class BulkCreateForCentreService extends BaseService {
   async perform(): Promise<void> {
     const { fundingRegionId, buildingUsagePercent } = this.centre
 
+    // TODO: ensure that there are some defaults for building expense categories?
     const buildingExpenseCategories = await BuildingExpenseCategory.findAll({
       include: [
         {
@@ -24,12 +25,12 @@ export class BulkCreateForCentreService extends BaseService {
       ],
     })
 
-    await this.ensureFiscalPeriodsForCurrentFundingPeriod()
+    const fiscalPeriods = await this.ensureFiscalPeriodsForCurrentFundingPeriod()
 
     let buildingExpensesAttributes: CreationAttributes<BuildingExpense>[] = []
     const BATCH_SIZE = 1000
 
-    await FiscalPeriod.findEach(async (fiscalPeriod) => {
+    for (const fiscalPeriod of fiscalPeriods) {
       for (const buildingExpenseCategory of buildingExpenseCategories) {
         const { subsidyRate, fundingRegion } = buildingExpenseCategory
         if (isUndefined(fundingRegion)) {
@@ -55,16 +56,16 @@ export class BulkCreateForCentreService extends BaseService {
           buildingExpensesAttributes = []
         }
       }
-    })
+    }
 
     if (buildingExpensesAttributes.length > 0) {
       await BuildingExpense.bulkCreate(buildingExpensesAttributes)
     }
   }
 
-  private async ensureFiscalPeriodsForCurrentFundingPeriod() {
+  private async ensureFiscalPeriodsForCurrentFundingPeriod(): Promise<FiscalPeriod[]> {
     const fundingPeriod = await FundingPeriods.EnsureCurrentService.perform()
-    await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+    return FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
   }
 }
 
