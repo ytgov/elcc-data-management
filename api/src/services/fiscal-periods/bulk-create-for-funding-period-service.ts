@@ -10,7 +10,7 @@ export class BulkCreateForFundingPeriodService extends BaseService {
     super()
   }
 
-  async perform(): Promise<void> {
+  async perform(): Promise<FiscalPeriod[]> {
     const {
       id: fundingPeriodId,
       fromDate: fundingPeriodFromDate,
@@ -40,7 +40,8 @@ export class BulkCreateForFundingPeriodService extends BaseService {
       currentDate = currentDate.plus({ months: 1 })
     }
 
-    await FiscalPeriod.bulkCreate(fiscalPeriodsAttributes)
+    const fiscalPeriods = await FiscalPeriod.bulkCreate(fiscalPeriodsAttributes)
+    return fiscalPeriods
   }
 }
 

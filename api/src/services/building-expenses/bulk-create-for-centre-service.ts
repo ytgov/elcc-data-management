@@ -3,6 +3,7 @@ import { isUndefined } from "lodash"
 
 import { BuildingExpense, BuildingExpenseCategory, Centre, FiscalPeriod } from "@/models"
 import BaseService from "@/services/base-service"
+import { FiscalPeriods, FundingPeriods } from "@/services"
 
 export class BulkCreateForCentreService extends BaseService {
   constructor(private centre: Centre) {
@@ -22,6 +23,8 @@ export class BulkCreateForCentreService extends BaseService {
         },
       ],
     })
+
+    await this.ensureFiscalPeriodsForCurrentFundingPeriod()
 
     let buildingExpensesAttributes: CreationAttributes<BuildingExpense>[] = []
     const BATCH_SIZE = 1000
@@ -57,6 +60,11 @@ export class BulkCreateForCentreService extends BaseService {
     if (buildingExpensesAttributes.length > 0) {
       await BuildingExpense.bulkCreate(buildingExpensesAttributes)
     }
+  }
+
+  private async ensureFiscalPeriodsForCurrentFundingPeriod() {
+    const fundingPeriod = await FundingPeriods.EnsureCurrentService.perform()
+    await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
   }
 }
 

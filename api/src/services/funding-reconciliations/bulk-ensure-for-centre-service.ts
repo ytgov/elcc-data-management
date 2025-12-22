@@ -1,5 +1,8 @@
+import { isNil } from "lodash"
+
 import { Centre, FundingReconciliation } from "@/models"
 import BaseService from "@/services/base-service"
+import { FundingPeriods } from "@/services"
 import BulkCreateForCentreService from "@/services/funding-reconciliations/bulk-create-for-centre-service"
 
 export class BulkEnsureForCentreService extends BaseService {
@@ -7,16 +10,19 @@ export class BulkEnsureForCentreService extends BaseService {
     super()
   }
 
-  async perform(): Promise<void> {
-    const fundingReconciliationCount = await FundingReconciliation.count({
+  async perform(): Promise<FundingReconciliation> {
+    const fundingPeriod = await FundingPeriods.EnsureCurrentService.perform()
+
+    const fundingReconciliation = await FundingReconciliation.findOne({
       where: {
         centreId: this.centre.id,
+        fundingPeriodId: fundingPeriod.id,
       },
     })
 
-    if (fundingReconciliationCount > 0) return
+    if (!isNil(fundingReconciliation)) return fundingReconciliation
 
-    await BulkCreateForCentreService.perform(this.centre)
+    return BulkCreateForCentreService.perform(this.centre)
   }
 }
 
