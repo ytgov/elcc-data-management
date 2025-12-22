@@ -16,7 +16,7 @@ import { MAX_PER_PAGE } from "@/api/base-api"
 import useFiscalPeriods, { FiscalPeriod } from "@/use/use-fiscal-periods"
 
 defineProps<{
-  modelValue: string | null
+  modelValue: string | null | undefined
 }>()
 
 const emit = defineEmits(["update:modelValue"])

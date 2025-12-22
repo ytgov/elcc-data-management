@@ -52,7 +52,7 @@ export function useFundingSubmissionLineJsons(
       state.totalCount = totalCount
       return fundingSubmissionLineJsons
     } catch (error) {
-      console.error("Failed to fetch funding submission line jsons:", error)
+      console.error(`Failed to fetch funding submission line jsons: ${error}`, { error })
       state.isErrored = true
       throw error
     } finally {

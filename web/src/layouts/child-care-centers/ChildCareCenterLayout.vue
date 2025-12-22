@@ -29,8 +29,10 @@
           <v-divider></v-divider>
           <v-card-text class="pt-3">
             <FundingLineValuesEnrollmentChart
+              v-if="!isNil(fiscalYearLegacy) && !isEmpty(fiscalYearLegacy)"
               ref="fundingLineValuesEnrollmentChartRef"
               :centre-id="centreIdAsNumber"
+              :fiscal-year-legacy="fiscalYearLegacy"
             />
           </v-card-text>
         </v-card>
@@ -96,7 +98,7 @@
 </template>
 
 <script setup lang="ts">
-import { isEmpty } from "lodash"
+import { isEmpty, isNil } from "lodash"
 import { useRoute, useRouter } from "vue-router"
 import { computed, onMounted, useTemplateRef } from "vue"
 
@@ -121,7 +123,7 @@ const props = withDefaults(
 const centreIdAsNumber = computed(() => parseInt(props.centreId))
 const { centre, refresh } = useCentre(centreIdAsNumber)
 
-const fiscalYearLegacy = computed(() => props.fiscalYearSlug?.replace("-", "/"))
+const fiscalYearLegacy = computed<string | undefined>(() => props.fiscalYearSlug?.replace("-", "/"))
 
 onMounted(async () => {
   if (isEmpty(props.fiscalYearSlug)) {
