@@ -8,7 +8,7 @@ import {
   type FundingPeriod,
 } from "@/models"
 import BaseService from "@/services/base-service"
-import { FundingPeriods, FundingSubmissionLines } from "@/services"
+import { FundingPeriods } from "@/services"
 
 export class BulkCreateForCentreService extends BaseService {
   constructor(private centre: Centre) {
@@ -73,7 +73,7 @@ export class BulkCreateForCentreService extends BaseService {
   private async ensureFundingSubmissionLines(
     fundingPeriod: FundingPeriod
   ): Promise<FundingSubmissionLine[]> {
-    return FundingSubmissionLines.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+    return FundingPeriods.FundingSubmissionLines.BulkEnsureService.perform(fundingPeriod)
   }
 }
 

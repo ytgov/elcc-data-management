@@ -2,10 +2,10 @@ import { FundingSubmissionLine } from "@/models"
 import FUNDING_SUBMISSION_LINE_DEFAULTS from "@/models/funding-submission-line-defaults"
 import { fundingPeriodFactory, fundingSubmissionLineFactory } from "@/factories"
 
-import BulkCreateForFundingPeriodService from "@/services/funding-submission-lines/bulk-create-for-funding-period-service"
+import BulkCreateService from "@/services/funding-periods/funding-submission-lines/bulk-create-service"
 
-describe("api/src/services/funding-submission-lines/bulk-create-for-funding-period-service.ts", () => {
-  describe("BulkCreateForFundingPeriodService", () => {
+describe("api/src/services/funding-periods/funding-submission-lines/bulk-create-service.ts", () => {
+  describe("BulkCreateService", () => {
     describe("#perform", () => {
       test("when previous fiscal year submission lines exist, creates new lines from previous year template", async () => {
         // Arrange
@@ -26,16 +26,15 @@ describe("api/src/services/funding-submission-lines/bulk-create-for-funding-peri
         })
 
         // Act
-        await BulkCreateForFundingPeriodService.perform(fundingPeriod)
+        await BulkCreateService.perform(fundingPeriod)
 
         // Assert
-        const createdLines = await FundingSubmissionLine.findAll({
+        const fundingSubmissionLines = await FundingSubmissionLine.findAll({
           where: {
             fiscalYear: "2024/25",
           },
         })
-
-        expect(createdLines).toEqual([
+        expect(fundingSubmissionLines).toEqual([
           expect.objectContaining({
             sectionName: "Template Section One",
             lineName: "Template Line One",
@@ -56,15 +55,15 @@ describe("api/src/services/funding-submission-lines/bulk-create-for-funding-peri
         })
 
         // Act
-        await BulkCreateForFundingPeriodService.perform(fundingPeriod)
+        await BulkCreateService.perform(fundingPeriod)
 
         // Assert
-        const createdLines = await FundingSubmissionLine.findAll({
+        const fundingSubmissionLines = await FundingSubmissionLine.findAll({
           where: {
             fiscalYear: "2024/25",
           },
         })
-        expect(createdLines).toHaveLength(FUNDING_SUBMISSION_LINE_DEFAULTS.length)
+        expect(fundingSubmissionLines).toHaveLength(FUNDING_SUBMISSION_LINE_DEFAULTS.length)
       })
 
       test("when submission lines for the current fiscal year already exist, does not create duplicates", async () => {
@@ -87,7 +86,7 @@ describe("api/src/services/funding-submission-lines/bulk-create-for-funding-peri
           })
 
         // Act
-        await BulkCreateForFundingPeriodService.perform(fundingPeriod)
+        await BulkCreateService.perform(fundingPeriod)
 
         // Assert
         const fundingSubmissionLines = await FundingSubmissionLine.findAll({

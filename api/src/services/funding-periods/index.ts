@@ -7,4 +7,6 @@ export { EnsureCurrentService } from "./ensure-current-service"
 export { EnsureDependenciesService } from "./ensure-dependencies-service"
 
 // Bundled exports
+export * as EmployeeWageTiers from "./employee-wage-tiers"
 export * as FiscalPeriods from "./fiscal-periods"
+export * as FundingSubmissionLines from "./funding-submission-lines"

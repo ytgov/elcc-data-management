@@ -7,12 +7,10 @@ import LogServices from "@/services/log-services"
 import {
   Centres,
   EmployeeBenefits,
-  EmployeeWageTiers,
   FundingPeriods,
   FundingReconciliationAdjustments,
   FundingReconciliations,
   FundingSubmissionLineJsons,
-  FundingSubmissionLines,
 } from "@/services"
 
 export type CentreCreationAttributes = Partial<CreationAttributes<Centre>>
@@ -80,8 +78,8 @@ export class CreateService extends BaseService {
   private async ensureCurrentFiscalAndBaseEntities(): Promise<FundingPeriod> {
     const fundingPeriod = await FundingPeriods.EnsureCurrentService.perform()
     await FundingPeriods.FiscalPeriods.BulkEnsureService.perform(fundingPeriod)
-    await EmployeeWageTiers.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
-    await FundingSubmissionLines.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+    await FundingPeriods.EmployeeWageTiers.BulkEnsureService.perform(fundingPeriod)
+    await FundingPeriods.FundingSubmissionLines.BulkEnsureService.perform(fundingPeriod)
     return fundingPeriod
   }
 

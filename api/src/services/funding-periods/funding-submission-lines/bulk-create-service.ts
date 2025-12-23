@@ -8,7 +8,7 @@ import FUNDING_SUBMISSION_LINE_DEFAULTS, {
 
 import BaseService from "@/services/base-service"
 
-export class BulkCreateForFundingPeriodService extends BaseService {
+export class BulkCreateService extends BaseService {
   constructor(private fundingPeriod: FundingPeriod) {
     super()
   }
@@ -95,4 +95,4 @@ export class BulkCreateForFundingPeriodService extends BaseService {
   }
 }
 
-export default BulkCreateForFundingPeriodService
+export default BulkCreateService

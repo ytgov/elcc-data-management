@@ -3,9 +3,9 @@ import { isEmpty } from "lodash"
 import { FundingPeriod, FundingSubmissionLine } from "@/models"
 
 import BaseService from "@/services/base-service"
-import BulkCreateForFundingPeriodService from "@/services/funding-submission-lines/bulk-create-for-funding-period-service"
+import BulkCreateService from "@/services/funding-periods/funding-submission-lines/bulk-create-service"
 
-export class BulkEnsureForFundingPeriodService extends BaseService {
+export class BulkEnsureService extends BaseService {
   constructor(private fundingPeriod: FundingPeriod) {
     super()
   }
@@ -22,8 +22,8 @@ export class BulkEnsureForFundingPeriodService extends BaseService {
     })
     if (!isEmpty(fundingSubmissionLineCount)) return fundingSubmissionLineCount
 
-    return BulkCreateForFundingPeriodService.perform(this.fundingPeriod)
+    return BulkCreateService.perform(this.fundingPeriod)
   }
 }
 
-export default BulkEnsureForFundingPeriodService
+export default BulkEnsureService

@@ -11,7 +11,7 @@ import {
   FundingSubmissionLineJson,
 } from "@/models"
 import BaseService from "@/services/base-service"
-import { FundingSubmissionLines } from "@/services"
+import { FundingPeriods } from "@/services"
 
 // NOTE: this is a shim service until all dependencies are being created by funding-period creation.
 export class EnsureDependenciesService extends BaseService {
@@ -105,7 +105,7 @@ export class EnsureDependenciesService extends BaseService {
     if (fundingSubmissionLineJsonCount > 0) return
 
     const fundingSubmissionLines =
-      await FundingSubmissionLines.BulkEnsureForFundingPeriodService.perform(this.fundingPeriod)
+      await FundingPeriods.FundingSubmissionLines.BulkEnsureService.perform(this.fundingPeriod)
 
     const defaultLineValues = fundingSubmissionLines.map((fundingSubmissionLine) => ({
       submissionLineId: fundingSubmissionLine.id,

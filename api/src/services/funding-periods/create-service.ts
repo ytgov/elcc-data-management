@@ -6,12 +6,10 @@ import BaseService from "@/services/base-service"
 import {
   BuildingExpenses,
   EmployeeBenefits,
-  EmployeeWageTiers,
   FundingPeriods,
   FundingReconciliationAdjustments,
   FundingReconciliations,
   FundingSubmissionLineJsons,
-  FundingSubmissionLines,
 } from "@/services"
 
 export type FundingPeriodCreationAttributes = Partial<CreationAttributes<FundingPeriod>>
@@ -67,7 +65,7 @@ export class CreateService extends BaseService {
   }
 
   private async createEmployeeWageTiers(fundingPeriod: FundingPeriod) {
-    await EmployeeWageTiers.BulkCreateForFundingPeriodService.perform(fundingPeriod)
+    await FundingPeriods.EmployeeWageTiers.BulkCreateService.perform(fundingPeriod)
   }
 
   private async createEmployeeBenefits(fundingPeriod: FundingPeriod) {
@@ -79,7 +77,7 @@ export class CreateService extends BaseService {
   }
 
   private async createFundingSubmissionLines(fundingPeriod: FundingPeriod) {
-    await FundingSubmissionLines.BulkCreateForFundingPeriodService.perform(fundingPeriod)
+    await FundingPeriods.FundingSubmissionLines.BulkCreateService.perform(fundingPeriod)
   }
 
   private async createFundingSubmissionLineJsons(fundingPeriod: FundingPeriod) {
