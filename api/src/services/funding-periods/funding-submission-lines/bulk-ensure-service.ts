@@ -15,12 +15,12 @@ export class BulkEnsureService extends BaseService {
     const currentFiscalYearLegacy =
       FundingSubmissionLine.toLegacyFiscalYearFormat(fundingPeriodFiscalYear)
 
-    const fundingSubmissionLineCount = await FundingSubmissionLine.findAll({
+    const fundingSubmissionLines = await FundingSubmissionLine.findAll({
       where: {
         fiscalYear: currentFiscalYearLegacy,
       },
     })
-    if (!isEmpty(fundingSubmissionLineCount)) return fundingSubmissionLineCount
+    if (!isEmpty(fundingSubmissionLines)) return fundingSubmissionLines
 
     return BulkCreateService.perform(this.fundingPeriod)
   }

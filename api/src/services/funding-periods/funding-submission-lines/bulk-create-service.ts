@@ -1,10 +1,7 @@
-import { CreationAttributes, Op } from "@sequelize/core"
-import { isEmpty, isNil } from "lodash"
+import { Op, sql } from "@sequelize/core"
+import { isEmpty } from "lodash"
 
 import { FundingPeriod, FundingSubmissionLine } from "@/models"
-import FUNDING_SUBMISSION_LINE_DEFAULTS, {
-  FundingSubmissionLineDefault,
-} from "@/models/funding-submission-line-defaults"
 
 import BaseService from "@/services/base-service"
 
@@ -19,79 +16,48 @@ export class BulkCreateService extends BaseService {
     const currentFiscalYearLegacy =
       FundingSubmissionLine.toLegacyFiscalYearFormat(fundingPeriodFiscalYear)
 
-    const previousFundingSubmissionLines =
-      await this.findNewestFundingSubmissionLines(currentFiscalYearLegacy)
+    const fundingSubmissionLineDefaults = await this.buildFundingSubmissionLineDefaults()
 
-    if (!isEmpty(previousFundingSubmissionLines)) {
-      return this.createFundingSubmissionLinesFromTemplateData(
-        currentFiscalYearLegacy,
-        previousFundingSubmissionLines
-      )
-    }
-
-    return this.createFundingSubmissionLinesFromTemplateData(
-      currentFiscalYearLegacy,
-      FUNDING_SUBMISSION_LINE_DEFAULTS
+    const fundingSubmissionLinesAttributes = fundingSubmissionLineDefaults.map(
+      (fundingSubmissionLineDefault) => ({
+        ...fundingSubmissionLineDefault,
+        fiscalYear: currentFiscalYearLegacy,
+      })
     )
+
+    return FundingSubmissionLine.bulkCreate(fundingSubmissionLinesAttributes)
   }
 
-  private async findNewestFundingSubmissionLines(
-    excludeFiscalYearLegacy: string
-  ): Promise<FundingSubmissionLine[]> {
-    const newestFundingSubmissionLine = await FundingSubmissionLine.findOne({
+  private async buildFundingSubmissionLineDefaults() {
+    const newestFiscalYearWithFundingSubmissionLines = sql`
+      (
+        SELECT
+          TOP 1 funding_submission_lines.fiscal_year
+        FROM
+          funding_submission_lines
+        ORDER BY
+          funding_submission_lines.fiscal_year DESC,
+          funding_submission_lines.id DESC
+      )
+    `
+    const newestFundingSubmissionLines = await FundingSubmissionLine.findAll({
       where: {
         fiscalYear: {
-          [Op.ne]: excludeFiscalYearLegacy,
+          [Op.in]: newestFiscalYearWithFundingSubmissionLines,
         },
       },
-      order: [["fiscalYear", "DESC"]],
     })
-    if (isNil(newestFundingSubmissionLine)) return []
+    if (isEmpty(newestFundingSubmissionLines)) return FundingSubmissionLine.DEFAULTS
 
-    return FundingSubmissionLine.findAll({
-      where: {
-        fiscalYear: newestFundingSubmissionLine.fiscalYear,
-      },
-    })
-  }
-
-  private async createFundingSubmissionLinesFromTemplateData(
-    currentFiscalYearLegacy: string,
-    templateRows:
-      | Pick<
-          FundingSubmissionLine,
-          "sectionName" | "lineName" | "fromAge" | "toAge" | "monthlyAmount"
-        >[]
-      | ReadonlyArray<FundingSubmissionLineDefault>
-  ): Promise<FundingSubmissionLine[]> {
-    const fundingSubmissionLines = []
-
-    const fundingSubmissionLinesAttributes: CreationAttributes<FundingSubmissionLine>[] =
-      templateRows.map((templateRow) => ({
-        fiscalYear: currentFiscalYearLegacy,
-        sectionName: templateRow.sectionName,
-        lineName: templateRow.lineName,
-        fromAge: templateRow.fromAge,
-        toAge: templateRow.toAge,
-        monthlyAmount: templateRow.monthlyAmount,
-      }))
-
-    for (const fundingSubmissionLineAttributes of fundingSubmissionLinesAttributes) {
-      let fundingSubmissionLine = await FundingSubmissionLine.findOne({
-        where: {
-          fiscalYear: fundingSubmissionLineAttributes.fiscalYear,
-          sectionName: fundingSubmissionLineAttributes.sectionName,
-          lineName: fundingSubmissionLineAttributes.lineName,
-        },
+    return newestFundingSubmissionLines.map(
+      ({ sectionName, lineName, fromAge, toAge, monthlyAmount }) => ({
+        sectionName,
+        lineName,
+        fromAge,
+        toAge,
+        monthlyAmount,
       })
-      if (isNil(fundingSubmissionLine)) {
-        fundingSubmissionLine = await FundingSubmissionLine.create(fundingSubmissionLineAttributes)
-      }
-
-      fundingSubmissionLines.push(fundingSubmissionLine)
-    }
-
-    return fundingSubmissionLines
+    )
   }
 }
 

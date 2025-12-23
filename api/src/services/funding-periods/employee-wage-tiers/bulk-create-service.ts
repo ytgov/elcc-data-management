@@ -23,9 +23,9 @@ export class BulkCreateService extends BaseService {
     const employeeWageTierDefaults = await this.buildEmployeeWageTierDefaults()
 
     const employeeWageTiersAttributes = fiscalPeriods.flatMap((fiscalPeriod) =>
-      employeeWageTierDefaults.map((template) => ({
+      employeeWageTierDefaults.map((employeeWageTierDefault) => ({
         fiscalPeriodId: fiscalPeriod.id,
-        ...template,
+        ...employeeWageTierDefault,
       }))
     )
 
@@ -36,16 +36,15 @@ export class BulkCreateService extends BaseService {
     const newestFundingPeriodWithEmployeeWageTiers = sql`
       (
         SELECT
-          fiscal_periods.funding_period_id
+          TOP 1 fiscal_periods.funding_period_id
         FROM
           fiscal_periods
           INNER JOIN employee_wage_tiers ON employee_wage_tiers.fiscal_period_id = fiscal_periods.id
         ORDER BY
           fiscal_periods.date_end DESC,
-          fiscal_periods.id DESC LIMIT 1
+          fiscal_periods.id DESC
       )
     `
-
     const newestEmployeeWageTiers = await EmployeeWageTier.findAll({
       include: [
         {

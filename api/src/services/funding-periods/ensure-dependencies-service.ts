@@ -13,7 +13,11 @@ import {
 import BaseService from "@/services/base-service"
 import { FundingPeriods } from "@/services"
 
-// NOTE: this is a shim service until all dependencies are being created by funding-period creation.
+/**
+ * NOTE: this is a shim service until all dependencies are being created by funding-period creation.
+ *
+ * @deprecated - prefer ensure children type services instead
+ */
 export class EnsureDependenciesService extends BaseService {
   constructor(
     private centre: Centre,

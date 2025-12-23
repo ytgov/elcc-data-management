@@ -4,6 +4,7 @@ export { UpdateService } from "./update-service"
 
 // Special actions
 export { EnsureCurrentService } from "./ensure-current-service"
+export { EnsureChildrenService } from "./ensure-children-service"
 export { EnsureDependenciesService } from "./ensure-dependencies-service"
 
 // Bundled exports

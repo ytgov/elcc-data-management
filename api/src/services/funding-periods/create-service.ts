@@ -40,16 +40,14 @@ export class CreateService extends BaseService {
         title,
       })
 
-      await this.prefillChildEntities(fundingPeriod)
+      await this.ensureChildren(fundingPeriod)
 
       return fundingPeriod
     })
   }
 
-  private async prefillChildEntities(fundingPeriod: FundingPeriod) {
-    await FundingPeriods.FiscalPeriods.BulkCreateService.perform(fundingPeriod)
-    await FundingPeriods.EmployeeWageTiers.BulkCreateService.perform(fundingPeriod)
-    await FundingPeriods.FundingSubmissionLines.BulkCreateService.perform(fundingPeriod)
+  private async ensureChildren(fundingPeriod: FundingPeriod) {
+    await FundingPeriods.EnsureChildrenService.perform(fundingPeriod)
   }
 }
 

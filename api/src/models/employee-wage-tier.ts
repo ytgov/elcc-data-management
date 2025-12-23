@@ -38,6 +38,8 @@ export const EMPLOYEE_WAGE_TIER_DEFAULTS: ReadonlyArray<EmployeeWageTierDefault>
   { tierLevel: 6, tierLabel: "ECE Level 3", wageRatePerHour: "15.31" },
 ])
 
+// TODO: consider if these should be mapped directly to a funding period rather than a fiscal period?
+// Then employee benefits would denormalize the data at creation time on a per-fiscal period basis.
 export class EmployeeWageTier extends BaseModel<
   InferAttributes<EmployeeWageTier>,
   InferCreationAttributes<EmployeeWageTier>

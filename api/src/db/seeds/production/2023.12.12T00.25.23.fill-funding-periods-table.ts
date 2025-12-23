@@ -1,7 +1,8 @@
-import { CreationAttributes } from "@sequelize/core"
+import { type CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
 
 import { FundingPeriod } from "@/models"
+import { FundingPeriods } from "@/services"
 
 export async function up() {
   const fundingPeriodsAttributes: CreationAttributes<FundingPeriod>[] = [
@@ -45,7 +46,7 @@ export async function up() {
     })
 
     if (isNil(fundingPeriod)) {
-      await FundingPeriod.create(fundingPeriodAttributes)
+      await FundingPeriods.CreateService.perform(fundingPeriodAttributes)
     }
   }
 }
