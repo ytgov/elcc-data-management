@@ -791,6 +791,57 @@ if (isNil(existingRecord)) {
 }
 ```
 
+### SQL Patterns
+
+**Subquery Wrapping:** Wrap ALL subqueries in parentheses for clarity and operator precedence, regardless of context.
+
+**Sequelize Subquery Pattern:** All subqueries must use the "id: Op.in subquery" pattern to be properly composable in Sequelize.
+
+```typescript
+// Correct - explicit subquery wrapping with Op.in pattern
+const fundingSubmissionLinesByFundingPeriodIdQuery = sql`
+  (
+    SELECT
+      id
+    FROM
+      funding_submission_lines
+    WHERE
+      EXISTS (
+        SELECT
+          1
+        FROM
+          funding_periods
+        WHERE
+          funding_periods.id = :fundingPeriodId
+          AND funding_submission_lines.fiscal_year = REPLACE(
+            funding_periods.fiscal_year,
+            '-' + RIGHT(funding_periods.fiscal_year, 4),
+            '/' + RIGHT(funding_periods.fiscal_year, 2)
+          )
+      )
+  )
+`
+
+// Usage in scope - must use Op.in with the subquery
+return {
+  where: {
+    id: {
+      [Op.in]: fundingSubmissionLinesByFundingPeriodIdQuery,
+    },
+  },
+  replacements: {
+    fundingPeriodId,
+  },
+}
+
+// Incorrect - no wrapping and wrong pattern
+const query = sql`
+  SELECT id FROM funding_submission_lines WHERE EXISTS (...)
+`
+```
+
+**Rationale:** Explicit parentheses are required to write valid SQL and prevent operator precedence issues. The "id: Op.in subquery" pattern is required for Sequelize composability.
+
 ### Controller Structure
 
 **Pattern:** Use policies, services, serializers, and consistent error handling.
@@ -1446,6 +1497,41 @@ expect(response.body.user).toMatchObject({
 
 // Incorrect - single line
 expect(response.body.user).toMatchObject({ id: user.id, email: user.email })
+```
+
+**Pattern 4:** Use destructuring when extracting single properties from objects in map functions.
+
+```typescript
+// Correct - destructuring for single property
+const fundingSubmissionLineIds = fundingSubmissionLines.map(({ id }) => id)
+
+// Incorrect - full object parameter
+const fundingSubmissionLineIds = fundingSubmissionLines.map((line) => line.id)
+```
+
+**Pattern 5:** Format arrays in expect statements across multiple lines. Avoid sorting entirely and be explicit about expected order since Sequelize is deterministic.
+
+```typescript
+// Correct - multi-line, explicit order
+expect(fundingSubmissionLineIds).toEqual([
+  fundingSubmissionLine1.id,
+  fundingSubmissionLine2.id,
+])
+
+// Incorrect - single line with sorting
+expect(fundingSubmissionLineIds).toEqual(
+  [fundingSubmissionLine1.id, fundingSubmissionLine2.id].sort()
+)
+```
+
+**Pattern 6:** Use `-1` for non-existent ID test scenarios in all test cases.
+
+```typescript
+// Correct
+const results = await Model.scope("byFundingPeriodId", -1).findAll()
+
+// Incorrect
+const results = await Model.scope("byFundingPeriodId", 99999).findAll()
 ```
 
 **Rationale:**
