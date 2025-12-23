@@ -10,7 +10,7 @@ import { FundingRegions } from "@/services"
 
 export async function up() {
   await FundingRegion.findEach(async (fundingRegion) => {
-    await FundingRegions.EnsureDependenciesService.perform(fundingRegion)
+    await FundingRegions.EnsureChildrenService.perform(fundingRegion)
   })
 }
 

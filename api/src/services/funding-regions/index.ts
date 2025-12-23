@@ -3,7 +3,7 @@ export { UpdateService } from "./update-service"
 export { DestroyService } from "./destroy-service"
 
 // Special Actions
-export { EnsureDependenciesService } from "./ensure-dependencies-service"
+export { EnsureChildrenService } from "./ensure-children-service"
 
 // Bundled Exports
 export * as BuildingExpenseCategories from "./building-expense-categories"

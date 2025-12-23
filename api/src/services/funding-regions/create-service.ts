@@ -1,8 +1,9 @@
 import { type CreationAttributes } from "@sequelize/core"
-import { isEmpty, isNil } from "lodash"
+import { isNil } from "lodash"
 
-import db, { BuildingExpenseCategory, FundingRegion, User } from "@/models"
+import db, { FundingRegion, User } from "@/models"
 import BaseService from "@/services/base-service"
+import { FundingRegions } from "@/services"
 
 export type FundingRegionCreationAttributes = Partial<CreationAttributes<FundingRegion>>
 
@@ -31,34 +32,16 @@ export class CreateService extends BaseService {
         subsidyRate,
       })
 
-      await this.copyBuildingExpenseCategoriesFromExisting(fundingRegion)
+      await this.ensureChildren(fundingRegion)
 
       return fundingRegion
     })
   }
 
-  private async copyBuildingExpenseCategoriesFromExisting(
+  private async ensureChildren(
     newFundingRegion: FundingRegion
   ): Promise<void> {
-    const existingFundingRegion = await FundingRegion.findOne({
-      order: [["id", "ASC"]],
-    })
-    if (isNil(existingFundingRegion)) return
-
-    const existingCategories = await BuildingExpenseCategory.findAll({
-      where: {
-        fundingRegionId: existingFundingRegion.id,
-      },
-    })
-    if (isEmpty(existingCategories)) return
-
-    const newCategoriesAttributes = existingCategories.map((category) => ({
-      fundingRegionId: newFundingRegion.id,
-      categoryName: category.categoryName,
-      subsidyRate: category.subsidyRate,
-    }))
-
-    await BuildingExpenseCategory.bulkCreate(newCategoriesAttributes)
+    await FundingRegions.EnsureChildrenService.perform(newFundingRegion)
   }
 }
 

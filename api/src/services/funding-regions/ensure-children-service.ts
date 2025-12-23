@@ -2,7 +2,7 @@ import { FundingRegion } from "@/models"
 import BaseService from "@/services/base-service"
 import { FundingRegions } from "@/services"
 
-export class EnsureDependenciesService extends BaseService {
+export class EnsureChildrenService extends BaseService {
   constructor(private fundingRegion: FundingRegion) {
     super()
   }
@@ -12,4 +12,4 @@ export class EnsureDependenciesService extends BaseService {
   }
 }
 
-export default EnsureDependenciesService
+export default EnsureChildrenService

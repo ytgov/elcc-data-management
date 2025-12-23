@@ -1,23 +1,33 @@
-import { type CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
 
-import { FundingRegion } from "@/models"
+import { FundingRegion, User } from "@/models"
+import { FundingRegions } from "@/services"
 
 export async function up() {
-  const fundingRegionsAttributes: CreationAttributes<FundingRegion>[] = [
-    { region: "Whitehorse", subsidyRate: "0.3700" },
-    { region: "Communities", subsidyRate: "0.3700" },
-  ]
+  let systemUser = await User.findOne({
+    where: {
+      email: "system.user@elcc.com",
+    },
+  })
+  if (isNil(systemUser)) {
+    systemUser = await User.create({
+      email: "system.user@elcc.com",
+      sub: "NO_LOGIN_system.user@elcc.com",
+      firstName: "System",
+      lastName: "User",
+      status: User.Status.ACTIVE,
+      roles: [User.Roles.SUPER_ADMIN],
+    })
+  }
 
-  for (const fundingRegionAttributes of fundingRegionsAttributes) {
+  for (const fundingRegionAttributes of FundingRegion.DEFAULTS) {
     const fundingRegion = await FundingRegion.findOne({
       where: {
         region: fundingRegionAttributes.region,
       },
     })
-
     if (isNil(fundingRegion)) {
-      await FundingRegion.create(fundingRegionAttributes)
+      await FundingRegions.CreateService.perform(fundingRegionAttributes, systemUser)
     }
   }
 }
