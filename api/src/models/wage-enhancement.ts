@@ -90,7 +90,22 @@ export class WageEnhancement extends BaseModel<
   declare employeeWageTier?: NonAttribute<EmployeeWageTier>
 
   static establishScopes() {
-    // add as needed
+    this.addScope("byFundingPeriod", (fundingPeriodId: number) => ({
+      include: [
+        {
+          association: "employeeWageTier",
+          include: [
+            {
+              association: "fiscalPeriod",
+              where: {
+                fundingPeriodId,
+              },
+            },
+          ],
+          required: true,
+        },
+      ],
+    }))
   }
 }
 

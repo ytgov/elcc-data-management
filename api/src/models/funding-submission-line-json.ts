@@ -14,6 +14,7 @@ import {
   Default,
   NotNull,
   PrimaryKey,
+  Table,
   ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
 import { DateTime } from "luxon"
@@ -44,6 +45,9 @@ const FUNDING_SUBMISSION_LINE_JSON_MONTHS = Object.values(FundingSubmissionLineJ
 
 // TODO: consider renaming this to MonthlyWorksheet?
 // TODO: link this model to a fiscal period, and remove fiscalYear, dateName, dateStart, and dateEnd
+@Table({
+  tableName: "funding_submission_line_jsons",
+})
 export class FundingSubmissionLineJson extends BaseModel<
   InferAttributes<FundingSubmissionLineJson>,
   InferCreationAttributes<FundingSubmissionLineJson>
@@ -149,6 +153,38 @@ export class FundingSubmissionLineJson extends BaseModel<
   declare centre?: NonAttribute<Centre>
 
   static establishScopes() {
+    this.addScope("byFundingPeriodId", (fundingPeriodId: number) => {
+      const fundingSubmissionLineJsonsByFundingPeriodIdQuery = sql`
+        (
+          SELECT
+            id
+          FROM
+            funding_submission_line_jsons
+          WHERE
+            EXISTS (
+              SELECT
+                1
+              FROM
+                funding_periods
+              WHERE
+                funding_periods.id = ${fundingPeriodId}
+                AND funding_submission_line_jsons.fiscal_year = REPLACE(
+                  funding_periods.fiscal_year,
+                  '-' + RIGHT(funding_periods.fiscal_year, 4),
+                  '/' + RIGHT(funding_periods.fiscal_year, 2)
+                )
+            )
+        )
+      `
+      return {
+        where: {
+          id: {
+            [Op.in]: fundingSubmissionLineJsonsByFundingPeriodIdQuery,
+          },
+        },
+      }
+    })
+
     this.addScope("withChildOccupancyRate", (sectionName: string) => {
       const withChildOccupancyRateQuery = sql`
         (
@@ -169,7 +205,7 @@ export class FundingSubmissionLineJson extends BaseModel<
                   JSON_VALUE(
                     json_array_element.value,
                     '$.actualChildOccupancyRate'
-                  ) AS decimal(10,2)
+                  ) AS decimal(10, 2)
                 ),
                 0
               )

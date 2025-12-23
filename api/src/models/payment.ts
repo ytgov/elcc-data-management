@@ -112,7 +112,16 @@ export class Payment extends BaseModel<InferAttributes<Payment>, InferCreationAt
   declare fiscalPeriod?: NonAttribute<FiscalPeriod>
 
   static establishScopes() {
-    // add as needed
+    this.addScope("byFundingPeriod", (fundingPeriodId: number) => ({
+      include: [
+        {
+          association: "fiscalPeriod",
+          where: {
+            fundingPeriodId,
+          },
+        },
+      ],
+    }))
   }
 }
 

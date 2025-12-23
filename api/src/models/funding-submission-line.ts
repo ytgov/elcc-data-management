@@ -1,5 +1,6 @@
 import {
   DataTypes,
+  Op,
   sql,
   type CreationOptional,
   type InferAttributes,
@@ -86,6 +87,38 @@ export class FundingSubmissionLine extends BaseModel<
 
   static establishScopes() {
     this.addSearchScope(["fiscalYear", "sectionName", "lineName"])
+
+    this.addScope("byFundingPeriodId", (fundingPeriodId: number) => {
+      const fundingSubmissionLinesByFundingPeriodIdQuery = sql`
+        (
+          SELECT
+            id
+          FROM
+            funding_submission_lines
+          WHERE
+            EXISTS (
+              SELECT
+                1
+              FROM
+                funding_periods
+              WHERE
+                funding_periods.id = ${fundingPeriodId}
+                AND funding_submission_lines.fiscal_year = REPLACE(
+                  funding_periods.fiscal_year,
+                  '-' + RIGHT(funding_periods.fiscal_year, 4),
+                  '/' + RIGHT(funding_periods.fiscal_year, 2)
+                )
+            )
+        )
+      `
+      return {
+        where: {
+          id: {
+            [Op.in]: fundingSubmissionLinesByFundingPeriodIdQuery,
+          },
+        },
+      }
+    })
   }
 }
 
