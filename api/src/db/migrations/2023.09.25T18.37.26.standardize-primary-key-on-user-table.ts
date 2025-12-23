@@ -2,7 +2,7 @@ import { DataTypes } from "@sequelize/core"
 
 import { type Migration } from "@/db/umzug"
 
-import { removeConstraint } from "@/db/utils/mssql-drop-constraint"
+import { removeConstraint } from "@/db/utils/mssql-remove-constraint"
 
 export async function up({ context: queryInterface }: Migration) {
   await removeConstraint(queryInterface, "user_roles", {

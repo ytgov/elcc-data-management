@@ -67,7 +67,21 @@ export enum MSSQL_CONSTRAINT_TYPES {
   UNIQUE = "UQ",
   FOREIGN_KEY = "F",
   CHECK = "C",
-  DEFAULT = "NOT IMPLEMENTED",
+  DEFAULT = "D",
+}
+
+function findDefaultConstraintQuery(tableName: string, columnName: string) {
+  return /* sql */ `
+    SELECT
+      default_constraints.name AS constraintName
+    FROM
+      sys.default_constraints
+      INNER JOIN sys.columns ON default_constraints.parent_object_id = columns.object_id
+      AND default_constraints.parent_column_id = columns.column_id
+    WHERE
+      default_constraints.parent_object_id = OBJECT_ID('${tableName}')
+      AND columns.name = '${columnName}';
+  `
 }
 
 function findForeignKeyConstraintQuery(tableName: string, columnName: string) {
@@ -145,6 +159,7 @@ export interface RemoveUniqueConstraintOptions extends BaseConstraintQueryOption
 
 export interface RemoveDefaultConstraintOptions extends BaseConstraintQueryOptions {
   type: "DEFAULT"
+  fields: [string]
 }
 
 export interface RemoveCheckConstraintOptions extends BaseConstraintQueryOptions {
@@ -205,6 +220,8 @@ export async function removeConstraint(
         MSSQL_CONSTRAINT_TYPES.UNIQUE
       )
     }
+  } else if (options.type === "DEFAULT") {
+    query = findDefaultConstraintQuery(tableName, options.fields[0])
   } else {
     throw new Error(`Constraint type: ${options.type} NOT IMPLEMENTED`)
   }
