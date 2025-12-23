@@ -1,3 +1,4 @@
+import { Op, sql } from "@sequelize/core"
 import { isEmpty } from "lodash"
 
 import { EmployeeWageTier, FiscalPeriod, FundingPeriod } from "@/models"
@@ -19,14 +20,54 @@ export class BulkCreateService extends BaseService {
       throw new Error("No fiscal periods found for funding period.")
     }
 
+    const employeeWageTierDefaults = await this.buildEmployeeWageTierDefaults()
+
     const employeeWageTiersAttributes = fiscalPeriods.flatMap((fiscalPeriod) =>
-      EMPLOYEE_WAGE_TIER_DEFAULTS.map((employeeWageTier) => ({
+      employeeWageTierDefaults.map((template) => ({
         fiscalPeriodId: fiscalPeriod.id,
-        ...employeeWageTier,
+        ...template,
       }))
     )
 
     return EmployeeWageTier.bulkCreate(employeeWageTiersAttributes)
+  }
+
+  private async buildEmployeeWageTierDefaults() {
+    const newestFundingPeriodWithEmployeeWageTiers = sql`
+      (
+        SELECT
+          fiscal_periods.funding_period_id
+        FROM
+          fiscal_periods
+          INNER JOIN employee_wage_tiers ON employee_wage_tiers.fiscal_period_id = fiscal_periods.id
+        ORDER BY
+          fiscal_periods.date_end DESC,
+          fiscal_periods.id DESC LIMIT 1
+      )
+    `
+
+    const newestEmployeeWageTiers = await EmployeeWageTier.findAll({
+      include: [
+        {
+          association: "fiscalPeriod",
+          where: {
+            fundingPeriodId: {
+              [Op.in]: newestFundingPeriodWithEmployeeWageTiers,
+            },
+          },
+        },
+      ],
+    })
+
+    if (isEmpty(newestEmployeeWageTiers)) {
+      return EMPLOYEE_WAGE_TIER_DEFAULTS
+    }
+
+    return newestEmployeeWageTiers.map(({ tierLevel, tierLabel, wageRatePerHour }) => ({
+      tierLevel,
+      tierLabel,
+      wageRatePerHour,
+    }))
   }
 }
 

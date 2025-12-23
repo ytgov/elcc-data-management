@@ -7,7 +7,6 @@ import LogServices from "@/services/log-services"
 import {
   Centres,
   EmployeeBenefits,
-  FundingPeriods,
   FundingReconciliationAdjustments,
   FundingReconciliations,
   FundingSubmissionLineJsons,
@@ -54,6 +53,13 @@ export class CreateService extends BaseService {
       throw new Error("Is First Nation Program is required")
     }
 
+    const fundingPeriod = await this.getLatestFundingPeriod()
+    if (isNil(fundingPeriod)) {
+      throw new Error(
+        "A funding period must be created before creating centres. Please create a funding period first."
+      )
+    }
+
     const statusOrFallback = status || Centre.Statuses.ACTIVE
 
     return db.transaction(async () => {
@@ -67,7 +73,7 @@ export class CreateService extends BaseService {
         status: statusOrFallback,
       })
 
-      const fundingPeriod = await this.ensureCurrentFiscalAndBaseEntities()
+      await centre.reload({ include: ["fundingRegion"] })
       await this.ensureChildEntitiesForCentre(centre, fundingPeriod)
       await this.logCentreCreation(centre, this.currentUser)
 
@@ -75,12 +81,10 @@ export class CreateService extends BaseService {
     })
   }
 
-  private async ensureCurrentFiscalAndBaseEntities(): Promise<FundingPeriod> {
-    const fundingPeriod = await FundingPeriods.EnsureCurrentService.perform()
-    await FundingPeriods.FiscalPeriods.BulkEnsureService.perform(fundingPeriod)
-    await FundingPeriods.EmployeeWageTiers.BulkEnsureService.perform(fundingPeriod)
-    await FundingPeriods.FundingSubmissionLines.BulkEnsureService.perform(fundingPeriod)
-    return fundingPeriod
+  private async getLatestFundingPeriod(): Promise<FundingPeriod | null> {
+    return FundingPeriod.findOne({
+      order: [["fromDate", "DESC"]],
+    })
   }
 
   private async ensureChildEntitiesForCentre(centre: Centre, fundingPeriod: FundingPeriod) {

@@ -33,7 +33,6 @@ export class BulkCreateBuildingExpensesService extends BaseService {
       throw new Error("No fiscal periods found for funding period.")
     }
 
-    // TODO: ensure that there are some defaults for building expense categories?
     const { fundingRegionId } = this.centre
     const buildingExpenseCategories = await BuildingExpenseCategory.findAll({
       where: {
