@@ -3,7 +3,7 @@ import { isNil } from "lodash"
 import logger from "@/utils/logger"
 import { Centre, FundingPeriod } from "@/models"
 import { CentrePolicy } from "@/policies/centre-policy"
-import { EnsureDependenciesService } from "@/services/funding-periods"
+import { EnsureDependenciesService } from "@/services/centres/funding-periods"
 
 import BaseController from "@/controllers/base-controller"
 

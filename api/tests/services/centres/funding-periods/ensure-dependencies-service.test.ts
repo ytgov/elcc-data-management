@@ -11,9 +11,9 @@ import {
   fundingSubmissionLineJsonFactory,
 } from "@/factories"
 
-import EnsureDependenciesService from "@/services/funding-periods/ensure-dependencies-service"
+import EnsureDependenciesService from "@/services/centres/funding-periods/ensure-dependencies-service"
 
-describe("api/src/services/funding-periods/ensure-dependencies-service.ts", () => {
+describe("api/src/services/centres/funding-periods/ensure-dependencies-service.ts", () => {
   describe("EnsureDependenciesService", () => {
     describe("#perform", () => {
       test("when funding period spans full year, and there are funding submission lines, creates funding submission line json records for each month", async () => {
