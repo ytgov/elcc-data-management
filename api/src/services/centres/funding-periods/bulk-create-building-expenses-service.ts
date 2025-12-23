@@ -1,33 +1,52 @@
 import { type CreationAttributes } from "@sequelize/core"
-import { isUndefined } from "lodash"
+import { isEmpty, isUndefined } from "lodash"
 
-import { BuildingExpense, BuildingExpenseCategory, Centre, FiscalPeriod } from "@/models"
+import {
+  BuildingExpense,
+  BuildingExpenseCategory,
+  Centre,
+  FiscalPeriod,
+  FundingPeriod,
+} from "@/models"
 import BaseService from "@/services/base-service"
-import { FiscalPeriods, FundingPeriods } from "@/services"
 
-export class BulkCreateForCentreService extends BaseService {
-  constructor(private centre: Centre) {
+export class BulkCreateBuildingExpensesService extends BaseService {
+  constructor(
+    private centre: Centre,
+    private fundingPeriod: FundingPeriod
+  ) {
     super()
   }
 
   async perform(): Promise<void> {
-    const { fundingRegionId, buildingUsagePercent } = this.centre
+    const { fundingRegion } = this.centre
+    if (isUndefined(fundingRegion)) {
+      throw new Error("Expected fundingRegion association to be pre-loaded.")
+    }
+
+    const fiscalPeriods = await FiscalPeriod.findAll({
+      where: {
+        fundingPeriodId: this.fundingPeriod.id,
+      },
+    })
+    if (isEmpty(fiscalPeriods)) {
+      throw new Error("No fiscal periods found for funding period.")
+    }
 
     // TODO: ensure that there are some defaults for building expense categories?
+    const { fundingRegionId } = this.centre
     const buildingExpenseCategories = await BuildingExpenseCategory.findAll({
-      include: [
-        {
-          association: "fundingRegion",
-          where: {
-            id: fundingRegionId,
-          },
-        },
-      ],
+      where: {
+        fundingRegionId,
+      },
+      include: ["fundingRegion"],
     })
-
-    const fiscalPeriods = await this.ensureFiscalPeriodsForCurrentFundingPeriod()
+    if (isEmpty(buildingExpenseCategories)) {
+      throw new Error("No building expense categories found for the centre's funding region.")
+    }
 
     let buildingExpensesAttributes: CreationAttributes<BuildingExpense>[] = []
+    const { buildingUsagePercent } = this.centre
     const BATCH_SIZE = 1000
 
     for (const fiscalPeriod of fiscalPeriods) {
@@ -62,11 +81,6 @@ export class BulkCreateForCentreService extends BaseService {
       await BuildingExpense.bulkCreate(buildingExpensesAttributes)
     }
   }
-
-  private async ensureFiscalPeriodsForCurrentFundingPeriod(): Promise<FiscalPeriod[]> {
-    const fundingPeriod = await FundingPeriods.EnsureCurrentService.perform()
-    return FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
-  }
 }
 
-export default BulkCreateForCentreService
+export default BulkCreateBuildingExpensesService

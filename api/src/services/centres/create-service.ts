@@ -1,11 +1,11 @@
 import { type CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
 
-import db, { Centre, Log, User } from "@/models"
+import db, { Centre, FundingPeriod, Log, User } from "@/models"
 import BaseService from "@/services/base-service"
 import LogServices from "@/services/log-services"
 import {
-  BuildingExpenses,
+  Centres,
   EmployeeBenefits,
   EmployeeWageTiers,
   FiscalPeriods,
@@ -70,24 +70,25 @@ export class CreateService extends BaseService {
         status: statusOrFallback,
       })
 
-      await this.ensureCurrentFiscalAndBaseEntities()
-      await this.ensureChildEntitiesForCentre(centre)
+      const fundingPeriod = await this.ensureCurrentFiscalAndBaseEntities()
+      await this.ensureChildEntitiesForCentre(centre, fundingPeriod)
       await this.logCentreCreation(centre, this.currentUser)
 
       return centre
     })
   }
 
-  private async ensureCurrentFiscalAndBaseEntities() {
+  private async ensureCurrentFiscalAndBaseEntities(): Promise<FundingPeriod> {
     const fundingPeriod = await FundingPeriods.EnsureCurrentService.perform()
     await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
     await EmployeeWageTiers.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
     await FundingSubmissionLines.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+    return fundingPeriod
   }
 
-  private async ensureChildEntitiesForCentre(centre: Centre) {
+  private async ensureChildEntitiesForCentre(centre: Centre, fundingPeriod: FundingPeriod) {
     await EmployeeBenefits.BulkEnsureForCentreService.perform(centre)
-    await BuildingExpenses.BulkEnsureForCentreService.perform(centre)
+    await Centres.FundingPeriods.BulkEnsureBuildingExpensesService.perform(centre, fundingPeriod)
     await FundingSubmissionLineJsons.BulkEnsureForCentreService.perform(centre)
     await FundingReconciliations.BulkEnsureForCentreService.perform(centre)
     await FundingReconciliationAdjustments.BulkEnsureForCentreService.perform(centre)

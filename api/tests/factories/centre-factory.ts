@@ -1,5 +1,6 @@
 import { Factory } from "fishery"
 import { faker } from "@faker-js/faker"
+import { type Includeable } from "@sequelize/core"
 
 import { Centre } from "@/models"
 import { CentreStatuses } from "@/models/centre"
@@ -24,12 +25,23 @@ const yukonCommunities = [
   "Champagne",
 ]
 
-export const centreFactory = Factory.define<Centre>(
-  ({ sequence, params, associations, onCreate }) => {
+type TransientParam = {
+  include?: Includeable | Includeable[]
+}
+
+export const centreFactory = Factory.define<Centre, TransientParam>(
+  ({ sequence, params, associations, transientParams, onCreate }) => {
     onCreate(async (centre) => {
       try {
         await nestedSaveAndAssociateIfNew(centre)
-        return centre
+
+        if (transientParams.include === undefined) {
+          return centre
+        }
+
+        return centre.reload({
+          include: transientParams.include,
+        })
       } catch (error) {
         console.error(error)
         throw new Error(
