@@ -14,6 +14,7 @@ import {
   HasMany,
   NotNull,
   PrimaryKey,
+  Table,
   ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
 import { DateTime } from "luxon"
@@ -57,6 +58,9 @@ export const FISCAL_PERIOD_MONTHS = Object.values<string>(FiscalPeriodMonths)
  *
  * @see FundingPeriod - The parent fiscal year that contains these monthly periods
  */
+@Table({
+  tableName: "fiscal_periods",
+})
 export class FiscalPeriod extends BaseModel<
   InferAttributes<FiscalPeriod>,
   InferCreationAttributes<FiscalPeriod>
