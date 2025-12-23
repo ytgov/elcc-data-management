@@ -7,7 +7,7 @@ import {
   BuildingExpenses,
   EmployeeBenefits,
   EmployeeWageTiers,
-  FiscalPeriods,
+  FundingPeriods,
   FundingReconciliationAdjustments,
   FundingReconciliations,
   FundingSubmissionLineJsons,
@@ -63,7 +63,7 @@ export class CreateService extends BaseService {
   }
 
   private async createFiscalPeriods(fundingPeriod: FundingPeriod) {
-    await FiscalPeriods.BulkCreateForFundingPeriodService.perform(fundingPeriod)
+    await FundingPeriods.FiscalPeriods.BulkCreateService.perform(fundingPeriod)
   }
 
   private async createEmployeeWageTiers(fundingPeriod: FundingPeriod) {

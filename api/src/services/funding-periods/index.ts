@@ -5,3 +5,6 @@ export { UpdateService } from "./update-service"
 // Special actions
 export { EnsureCurrentService } from "./ensure-current-service"
 export { EnsureDependenciesService } from "./ensure-dependencies-service"
+
+// Bundled exports
+export * as FiscalPeriods from "./fiscal-periods"

@@ -5,7 +5,7 @@ import { FiscalPeriod, FundingPeriod } from "@/models"
 import { FiscalPeriodMonths } from "@/models/fiscal-period"
 import BaseService from "@/services/base-service"
 
-export class BulkCreateForFundingPeriodService extends BaseService {
+export class BulkCreateService extends BaseService {
   constructor(private fundingPeriod: FundingPeriod) {
     super()
   }
@@ -45,4 +45,4 @@ export class BulkCreateForFundingPeriodService extends BaseService {
   }
 }
 
-export default BulkCreateForFundingPeriodService
+export default BulkCreateService

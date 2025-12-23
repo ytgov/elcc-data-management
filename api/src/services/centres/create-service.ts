@@ -8,7 +8,6 @@ import {
   Centres,
   EmployeeBenefits,
   EmployeeWageTiers,
-  FiscalPeriods,
   FundingPeriods,
   FundingReconciliationAdjustments,
   FundingReconciliations,
@@ -80,7 +79,7 @@ export class CreateService extends BaseService {
 
   private async ensureCurrentFiscalAndBaseEntities(): Promise<FundingPeriod> {
     const fundingPeriod = await FundingPeriods.EnsureCurrentService.perform()
-    await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+    await FundingPeriods.FiscalPeriods.BulkEnsureService.perform(fundingPeriod)
     await EmployeeWageTiers.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
     await FundingSubmissionLines.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
     return fundingPeriod

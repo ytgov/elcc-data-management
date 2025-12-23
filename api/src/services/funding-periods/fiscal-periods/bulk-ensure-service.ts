@@ -2,9 +2,9 @@ import { isEmpty } from "lodash"
 
 import { FiscalPeriod, FundingPeriod } from "@/models"
 import BaseService from "@/services/base-service"
-import BulkCreateForFundingPeriodService from "@/services/fiscal-periods/bulk-create-for-funding-period-service"
+import BulkCreateService from "@/services/funding-periods/fiscal-periods/bulk-create-service"
 
-export class BulkEnsureForFundingPeriodService extends BaseService {
+export class BulkEnsureService extends BaseService {
   constructor(private fundingPeriod: FundingPeriod) {
     super()
   }
@@ -17,8 +17,8 @@ export class BulkEnsureForFundingPeriodService extends BaseService {
     })
     if (!isEmpty(fiscalPeriods)) return fiscalPeriods
 
-    return BulkCreateForFundingPeriodService.perform(this.fundingPeriod)
+    return BulkCreateService.perform(this.fundingPeriod)
   }
 }
 
-export default BulkEnsureForFundingPeriodService
+export default BulkEnsureService

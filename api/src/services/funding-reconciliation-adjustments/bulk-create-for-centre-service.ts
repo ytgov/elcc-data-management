@@ -7,7 +7,7 @@ import {
   FundingReconciliationAdjustment,
 } from "@/models"
 import BaseService from "@/services/base-service"
-import { FiscalPeriods, FundingPeriods, FundingReconciliations } from "@/services"
+import { FundingPeriods, FundingReconciliations } from "@/services"
 
 export class BulkCreateForCentreService extends BaseService {
   constructor(private centre: Centre) {
@@ -40,7 +40,7 @@ export class BulkCreateForCentreService extends BaseService {
 
   private async ensureFiscalPeriodsForCurrentFundingPeriod(): Promise<FiscalPeriod[]> {
     const fundingPeriod = await FundingPeriods.EnsureCurrentService.perform()
-    return FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+    return FundingPeriods.FiscalPeriods.BulkEnsureService.perform(fundingPeriod)
   }
 }
 

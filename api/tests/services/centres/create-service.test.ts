@@ -11,13 +11,13 @@ import {
 
 import {
   buildingExpenseCategoryFactory,
+  fiscalPeriodFactory,
   fundingPeriodFactory,
   fundingRegionFactory,
   userFactory,
 } from "@/factories"
 
 import CreateService from "@/services/centres/create-service"
-import { FiscalPeriods } from "@/services"
 
 describe("api/src/services/centres/create-service.ts", () => {
   describe("CreateService", () => {
@@ -149,7 +149,6 @@ describe("api/src/services/centres/create-service.ts", () => {
         const buildingExpensesCount = await BuildingExpense.count({
           where: { centreId: centre.id },
         })
-
         expect(buildingExpensesCount).toEqual(24) // 12 fiscal periods × 2 categories
       })
 
@@ -173,7 +172,6 @@ describe("api/src/services/centres/create-service.ts", () => {
         const fundingSubmissionLineJsons = await FundingSubmissionLineJson.findAll({
           where: { centreId: centre.id },
         })
-
         expect(fundingSubmissionLineJsons.length).toEqual(12) // 12 months
       })
 
@@ -197,7 +195,6 @@ describe("api/src/services/centres/create-service.ts", () => {
         const fundingReconciliationsCount = await FundingReconciliation.count({
           where: { centreId: centre.id },
         })
-
         expect(fundingReconciliationsCount).toEqual(1)
       })
 
@@ -226,7 +223,6 @@ describe("api/src/services/centres/create-service.ts", () => {
             },
           ],
         })
-
         expect(fundingReconciliationAdjustmentsCount).toEqual(12) // 1 funding period × 12 fiscal periods
       })
 
@@ -240,7 +236,16 @@ describe("api/src/services/centres/create-service.ts", () => {
             fromDate: new Date("2024-04-01"),
             toDate: new Date("2025-03-31"),
           })
-          await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+          await fiscalPeriodFactory.create({
+            fundingPeriodId: fundingPeriod.id,
+            fiscalYear: "2024-25",
+            dateStart: new Date("2024-04-01"),
+          })
+          await fiscalPeriodFactory.create({
+            fundingPeriodId: fundingPeriod.id,
+            fiscalYear: "2024-25",
+            dateStart: new Date("2024-05-01"),
+          })
 
           const attributes = {
             fundingRegionId: fundingRegion.id,
@@ -275,7 +280,16 @@ describe("api/src/services/centres/create-service.ts", () => {
             fromDate: new Date("2024-04-01"),
             toDate: new Date("2025-03-31"),
           })
-          await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+          await fiscalPeriodFactory.create({
+            fundingPeriodId: fundingPeriod.id,
+            fiscalYear: "2024-25",
+            dateStart: new Date("2024-04-01"),
+          })
+          await fiscalPeriodFactory.create({
+            fundingPeriodId: fundingPeriod.id,
+            fiscalYear: "2024-25",
+            dateStart: new Date("2024-05-01"),
+          })
 
           const attributes = {
             fundingRegionId: fundingRegion.id,
@@ -292,7 +306,6 @@ describe("api/src/services/centres/create-service.ts", () => {
           const employeeBenefitsCount = await EmployeeBenefit.count({
             where: { centreId: centre.id },
           })
-
           expect(employeeBenefitsCount).toEqual(12)
         })
 
@@ -308,7 +321,16 @@ describe("api/src/services/centres/create-service.ts", () => {
             fromDate: new Date("2024-04-01"),
             toDate: new Date("2025-03-31"),
           })
-          await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+          await fiscalPeriodFactory.create({
+            fundingPeriodId: fundingPeriod.id,
+            fiscalYear: "2024-25",
+            dateStart: new Date("2024-04-01"),
+          })
+          await fiscalPeriodFactory.create({
+            fundingPeriodId: fundingPeriod.id,
+            fiscalYear: "2024-25",
+            dateStart: new Date("2024-05-01"),
+          })
 
           const attributes = {
             fundingRegionId: fundingRegion.id,
@@ -339,7 +361,16 @@ describe("api/src/services/centres/create-service.ts", () => {
             fromDate: new Date("2025-04-01"),
             toDate: new Date("2026-03-31"),
           })
-          await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+          await fiscalPeriodFactory.create({
+            fundingPeriodId: fundingPeriod.id,
+            fiscalYear: "2024-25",
+            dateStart: new Date("2024-04-01"),
+          })
+          await fiscalPeriodFactory.create({
+            fundingPeriodId: fundingPeriod.id,
+            fiscalYear: "2024-25",
+            dateStart: new Date("2024-05-01"),
+          })
 
           const attributes = {
             fundingRegionId: fundingRegion.id,
@@ -354,7 +385,6 @@ describe("api/src/services/centres/create-service.ts", () => {
 
           // Assert
           const fundingPeriodsCount = await FundingPeriod.count()
-
           expect(fundingPeriodsCount).toEqual(1)
         })
 
@@ -367,7 +397,16 @@ describe("api/src/services/centres/create-service.ts", () => {
             fromDate: new Date("2024-04-01"),
             toDate: new Date("2025-03-31"),
           })
-          await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+          await fiscalPeriodFactory.create({
+            fundingPeriodId: fundingPeriod.id,
+            fiscalYear: "2024-25",
+            dateStart: new Date("2024-04-01"),
+          })
+          await fiscalPeriodFactory.create({
+            fundingPeriodId: fundingPeriod.id,
+            fiscalYear: "2024-25",
+            dateStart: new Date("2024-05-01"),
+          })
 
           const attributes = {
             fundingRegionId: fundingRegion.id,
@@ -384,7 +423,6 @@ describe("api/src/services/centres/create-service.ts", () => {
           const fundingReconciliationsCount = await FundingReconciliation.count({
             where: { centreId: centre.id },
           })
-
           expect(fundingReconciliationsCount).toEqual(1)
         })
 
@@ -397,7 +435,16 @@ describe("api/src/services/centres/create-service.ts", () => {
             fromDate: new Date("2024-04-01"),
             toDate: new Date("2025-03-31"),
           })
-          await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+          await fiscalPeriodFactory.create({
+            fundingPeriodId: fundingPeriod.id,
+            fiscalYear: "2024-25",
+            dateStart: new Date("2024-04-01"),
+          })
+          await fiscalPeriodFactory.create({
+            fundingPeriodId: fundingPeriod.id,
+            fiscalYear: "2024-25",
+            dateStart: new Date("2024-05-01"),
+          })
 
           const attributes = {
             fundingRegionId: fundingRegion.id,
@@ -421,7 +468,7 @@ describe("api/src/services/centres/create-service.ts", () => {
               ],
             }
           )
-          expect(fundingReconciliationAdjustmentsCount).toEqual(12) // 1 funding period × 12 fiscal periods
+          expect(fundingReconciliationAdjustmentsCount).toEqual(2) // 1 funding period × 2 fiscal periods
         })
       })
     })
