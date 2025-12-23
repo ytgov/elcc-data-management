@@ -1216,6 +1216,39 @@ export default UpdateService
 
 Example: A `CreateService` for fiscal periods creates 12 records (one for each month of the fiscal year). The file is still named `create-service.ts` and the class is still `CreateService`, because it's the standard create operation for that resource.
 
+**Service organization for scoped entities:**
+
+When services operate exclusively on child entities of a parent (e.g., employee wage tiers that only exist within funding periods), nest them under the parent using namespace exports:
+
+```
+services/
+  funding-periods/
+    create-service.ts
+    employee-wage-tiers/
+      bulk-create-service.ts       # Creates employee wage tiers for a funding period
+      bulk-ensure-service.ts
+      index.ts
+    index.ts                        # Exports EmployeeWageTiers namespace
+```
+
+**Usage pattern:**
+
+```typescript
+// Before (flat structure with redundant naming):
+import { EmployeeWageTiers } from "@/services"
+await EmployeeWageTiers.BulkCreateForFundingPeriodService.perform(fundingPeriod)
+
+// After (hierarchical structure with concise naming):
+import { FundingPeriods } from "@/services"
+await FundingPeriods.EmployeeWageTiers.BulkCreateService.perform(fundingPeriod)
+```
+
+**Benefits:**
+- Eliminates redundant context in service names
+- Makes parent-child relationships explicit through directory structure
+- Reduces top-level namespace pollution
+- Service name indicates action, directory path indicates scope
+
 ### Serializers
 
 **Pattern:** Control exactly which attributes are exposed to the API.
