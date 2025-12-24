@@ -165,6 +165,7 @@ docker compose -f docker-compose.development.yaml up --remove-orphans --build
 2. **No abbreviations**
    - Variables: `migration` not `mig`
    - SQL tables: `employee_benefits` not `emp_ben`
+   - SQL aliases: Use full table names instead of abbreviations (e.g., `funding_submission_line_jsons` not `fslj`)
    - Function parameters: `fiscalPeriod` not `fp`
 
 3. **Self-documenting code**
