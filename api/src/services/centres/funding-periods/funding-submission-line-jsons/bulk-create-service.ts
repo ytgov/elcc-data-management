@@ -1,9 +1,9 @@
 import { type CreationAttributes } from "@sequelize/core"
-import { DateTime } from "luxon"
 import { isEmpty } from "lodash"
 
 import {
   Centre,
+  FiscalPeriod,
   FundingSubmissionLine,
   FundingSubmissionLineJson,
   type FundingPeriod,
@@ -19,21 +19,27 @@ export class BulkCreateService extends BaseService {
   }
 
   async perform(): Promise<FundingSubmissionLineJson[]> {
-    const { fiscalYear: fundingPeriodFiscalYear } = this.fundingPeriod
-    const currentFiscalYearLegacy =
-      FundingSubmissionLine.toLegacyFiscalYearFormat(fundingPeriodFiscalYear)
+    const fiscalPeriods = await FiscalPeriod.findAll({
+      where: {
+        fundingPeriodId: this.fundingPeriod.id,
+      },
+    })
+    if (isEmpty(fiscalPeriods)) {
+      throw new Error("No fiscal periods found for the given funding period")
+    }
+
+    const { fiscalYear: fiscalYearLong } = this.fundingPeriod
+    const fiscalYearLegacy = FundingSubmissionLine.toLegacyFiscalYearFormat(fiscalYearLong)
 
     const fundingSubmissionLines = await FundingSubmissionLine.findAll({
       where: {
-        fiscalYear: currentFiscalYearLegacy,
+        fiscalYear: fiscalYearLegacy,
       },
     })
     if (isEmpty(fundingSubmissionLines)) {
       throw new Error("No funding submission lines found for the funding period.")
     }
 
-    const { fromDate, toDate } = this.fundingPeriod
-    const fiscalYearLegacy = FundingSubmissionLine.toLegacyFiscalYearFormat(fundingPeriodFiscalYear)
     const fundingSubmissionLineJsonsDefaults = fundingSubmissionLines.map(
       (fundingSubmissionLine) => ({
         submissionLineId: fundingSubmissionLine.id,
@@ -47,26 +53,20 @@ export class BulkCreateService extends BaseService {
       })
     )
 
-    const fundingSubmissionLineJsonsAttributes: CreationAttributes<FundingSubmissionLineJson>[] = []
-    let currentDate = DateTime.fromJSDate(fromDate)
-    const toDateDateTime = DateTime.fromJSDate(toDate)
-
-    while (currentDate <= toDateDateTime) {
-      const dateStart = currentDate.startOf("month")
-      const dateEnd = currentDate.endOf("month").set({ millisecond: 0 })
-      const dateName = FundingSubmissionLineJson.asFundingSubmissionLineJsonMonth(dateStart)
-
-      fundingSubmissionLineJsonsAttributes.push({
-        centreId: this.centre.id,
-        fiscalYear: fiscalYearLegacy,
-        dateName,
-        dateStart: dateStart.toJSDate(),
-        dateEnd: dateEnd.toJSDate(),
-        values: JSON.stringify(fundingSubmissionLineJsonsDefaults),
+    const { id: centreId } = this.centre
+    const fundingSubmissionLineJsonsAttributes: CreationAttributes<FundingSubmissionLineJson>[] =
+      fiscalPeriods.map(({ dateStart, dateEnd }) => {
+        const dateName = FundingSubmissionLineJson.asFundingSubmissionLineJsonMonth(dateStart)
+        const values = JSON.stringify(fundingSubmissionLineJsonsDefaults)
+        return {
+          centreId,
+          fiscalYear: fiscalYearLegacy,
+          dateName,
+          dateStart,
+          dateEnd,
+          values,
+        }
       })
-
-      currentDate = currentDate.plus({ months: 1 })
-    }
 
     return FundingSubmissionLineJson.bulkCreate(fundingSubmissionLineJsonsAttributes)
   }
