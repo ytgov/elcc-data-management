@@ -23,6 +23,7 @@ This file follows the format from https://agents.md/ for AI agent documentation.
   - [Decimal Type Handling](#decimal-type-handling)
 - [Backend Patterns](#backend-patterns)
   - [Model Organization](#model-organization)
+    - [Scope Naming Convention](#scope-naming-convention)
     - [Soft Delete (Paranoid Mode)](#soft-delete-paranoid-mode)
   - [Seed File Patterns](#seed-file-patterns)
   - [Controller Structure](#controller-structure)
@@ -686,6 +687,26 @@ const formatted = formatMoney(total)
   - `timestampField: CreationOptional<Date>` (non-nullable with database default)
   - `optionalField: Type | null` (truly nullable, no CreationOptional)
   - `requiredField: Type` (required, no CreationOptional)
+
+#### Scope Naming Convention
+
+**Pattern:** Scope names describe the relationship/entity being filtered, not the parameter type. Omit "Id" suffix from scope names even when the parameter is an ID.
+
+```typescript
+// Correct - scope name describes the relationship
+this.addScope("byFundingPeriod", (fundingPeriodId: number) => { ... })
+
+// Usage
+Model.withScope({ method: ["byFundingPeriod", fundingPeriodId] }).findAll()
+
+// Incorrect - don't include "Id" in scope name
+this.addScope("byFundingPeriodId", ...)  // Wrong
+```
+
+**Examples of correct naming:**
+- `byFundingPeriod` (not `byFundingPeriodId`)
+- `byCentre` (not `byCentreId`)
+- `byFiscalPeriod` (not `byFiscalPeriodId`)
 
 #### Soft Delete (Paranoid Mode)
 
