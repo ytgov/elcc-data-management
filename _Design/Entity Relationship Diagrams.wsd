@@ -7,106 +7,242 @@ This diagram may be out of date and should be verified against the current datab
 Last updated (by Claude Sonet 4.5): 2025-12-01
 end note
 
-entity "centres" {
-  * id : int [PK]
-  --
-  * name : nvarchar(200)
-  * status : nvarchar(255)
-  * region : nvarchar(100)
-  * community : nvarchar(255)
-  * is_first_nation_program : bit
-  --
-  alt_email : nvarchar(100)
-  alt_phone_number : nvarchar(20)
-  contact_name : nvarchar(100)
-  email : nvarchar(100)
-  fax_number : nvarchar(20)
-  hot_meal : bit
-  inspector_name : nvarchar(100)
-  last_submission : date
-  license : nvarchar(255)
-  license_holder_name : nvarchar(100)
-  licensed_for : int
-  mailing_address : nvarchar(250)
-  neighborhood : nvarchar(100)
-  phone_number : nvarchar(20)
-  physical_address : nvarchar(250)
-  vendor_identifier : nvarchar(20)
-  --
-  * created_at : datetime2
-  * updated_at : datetime2
+together {
+  entity "funding_regions" {
+    * id : int [PK]
+    --
+    * region : nvarchar(100)
+    * subsidy_rate : decimal(5,4)
+    --
+    * created_at : datetime2
+    * updated_at : datetime2
+    deleted_at : datetime2
+  }
+
+  entity "building_expense_categories" {
+    * id : int [PK]
+    --
+    * funding_region_id : int [FK]
+    * category_name : nvarchar(100)
+    * subsidy_rate : decimal(5,4)
+    --
+    * created_at : datetime2
+    * updated_at : datetime2
+    deleted_at : datetime2
+  }
 }
 
-entity "employee_benefits" {
-  * id : int [PK]
-  --
-  * centre_id : int [FK]
-  * fiscal_period_id : int [FK]
-  --
-  * gross_payroll_monthly_actual : decimal(15,4)
-  * gross_payroll_monthly_estimated : decimal(15,4)
-  * cost_cap_percentage : decimal(5,2)
-  * employee_cost_actual : decimal(15,4)
-  * employee_cost_estimated : decimal(15,4)
-  * employer_cost_actual : decimal(15,4)
-  * employer_cost_estimated : decimal(15,4)
-  --
-  * created_at : datetime2
-  * updated_at : datetime2
+together {
+  entity "funding_periods" {
+    * id : int [PK]
+    --
+    * fiscal_year : nvarchar(10)
+    * from_date : datetime2(0)
+    * to_date : datetime2(0)
+    * title : nvarchar(100)
+    --
+    * created_at : datetime2
+    * updated_at : datetime2
+    deleted_at : datetimeoffset
+  }
+
+  entity "employee_wage_tiers" {
+    * id : int [PK]
+    --
+    * fiscal_period_id : int [FK]
+    --
+    * tier_label : nvarchar(50)
+    * tier_level : int
+    * wage_rate_per_hour : decimal(10,4)
+    --
+    * created_at : datetime2
+    * updated_at : datetime2
+    deleted_at : datetimeoffset
+  }
+
+  entity "fiscal_periods" {
+    * id : int [PK]
+    --
+    * funding_period_id : int [FK]
+    --
+    * fiscal_year : nvarchar(10)
+    * [month] : nvarchar(10)
+    * date_start : datetime2(0)
+    * date_end : datetime2(0)
+    --
+    * created_at : datetime2(0)
+    * updated_at : datetime2(0)
+    deleted_at : datetimeoffset
+  }
+
+  entity "funding_submission_lines" {
+    * id : int [PK]
+    --
+    * fiscal_year : nvarchar(10)
+    * section_name : nvarchar(200)
+    * line_name : nvarchar(200)
+    * monthly_amount : decimal(15,4)
+    --
+    from_age : int
+    to_age : int
+    --
+    * created_at : datetime2
+    * updated_at : datetime2
+    deleted_at : datetimeoffset
+  }
 }
 
-entity "employee_wage_tiers" {
-  * id : int [PK]
-  --
-  * fiscal_period_id : int [FK]
-  --
-  * tier_label : nvarchar(50)
-  * tier_level : int
-  * wage_rate_per_hour : decimal(10,4)
-  --
-  * created_at : datetime2
-  * updated_at : datetime2
-}
+together {
+  entity "centres" {
+    * id : int [PK]
+    --
+    * funding_region_id : int [FK]
+    --
+    * name : nvarchar(200)
+    * status : nvarchar(255)
+    * region : nvarchar(100)
+    * community : nvarchar(255)
+    * is_first_nation_program : bit
+    --
+    alt_email : nvarchar(100)
+    alt_phone_number : nvarchar(20)
+    contact_name : nvarchar(100)
+    email : nvarchar(100)
+    fax_number : nvarchar(20)
+    hot_meal : bit
+    inspector_name : nvarchar(100)
+    last_submission : date
+    license : nvarchar(255)
+    license_holder_name : nvarchar(100)
+    licensed_for : int
+    mailing_address : nvarchar(250)
+    neighborhood : nvarchar(100)
+    phone_number : nvarchar(20)
+    physical_address : nvarchar(250)
+    vendor_identifier : nvarchar(20)
+    --
+    * created_at : datetime2
+    * updated_at : datetime2
+  }
 
-entity "fiscal_periods" {
-  * id : int [PK]
-  --
-  funding_period_id : int [FK]
-  --
-  * fiscal_year : nvarchar(10)
-  * [month] : nvarchar(10)
-  * date_start : datetime2(0)
-  * date_end : datetime2(0)
-  --
-  * created_at : datetime2(0)
-  * updated_at : datetime2(0)
-}
+  entity "building_expenses" {
+    * id : int [PK]
+    --
+    * building_expense_category_id : int [FK]
+    * centre_id : int [FK]
+    * fiscal_period_id : int [FK]
+    --
+    * funding_region_snapshot : nvarchar(100)
+    * subsidy_rate : decimal(5,4)
+    * building_usage_percent : decimal(5,2)
+    * estimated_cost : decimal(15,4)
+    * actual_cost : decimal(15,4)
+    * total_cost : decimal(15,4)
+    notes : nvarchar(MAX)
+    --
+    * created_at : datetime2
+    * updated_at : datetime2
+    deleted_at : datetime2
+  }
 
-entity "funding_periods" {
-  * id : int [PK]
-  --
-  * fiscal_year : nvarchar(10)
-  * from_date : datetime2(0)
-  * to_date : datetime2(0)
-  * title : nvarchar(100)
-  --
-  * created_at : datetime2
-  * updated_at : datetime2
-}
+  entity "employee_benefits" {
+    * id : int [PK]
+    --
+    * centre_id : int [FK]
+    * fiscal_period_id : int [FK]
+    --
+    * gross_payroll_monthly_actual : decimal(15,4)
+    * gross_payroll_monthly_estimated : decimal(15,4)
+    * cost_cap_percentage : decimal(5,2)
+    * employee_cost_actual : decimal(15,4)
+    * employee_cost_estimated : decimal(15,4)
+    * employer_cost_actual : decimal(15,4)
+    * employer_cost_estimated : decimal(15,4)
+    --
+    * created_at : datetime2
+    * updated_at : datetime2
+    deleted_at : datetimeoffset
+  }
 
-entity "funding_submission_line_jsons" {
-  * id : int [PK]
-  --
-  * centre_id : int [FK]
-  --
-  * fiscal_year : nvarchar(10)
-  * date_name : nvarchar(100)
-  * date_start : datetime2(0)
-  * date_end : datetime2(0)
-  * [values] : nvarchar(MAX)
-  --
-  * created_at : datetime2
-  * updated_at : datetime2
+  entity "funding_submission_line_jsons" {
+    * id : int [PK]
+    --
+    * centre_id : int [FK]
+    --
+    * fiscal_year : nvarchar(10)
+    * date_name : nvarchar(100)
+    * date_start : datetime2(0)
+    * date_end : datetime2(0)
+    * [values] : nvarchar(MAX)
+    --
+    * created_at : datetime2
+    * updated_at : datetime2
+  }
+
+  entity "funding_reconciliations" {
+    * id : int [PK]
+    --
+    * centre_id : int [FK]
+    * funding_period_id : int [FK]
+    finalized_by_id : int [FK]
+    --
+    * status : nvarchar(20)
+    * funding_received_total_amount : decimal(15,4)
+    * eligible_expenses_total_amount : decimal(15,4)
+    * payroll_adjustments_total_amount : decimal(15,4)
+    * final_balance_amount : decimal(15,4)
+    notes : nvarchar(MAX)
+    finalized_at : datetime2
+    --
+    * created_at : datetime2
+    * updated_at : datetime2
+    deleted_at : datetime2
+  }
+
+  entity "funding_reconciliation_adjustments" {
+    * id : int [PK]
+    --
+    * funding_reconciliation_id : int [FK]
+    * fiscal_period_id : int [FK]
+    --
+    * funding_received_period_amount : decimal(15,4)
+    * eligible_expenses_period_amount : decimal(15,4)
+    * payroll_adjustments_period_amount : decimal(15,4)
+    * cumulative_balance_amount : decimal(15,4)
+    --
+    * created_at : datetime2
+    * updated_at : datetime2
+    deleted_at : datetime2
+  }
+
+  entity "payments" {
+    * id : int [PK]
+    --
+    * centre_id : int [FK]
+    fiscal_period_id : int [FK]
+    --
+    * fiscal_year : nvarchar(10)
+    * paid_on : date
+    * amount : decimal(15,4)
+    * name : nvarchar(100)
+    --
+    * created_at : datetime2
+    * updated_at : datetime2
+  }
+
+  entity "wage_enhancements" {
+    * id : int [PK]
+    --
+    * centre_id : int [FK]
+    * employee_wage_tier_id : int [FK]
+    --
+    * employee_name : nvarchar(100)
+    * hours_estimated : decimal(10,2)
+    * hours_actual : decimal(10,2)
+    --
+    * created_at : datetime2
+    * updated_at : datetime2
+  }
 }
 
 ' This is stored as json in the funding_submission_line_jsons::values column
@@ -123,21 +259,6 @@ entity "FundingLineValue" {
   * estimated_computed_total : string (decimal)
 }
 
-entity "funding_submission_lines" {
-  * id : int [PK]
-  --
-  * fiscal_year : nvarchar(10)
-  * section_name : nvarchar(200)
-  * line_name : nvarchar(200)
-  * monthly_amount : decimal(15,4)
-  --
-  from_age : int
-  to_age : int
-  --
-  * created_at : datetime2
-  * updated_at : datetime2
-}
-
 ' This table is a sort of polymorphic table to store changes relating to some arbitrary table.
 entity "logs" {
   * id : int [PK]
@@ -149,21 +270,7 @@ entity "logs" {
   --
   * created_at : datetime2
   * updated_at : datetime2
-}
-
-entity "payments" {
-  * id : int [PK]
-  --
-  * centre_id : int [FK]
-  fiscal_period_id : int [FK]
-  --
-  * fiscal_year : nvarchar(10)
-  * paid_on : date
-  * amount : decimal(15,4)
-  * name : nvarchar(100)
-  --
-  * created_at : datetime2
-  * updated_at : datetime2
+  deleted_at : datetimeoffset
 }
 
 entity "users" {
@@ -182,75 +289,32 @@ entity "users" {
   --
   * created_at : datetime2
   * updated_at : datetime2
-}
-
-entity "wage_enhancements" {
-  * id : int [PK]
-  --
-  * centre_id : int [FK]
-  * employee_wage_tier_id : int [FK]
-  --
-  * employee_name : nvarchar(100)
-  * hours_estimated : decimal(10,2)
-  * hours_actual : decimal(10,2)
-  --
-  * created_at : datetime2
-  * updated_at : datetime2
-}
-
-entity "funding_reconciliations" {
-  * id : int [PK]
-  --
-  * centre_id : int [FK]
-  * funding_period_id : int [FK]
-  finalized_by_id : int [FK]
-  --
-  * status : nvarchar(20)
-  * funding_received_total_amount : decimal(15,4)
-  * eligible_expenses_total_amount : decimal(15,4)
-  * payroll_adjustments_total_amount : decimal(15,4)
-  * final_balance_amount : decimal(15,4)
-  notes : nvarchar(MAX)
-  finalized_at : datetime2
-  --
-  * created_at : datetime2
-  * updated_at : datetime2
-  deleted_at : datetime2
-}
-
-entity "funding_reconciliation_adjustments" {
-  * id : int [PK]
-  --
-  * funding_reconciliation_id : int [FK]
-  * fiscal_period_id : int [FK]
-  --
-  * funding_received_period_amount : decimal(15,4)
-  * eligible_expenses_period_amount : decimal(15,4)
-  * payroll_adjustments_period_amount : decimal(15,4)
-  * cumulative_balance_amount : decimal(15,4)
-  --
-  * created_at : datetime2
-  * updated_at : datetime2
-  deleted_at : datetime2
+  deleted_at : datetimeoffset
 }
 
 ' Relationships
+building_expense_categories::id }o--|| building_expenses::building_expense_category_id
+centres }o--o| logs::table_name
+centres::id }o--|| building_expenses::centre_id
 centres::id }o--|| employee_benefits::centre_id
+centres::id }o--|| funding_reconciliations::centre_id
 centres::id }o--|| funding_submission_line_jsons::centre_id
 centres::id }o--|| payments::centre_id
 centres::id }o--|| wage_enhancements::centre_id
-centres::id }o--|| funding_reconciliations::centre_id
-centres }o--o| logs::table_name
 employee_wage_tiers::id }o--|| wage_enhancements::employee_wage_tier_id
+fiscal_periods::id }o--|| building_expenses::fiscal_period_id
 fiscal_periods::id }o--|| employee_benefits::fiscal_period_id
 fiscal_periods::id }o--|| employee_wage_tiers::fiscal_period_id
-fiscal_periods::id }o--|| payments::fiscal_period_id
 fiscal_periods::id }o--|| funding_reconciliation_adjustments::fiscal_period_id
+fiscal_periods::id }o--|| payments::fiscal_period_id
 funding_periods::id }o--|| fiscal_periods::funding_period_id
 funding_periods::id }o--|| funding_reconciliations::funding_period_id
+funding_periods::fiscal_year }o..|| funding_submission_lines::fiscal_year
 funding_reconciliations::id }o--|| funding_reconciliation_adjustments::funding_reconciliation_id
+funding_regions::id }o--|| building_expense_categories::funding_region_id
+funding_regions::id }o--|| centres::funding_region_id
 funding_submission_line_jsons::values }o--|| FundingLineValue
 funding_submission_lines::id }o--|| FundingLineValue::submission_line_id
-users::id }o--|| funding_reconciliations::finalized_by_id
 users::email }o--|| logs::user_email
+users::id }o--|| funding_reconciliations::finalized_by_id
 @enduml
