@@ -3,7 +3,6 @@ export { UpdateService } from "./update-service"
 
 // Specialized services
 export { BulkCreateForCentreService } from "./bulk-create-for-centre-service"
-export { BulkCreateForFundingPeriodService } from "./bulk-create-for-funding-period-service"
 export { BulkEnsureForCentreService } from "./bulk-ensure-for-centre-service"
 export { CalculateEligibleExpensesPeriodAmountService } from "./calculate-eligible-expenses-period-amount-service"
 export { CalculateFundingReceivedPeriodAmountService } from "./calculate-funding-received-period-amount-service"
