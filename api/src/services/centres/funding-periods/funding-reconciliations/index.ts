@@ -1,2 +1,2 @@
 export { CreateService } from "./create-service"
-export { UpdateService } from "./update-service"
+export { EnsureService } from "./ensure-service"
