@@ -13,7 +13,9 @@ export class BulkEnsureService extends BaseService {
   }
 
   async perform(): Promise<BuildingExpense[]> {
-    const buildingExpenses = await BuildingExpense.findAll({
+    const buildingExpenses = await BuildingExpense.withScope({
+      method: ["byFundingPeriod", this.fundingPeriod.id],
+    }).findAll({
       where: {
         centreId: this.centre.id,
       },
