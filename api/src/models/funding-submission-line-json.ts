@@ -153,7 +153,7 @@ export class FundingSubmissionLineJson extends BaseModel<
   declare centre?: NonAttribute<Centre>
 
   static establishScopes() {
-    this.addScope("byFundingPeriodId", (fundingPeriodId: number) => {
+    this.addScope("byFundingPeriod", (fundingPeriodId: number) => {
       const fundingSubmissionLineJsonsByFundingPeriodIdQuery = sql`
         (
           SELECT

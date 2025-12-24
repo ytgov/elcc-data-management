@@ -39,7 +39,7 @@ describe("api/src/models/funding-submission-line.ts", () => {
     })
 
     describe(".withScopes", () => {
-      describe(".byFundingPeriodId scope", () => {
+      describe(".byFundingPeriod scope", () => {
         test("when funding period exists with matching fiscal year, includes funding submission lines", async () => {
           // Arrange
           const fundingPeriod = await fundingPeriodFactory.create({
@@ -60,7 +60,7 @@ describe("api/src/models/funding-submission-line.ts", () => {
 
           // Act
           const fundingSubmissionLines = await FundingSubmissionLine.withScope({
-            method: ["byFundingPeriodId", fundingPeriod.id],
+            method: ["byFundingPeriod", fundingPeriod.id],
           }).findAll()
 
           // Assert
@@ -79,7 +79,7 @@ describe("api/src/models/funding-submission-line.ts", () => {
 
           // Act
           const fundingSubmissionLines = await FundingSubmissionLine.withScope({
-            method: ["byFundingPeriodId", -1],
+            method: ["byFundingPeriod", -1],
           }).findAll()
 
           // Assert
@@ -114,7 +114,7 @@ describe("api/src/models/funding-submission-line.ts", () => {
 
           // Act
           const fundingSubmissionLines = await FundingSubmissionLine.withScope({
-            method: ["byFundingPeriodId", fundingPeriod.id],
+            method: ["byFundingPeriod", fundingPeriod.id],
           }).findAll()
 
           // Assert
@@ -140,7 +140,7 @@ describe("api/src/models/funding-submission-line.ts", () => {
 
           // Act
           const fundingSubmissionLines = await FundingSubmissionLine.withScope({
-            method: ["byFundingPeriodId", fundingPeriod.id],
+            method: ["byFundingPeriod", fundingPeriod.id],
           }).findAll()
 
           // Assert
@@ -172,7 +172,7 @@ describe("api/src/models/funding-submission-line.ts", () => {
 
           // Act
           await FundingSubmissionLine.withScope({
-            method: ["byFundingPeriodId", fundingPeriod1.id],
+            method: ["byFundingPeriod", fundingPeriod1.id],
           }).destroy({ where: {} })
 
           // Assert

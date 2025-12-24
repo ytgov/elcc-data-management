@@ -79,13 +79,13 @@ export class DestroyService extends BaseService {
 
   private async destroyDependentFundingSubmissionLines(fundingPeriodId: number) {
     await FundingSubmissionLine.withScope({
-      method: ["byFundingPeriodId", fundingPeriodId],
+      method: ["byFundingPeriod", fundingPeriodId],
     }).destroy({ where: {} })
   }
 
   private async destroyDependentFundingSubmissionLineJsons(fundingPeriodId: number) {
     await FundingSubmissionLineJson.withScope({
-      method: ["byFundingPeriodId", fundingPeriodId],
+      method: ["byFundingPeriod", fundingPeriodId],
     }).destroy({ where: {} })
   }
 

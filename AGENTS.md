@@ -1245,6 +1245,7 @@ await FundingPeriods.EmployeeWageTiers.BulkCreateService.perform(fundingPeriod)
 ```
 
 **Benefits:**
+
 - Eliminates redundant context in service names
 - Makes parent-child relationships explicit through directory structure
 - Reduces top-level namespace pollution
@@ -1547,10 +1548,7 @@ const fundingSubmissionLineIds = fundingSubmissionLines.map((line) => line.id)
 
 ```typescript
 // Correct - multi-line, explicit order
-expect(fundingSubmissionLineIds).toEqual([
-  fundingSubmissionLine1.id,
-  fundingSubmissionLine2.id,
-])
+expect(fundingSubmissionLineIds).toEqual([fundingSubmissionLine1.id, fundingSubmissionLine2.id])
 
 // Incorrect - single line with sorting
 expect(fundingSubmissionLineIds).toEqual(
@@ -1562,10 +1560,10 @@ expect(fundingSubmissionLineIds).toEqual(
 
 ```typescript
 // Correct
-const results = await Model.scope("byFundingPeriodId", -1).findAll()
+const results = await Model.scope("byFundingPeriod", -1).findAll()
 
 // Incorrect
-const results = await Model.scope("byFundingPeriodId", 99999).findAll()
+const results = await Model.scope("byFundingPeriod", 99999).findAll()
 ```
 
 **Rationale:**

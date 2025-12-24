@@ -29,7 +29,7 @@ Based on [sequelize/sequelize#17307](https://github.com/sequelize/sequelize/issu
 
 **File: `api/src/models/decorators/model-scope.ts`**
 
-```typescript
+````typescript
 import { type Attributes, type FindOptions, type Model, type ModelStatic } from "@sequelize/core"
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 import { registerModelOptions } from "@sequelize/core/_non-semver-use-at-your-own-risk_/decorators/shared/model.js"
@@ -81,7 +81,7 @@ export function ModelScope<M extends Model>(
 }
 
 export default ModelScope
-```
+````
 
 **Note:** This uses Sequelize's internal `_non-semver-use-at-your-own-risk_` API. It's the same mechanism used by `@Attribute`, `@Table`, etc., but may change between minor versions.
 
@@ -158,8 +158,8 @@ export class EmployeeWageTier extends BaseModel<...> {
 6. `api/src/models/funding-reconciliation.ts` - Same (`byFiscalYearLong`)
 7. `api/src/models/funding-region.ts` - Same (`excludingIds`)
 8. `api/src/models/building-expense-category.ts` - Same (`excludingIds`)
-9. `api/src/models/funding-submission-line.ts` - Same (`byFundingPeriodId`)
-10. `api/src/models/funding-submission-line-json.ts` - Same (`byFundingPeriodId`, `withChildOccupancyRate`)
+9. `api/src/models/funding-submission-line.ts` - Same (`byFundingPeriod`)
+10. `api/src/models/funding-submission-line-json.ts` - Same (`byFundingPeriod`, `withChildOccupancyRate`)
 
 ### Usage in Services
 

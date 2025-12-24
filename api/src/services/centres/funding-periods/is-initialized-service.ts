@@ -80,7 +80,7 @@ export class IsInitializedService extends BaseService {
     fundingPeriodId: number
   ): Promise<boolean> {
     const count = await FundingSubmissionLineJson.withScope({
-      method: ["byFundingPeriodId", fundingPeriodId],
+      method: ["byFundingPeriod", fundingPeriodId],
     }).count({
       where: {
         centreId,

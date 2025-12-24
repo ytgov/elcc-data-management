@@ -91,7 +91,7 @@ export class FundingSubmissionLine extends BaseModel<
   static establishScopes() {
     this.addSearchScope(["fiscalYear", "sectionName", "lineName"])
 
-    this.addScope("byFundingPeriodId", (fundingPeriodId: number) => {
+    this.addScope("byFundingPeriod", (fundingPeriodId: number) => {
       const fundingSubmissionLinesByFundingPeriodIdQuery = sql`
         (
           SELECT
