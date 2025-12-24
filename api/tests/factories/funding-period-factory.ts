@@ -33,8 +33,10 @@ export const fundingPeriodFactory = Factory.define<FundingPeriod>(
     const toDate = DateTime.fromObject({
       year: nextYear,
       month: 3,
-      day: 31,
-    }).toJSDate()
+    })
+      .endOf("month")
+      .set({ millisecond: 0 })
+      .toJSDate()
     const title = `Funding Period ${sequence}`
 
     return FundingPeriod.build({
