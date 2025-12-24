@@ -4,13 +4,7 @@ import { isNil } from "lodash"
 import db, { Centre, FundingPeriod, Log, User } from "@/models"
 import BaseService from "@/services/base-service"
 import LogServices from "@/services/log-services"
-import {
-  Centres,
-  EmployeeBenefits,
-  FundingReconciliationAdjustments,
-  FundingReconciliations,
-  FundingSubmissionLineJsons,
-} from "@/services"
+import { Centres } from "@/services"
 
 export type CentreCreationAttributes = Partial<CreationAttributes<Centre>>
 
@@ -53,13 +47,6 @@ export class CreateService extends BaseService {
       throw new Error("Is First Nation Program is required")
     }
 
-    const fundingPeriod = await this.getLatestFundingPeriod()
-    if (isNil(fundingPeriod)) {
-      throw new Error(
-        "A funding period must be created before creating centres. Please create a funding period first."
-      )
-    }
-
     const statusOrFallback = status || Centre.Statuses.ACTIVE
 
     return db.transaction(async () => {
@@ -73,7 +60,12 @@ export class CreateService extends BaseService {
         status: statusOrFallback,
       })
 
-      await centre.reload({ include: ["fundingRegion"] })
+      const fundingPeriod = await this.getLatestFundingPeriod()
+      if (isNil(fundingPeriod)) {
+        throw new Error(
+          "A funding period must be created before creating centres. Please create a funding period first."
+        )
+      }
       await this.ensureChildEntitiesForCentre(centre, fundingPeriod)
       await this.logCentreCreation(centre, this.currentUser)
 
@@ -88,11 +80,7 @@ export class CreateService extends BaseService {
   }
 
   private async ensureChildEntitiesForCentre(centre: Centre, fundingPeriod: FundingPeriod) {
-    await EmployeeBenefits.BulkEnsureForCentreService.perform(centre)
-    await Centres.FundingPeriods.BulkEnsureBuildingExpensesService.perform(centre, fundingPeriod)
-    await FundingSubmissionLineJsons.BulkEnsureForCentreService.perform(centre)
-    await FundingReconciliations.BulkEnsureForCentreService.perform(centre)
-    await FundingReconciliationAdjustments.BulkEnsureForCentreService.perform(centre)
+    await Centres.FundingPeriods.EnsureChildrenService.perform(centre, fundingPeriod)
   }
 
   private async logCentreCreation(centre: Centre, currentUser: User) {
