@@ -1,3 +1,4 @@
+import { Op } from "@sequelize/core"
 import { type CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
 
@@ -60,7 +61,7 @@ export class CreateService extends BaseService {
         status: statusOrFallback,
       })
 
-      const fundingPeriod = await this.getLatestFundingPeriod()
+      const fundingPeriod = await this.getCurrentFundingPeriod()
       if (isNil(fundingPeriod)) {
         throw new Error(
           "A funding period must be created before creating centres. Please create a funding period first."
@@ -73,8 +74,26 @@ export class CreateService extends BaseService {
     })
   }
 
-  private async getLatestFundingPeriod(): Promise<FundingPeriod | null> {
+  private async getCurrentFundingPeriod(): Promise<FundingPeriod | null> {
+    const currentDate = new Date()
+    const currentFundingPeriod = await FundingPeriod.findOne({
+      where: {
+        fromDate: {
+          [Op.lte]: currentDate,
+        },
+        toDate: {
+          [Op.gte]: currentDate,
+        },
+      },
+    })
+    if (currentFundingPeriod) return currentFundingPeriod
+
     return FundingPeriod.findOne({
+      where: {
+        fromDate: {
+          [Op.lte]: currentDate,
+        },
+      },
       order: [["fromDate", "DESC"]],
     })
   }
