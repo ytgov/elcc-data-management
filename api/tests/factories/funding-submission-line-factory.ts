@@ -9,8 +9,6 @@ export const SECTION_NAMES_EXAMPLES = Object.freeze([
   "Administration (10% of Spaces)",
   "Quality Program Enhancement",
   "Children with Diverse Needs",
-  "Building Expenses",
-  "Wage Enhancement",
 ])
 
 export const LINE_NAMES_EXAMPLES = Object.freeze([
@@ -21,27 +19,6 @@ export const LINE_NAMES_EXAMPLES = Object.freeze([
   "Kindergarten (FT)",
   "School Age (PT)",
   "School Age (FT)",
-  "Rent or Mortgage",
-  "Phone",
-  "Internet",
-  "Cell Phone",
-  "Security",
-  "Electric",
-  "Fuel",
-  "Garbage",
-  "Snow Removal",
-  "Water/Sewer/Taxes",
-  "Insurance",
-  "Janitorial",
-  "Cleaning Supplies",
-  "Minor Repairs",
-  "Level 0",
-  "Level 1",
-  "Level 1a",
-  "Level 2",
-  "Level 2a",
-  "Level 3eq",
-  "Level 3",
 ])
 
 export const fundingSubmissionLineFactory = Factory.define<FundingSubmissionLine>(
