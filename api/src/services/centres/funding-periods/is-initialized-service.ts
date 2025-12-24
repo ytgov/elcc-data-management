@@ -25,10 +25,18 @@ export class IsInitializedService extends BaseService {
   }
 
   async perform(): Promise<InitializationStatus> {
-    const hasEmployeeBenefits = await this.checkEmployeeBenefits()
-    const hasBuildingExpenses = await this.checkBuildingExpenses()
-    const hasFundingSubmissionLineJsons = await this.checkFundingSubmissionLineJsons()
-    const hasFundingReconciliation = await this.checkFundingReconciliation()
+    const { id: centreId } = this.centre
+    const { id: fundingPeriodId } = this.fundingPeriod
+    const hasEmployeeBenefits = await this.checkEmployeeBenefits(centreId, fundingPeriodId)
+    const hasBuildingExpenses = await this.checkBuildingExpenses(centreId, fundingPeriodId)
+    const hasFundingSubmissionLineJsons = await this.checkFundingSubmissionLineJsons(
+      centreId,
+      fundingPeriodId
+    )
+    const hasFundingReconciliation = await this.checkFundingReconciliation(
+      centreId,
+      fundingPeriodId
+    )
 
     const isInitialized =
       hasEmployeeBenefits &&
@@ -45,44 +53,50 @@ export class IsInitializedService extends BaseService {
     }
   }
 
-  private async checkEmployeeBenefits(): Promise<boolean> {
+  private async checkEmployeeBenefits(centreId: number, fundingPeriodId: number): Promise<boolean> {
     const count = await EmployeeBenefit.withScope({
-      method: ["byFundingPeriod", this.fundingPeriod.id],
+      method: ["byFundingPeriod", fundingPeriodId],
     }).count({
       where: {
-        centreId: this.centre.id,
+        centreId,
       },
     })
     return count > 0
   }
 
-  private async checkBuildingExpenses(): Promise<boolean> {
+  private async checkBuildingExpenses(centreId: number, fundingPeriodId: number): Promise<boolean> {
     const count = await BuildingExpense.withScope({
-      method: ["byFundingPeriod", this.fundingPeriod.id],
+      method: ["byFundingPeriod", fundingPeriodId],
     }).count({
       where: {
-        centreId: this.centre.id,
+        centreId,
       },
     })
     return count > 0
   }
 
-  private async checkFundingSubmissionLineJsons(): Promise<boolean> {
+  private async checkFundingSubmissionLineJsons(
+    centreId: number,
+    fundingPeriodId: number
+  ): Promise<boolean> {
     const count = await FundingSubmissionLineJson.withScope({
-      method: ["byFundingPeriodId", this.fundingPeriod.id],
+      method: ["byFundingPeriodId", fundingPeriodId],
     }).count({
       where: {
-        centreId: this.centre.id,
+        centreId,
       },
     })
     return count > 0
   }
 
-  private async checkFundingReconciliation(): Promise<boolean> {
+  private async checkFundingReconciliation(
+    centreId: number,
+    fundingPeriodId: number
+  ): Promise<boolean> {
     const count = await FundingReconciliation.count({
       where: {
-        centreId: this.centre.id,
-        fundingPeriodId: this.fundingPeriod.id,
+        centreId,
+        fundingPeriodId,
       },
     })
     return count > 0
