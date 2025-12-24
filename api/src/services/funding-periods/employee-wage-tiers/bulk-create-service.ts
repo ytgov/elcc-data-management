@@ -33,10 +33,10 @@ export class BulkCreateService extends BaseService {
   }
 
   private async buildEmployeeWageTierDefaults() {
-    const newestFundingPeriodWithEmployeeWageTiers = sql`
+    const newestFiscalPeriodWithEmployeeWageTiers = sql`
       (
         SELECT
-          TOP 1 fiscal_periods.funding_period_id
+          TOP 1 fiscal_periods.id
         FROM
           fiscal_periods
           INNER JOIN employee_wage_tiers ON employee_wage_tiers.fiscal_period_id = fiscal_periods.id
@@ -50,8 +50,8 @@ export class BulkCreateService extends BaseService {
         {
           association: "fiscalPeriod",
           where: {
-            fundingPeriodId: {
-              [Op.in]: newestFundingPeriodWithEmployeeWageTiers,
+            id: {
+              [Op.in]: newestFiscalPeriodWithEmployeeWageTiers,
             },
           },
         },

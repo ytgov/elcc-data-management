@@ -115,7 +115,7 @@ describe("api/src/services/funding-periods/employee-wage-tiers/bulk-create-servi
         )
       })
 
-      test("when employee wage tiers exist in another funding period, copies from newest funding period", async () => {
+      test("when employee wage tiers exist in another fiscal period, copies from newest fiscal period", async () => {
         // Arrange
         const olderFundingPeriod = await fundingPeriodFactory.create({
           fiscalYear: "2023-2024",
