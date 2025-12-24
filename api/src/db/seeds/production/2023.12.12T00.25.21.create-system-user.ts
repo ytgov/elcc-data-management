@@ -15,7 +15,7 @@ export async function up() {
       firstName: "System",
       lastName: "User",
       status: User.Status.ACTIVE,
-      roles: [User.Roles.SUPER_ADMIN],
+      roles: [User.Roles.SYSTEM_ADMINISTRATOR],
     })
   }
 }
