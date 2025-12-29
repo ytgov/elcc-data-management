@@ -44,6 +44,8 @@ export class EmployeeWageTier extends BaseModel<
   InferAttributes<EmployeeWageTier>,
   InferCreationAttributes<EmployeeWageTier>
 > {
+  static readonly DEFAULTS = EMPLOYEE_WAGE_TIER_DEFAULTS
+
   @Attribute(DataTypes.INTEGER)
   @PrimaryKey
   @AutoIncrement
