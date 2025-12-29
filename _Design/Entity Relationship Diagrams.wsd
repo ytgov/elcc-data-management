@@ -92,12 +92,11 @@ together {
   }
 }
 
-' TODO: make centres funding_region_id not nullable
 together {
   entity "centres" {
     * id : int [PK]
     --
-    funding_region_id : int [FK]
+    * funding_region_id : int [FK]
     --
     * name : nvarchar(200)
     * status : nvarchar(255)
