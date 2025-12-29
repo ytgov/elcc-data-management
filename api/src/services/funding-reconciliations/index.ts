@@ -1,5 +1,6 @@
 export { CreateService } from "./create-service"
 export { UpdateService } from "./update-service"
+export { DestroyService } from "./destroy-service"
 
 // Specialized services
 export { CalculateEligibleExpensesPeriodAmountService } from "./calculate-eligible-expenses-period-amount-service"
