@@ -5,6 +5,9 @@ export const FiscalPeriodsFundingPeriodIdFiscalYearMonthUniqueIndex = createInde
   {
     unique: true,
     name: "fiscal_periods_funding_period_id_fiscal_year_month_unique",
+    where: {
+      deletedAt: null,
+    },
     msg: "Fiscal period already exists for this funding period, fiscal year, and month.",
   }
 )

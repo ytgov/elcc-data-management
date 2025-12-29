@@ -22,10 +22,17 @@ import BaseModel from "@/models/base-model"
 import BuildingExpenseCategory from "@/models/building-expense-category"
 import Centre from "@/models/centre"
 
+export const FUNDING_REGION_DEFAULTS = Object.freeze([
+  { region: "Whitehorse", subsidyRate: "0.3700" },
+  { region: "Communities", subsidyRate: "0.3700" },
+])
+
 export class FundingRegion extends BaseModel<
   InferAttributes<FundingRegion>,
   InferCreationAttributes<FundingRegion>
 > {
+  static readonly DEFAULTS = FUNDING_REGION_DEFAULTS
+
   @Attribute(DataTypes.INTEGER)
   @PrimaryKey
   @AutoIncrement

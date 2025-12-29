@@ -3,7 +3,7 @@ import { isNil } from "lodash"
 import logger from "@/utils/logger"
 import { FundingReconciliation } from "@/models"
 import { FundingReconciliationPolicy } from "@/policies"
-import { CreateService, UpdateService } from "@/services/funding-reconciliations"
+import { CreateService, DestroyService, UpdateService } from "@/services/funding-reconciliations"
 import { IndexSerializer, ShowSerializer } from "@/serializers/funding-reconciliations"
 import BaseController from "@/controllers/base-controller"
 
@@ -139,7 +139,7 @@ export class FundingReconciliationsController extends BaseController<FundingReco
         })
       }
 
-      await fundingReconciliation.destroy()
+      await DestroyService.perform(fundingReconciliation, this.currentUser)
       return this.response.status(204).send()
     } catch (error) {
       logger.error(`Error deleting funding reconciliation: ${error}`, { error })

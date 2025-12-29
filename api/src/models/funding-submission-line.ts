@@ -1,5 +1,6 @@
 import {
   DataTypes,
+  Op,
   sql,
   type CreationOptional,
   type InferAttributes,
@@ -11,21 +12,20 @@ import {
   Default,
   NotNull,
   PrimaryKey,
-  Table,
   ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
 
 import { isValidFiscalYearLegacy } from "@/models/validators"
 
 import BaseModel from "@/models/base-model"
+import FUNDING_SUBMISSION_LINE_DEFAULTS from "@/models/funding-submission-line-defaults"
 
-@Table({
-  paranoid: false,
-})
 export class FundingSubmissionLine extends BaseModel<
   InferAttributes<FundingSubmissionLine>,
   InferCreationAttributes<FundingSubmissionLine>
 > {
+  static readonly DEFAULTS = FUNDING_SUBMISSION_LINE_DEFAULTS
+
   @Attribute(DataTypes.INTEGER)
   @PrimaryKey
   @AutoIncrement
@@ -59,13 +59,16 @@ export class FundingSubmissionLine extends BaseModel<
 
   @Attribute(DataTypes.DATE)
   @NotNull
-  @Default(sql.fn("getdate"))
+  @Default(sql.fn("getutcdate"))
   declare createdAt: CreationOptional<Date>
 
   @Attribute(DataTypes.DATE)
   @NotNull
-  @Default(sql.fn("getdate"))
+  @Default(sql.fn("getutcdate"))
   declare updatedAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  declare deletedAt: Date | null
 
   // Helpers
 
@@ -87,6 +90,38 @@ export class FundingSubmissionLine extends BaseModel<
 
   static establishScopes() {
     this.addSearchScope(["fiscalYear", "sectionName", "lineName"])
+
+    this.addScope("byFundingPeriod", (fundingPeriodId: number) => {
+      const fundingSubmissionLinesByFundingPeriodIdQuery = sql`
+        (
+          SELECT
+            id
+          FROM
+            funding_submission_lines
+          WHERE
+            EXISTS (
+              SELECT
+                1
+              FROM
+                funding_periods
+              WHERE
+                funding_periods.id = ${fundingPeriodId}
+                AND funding_submission_lines.fiscal_year = REPLACE(
+                  funding_periods.fiscal_year,
+                  '-' + RIGHT(funding_periods.fiscal_year, 4),
+                  '/' + RIGHT(funding_periods.fiscal_year, 2)
+                )
+            )
+        )
+      `
+      return {
+        where: {
+          id: {
+            [Op.in]: fundingSubmissionLinesByFundingPeriodIdQuery,
+          },
+        },
+      }
+    })
   }
 }
 

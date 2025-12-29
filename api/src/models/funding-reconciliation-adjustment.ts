@@ -19,6 +19,8 @@ import BaseModel from "@/models/base-model"
 import FiscalPeriod from "@/models/fiscal-period"
 import FundingReconciliation from "@/models/funding-reconciliation"
 
+// TODO: add centreId to this table to make querying and testing easier.
+// Also would make association with center more obvious.
 export class FundingReconciliationAdjustment extends BaseModel<
   InferAttributes<FundingReconciliationAdjustment>,
   InferCreationAttributes<FundingReconciliationAdjustment>

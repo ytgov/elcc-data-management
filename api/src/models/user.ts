@@ -13,7 +13,6 @@ import {
   HasMany,
   NotNull,
   PrimaryKey,
-  Table,
   Unique,
   ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
@@ -39,9 +38,6 @@ export enum UserRoles {
 
 export const USER_ROLES = Object.values<string>(UserRoles)
 
-@Table({
-  paranoid: false,
-})
 export class User extends BaseModel<InferAttributes<User>, InferCreationAttributes<User>> {
   static readonly Status = UserStatus
   static readonly Roles = UserRoles
@@ -114,13 +110,16 @@ export class User extends BaseModel<InferAttributes<User>, InferCreationAttribut
 
   @Attribute(DataTypes.DATE)
   @NotNull
-  @Default(sql.fn("getdate"))
+  @Default(sql.fn("getutcdate"))
   declare createdAt: CreationOptional<Date>
 
   @Attribute(DataTypes.DATE)
   @NotNull
-  @Default(sql.fn("getdate"))
+  @Default(sql.fn("getutcdate"))
   declare updatedAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  declare deletedAt: Date | null
 
   // Magic Attributes
   get displayName(): NonAttribute<string> {

@@ -49,7 +49,8 @@ export const fiscalPeriodFactory = Factory.define<FiscalPeriod>(
 
     const dateStartDateTime = DateTime.fromJSDate(dateStart)
 
-    const dateEnd = params.dateEnd ?? dateStartDateTime.plus({ months: 1 }).toJSDate()
+    const dateEnd =
+      params.dateEnd ?? dateStartDateTime.endOf("month").set({ millisecond: 0 }).toJSDate()
     const month = params.month ?? FiscalPeriod.asFiscalPeriodMonth(dateStartDateTime)
 
     return FiscalPeriod.build({

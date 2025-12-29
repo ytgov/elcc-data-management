@@ -1,9 +1,16 @@
 import { CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
 
-import { Centre, FundingRegion } from "@/models"
+import { Centre, FundingRegion, User } from "@/models"
+import { Centres } from "@/services"
 
 export async function up() {
+  const systemUser = await User.findOne({
+    where: {
+      email: "system.user@elcc.com",
+    },
+    rejectOnEmpty: true,
+  })
   const fundingRegion = await FundingRegion.findOne({
     where: {
       region: "Whitehorse",
@@ -22,7 +29,7 @@ export async function up() {
       hotMeal: true,
       licensedFor: 19,
       buildingUsagePercent: "100.00",
-      lastSubmission: new Date("2019-01-01"),
+      lastSubmission: new Date("2024-01-01"),
     },
     {
       name: "Happy Hearts Preschool",
@@ -34,7 +41,7 @@ export async function up() {
       hotMeal: true,
       licensedFor: 25,
       buildingUsagePercent: "100.00",
-      lastSubmission: new Date("2019-01-01"),
+      lastSubmission: new Date("2024-01-01"),
     },
   ]
 
@@ -47,7 +54,7 @@ export async function up() {
     })
 
     if (isNil(centre)) {
-      await Centre.create(centreAttributes)
+      await Centres.CreateService.perform(centreAttributes, systemUser)
     }
   }
 }
