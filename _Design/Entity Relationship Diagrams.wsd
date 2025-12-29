@@ -4,7 +4,7 @@ top to bottom direction
 note as Disclaimer
 PlantUML URL: https://plantuml.com/ie-diagram
 This diagram may be out of date and should be verified against the current database schema.
-Last updated (by Claude Sonet 4.5): 2025-12-01
+Last updated (by Claude Opus 4.5): 2025-12-29
 end note
 
 together {
@@ -92,17 +92,18 @@ together {
   }
 }
 
+' TODO: make centres funding_region_id not nullable
 together {
   entity "centres" {
     * id : int [PK]
     --
-    * funding_region_id : int [FK]
+    funding_region_id : int [FK]
     --
     * name : nvarchar(200)
     * status : nvarchar(255)
-    * region : nvarchar(100)
     * community : nvarchar(255)
     * is_first_nation_program : bit
+    * building_usage_percent : decimal(5,2)
     --
     alt_email : nvarchar(100)
     alt_phone_number : nvarchar(20)
@@ -123,6 +124,7 @@ together {
     --
     * created_at : datetime2
     * updated_at : datetime2
+    deleted_at : datetimeoffset
   }
 
   entity "building_expenses" {
@@ -177,6 +179,7 @@ together {
     --
     * created_at : datetime2
     * updated_at : datetime2
+    deleted_at : datetimeoffset
   }
 
   entity "funding_reconciliations" {
@@ -228,6 +231,7 @@ together {
     --
     * created_at : datetime2
     * updated_at : datetime2
+    deleted_at : datetimeoffset
   }
 
   entity "wage_enhancements" {
@@ -242,6 +246,7 @@ together {
     --
     * created_at : datetime2
     * updated_at : datetime2
+    deleted_at : datetimeoffset
   }
 }
 
