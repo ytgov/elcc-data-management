@@ -63,9 +63,6 @@ router
   .delete(CentresController.destroy)
 
 router
-  .route("/api/centres/:centreId/funding-periods/:fundingPeriodId/ensure-dependencies")
-  .post(Centres.FundingPeriods.EnsureDependenciesController.create)
-router
   .route("/api/centres/:centreId/funding-periods/:fundingPeriodId/initialize")
   .get(Centres.FundingPeriods.InitializeController.show)
   .post(Centres.FundingPeriods.InitializeController.create)
@@ -81,9 +78,7 @@ router
   .delete(EmployeeBenefitsController.destroy)
 
 router.route("/api/employee-wage-tiers").get(EmployeeWageTiersController.index)
-router
-  .route("/api/employee-wage-tiers/:employeeWageTierId")
-  .get(EmployeeWageTiersController.show)
+router.route("/api/employee-wage-tiers/:employeeWageTierId").get(EmployeeWageTiersController.show)
 
 router.route("/api/fiscal-periods").get(FiscalPeriodsController.index)
 

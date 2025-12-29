@@ -1,5 +1,4 @@
 export { EnsureChildrenService } from "./ensure-children-service"
-export { EnsureDependenciesService } from "./ensure-dependencies-service"
 export { InitializeService } from "./initialize-service"
 export { IsInitializedService, type InitializationStatus } from "./is-initialized-service"
 
