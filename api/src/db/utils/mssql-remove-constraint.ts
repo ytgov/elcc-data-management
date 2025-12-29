@@ -1,4 +1,10 @@
-import { type BaseConstraintQueryOptions, type RemoveConstraintQueryOptions } from "@sequelize/core"
+import {
+  QueryTypes,
+  sql,
+  type BaseConstraintQueryOptions,
+  type Literal,
+  type RemoveConstraintQueryOptions,
+} from "@sequelize/core"
 import { type MsSqlQueryInterface } from "@sequelize/mssql"
 
 import { type NonEmptyArray } from "@/utils/utility-types"
@@ -70,8 +76,8 @@ export enum MSSQL_CONSTRAINT_TYPES {
   DEFAULT = "D",
 }
 
-function findDefaultConstraintQuery(tableName: string, columnName: string) {
-  return /* sql */ `
+function findDefaultConstraintQuery(tableName: string, columnName: string): Literal {
+  return sql`
     SELECT
       default_constraints.name AS constraintName
     FROM
@@ -79,13 +85,13 @@ function findDefaultConstraintQuery(tableName: string, columnName: string) {
       INNER JOIN sys.columns ON default_constraints.parent_object_id = columns.object_id
       AND default_constraints.parent_column_id = columns.column_id
     WHERE
-      default_constraints.parent_object_id = OBJECT_ID('${tableName}')
-      AND columns.name = '${columnName}';
+      default_constraints.parent_object_id = OBJECT_ID(${tableName})
+      AND columns.name = ${columnName};
   `
 }
 
-function findForeignKeyConstraintQuery(tableName: string, columnName: string) {
-  return /* sql */ `
+function findForeignKeyConstraintQuery(tableName: string, columnName: string): Literal {
+  return sql`
     SELECT
       foreign_keys.name AS constraintName
     FROM
@@ -94,8 +100,8 @@ function findForeignKeyConstraintQuery(tableName: string, columnName: string) {
       INNER JOIN sys.columns ON foreign_key_columns.parent_column_id = columns.column_id
       AND foreign_key_columns.parent_object_id = columns.object_id
     WHERE
-      foreign_keys.parent_object_id = OBJECT_ID('${tableName}')
-      AND columns.name = '${columnName}';
+      foreign_keys.parent_object_id = OBJECT_ID(${tableName})
+      AND columns.name = ${columnName};
   `
 }
 
@@ -103,8 +109,8 @@ function findNonForeignKeyConstraintQuery(
   tableName: string,
   columnName: string,
   constraintType: MSSQL_CONSTRAINT_TYPES
-) {
-  return /* sql */ `
+): Literal {
+  return sql`
     SELECT
       key_constraints.name as constraintName
     FROM
@@ -113,9 +119,9 @@ function findNonForeignKeyConstraintQuery(
       INNER JOIN sys.columns ON index_columns.column_id = columns.column_id
       AND index_columns.object_id = columns.object_id
     WHERE
-      key_constraints.type = '${constraintType}'
-      AND columns.name = '${columnName}'
-      AND key_constraints.parent_object_id = OBJECT_ID('${tableName}');
+      key_constraints.type = ${constraintType}
+      AND columns.name = ${columnName}
+      AND key_constraints.parent_object_id = OBJECT_ID(${tableName});
   `
 }
 
@@ -123,11 +129,11 @@ function findMultiFieldNonForeignKeyConstraintQuery(
   tableName: string,
   fields: string[],
   constraintType: MSSQL_CONSTRAINT_TYPES
-) {
+): Literal {
   const expectedFieldCount = fields.length
   const fieldNamesList = fields.map((fieldName) => `'${fieldName}'`).join(", ")
 
-  return /* sql */ `
+  return sql`
     SELECT
       key_constraints.name as constraintName
     FROM
@@ -137,8 +143,8 @@ function findMultiFieldNonForeignKeyConstraintQuery(
       INNER JOIN sys.columns AS columns ON index_columns.object_id = columns.object_id
       AND index_columns.column_id = columns.column_id
     WHERE
-      key_constraints.type = '${constraintType}'
-      AND key_constraints.parent_object_id = OBJECT_ID('${tableName}')
+      key_constraints.type = ${constraintType}
+      AND key_constraints.parent_object_id = OBJECT_ID(${tableName})
     GROUP BY
       key_constraints.name
     HAVING
@@ -190,14 +196,22 @@ export type RemoveConstraintOptions =
   | RemovePrimaryKeyConstraintOptions
   | RemoveForeignKeyConstraintOptions
 
+export interface RemoveConstraintExtraOptions {
+  /**
+   * When true, removes all matching constraints instead of throwing an error when multiple are found.
+   * Use this when you need to clean up duplicate constraints on the same column.
+   */
+  multiple?: boolean
+}
+
 // FYI: this is a very minimal implementation, if you want more options,
 // you'll need to add them.
 export async function removeConstraint(
   queryInterface: MsSqlQueryInterface,
   tableName: string,
-  options: RemoveConstraintOptions & RemoveConstraintQueryOptions
+  options: RemoveConstraintOptions & RemoveConstraintQueryOptions & RemoveConstraintExtraOptions
 ) {
-  let query
+  let query: Literal
   if (options.type === "FOREIGN KEY") {
     query = findForeignKeyConstraintQuery(tableName, options.fields[0])
   } else if (options.type === "PRIMARY KEY") {
@@ -226,14 +240,27 @@ export async function removeConstraint(
     throw new Error(`Constraint type: ${options.type} NOT IMPLEMENTED`)
   }
 
-  const [results, metadata] = await queryInterface.sequelize.query(query)
-  if ((metadata as number) > 1) {
-    throw new Error("Unsafe operation, too many results, exiting ...")
-  } else if (metadata === 0) {
+  const constraintNamesResults = await queryInterface.sequelize.query<{
+    constraintName: string
+  }>(query, {
+    type: QueryTypes.SELECT,
+    raw: true,
+  })
+  const constraintNames = constraintNamesResults.map(({ constraintName }) => constraintName)
+
+  if (constraintNames.length === 0) {
     console.log("No constraint found, skipping...")
     return
   }
 
-  const constraintName = (results as [{ constraintName: string }])[0].constraintName
-  return await queryInterface.removeConstraint(tableName, constraintName)
+  if (constraintNames.length > 1 && options.multiple !== true) {
+    throw new Error(
+      `Unsafe operation: found ${constraintNames.length} constraints, but multiple=true was not specified. ` +
+        `If you want to remove all matching constraints, pass { multiple: true } in options.`
+    )
+  }
+
+  for (const constraintName of constraintNames) {
+    await queryInterface.removeConstraint(tableName, constraintName)
+  }
 }
