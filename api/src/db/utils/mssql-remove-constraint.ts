@@ -131,8 +131,6 @@ function findMultiFieldNonForeignKeyConstraintQuery(
   constraintType: MSSQL_CONSTRAINT_TYPES
 ): Literal {
   const expectedFieldCount = fields.length
-  const fieldNamesList = fields.map((fieldName) => `'${fieldName}'`).join(", ")
-
   return sql`
     SELECT
       key_constraints.name as constraintName
@@ -151,7 +149,7 @@ function findMultiFieldNonForeignKeyConstraintQuery(
       COUNT(*) = ${expectedFieldCount}
       AND SUM(
         CASE
-          WHEN columns.name IN (${fieldNamesList}) THEN 1
+          WHEN columns.name IN ${sql.list(fields)} THEN 1
           ELSE 0
         END
       ) = ${expectedFieldCount};
