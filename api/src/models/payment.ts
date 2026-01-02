@@ -1,6 +1,5 @@
 import {
   DataTypes,
-  Model,
   sql,
   type CreationOptional,
   type InferAttributes,
@@ -15,20 +14,17 @@ import {
   ModelValidator,
   NotNull,
   PrimaryKey,
-  Table,
   ValidateAttribute,
 } from "@sequelize/core/decorators-legacy"
 import { isNil } from "lodash"
 
 import { isValidFiscalYearLegacy } from "@/models/validators"
 
+import BaseModel from "@/models/base-model"
 import Centre from "@/models/centre"
 import FiscalPeriod from "@/models/fiscal-period"
 
-@Table({
-  paranoid: false,
-})
-export class Payment extends Model<InferAttributes<Payment>, InferCreationAttributes<Payment>> {
+export class Payment extends BaseModel<InferAttributes<Payment>, InferCreationAttributes<Payment>> {
   @Attribute(DataTypes.INTEGER)
   @PrimaryKey
   @AutoIncrement
@@ -64,13 +60,16 @@ export class Payment extends Model<InferAttributes<Payment>, InferCreationAttrib
 
   @Attribute(DataTypes.DATE)
   @NotNull
-  @Default(sql.fn("getdate"))
+  @Default(sql.fn("getutcdate"))
   declare createdAt: CreationOptional<Date>
 
   @Attribute(DataTypes.DATE)
   @NotNull
-  @Default(sql.fn("getdate"))
+  @Default(sql.fn("getutcdate"))
   declare updatedAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  declare deletedAt: Date | null
 
   // Model Validators
   @ModelValidator
@@ -113,7 +112,16 @@ export class Payment extends Model<InferAttributes<Payment>, InferCreationAttrib
   declare fiscalPeriod?: NonAttribute<FiscalPeriod>
 
   static establishScopes() {
-    // add as needed
+    this.addScope("byFundingPeriod", (fundingPeriodId: number) => ({
+      include: [
+        {
+          association: "fiscalPeriod",
+          where: {
+            fundingPeriodId,
+          },
+        },
+      ],
+    }))
   }
 }
 

@@ -14,7 +14,6 @@ import {
   HasMany,
   NotNull,
   PrimaryKey,
-  Table,
 } from "@sequelize/core/decorators-legacy"
 
 import { EmployeeWageTiersFiscalPeriodIdTierLevelUniqueIndex } from "@/models/indexes"
@@ -39,13 +38,14 @@ export const EMPLOYEE_WAGE_TIER_DEFAULTS: ReadonlyArray<EmployeeWageTierDefault>
   { tierLevel: 6, tierLabel: "ECE Level 3", wageRatePerHour: "15.31" },
 ])
 
-@Table({
-  paranoid: false,
-})
+// TODO: consider if these should be mapped directly to a funding period rather than a fiscal period?
+// Then employee benefits would denormalize the data at creation time on a per-fiscal period basis.
 export class EmployeeWageTier extends BaseModel<
   InferAttributes<EmployeeWageTier>,
   InferCreationAttributes<EmployeeWageTier>
 > {
+  static readonly DEFAULTS = EMPLOYEE_WAGE_TIER_DEFAULTS
+
   @Attribute(DataTypes.INTEGER)
   @PrimaryKey
   @AutoIncrement
@@ -71,13 +71,16 @@ export class EmployeeWageTier extends BaseModel<
 
   @Attribute(DataTypes.DATE)
   @NotNull
-  @Default(sql.fn("getdate"))
+  @Default(sql.fn("getutcdate"))
   declare createdAt: CreationOptional<Date>
 
   @Attribute(DataTypes.DATE)
   @NotNull
-  @Default(sql.fn("getdate"))
+  @Default(sql.fn("getutcdate"))
   declare updatedAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  declare deletedAt: Date | null
 
   // Associations
   @BelongsTo(() => FiscalPeriod, {
@@ -98,7 +101,16 @@ export class EmployeeWageTier extends BaseModel<
   declare wageEnhancements?: NonAttribute<WageEnhancement[]>
 
   static establishScopes() {
-    // add as needed
+    this.addScope("byFundingPeriod", (fundingPeriodId: number) => ({
+      include: [
+        {
+          association: "fiscalPeriod",
+          where: {
+            fundingPeriodId,
+          },
+        },
+      ],
+    }))
   }
 }
 

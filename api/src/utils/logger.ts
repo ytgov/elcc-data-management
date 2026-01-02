@@ -11,6 +11,7 @@ import {
   DEFAULT_LOG_LEVEL,
   RELEASE_TAG,
 } from "@/config"
+import { simpleWithObjectHandling } from "@/utils/formatters"
 
 export const cloudwatchLogger = createLogger({
   format: format.json(),
@@ -33,7 +34,12 @@ export const cloudwatchLogger = createLogger({
 
 export const consoleLogger = createLogger({
   level: DEFAULT_LOG_LEVEL,
-  format: format.combine(format.colorize(), format.simple()),
+  format: format.combine(
+    format.errors({ stack: true }),
+    format.timestamp(),
+    format.colorize(),
+    simpleWithObjectHandling()
+  ),
   transports: [new transports.Console()],
 })
 

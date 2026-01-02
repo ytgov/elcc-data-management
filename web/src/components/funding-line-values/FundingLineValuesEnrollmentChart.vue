@@ -2,6 +2,7 @@
   <v-skeleton-loader
     v-if="isLoading"
     type="image"
+    color="transparent"
   />
   <VueApexCharts
     v-else-if="hasActualChildOccupancyRates"
@@ -29,6 +30,7 @@ import useFundingSubmissionLineJsons, {
 
 const props = defineProps<{
   centreId: number
+  fiscalYearLegacy: string
 }>()
 
 const SECTION_NAME = "Child Care Spaces"
@@ -36,6 +38,7 @@ const SECTION_NAME = "Child Care Spaces"
 const fundingSubmissionLineJsonsQuery = computed<FundingSubmissionLineJsonQueryOptions>(() => ({
   where: {
     centreId: props.centreId,
+    fiscalYear: props.fiscalYearLegacy,
   },
   filters: {
     withChildOccupancyRate: SECTION_NAME,

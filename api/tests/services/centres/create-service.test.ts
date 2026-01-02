@@ -2,7 +2,6 @@ import {
   BuildingExpense,
   Centre,
   EmployeeBenefit,
-  FundingPeriod,
   FundingReconciliation,
   FundingReconciliationAdjustment,
   FundingSubmissionLineJson,
@@ -11,13 +10,14 @@ import {
 
 import {
   buildingExpenseCategoryFactory,
+  fiscalPeriodFactory,
   fundingPeriodFactory,
   fundingRegionFactory,
+  fundingSubmissionLineFactory,
   userFactory,
 } from "@/factories"
 
 import CreateService from "@/services/centres/create-service"
-import { FiscalPeriods } from "@/services"
 
 describe("api/src/services/centres/create-service.ts", () => {
   describe("CreateService", () => {
@@ -25,7 +25,22 @@ describe("api/src/services/centres/create-service.ts", () => {
       test("when provided with valid attributes, creates a centre", async () => {
         // Arrange
         const currentUser = await userFactory.create()
+
         const fundingRegion = await fundingRegionFactory.create()
+        await buildingExpenseCategoryFactory.create({
+          fundingRegionId: fundingRegion.id,
+        })
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+        })
+        await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          dateStart: new Date("2025-04-01"),
+        })
+        await fundingSubmissionLineFactory.create({
+          fiscalYear: "2025/26",
+        })
 
         const attributes = {
           fundingRegionId: fundingRegion.id,
@@ -33,7 +48,6 @@ describe("api/src/services/centres/create-service.ts", () => {
           license: "ECLC-438361",
           community: "Destruction Bay",
           isFirstNationProgram: false,
-          status: "Up to date",
         }
 
         // Act
@@ -42,41 +56,34 @@ describe("api/src/services/centres/create-service.ts", () => {
         // Assert
         expect(centre).toEqual(
           expect.objectContaining({
-            id: expect.any(Number),
             fundingRegionId: fundingRegion.id,
             name: "Reba",
             license: "ECLC-438361",
             community: "Destruction Bay",
             isFirstNationProgram: false,
-            status: "Up to date",
+            status: Centre.Statuses.ACTIVE,
           })
         )
-      })
-
-      test("when status is not provided, defaults to ACTIVE", async () => {
-        // Arrange
-        const currentUser = await userFactory.create()
-        const fundingRegion = await fundingRegionFactory.create()
-
-        const attributes = {
-          fundingRegionId: fundingRegion.id,
-          name: "Test Centre",
-          license: "ECLC-12345",
-          community: "Whitehorse",
-          isFirstNationProgram: true,
-        }
-
-        // Act
-        const centre = await CreateService.perform(attributes, currentUser)
-
-        // Assert
-        expect(centre.status).toEqual(Centre.Statuses.ACTIVE)
       })
 
       test("when centre created, logs creation event", async () => {
         // Arrange
         const currentUser = await userFactory.create()
         const fundingRegion = await fundingRegionFactory.create()
+        await buildingExpenseCategoryFactory.create({
+          fundingRegionId: fundingRegion.id,
+        })
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+        })
+        await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          dateStart: new Date("2025-04-01"),
+        })
+        await fundingSubmissionLineFactory.create({
+          fiscalYear: "2025/26",
+        })
 
         const attributes = {
           fundingRegionId: fundingRegion.id,
@@ -102,10 +109,29 @@ describe("api/src/services/centres/create-service.ts", () => {
         ])
       })
 
-      test("when centre created, creates employee benefits for all fiscal periods", async () => {
+      test("when centre created, creates employee benefits for funding period's fiscal periods", async () => {
         // Arrange
         const currentUser = await userFactory.create()
         const fundingRegion = await fundingRegionFactory.create()
+        await buildingExpenseCategoryFactory.create({
+          fundingRegionId: fundingRegion.id,
+        })
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+        })
+        const fiscalPeriod1 = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          dateStart: new Date("2025-04-01"),
+        })
+        const fiscalPeriod2 = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          dateStart: new Date("2025-05-01"),
+        })
+        await fundingSubmissionLineFactory.create({
+          fiscalYear: "2025/26",
+        })
 
         const attributes = {
           fundingRegionId: fundingRegion.id,
@@ -119,18 +145,44 @@ describe("api/src/services/centres/create-service.ts", () => {
         const centre = await CreateService.perform(attributes, currentUser)
 
         // Assert
-        const employeeBenefitsCount = await EmployeeBenefit.count({
-          where: { centreId: centre.id },
-        })
-        expect(employeeBenefitsCount).toEqual(12)
+        const employeeBenefits = await EmployeeBenefit.findAll()
+        expect(employeeBenefits).toEqual([
+          expect.objectContaining({
+            centreId: centre.id,
+            fiscalPeriodId: fiscalPeriod1.id,
+          }),
+          expect.objectContaining({
+            centreId: centre.id,
+            fiscalPeriodId: fiscalPeriod2.id,
+          }),
+        ])
       })
 
-      test("when centre created, creates building expenses for all fiscal periods and categories", async () => {
+      test("when centre created, creates building expenses for funding period's fiscal periods and expense categories", async () => {
         // Arrange
         const currentUser = await userFactory.create()
         const fundingRegion = await fundingRegionFactory.create()
-        await buildingExpenseCategoryFactory.createList(2, {
+        const buildingExpenseCategory1 = await buildingExpenseCategoryFactory.create({
           fundingRegionId: fundingRegion.id,
+        })
+        const buildingExpenseCategory2 = await buildingExpenseCategoryFactory.create({
+          fundingRegionId: fundingRegion.id,
+        })
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+        })
+        const fiscalPeriod1 = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          dateStart: new Date("2025-04-01"),
+        })
+        const fiscalPeriod2 = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          dateStart: new Date("2025-05-01"),
+        })
+        await fundingSubmissionLineFactory.create({
+          fiscalYear: "2025/26",
         })
 
         const attributes = {
@@ -146,17 +198,54 @@ describe("api/src/services/centres/create-service.ts", () => {
         const centre = await CreateService.perform(attributes, currentUser)
 
         // Assert
-        const buildingExpensesCount = await BuildingExpense.count({
-          where: { centreId: centre.id },
-        })
-
-        expect(buildingExpensesCount).toEqual(24) // 12 fiscal periods × 2 categories
+        const buildingExpenses = await BuildingExpense.findAll()
+        expect(buildingExpenses).toEqual([
+          expect.objectContaining({
+            centreId: centre.id,
+            buildingExpenseCategoryId: buildingExpenseCategory1.id,
+            fiscalPeriodId: fiscalPeriod1.id,
+          }),
+          expect.objectContaining({
+            centreId: centre.id,
+            buildingExpenseCategoryId: buildingExpenseCategory2.id,
+            fiscalPeriodId: fiscalPeriod1.id,
+          }),
+          expect.objectContaining({
+            centreId: centre.id,
+            buildingExpenseCategoryId: buildingExpenseCategory1.id,
+            fiscalPeriodId: fiscalPeriod2.id,
+          }),
+          expect.objectContaining({
+            centreId: centre.id,
+            buildingExpenseCategoryId: buildingExpenseCategory2.id,
+            fiscalPeriodId: fiscalPeriod2.id,
+          }),
+        ])
       })
 
-      test("when centre created, creates funding submission line jsons for all months", async () => {
+      test("when centre created, creates funding submission line jsons for funding period's fiscal periods", async () => {
         // Arrange
         const currentUser = await userFactory.create()
         const fundingRegion = await fundingRegionFactory.create()
+        await buildingExpenseCategoryFactory.create({
+          fundingRegionId: fundingRegion.id,
+        })
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+        })
+        await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          dateStart: new Date("2025-04-01"),
+        })
+        await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          dateStart: new Date("2025-05-01"),
+        })
+        await fundingSubmissionLineFactory.create({
+          fiscalYear: "2025/26",
+        })
 
         const attributes = {
           fundingRegionId: fundingRegion.id,
@@ -170,17 +259,37 @@ describe("api/src/services/centres/create-service.ts", () => {
         const centre = await CreateService.perform(attributes, currentUser)
 
         // Assert
-        const fundingSubmissionLineJsons = await FundingSubmissionLineJson.findAll({
-          where: { centreId: centre.id },
-        })
-
-        expect(fundingSubmissionLineJsons.length).toEqual(12) // 12 months
+        const fundingSubmissionLineJsons = await FundingSubmissionLineJson.findAll()
+        expect(fundingSubmissionLineJsons).toEqual([
+          expect.objectContaining({
+            centreId: centre.id,
+            fiscalYear: "2025/26",
+          }),
+          expect.objectContaining({
+            centreId: centre.id,
+            fiscalYear: "2025/26",
+          }),
+        ])
       })
 
-      test("when centre created, creates funding reconciliations for all funding periods", async () => {
+      test("when centre created, creates a funding reconciliation funding period", async () => {
         // Arrange
         const currentUser = await userFactory.create()
         const fundingRegion = await fundingRegionFactory.create()
+        await buildingExpenseCategoryFactory.create({
+          fundingRegionId: fundingRegion.id,
+        })
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+        })
+        await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          dateStart: new Date("2025-04-01"),
+        })
+        await fundingSubmissionLineFactory.create({
+          fiscalYear: "2025/26",
+        })
 
         const attributes = {
           fundingRegionId: fundingRegion.id,
@@ -194,17 +303,43 @@ describe("api/src/services/centres/create-service.ts", () => {
         const centre = await CreateService.perform(attributes, currentUser)
 
         // Assert
-        const fundingReconciliationsCount = await FundingReconciliation.count({
-          where: { centreId: centre.id },
-        })
-
-        expect(fundingReconciliationsCount).toEqual(1)
+        const fundingReconciliations = await FundingReconciliation.findAll()
+        expect(fundingReconciliations).toEqual([
+          expect.objectContaining({
+            centreId: centre.id,
+            fundingPeriodId: fundingPeriod.id,
+            status: FundingReconciliation.Statuses.DRAFT,
+            fundingReceivedTotalAmount: "0",
+            eligibleExpensesTotalAmount: "0",
+            payrollAdjustmentsTotalAmount: "0",
+            finalBalanceAmount: "0",
+          }),
+        ])
       })
 
-      test("when centre created, creates funding reconciliation adjustments for all funding periods and fiscal periods", async () => {
+      test("when centre created, creates funding reconciliation adjustments for funding period's fiscal periods", async () => {
         // Arrange
         const currentUser = await userFactory.create()
         const fundingRegion = await fundingRegionFactory.create()
+        await buildingExpenseCategoryFactory.create({
+          fundingRegionId: fundingRegion.id,
+        })
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+        })
+        const fiscalPeriod1 = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          dateStart: new Date("2025-04-01"),
+        })
+        const fiscalPeriod2 = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          dateStart: new Date("2025-05-01"),
+        })
+        await fundingSubmissionLineFactory.create({
+          fiscalYear: "2025/26",
+        })
 
         const attributes = {
           fundingRegionId: fundingRegion.id,
@@ -218,156 +353,74 @@ describe("api/src/services/centres/create-service.ts", () => {
         const centre = await CreateService.perform(attributes, currentUser)
 
         // Assert
-        const fundingReconciliationAdjustmentsCount = await FundingReconciliationAdjustment.count({
-          include: [
-            {
-              association: "fundingReconciliation",
-              where: { centreId: centre.id },
-            },
-          ],
+        const fundingReconciliation = await FundingReconciliation.findOne({
+          where: {
+            fundingPeriodId: fundingPeriod.id,
+            centreId: centre.id,
+          },
+          rejectOnEmpty: true,
         })
-
-        expect(fundingReconciliationAdjustmentsCount).toEqual(12) // 1 funding period × 12 fiscal periods
+        const fundingReconciliationAdjustments = await FundingReconciliationAdjustment.findAll()
+        expect(fundingReconciliationAdjustments).toEqual([
+          expect.objectContaining({
+            fundingReconciliationId: fundingReconciliation.id,
+            fiscalPeriodId: fiscalPeriod1.id,
+            fundingReceivedPeriodAmount: "0",
+            eligibleExpensesPeriodAmount: "0",
+            payrollAdjustmentsPeriodAmount: "0",
+            cumulativeBalanceAmount: "0",
+          }),
+          expect.objectContaining({
+            fundingReconciliationId: fundingReconciliation.id,
+            fiscalPeriodId: fiscalPeriod2.id,
+            fundingReceivedPeriodAmount: "0",
+            eligibleExpensesPeriodAmount: "0",
+            payrollAdjustmentsPeriodAmount: "0",
+            cumulativeBalanceAmount: "0",
+          }),
+        ])
       })
 
-      describe("when funding period already exists", () => {
-        test("when funding period exists, creates centre successfully", async () => {
-          // Arrange
-          const currentUser = await userFactory.create()
-          const fundingRegion = await fundingRegionFactory.create()
-          const fundingPeriod = await fundingPeriodFactory.create({
-            fiscalYear: "2024-2025",
-            fromDate: new Date("2024-04-01"),
-            toDate: new Date("2025-03-31"),
-          })
-          await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
-
-          const attributes = {
-            fundingRegionId: fundingRegion.id,
-            name: "Test Centre",
-            license: "ECLC-12345",
-            community: "Whitehorse",
-            isFirstNationProgram: false,
-          }
-
-          // Act
-          const centre = await CreateService.perform(attributes, currentUser)
-
-          // Assert
-          expect(centre).toEqual(
-            expect.objectContaining({
-              id: expect.any(Number),
-              fundingRegionId: fundingRegion.id,
-              name: "Test Centre",
-              license: "ECLC-12345",
-              community: "Whitehorse",
-              isFirstNationProgram: false,
-            })
-          )
+      describe("time dependent effects", () => {
+        beforeEach(() => {
+          vi.useFakeTimers()
         })
 
-        test("when funding period exists, creates employee benefits using existing fiscal periods", async () => {
-          // Arrange
-          const currentUser = await userFactory.create()
-          const fundingRegion = await fundingRegionFactory.create()
-          const fundingPeriod = await fundingPeriodFactory.create({
-            fiscalYear: "2024-2025",
-            fromDate: new Date("2024-04-01"),
-            toDate: new Date("2025-03-31"),
-          })
-          await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
-
-          const attributes = {
-            fundingRegionId: fundingRegion.id,
-            name: "Test Centre",
-            license: "ECLC-12345",
-            community: "Whitehorse",
-            isFirstNationProgram: false,
-          }
-
-          // Act
-          const centre = await CreateService.perform(attributes, currentUser)
-
-          // Assert
-          const employeeBenefitsCount = await EmployeeBenefit.count({
-            where: { centreId: centre.id },
-          })
-
-          expect(employeeBenefitsCount).toEqual(12)
+        afterEach(() => {
+          vi.useRealTimers()
         })
 
-        test("when funding period exists, creates building expenses using existing fiscal periods", async () => {
+        test("when current funding period exists, selects the current funding period", async () => {
           // Arrange
+          const currentDate = new Date("2025-04-01")
+          vi.setSystemTime(currentDate)
+
           const currentUser = await userFactory.create()
           const fundingRegion = await fundingRegionFactory.create()
-          await buildingExpenseCategoryFactory.createList(3, {
+          await buildingExpenseCategoryFactory.create({
             fundingRegionId: fundingRegion.id,
           })
-          const fundingPeriod = await fundingPeriodFactory.create({
+          await fundingPeriodFactory.create({
             fiscalYear: "2024-2025",
             fromDate: new Date("2024-04-01"),
-            toDate: new Date("2025-03-31"),
           })
-          await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
-
-          const attributes = {
-            fundingRegionId: fundingRegion.id,
-            name: "Test Centre",
-            license: "ECLC-12345",
-            community: "Whitehorse",
-            isFirstNationProgram: false,
-            buildingUsagePercent: "80",
-          }
-
-          // Act
-          const centre = await CreateService.perform(attributes, currentUser)
-
-          // Assert
-          const buildingExpensesCount = await BuildingExpense.count({
-            where: { centreId: centre.id },
-          })
-
-          expect(buildingExpensesCount).toEqual(36) // 12 fiscal periods × 3 categories
-        })
-
-        test("when funding period exists, does not duplicate funding period", async () => {
-          // Arrange
-          const currentUser = await userFactory.create()
-          const fundingRegion = await fundingRegionFactory.create()
-          const fundingPeriod = await fundingPeriodFactory.create({
+          const currentFundingPeriod = await fundingPeriodFactory.create({
             fiscalYear: "2025-2026",
             fromDate: new Date("2025-04-01"),
-            toDate: new Date("2026-03-31"),
           })
-          await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
-
-          const attributes = {
-            fundingRegionId: fundingRegion.id,
-            name: "Test Centre",
-            license: "ECLC-12345",
-            community: "Whitehorse",
-            isFirstNationProgram: false,
-          }
-
-          // Act
-          await CreateService.perform(attributes, currentUser)
-
-          // Assert
-          const fundingPeriodsCount = await FundingPeriod.count()
-
-          expect(fundingPeriodsCount).toEqual(1)
-        })
-
-        test("when funding period exists, creates funding reconciliations", async () => {
-          // Arrange
-          const currentUser = await userFactory.create()
-          const fundingRegion = await fundingRegionFactory.create()
-          const fundingPeriod = await fundingPeriodFactory.create({
-            fiscalYear: "2024-2025",
-            fromDate: new Date("2024-04-01"),
-            toDate: new Date("2025-03-31"),
+          await fundingPeriodFactory.create({
+            fiscalYear: "2026-2027",
+            fromDate: new Date("2026-04-01"),
           })
-          await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+
+          const fiscalPeriodInCurrentFundingPeriod = await fiscalPeriodFactory.create({
+            fundingPeriodId: currentFundingPeriod.id,
+            fiscalYear: "2025-26",
+            dateStart: new Date("2025-04-01"),
+          })
+          await fundingSubmissionLineFactory.create({
+            fiscalYear: "2025/26",
+          })
 
           const attributes = {
             fundingRegionId: fundingRegion.id,
@@ -381,23 +434,44 @@ describe("api/src/services/centres/create-service.ts", () => {
           const centre = await CreateService.perform(attributes, currentUser)
 
           // Assert
-          const fundingReconciliationsCount = await FundingReconciliation.count({
-            where: { centreId: centre.id },
-          })
-
-          expect(fundingReconciliationsCount).toEqual(1)
+          const employeeBenefits = await EmployeeBenefit.findAll()
+          expect(employeeBenefits).toEqual([
+            expect.objectContaining({
+              centreId: centre.id,
+              fiscalPeriodId: fiscalPeriodInCurrentFundingPeriod.id,
+            }),
+          ])
         })
 
-        test("when funding period exists, creates funding reconciliation adjustments", async () => {
+        test("when funding period for current date does not exist, selects the newest valid funding period", async () => {
           // Arrange
+          // Arrange
+          const currentDate = new Date("2025-04-01")
+          vi.setSystemTime(currentDate)
+
           const currentUser = await userFactory.create()
           const fundingRegion = await fundingRegionFactory.create()
-          const fundingPeriod = await fundingPeriodFactory.create({
+          await buildingExpenseCategoryFactory.create({
+            fundingRegionId: fundingRegion.id,
+          })
+          const newestPastFundingPeriod = await fundingPeriodFactory.create({
             fiscalYear: "2024-2025",
             fromDate: new Date("2024-04-01"),
-            toDate: new Date("2025-03-31"),
           })
-          await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+
+          await fundingPeriodFactory.create({
+            fiscalYear: "2026-2027",
+            fromDate: new Date("2026-04-01"),
+          })
+
+          const fiscalPeriodInNewestPastFundingPeriod = await fiscalPeriodFactory.create({
+            fundingPeriodId: newestPastFundingPeriod.id,
+            fiscalYear: "2024-25",
+            dateStart: new Date("2024-04-01"),
+          })
+          await fundingSubmissionLineFactory.create({
+            fiscalYear: "2024/25",
+          })
 
           const attributes = {
             fundingRegionId: fundingRegion.id,
@@ -411,17 +485,13 @@ describe("api/src/services/centres/create-service.ts", () => {
           const centre = await CreateService.perform(attributes, currentUser)
 
           // Assert
-          const fundingReconciliationAdjustmentsCount = await FundingReconciliationAdjustment.count(
-            {
-              include: [
-                {
-                  association: "fundingReconciliation",
-                  where: { centreId: centre.id },
-                },
-              ],
-            }
-          )
-          expect(fundingReconciliationAdjustmentsCount).toEqual(12) // 1 funding period × 12 fiscal periods
+          const employeeBenefits = await EmployeeBenefit.findAll()
+          expect(employeeBenefits).toEqual([
+            expect.objectContaining({
+              centreId: centre.id,
+              fiscalPeriodId: fiscalPeriodInNewestPastFundingPeriod.id,
+            }),
+          ])
         })
       })
     })

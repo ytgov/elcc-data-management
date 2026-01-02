@@ -3,16 +3,7 @@ import { isNil } from "lodash"
 
 import db, { FundingPeriod } from "@/models"
 import BaseService from "@/services/base-service"
-import {
-  BuildingExpenses,
-  EmployeeBenefits,
-  EmployeeWageTiers,
-  FiscalPeriods,
-  FundingReconciliationAdjustments,
-  FundingReconciliations,
-  FundingSubmissionLineJsons,
-  FundingSubmissionLines,
-} from "@/services"
+import { FundingPeriods } from "@/services"
 
 export type FundingPeriodCreationAttributes = Partial<CreationAttributes<FundingPeriod>>
 
@@ -49,49 +40,14 @@ export class CreateService extends BaseService {
         title,
       })
 
-      await this.createFiscalPeriods(fundingPeriod)
-      await this.createEmployeeWageTiers(fundingPeriod)
-      await this.createEmployeeBenefits(fundingPeriod)
-      await this.createBuildingExpenses(fundingPeriod)
-      await this.createFundingSubmissionLines(fundingPeriod)
-      await this.createFundingSubmissionLineJsons(fundingPeriod)
-      await this.createFundingReconciliations(fundingPeriod)
-      await this.createFundingReconciliationAdjustments(fundingPeriod)
+      await this.ensureChildren(fundingPeriod)
 
-      return fundingPeriod.reload()
+      return fundingPeriod
     })
   }
 
-  private async createFiscalPeriods(fundingPeriod: FundingPeriod) {
-    await FiscalPeriods.BulkCreateForFundingPeriodService.perform(fundingPeriod)
-  }
-
-  private async createEmployeeWageTiers(fundingPeriod: FundingPeriod) {
-    await EmployeeWageTiers.BulkCreateForFundingPeriodService.perform(fundingPeriod)
-  }
-
-  private async createEmployeeBenefits(fundingPeriod: FundingPeriod) {
-    await EmployeeBenefits.BulkCreateForFundingPeriodService.perform(fundingPeriod)
-  }
-
-  private async createBuildingExpenses(fundingPeriod: FundingPeriod) {
-    await BuildingExpenses.BulkCreateForFundingPeriodService.perform(fundingPeriod)
-  }
-
-  private async createFundingSubmissionLines(fundingPeriod: FundingPeriod) {
-    await FundingSubmissionLines.BulkCreateForFundingPeriodService.perform(fundingPeriod)
-  }
-
-  private async createFundingSubmissionLineJsons(fundingPeriod: FundingPeriod) {
-    await FundingSubmissionLineJsons.BulkCreateForFundingPeriodService.perform(fundingPeriod)
-  }
-
-  private async createFundingReconciliations(fundingPeriod: FundingPeriod) {
-    await FundingReconciliations.BulkCreateForFundingPeriodService.perform(fundingPeriod)
-  }
-
-  private async createFundingReconciliationAdjustments(fundingPeriod: FundingPeriod) {
-    await FundingReconciliationAdjustments.BulkCreateForFundingPeriodService.perform(fundingPeriod)
+  private async ensureChildren(fundingPeriod: FundingPeriod) {
+    await FundingPeriods.EnsureChildrenService.perform(fundingPeriod)
   }
 }
 

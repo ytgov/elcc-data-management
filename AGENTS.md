@@ -23,6 +23,7 @@ This file follows the format from https://agents.md/ for AI agent documentation.
   - [Decimal Type Handling](#decimal-type-handling)
 - [Backend Patterns](#backend-patterns)
   - [Model Organization](#model-organization)
+    - [Scope Naming Convention](#scope-naming-convention)
     - [Soft Delete (Paranoid Mode)](#soft-delete-paranoid-mode)
   - [Seed File Patterns](#seed-file-patterns)
   - [Controller Structure](#controller-structure)
@@ -165,6 +166,7 @@ docker compose -f docker-compose.development.yaml up --remove-orphans --build
 2. **No abbreviations**
    - Variables: `migration` not `mig`
    - SQL tables: `employee_benefits` not `emp_ben`
+   - SQL aliases: Use full table names instead of abbreviations (e.g., `funding_submission_line_jsons` not `fslj`)
    - Function parameters: `fiscalPeriod` not `fp`
 
 3. **Self-documenting code**
@@ -686,6 +688,26 @@ const formatted = formatMoney(total)
   - `optionalField: Type | null` (truly nullable, no CreationOptional)
   - `requiredField: Type` (required, no CreationOptional)
 
+#### Scope Naming Convention
+
+**Pattern:** Scope names describe the relationship/entity being filtered, not the parameter type. Omit "Id" suffix from scope names even when the parameter is an ID.
+
+```typescript
+// Correct - scope name describes the relationship
+this.addScope("byFundingPeriod", (fundingPeriodId: number) => { ... })
+
+// Usage
+Model.withScope({ method: ["byFundingPeriod", fundingPeriodId] }).findAll()
+
+// Incorrect - don't include "Id" in scope name
+this.addScope("byFundingPeriodId", ...)  // Wrong
+```
+
+**Examples of correct naming:**
+- `byFundingPeriod` (not `byFundingPeriodId`)
+- `byCentre` (not `byCentreId`)
+- `byFiscalPeriod` (not `byFiscalPeriodId`)
+
 #### Soft Delete (Paranoid Mode)
 
 **Pattern:** Sequelize paranoid mode is enabled globally by default in `db-client.ts`. All models automatically support soft deletes.
@@ -790,6 +812,57 @@ if (isNil(existingRecord)) {
   await Model.create(attributes)
 }
 ```
+
+### SQL Patterns
+
+**Subquery Wrapping:** Wrap ALL subqueries in parentheses for clarity and operator precedence, regardless of context.
+
+**Sequelize Subquery Pattern:** All subqueries must use the "id: Op.in subquery" pattern to be properly composable in Sequelize.
+
+```typescript
+// Correct - explicit subquery wrapping with Op.in pattern
+const fundingSubmissionLinesByFundingPeriodIdQuery = sql`
+  (
+    SELECT
+      id
+    FROM
+      funding_submission_lines
+    WHERE
+      EXISTS (
+        SELECT
+          1
+        FROM
+          funding_periods
+        WHERE
+          funding_periods.id = :fundingPeriodId
+          AND funding_submission_lines.fiscal_year = REPLACE(
+            funding_periods.fiscal_year,
+            '-' + RIGHT(funding_periods.fiscal_year, 4),
+            '/' + RIGHT(funding_periods.fiscal_year, 2)
+          )
+      )
+  )
+`
+
+// Usage in scope - must use Op.in with the subquery
+return {
+  where: {
+    id: {
+      [Op.in]: fundingSubmissionLinesByFundingPeriodIdQuery,
+    },
+  },
+  replacements: {
+    fundingPeriodId,
+  },
+}
+
+// Incorrect - no wrapping and wrong pattern
+const query = sql`
+  SELECT id FROM funding_submission_lines WHERE EXISTS (...)
+`
+```
+
+**Rationale:** Explicit parentheses are required to write valid SQL and prevent operator precedence issues. The "id: Op.in subquery" pattern is required for Sequelize composability.
 
 ### Controller Structure
 
@@ -1165,6 +1238,40 @@ export default UpdateService
 
 Example: A `CreateService` for fiscal periods creates 12 records (one for each month of the fiscal year). The file is still named `create-service.ts` and the class is still `CreateService`, because it's the standard create operation for that resource.
 
+**Service organization for scoped entities:**
+
+When services operate exclusively on child entities of a parent (e.g., employee wage tiers that only exist within funding periods), nest them under the parent using namespace exports:
+
+```
+services/
+  funding-periods/
+    create-service.ts
+    employee-wage-tiers/
+      bulk-create-service.ts       # Creates employee wage tiers for a funding period
+      bulk-ensure-service.ts
+      index.ts
+    index.ts                        # Exports EmployeeWageTiers namespace
+```
+
+**Usage pattern:**
+
+```typescript
+// Before (flat structure with redundant naming):
+import { EmployeeWageTiers } from "@/services"
+await EmployeeWageTiers.BulkCreateForFundingPeriodService.perform(fundingPeriod)
+
+// After (hierarchical structure with concise naming):
+import { FundingPeriods } from "@/services"
+await FundingPeriods.EmployeeWageTiers.BulkCreateService.perform(fundingPeriod)
+```
+
+**Benefits:**
+
+- Eliminates redundant context in service names
+- Makes parent-child relationships explicit through directory structure
+- Reduces top-level namespace pollution
+- Service name indicates action, directory path indicates scope
+
 ### Serializers
 
 **Pattern:** Control exactly which attributes are exposed to the API.
@@ -1446,6 +1553,38 @@ expect(response.body.user).toMatchObject({
 
 // Incorrect - single line
 expect(response.body.user).toMatchObject({ id: user.id, email: user.email })
+```
+
+**Pattern 4:** Use destructuring when extracting single properties from objects in map functions.
+
+```typescript
+// Correct - destructuring for single property
+const fundingSubmissionLineIds = fundingSubmissionLines.map(({ id }) => id)
+
+// Incorrect - full object parameter
+const fundingSubmissionLineIds = fundingSubmissionLines.map((line) => line.id)
+```
+
+**Pattern 5:** Format arrays in expect statements across multiple lines. Avoid sorting entirely and be explicit about expected order since Sequelize is deterministic.
+
+```typescript
+// Correct - multi-line, explicit order
+expect(fundingSubmissionLineIds).toEqual([fundingSubmissionLine1.id, fundingSubmissionLine2.id])
+
+// Incorrect - single line with sorting
+expect(fundingSubmissionLineIds).toEqual(
+  [fundingSubmissionLine1.id, fundingSubmissionLine2.id].sort()
+)
+```
+
+**Pattern 6:** Use `-1` for non-existent ID test scenarios in all test cases.
+
+```typescript
+// Correct
+const results = await Model.scope("byFundingPeriod", -1).findAll()
+
+// Incorrect
+const results = await Model.scope("byFundingPeriod", 99999).findAll()
 ```
 
 **Rationale:**

@@ -131,7 +131,16 @@ export class BuildingExpense extends BaseModel<
   declare category?: NonAttribute<BuildingExpenseCategory>
 
   static establishScopes() {
-    // add as needed
+    this.addScope("byFundingPeriod", (fundingPeriodId: number) => ({
+      include: [
+        {
+          association: "fiscalPeriod",
+          where: {
+            fundingPeriodId,
+          },
+        },
+      ],
+    }))
   }
 }
 

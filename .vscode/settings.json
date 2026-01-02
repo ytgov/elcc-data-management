@@ -1,4 +1,8 @@
 {
   "eslint.workingDirectories": ["./api", "./web"],
-  "eslint.validate": ["javascript", "typescript", "vue"]
+  "eslint.validate": ["javascript", "typescript", "vue"],
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.preferences.preferTypeOnlyAutoImports": true,
+  "typescript.preferences.useAliasesForRenames": false,
+  "javascript.preferences.importModuleSpecifier": "non-relative"
 }

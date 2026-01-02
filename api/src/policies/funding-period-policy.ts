@@ -2,7 +2,7 @@ import { type Attributes, type FindOptions } from "@sequelize/core"
 
 import { type Path } from "@/utils/deep-pick"
 import { FundingPeriod, User } from "@/models"
-import { PolicyFactory } from "@/policies/base-policy"
+import { ALL_RECORDS_SCOPE, PolicyFactory } from "@/policies/base-policy"
 
 export class FundingPeriodPolicy extends PolicyFactory(FundingPeriod) {
   show(): boolean {
@@ -10,15 +10,21 @@ export class FundingPeriodPolicy extends PolicyFactory(FundingPeriod) {
   }
 
   create(): boolean {
-    return true
+    if (this.user.isSystemAdmin) return true
+
+    return false
   }
 
   update(): boolean {
-    return true
+    if (this.user.isSystemAdmin) return true
+
+    return false
   }
 
   destroy(): boolean {
-    return true
+    if (this.user.isSystemAdmin) return true
+
+    return false
   }
 
   permittedAttributes(): Path[] {
@@ -30,7 +36,7 @@ export class FundingPeriodPolicy extends PolicyFactory(FundingPeriod) {
   }
 
   static policyScope(_user: User): FindOptions<Attributes<FundingPeriod>> {
-    return {}
+    return ALL_RECORDS_SCOPE
   }
 }
 

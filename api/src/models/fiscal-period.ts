@@ -59,7 +59,7 @@ export const FISCAL_PERIOD_MONTHS = Object.values<string>(FiscalPeriodMonths)
  * @see FundingPeriod - The parent fiscal year that contains these monthly periods
  */
 @Table({
-  paranoid: false,
+  tableName: "fiscal_periods",
 })
 export class FiscalPeriod extends BaseModel<
   InferAttributes<FiscalPeriod>,
@@ -106,13 +106,16 @@ export class FiscalPeriod extends BaseModel<
 
   @Attribute(DataTypes.DATE)
   @NotNull
-  @Default(sql.fn("getdate"))
+  @Default(sql.fn("getutcdate"))
   declare createdAt: CreationOptional<Date>
 
   @Attribute(DataTypes.DATE)
   @NotNull
-  @Default(sql.fn("getdate"))
+  @Default(sql.fn("getutcdate"))
   declare updatedAt: CreationOptional<Date>
+
+  @Attribute(DataTypes.DATE)
+  declare deletedAt: Date | null
 
   // Helper functions
   static toShortFiscalYearFormat(fiscalYear: string): string {

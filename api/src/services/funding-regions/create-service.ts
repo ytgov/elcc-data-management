@@ -1,8 +1,9 @@
 import { type CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
 
-import { FundingRegion, User } from "@/models"
+import db, { FundingRegion, User } from "@/models"
 import BaseService from "@/services/base-service"
+import { FundingRegions } from "@/services"
 
 export type FundingRegionCreationAttributes = Partial<CreationAttributes<FundingRegion>>
 
@@ -25,12 +26,22 @@ export class CreateService extends BaseService {
       throw new Error("Subsidy rate is required")
     }
 
-    const fundingRegion = await FundingRegion.create({
-      region,
-      subsidyRate,
-    })
+    return db.transaction(async () => {
+      const fundingRegion = await FundingRegion.create({
+        region,
+        subsidyRate,
+      })
 
-    return fundingRegion
+      await this.ensureChildren(fundingRegion)
+
+      return fundingRegion
+    })
+  }
+
+  private async ensureChildren(
+    newFundingRegion: FundingRegion
+  ): Promise<void> {
+    await FundingRegions.EnsureChildrenService.perform(newFundingRegion)
   }
 }
 

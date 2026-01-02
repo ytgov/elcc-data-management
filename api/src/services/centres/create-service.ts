@@ -1,20 +1,11 @@
+import { Op } from "@sequelize/core"
 import { type CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
 
-import db, { Centre, Log, User } from "@/models"
+import db, { Centre, FundingPeriod, Log, User } from "@/models"
 import BaseService from "@/services/base-service"
 import LogServices from "@/services/log-services"
-import {
-  BuildingExpenses,
-  EmployeeBenefits,
-  EmployeeWageTiers,
-  FiscalPeriods,
-  FundingPeriods,
-  FundingReconciliationAdjustments,
-  FundingReconciliations,
-  FundingSubmissionLineJsons,
-  FundingSubmissionLines,
-} from "@/services"
+import { Centres } from "@/services"
 
 export type CentreCreationAttributes = Partial<CreationAttributes<Centre>>
 
@@ -70,27 +61,45 @@ export class CreateService extends BaseService {
         status: statusOrFallback,
       })
 
-      await this.ensureCurrentFiscalAndBaseEntities()
-      await this.ensureChildEntitiesForCentre(centre)
+      const fundingPeriod = await this.getCurrentFundingPeriod()
+      if (isNil(fundingPeriod)) {
+        throw new Error(
+          "A funding period must be created before creating centres. Please create a funding period first."
+        )
+      }
+      await this.ensureChildEntitiesForCentre(centre, fundingPeriod)
       await this.logCentreCreation(centre, this.currentUser)
 
       return centre
     })
   }
 
-  private async ensureCurrentFiscalAndBaseEntities() {
-    const fundingPeriod = await FundingPeriods.EnsureCurrentService.perform()
-    await FiscalPeriods.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
-    await EmployeeWageTiers.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
-    await FundingSubmissionLines.BulkEnsureForFundingPeriodService.perform(fundingPeriod)
+  private async getCurrentFundingPeriod(): Promise<FundingPeriod | null> {
+    const currentDate = new Date()
+    const currentFundingPeriod = await FundingPeriod.findOne({
+      where: {
+        fromDate: {
+          [Op.lte]: currentDate,
+        },
+        toDate: {
+          [Op.gte]: currentDate,
+        },
+      },
+    })
+    if (currentFundingPeriod) return currentFundingPeriod
+
+    return FundingPeriod.findOne({
+      where: {
+        fromDate: {
+          [Op.lte]: currentDate,
+        },
+      },
+      order: [["fromDate", "DESC"]],
+    })
   }
 
-  private async ensureChildEntitiesForCentre(centre: Centre) {
-    await EmployeeBenefits.BulkEnsureForCentreService.perform(centre)
-    await BuildingExpenses.BulkEnsureForCentreService.perform(centre)
-    await FundingSubmissionLineJsons.BulkEnsureForCentreService.perform(centre)
-    await FundingReconciliations.BulkEnsureForCentreService.perform(centre)
-    await FundingReconciliationAdjustments.BulkEnsureForCentreService.perform(centre)
+  private async ensureChildEntitiesForCentre(centre: Centre, fundingPeriod: FundingPeriod) {
+    await Centres.FundingPeriods.EnsureChildrenService.perform(centre, fundingPeriod)
   }
 
   private async logCentreCreation(centre: Centre, currentUser: User) {
