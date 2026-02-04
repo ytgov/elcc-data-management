@@ -1,7 +1,23 @@
 import { type Migration } from "@/db/umzug"
 
 export async function up({ context: queryInterface }: Migration) {
-  await queryInterface.removeIndex("fiscal_periods", "fiscal_periods_fiscal_year_month_unique")
+  try {
+    await queryInterface.removeIndex("fiscal_periods", "fiscal_periods_fiscal_year_month_unique")
+  } catch (error) {
+    console.debug(
+      `Aligning production and development environments: fiscal_periods_fiscal_year_month_unique index does not exist: ${error}`,
+      { error }
+    )
+  }
+
+  try {
+    await queryInterface.removeIndex("fiscal_periods", "fiscal_periods_fiscal_year_month")
+  } catch (error) {
+    console.debug(
+      `Aligning production and development environments: fiscal_periods_fiscal_year_month index does not exist: ${error}`,
+      { error }
+    )
+  }
 
   await queryInterface.addIndex("fiscal_periods", ["fiscal_year", "month"], {
     name: "fiscal_periods_fiscal_year_month_unique",
