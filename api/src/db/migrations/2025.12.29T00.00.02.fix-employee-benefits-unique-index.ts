@@ -1,10 +1,29 @@
 import { type Migration } from "@/db/umzug"
 
 export async function up({ context: queryInterface }: Migration) {
-  await queryInterface.removeIndex(
-    "employee_benefits",
-    "employee_benefits_centre_id_fiscal_period_id_unique"
-  )
+  try {
+    await queryInterface.removeIndex(
+      "employee_benefits",
+      "employee_benefits_centre_id_fiscal_period_id_unique"
+    )
+  } catch (error) {
+    console.debug(
+      `Aligning production and development environments: employee_benefits_centre_id_fiscal_period_id_unique index does not exist: ${error}`,
+      { error }
+    )
+  }
+
+  try {
+    await queryInterface.removeIndex(
+      "employee_benefits",
+      "employee_benefits_centre_id_fiscal_period_id"
+    )
+  } catch (error) {
+    console.debug(
+      `Aligning production and development environments: employee_benefits_centre_id_fiscal_period_id index does not exist: ${error}`,
+      { error }
+    )
+  }
 
   await queryInterface.addIndex("employee_benefits", ["centre_id", "fiscal_period_id"], {
     name: "employee_benefits_centre_id_fiscal_period_id_unique",
