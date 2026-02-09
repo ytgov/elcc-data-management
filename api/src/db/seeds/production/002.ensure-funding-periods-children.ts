@@ -10,7 +10,9 @@ import { FundingPeriods } from "@/services"
 
 export async function up() {
   await FundingPeriod.findEach(async (fundingPeriod) => {
-    await FundingPeriods.EnsureChildrenService.perform(fundingPeriod)
+    await FundingPeriods.FiscalPeriods.BulkEnsureService.perform(fundingPeriod)
+    await FundingPeriods.EmployeeWageTiers.BulkEnsureService.perform(fundingPeriod)
+    await FundingPeriods.FundingSubmissionLines.BulkEnsureService.perform(fundingPeriod)
   })
 }
 
