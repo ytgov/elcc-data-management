@@ -319,6 +319,94 @@ describe("api/src/services/funding-reconciliations/calculate-payroll-adjustments
         // Assert
         expect(result).toBe("328.0000")
       })
+
+      test("when employee benefits and wage enhancements are soft deleted, excludes them from totals", async () => {
+        // Arrange
+        const centre = await centreFactory.create()
+        const fundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+          fromDate: new Date("2025-04-01"),
+          toDate: new Date("2026-03-31"),
+        })
+        const fiscalPeriod = await fiscalPeriodFactory.create({
+          fundingPeriodId: fundingPeriod.id,
+          fiscalYear: "2025-26",
+          month: FiscalPeriod.Months.APRIL,
+          dateStart: new Date("2025-04-01"),
+          dateEnd: new Date("2025-04-30"),
+        })
+
+        const activeEmployeeBenefit = await employeeBenefitFactory.create({
+          centreId: centre.id,
+          fiscalPeriodId: fiscalPeriod.id,
+          grossPayrollMonthlyActual: "10000",
+          grossPayrollMonthlyEstimated: "10000",
+          costCapPercentage: "0.02",
+          employeeCostActual: "50",
+          employeeCostEstimated: "50",
+          employerCostActual: "100",
+          employerCostEstimated: "100",
+        })
+        await employeeBenefitFactory.create({
+          centreId: centre.id,
+          fiscalPeriodId: fiscalPeriod.id,
+          grossPayrollMonthlyActual: "10000",
+          grossPayrollMonthlyEstimated: "10000",
+          costCapPercentage: "0.02",
+          employeeCostActual: "500",
+          employeeCostEstimated: "500",
+          employerCostActual: "500",
+          employerCostEstimated: "500",
+          deletedAt: new Date("2026-02-23T23:52:26.396Z"),
+        })
+
+        const activeEmployeeWageTier = await employeeWageTierFactory.create({
+          fiscalPeriodId: fiscalPeriod.id,
+          tierLevel: 3,
+          tierLabel: "Level 2",
+          wageRatePerHour: "10.0",
+        })
+        const softDeletedEmployeeWageTier = await employeeWageTierFactory.create({
+          fiscalPeriodId: fiscalPeriod.id,
+          tierLevel: 4,
+          tierLabel: "Level 2a",
+          wageRatePerHour: "99.0",
+          deletedAt: new Date("2026-02-23T23:52:26.409Z"),
+        })
+
+        await wageEnhancementFactory.create({
+          centreId: centre.id,
+          employeeWageTierId: activeEmployeeWageTier.id,
+          employeeName: "Active Employee",
+          hoursEstimated: "20",
+          hoursActual: "20",
+        })
+        await wageEnhancementFactory.create({
+          centreId: centre.id,
+          employeeWageTierId: activeEmployeeWageTier.id,
+          employeeName: "Soft Deleted Enhancement",
+          hoursEstimated: "10",
+          hoursActual: "10",
+          deletedAt: new Date("2026-02-23T23:52:26.396Z"),
+        })
+        await wageEnhancementFactory.create({
+          centreId: centre.id,
+          employeeWageTierId: softDeletedEmployeeWageTier.id,
+          employeeName: "Deleted Tier Employee",
+          hoursEstimated: "10",
+          hoursActual: "10",
+        })
+
+        // Act
+        const result = await CalculatePayrollAdjustmentsPeriodAmountService.perform(
+          centre.id,
+          fiscalPeriod.id
+        )
+
+        // Assert
+        expect(activeEmployeeBenefit).toBeTruthy()
+        expect(result).toBe("328.0000")
+      })
     })
   })
 })

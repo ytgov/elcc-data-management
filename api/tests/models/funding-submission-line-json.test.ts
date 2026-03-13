@@ -260,6 +260,31 @@ describe("api/src/models/funding-submission-line-json.ts", () => {
             }),
           ])
         })
+
+        test("when matching funding submission line json is soft deleted, excludes it from the scope", async () => {
+          // Arrange
+          const fundingPeriod = await fundingPeriodFactory.create({
+            fiscalYear: "2023-2024",
+          })
+          const centre = await centreFactory.create()
+          const softDeletedFundingSubmissionLineJson = await fundingSubmissionLineJsonFactory.create({
+            centreId: centre.id,
+            fiscalYear: "2023/24",
+            dateName: FundingSubmissionLineJson.Months.APRIL,
+            dateStart: new Date("2023-04-01T00:00:00Z"),
+            dateEnd: new Date("2023-04-30T23:59:59Z"),
+            values: JSON.stringify([]),
+          })
+          await softDeletedFundingSubmissionLineJson.destroy()
+
+          // Act
+          const fundingSubmissionLineJsons = await FundingSubmissionLineJson.withScope({
+            method: ["byFundingPeriod", fundingPeriod.id],
+          }).findAll()
+
+          // Assert
+          expect(fundingSubmissionLineJsons).toEqual([])
+        })
       })
     })
   })

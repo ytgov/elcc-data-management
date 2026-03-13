@@ -161,6 +161,8 @@ export class FundingSubmissionLineJson extends BaseModel<
           FROM
             funding_submission_line_jsons
           WHERE
+            funding_submission_line_jsons.deleted_at IS NULL
+            AND
             EXISTS (
               SELECT
                 1
@@ -168,6 +170,7 @@ export class FundingSubmissionLineJson extends BaseModel<
                 funding_periods
               WHERE
                 funding_periods.id = ${fundingPeriodId}
+                AND funding_periods.deleted_at IS NULL
                 AND funding_submission_line_jsons.fiscal_year = REPLACE(
                   funding_periods.fiscal_year,
                   '-' + RIGHT(funding_periods.fiscal_year, 4),
@@ -194,7 +197,8 @@ export class FundingSubmissionLineJson extends BaseModel<
             funding_submission_line_jsons
             CROSS APPLY OPENJSON (funding_submission_line_jsons.[values]) AS json_array_element
           WHERE
-            JSON_VALUE(json_array_element.value, '$.sectionName') = :sectionName
+            funding_submission_line_jsons.deleted_at IS NULL
+            AND JSON_VALUE(json_array_element.value, '$.sectionName') = :sectionName
           GROUP BY
             funding_submission_line_jsons.id,
             JSON_VALUE(json_array_element.value, '$.sectionName')

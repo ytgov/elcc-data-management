@@ -32,6 +32,9 @@ export class BulkCreateService extends BaseService {
         FROM
           building_expense_categories
           INNER JOIN funding_regions ON funding_regions.id = building_expense_categories.funding_region_id
+            AND funding_regions.deleted_at IS NULL
+        WHERE
+          building_expense_categories.deleted_at IS NULL
         ORDER BY
           funding_regions.created_at DESC,
           funding_regions.id DESC

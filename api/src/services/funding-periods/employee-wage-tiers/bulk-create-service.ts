@@ -40,6 +40,9 @@ export class BulkCreateService extends BaseService {
         FROM
           fiscal_periods
           INNER JOIN employee_wage_tiers ON employee_wage_tiers.fiscal_period_id = fiscal_periods.id
+            AND employee_wage_tiers.deleted_at IS NULL
+        WHERE
+          fiscal_periods.deleted_at IS NULL
         ORDER BY
           fiscal_periods.date_end DESC,
           fiscal_periods.id DESC

@@ -35,6 +35,8 @@ export class BulkCreateService extends BaseService {
           TOP 1 funding_submission_lines.fiscal_year
         FROM
           funding_submission_lines
+        WHERE
+          funding_submission_lines.deleted_at IS NULL
         ORDER BY
           funding_submission_lines.fiscal_year DESC,
           funding_submission_lines.id DESC
