@@ -18,7 +18,7 @@ export class CreateService extends BaseService {
     const {
       centreId,
       fiscalPeriodId,
-      buildingExpenseCategoryId,
+      categoryId,
       estimatedCost,
       actualCost,
       totalCost,
@@ -33,7 +33,7 @@ export class CreateService extends BaseService {
       throw new Error("Fiscal period ID is required")
     }
 
-    if (isNil(buildingExpenseCategoryId)) {
+    if (isNil(categoryId)) {
       throw new Error("Building expense category ID is required")
     }
 
@@ -49,15 +49,15 @@ export class CreateService extends BaseService {
       throw new Error("Total cost is required")
     }
 
-    const fundingRegionSnapshot = await this.determineFundingRegion(buildingExpenseCategoryId)
+    const fundingRegionSnapshot = await this.determineFundingRegion(categoryId)
     const buildingUsagePercent = await this.determineBuildingUsagePercent(centreId)
-    const subsidyRate = await this.determineSubsidyRate(buildingExpenseCategoryId)
+    const subsidyRate = await this.determineSubsidyRate(categoryId)
 
     const buildingExpense = await BuildingExpense.create({
       ...optionalAttributes,
       centreId,
       fiscalPeriodId,
-      buildingExpenseCategoryId,
+      categoryId,
       fundingRegionSnapshot,
       subsidyRate,
       buildingUsagePercent,
@@ -69,14 +69,14 @@ export class CreateService extends BaseService {
     return buildingExpense
   }
 
-  private async determineFundingRegion(buildingExpenseCategoryId: number): Promise<string> {
+  private async determineFundingRegion(categoryId: number): Promise<string> {
     const fundingRegion = await FundingRegion.findOne({
       attributes: ["region"],
       include: [
         {
           association: "buildingExpenseCategories",
           where: {
-            id: buildingExpenseCategoryId,
+            id: categoryId,
           },
         },
       ],
@@ -96,8 +96,8 @@ export class CreateService extends BaseService {
     return buildingUsagePercent
   }
 
-  private async determineSubsidyRate(buildingExpenseCategoryId: number): Promise<string> {
-    const category = await BuildingExpenseCategory.findByPk(buildingExpenseCategoryId, {
+  private async determineSubsidyRate(categoryId: number): Promise<string> {
+    const category = await BuildingExpenseCategory.findByPk(categoryId, {
       attributes: ["subsidyRate"],
       rejectOnEmpty: true,
     })

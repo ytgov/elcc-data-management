@@ -54,7 +54,7 @@ export class BulkCreateService extends BaseService {
           return {
             centreId: this.centre.id,
             fiscalPeriodId: fiscalperiod.id,
-            buildingExpenseCategoryId: buildingExpenseCategory.id,
+            categoryId: buildingExpenseCategory.id,
             fundingRegionSnapshot,
             subsidyRate,
             buildingUsagePercent,

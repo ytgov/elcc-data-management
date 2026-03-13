@@ -40,7 +40,7 @@ export class BuildingExpensePolicy extends PolicyFactory(BuildingExpense) {
     return [
       "centreId",
       "fiscalPeriodId",
-      "buildingExpenseCategoryId",
+      "categoryId",
       ...this.permittedAttributes(),
     ]
   }

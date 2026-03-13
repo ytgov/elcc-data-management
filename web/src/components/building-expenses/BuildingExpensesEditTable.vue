@@ -9,7 +9,7 @@
     disable-sort
     @update:cell="saveBuildingExpenseIfDirty"
   >
-    <template #item.buildingExpenseCategoryId="{ item }">
+    <template #item.categoryId="{ item }">
       <BuildingExpenseCategoryAttributesChip :building-expense-category="item.category" />
     </template>
 
@@ -106,7 +106,7 @@ const { buildingExpenses, isLoading } = useBuildingExpenses(buildingExpensesQuer
 const headers = [
   {
     title: "Category",
-    key: "buildingExpenseCategoryId",
+    key: "categoryId",
   },
   {
     title: "Subsidy Rate / $",

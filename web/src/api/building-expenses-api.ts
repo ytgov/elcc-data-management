@@ -9,7 +9,7 @@ import { type BuildingExpenseCategoryAsReference } from "@/api/building-expense-
 
 export type BuildingExpense = {
   id: number
-  buildingExpenseCategoryId: number
+  categoryId: number
   centreId: number
   fiscalPeriodId: number
   subsidyRate: string
@@ -32,7 +32,7 @@ export type BuildingExpenseAsIndex = BuildingExpense & {
 
 export type BuildingExpenseWhereOptions = WhereOptions<
   BuildingExpense,
-  "id" | "centreId" | "fiscalPeriodId" | "buildingExpenseCategoryId"
+  "id" | "centreId" | "fiscalPeriodId" | "categoryId"
 >
 
 export type BuildingExpenseFiltersOptions = FiltersOptions

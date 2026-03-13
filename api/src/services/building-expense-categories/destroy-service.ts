@@ -22,7 +22,7 @@ export class DestroyService extends BaseService {
   private async assertNoDependentBuildingExpensesExist() {
     const buildingExpenseCount = await BuildingExpense.count({
       where: {
-        buildingExpenseCategoryId: this.buildingExpenseCategory.id,
+        categoryId: this.buildingExpenseCategory.id,
       },
     })
 

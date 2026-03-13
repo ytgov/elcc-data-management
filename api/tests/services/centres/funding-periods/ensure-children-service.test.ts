@@ -123,7 +123,7 @@ describe("api/src/services/centres/funding-periods/ensure-children-service.ts", 
           expect.objectContaining({
             centreId: centre.id,
             fiscalPeriodId: fiscalPeriod.id,
-            buildingExpenseCategoryId: buildingExpenseCategory.id,
+            categoryId: buildingExpenseCategory.id,
           }),
         ])
       })
@@ -147,7 +147,7 @@ describe("api/src/services/centres/funding-periods/ensure-children-service.ts", 
         const buildingExpense = await buildingExpenseFactory.create({
           centreId: centre.id,
           fiscalPeriodId: fiscalPeriod.id,
-          buildingExpenseCategoryId: buildingExpenseCategory.id,
+          categoryId: buildingExpenseCategory.id,
         })
         await fundingSubmissionLineFactory.create({
           fiscalYear: "2024/25",
@@ -163,7 +163,7 @@ describe("api/src/services/centres/funding-periods/ensure-children-service.ts", 
             id: buildingExpense.id,
             centreId: centre.id,
             fiscalPeriodId: fiscalPeriod.id,
-            buildingExpenseCategoryId: buildingExpenseCategory.id,
+            categoryId: buildingExpenseCategory.id,
           }),
         ])
       })

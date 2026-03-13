@@ -9,7 +9,7 @@ export type BuildingExpenseAsIndex = Pick<
   | "id"
   | "centreId"
   | "fiscalPeriodId"
-  | "buildingExpenseCategoryId"
+  | "categoryId"
   | "fundingRegionSnapshot"
   | "subsidyRate"
   | "buildingUsagePercent"
@@ -37,7 +37,7 @@ export class IndexSerializer extends BaseSerializer<BuildingExpense> {
         "id",
         "centreId",
         "fiscalPeriodId",
-        "buildingExpenseCategoryId",
+        "categoryId",
         "fundingRegionSnapshot",
         "subsidyRate",
         "buildingUsagePercent",

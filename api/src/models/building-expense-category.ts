@@ -89,7 +89,7 @@ export class BuildingExpenseCategory extends BaseModel<
   declare fundingRegion?: NonAttribute<FundingRegion>
 
   @HasMany(() => BuildingExpense, {
-    foreignKey: "buildingExpenseCategoryId",
+    foreignKey: "categoryId",
     inverse: {
       as: "category",
     },
