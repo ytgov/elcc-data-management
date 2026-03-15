@@ -2,7 +2,7 @@
   <EditDataTableVirtual
     :headers="headers"
     :items="buildingExpenses"
-    :loading="isLoading || isSaving"
+    :loading="isLoading || isSaving || !isNil(isDeletingBuildingExpenseId)"
     :editable-columns="editableColumns"
     height="630"
     fixed-footer
@@ -54,6 +54,18 @@
       />
     </template>
 
+    <template #item.actions="{ item }">
+      <v-btn
+        color="error"
+        variant="outlined"
+        size="small"
+        :loading="isDeletingBuildingExpenseId === item.id"
+        @click.stop="deleteBuildingExpense(item)"
+      >
+        Delete
+      </v-btn>
+    </template>
+
     <template #tfoot>
       <tfoot>
         <tr class="bg-grey-lighten-3 font-weight-medium">
@@ -62,6 +74,7 @@
           <td>{{ formatMoney(totalEstimatedCost) }}</td>
           <td>{{ formatMoney(totalActualCost) }}</td>
           <td>{{ formatMoney(totalCost) }}</td>
+          <td></td>
           <td></td>
         </tr>
       </tfoot>
@@ -74,8 +87,10 @@ import { computed, ref } from "vue"
 import { isNil, keyBy, pick } from "lodash"
 
 import { formatMoney } from "@/utils/formatters"
+import blockedToTrueConfirm from "@/utils/blocked-to-true-confirm"
 import sumByDecimal from "@/utils/sum-by-decimal"
 
+import { MAX_PER_PAGE } from "@/api/base-api"
 import buildingExpensesApi, {
   BuildingExpenseAsIndex,
   type BuildingExpense,
@@ -106,6 +121,7 @@ const buildingExpensesQuery = computed<BuildingExpenseQueryOptions>(() => {
   return {
     where: props.where,
     filters: props.filters,
+    perPage: MAX_PER_PAGE,
   }
 })
 
@@ -136,6 +152,12 @@ const headers = [
     title: "Notes",
     key: "notes",
     width: "16rem",
+  },
+  {
+    title: "Actions",
+    key: "actions",
+    sortable: false,
+    align: "center" as const,
   },
 ]
 
@@ -172,7 +194,6 @@ const buildingExpenseIdToIndex = computed<Record<number, number>>(() =>
 )
 
 const isSaving = ref(false)
-
 const snack = useSnack()
 
 async function saveBuildingExpenseIfDirty(buildingExpense: BuildingExpense) {
@@ -208,6 +229,24 @@ async function saveBuildingExpenseIfDirty(buildingExpense: BuildingExpense) {
     snack.error(`Failed to save building expense: ${error}`)
   } finally {
     isSaving.value = false
+  }
+}
+
+const isDeletingBuildingExpenseId = ref<number | null>(null)
+
+async function deleteBuildingExpense(buildingExpense: BuildingExpense) {
+  if (!blockedToTrueConfirm("Are you sure you want to remove this building expense?")) return
+
+  isDeletingBuildingExpenseId.value = buildingExpense.id
+  try {
+    await buildingExpensesApi.delete(buildingExpense.id)
+    await refresh()
+    snack.success("Building expense deleted!")
+  } catch (error) {
+    console.error(`Failed to delete building expense: ${error}`, { error })
+    snack.error(`Failed to delete building expense: ${error}`)
+  } finally {
+    isDeletingBuildingExpenseId.value = null
   }
 }
 
