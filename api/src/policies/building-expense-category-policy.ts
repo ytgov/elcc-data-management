@@ -32,7 +32,11 @@ export class BuildingExpenseCategoryPolicy extends PolicyFactory(BuildingExpense
   }
 
   permittedAttributesForCreate(): Path[] {
-    return ["fundingRegionId", ...this.permittedAttributes()]
+    return [
+      "fundingRegionId",
+      "applyToCurrentAndFutureCentreFundingPeriods",
+      ...this.permittedAttributes(),
+    ]
   }
 
   static policyScope(_user: User): FindOptions<Attributes<BuildingExpenseCategory>> {
