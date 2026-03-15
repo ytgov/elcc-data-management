@@ -12,7 +12,7 @@ export class BuildingExpensesController extends BaseController<BuildingExpense> 
     try {
       const where = this.buildWhere()
       const scopes = this.buildFilterScopes()
-      const order = this.buildOrder([["createdAt", "DESC"]])
+      const order = this.buildOrder([["category", "categoryName", "ASC"]])
       const scopedBuildingExpenses = BuildingExpensePolicy.applyScope(scopes, this.currentUser)
 
       const totalCount = await scopedBuildingExpenses.count({ where })
