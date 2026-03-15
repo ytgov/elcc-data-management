@@ -28,12 +28,7 @@ export class BuildingExpensePolicy extends PolicyFactory(BuildingExpense) {
   }
 
   permittedAttributes(): Path[] {
-    const permittedAttributes: Path[] = [
-      "estimatedCost",
-      "actualCost",
-      "totalCost",
-      "notes",
-    ]
+    const permittedAttributes: Path[] = ["estimatedCost", "actualCost", "totalCost", "notes"]
 
     if (this.user.isSystemAdmin) {
       permittedAttributes.push("subsidyRate")

@@ -63,3 +63,35 @@ export class BuildingExpense extends BaseModel {
 - Do not re-template or automatically recompute frozen, period-anchored fields on ledger models.
 - Template models can be freely updated; ledger models keep the values they were created with.
 - When designing new models, be explicit about which fields are copied "as of" a given month or fiscal period.
+
+#### Scope Patterns
+
+- Prefer scope names that describe the business rule being applied, not the parameter type
+- When excluding rows that already have a related record, prefer correlated `NOT EXISTS` predicates over client-built exclusion lists and over `NOT IN` lists
+
+**Preferred anti-match scope pattern:**
+
+```typescript
+this.addScope(
+  "excludingUsedByCentreFiscalPeriod",
+  ({ centreId, fiscalPeriodId }: { centreId: number; fiscalPeriodId: number }) => {
+    return {
+      where: {
+        [Op.and]: sql`
+          NOT EXISTS (
+            SELECT
+              1
+            FROM
+              building_expenses
+            WHERE
+              building_expenses.category_id = ${sql.attribute("id")}
+              AND building_expenses.deleted_at IS NULL
+              AND building_expenses.centre_id = ${centreId}
+              AND building_expenses.fiscal_period_id = ${fiscalPeriodId}
+          )
+        `,
+      },
+    }
+  }
+)
+```
