@@ -34,6 +34,10 @@ export type BuildingExpenseCategoryWhereOptions = WhereOptions<
 export type BuildingExpenseCategoryFiltersOptions = FiltersOptions<{
   search: string
   excludingIds: number[]
+  excludingUsedByCentreFiscalPeriod: {
+    centreId: number
+    fiscalPeriodId: number
+  }
 }>
 
 export type BuildingExpenseCategoryQueryOptions = QueryOptions<

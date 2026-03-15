@@ -101,7 +101,7 @@ const buildingExpensesQuery = computed<BuildingExpenseQueryOptions>(() => {
   }
 })
 
-const { buildingExpenses, isLoading } = useBuildingExpenses(buildingExpensesQuery)
+const { buildingExpenses, isLoading, refresh } = useBuildingExpenses(buildingExpensesQuery)
 
 const headers = [
   {
@@ -188,4 +188,8 @@ async function saveBuildingExpenseIfDirty(buildingExpense: BuildingExpense) {
     isSaving.value = false
   }
 }
+
+defineExpose({
+  refresh,
+})
 </script>

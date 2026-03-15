@@ -49,23 +49,57 @@
         </v-icon>
       </h3>
 
-      <BuildingExpensesEditTable :where="buildingExpenseWhere" />
+      <BuildingExpensesEditTable
+        ref="buildingExpensesEditTable"
+        :where="buildingExpenseWhere"
+      />
+
+      <v-row class="mt-4">
+        <v-col
+          v-if="!showBuildingExpenseCreateForm"
+          cols="12"
+          class="d-flex justify-end"
+        >
+          <v-btn
+            color="primary"
+            @click="showBuildingExpenseCreateForm = true"
+          >
+            Add Building Expense
+          </v-btn>
+        </v-col>
+        <v-col
+          v-else
+          cols="12"
+        >
+          <BuildingExpenseCreateFormCard
+            id="building-expense-create-form-card"
+            :centre-id="centreId"
+            :fiscal-period-id="fiscalPeriodId"
+            @created="closeCreateFormAndRefresh"
+            @cancel="showBuildingExpenseCreateForm = false"
+          />
+        </v-col>
+      </v-row>
     </section>
     <KeyboardShortcutsModal ref="keyboardShortcutsModal" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, useTemplateRef } from "vue"
+import { computed, useTemplateRef, watchEffect } from "vue"
 import { isEmpty, isNil, upperFirst } from "lodash"
 import { useHotkey } from "vuetify"
+import { useRouteQuery } from "@vueuse/router"
 
+import sleepMs from "@/utils/sleep-ms"
+import { booleanTransformer } from "@/utils/use-route-query-transformers"
 import useFiscalPeriods, { FiscalPeriodMonths } from "@/use/use-fiscal-periods"
 import useFundingSubmissionLineJsons from "@/use/use-funding-submission-line-jsons"
 
 import PageLoader from "@/components/common/PageLoader.vue"
 import KeyboardShortcutsModal from "@/components/common/KeyboardShortcutsModal.vue"
 import FundingSubmissionLineJsonEditSheet from "@/components/funding-submission-line-jsons/FundingSubmissionLineJsonEditSheet.vue"
+import BuildingExpenseCreateFormCard from "@/components/building-expenses/BuildingExpenseCreateFormCard.vue"
 import BuildingExpensesEditTable from "@/components/building-expenses/BuildingExpensesEditTable.vue"
 
 const props = defineProps<{
@@ -112,11 +146,32 @@ const buildingExpenseWhere = computed(() => ({
   fiscalPeriodId: fiscalPeriodId.value,
 }))
 
+const showBuildingExpenseCreateForm = useRouteQuery("showBuildingExpenseCreateForm", "false", {
+  transform: booleanTransformer,
+})
+
 const keyboardShortcutsModal = useTemplateRef("keyboardShortcutsModal")
+const buildingExpensesEditTable = useTemplateRef("buildingExpensesEditTable")
 
 useHotkey("shift+?", showKeyboardShortcutsModal)
 
+watchEffect(async () => {
+  if (!showBuildingExpenseCreateForm.value) return
+
+  await sleepMs(50)
+
+  document.getElementById("building-expense-create-form-card")?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  })
+})
+
 function showKeyboardShortcutsModal() {
   keyboardShortcutsModal.value?.open()
+}
+
+async function closeCreateFormAndRefresh() {
+  showBuildingExpenseCreateForm.value = false
+  await buildingExpensesEditTable.value?.refresh()
 }
 </script>
