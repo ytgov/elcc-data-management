@@ -54,6 +54,8 @@
         :where="buildingExpenseWhere"
       />
 
+      <!-- TODO: only show this feature when month is not in the past? -->
+      <!-- TODO: maybe move this to a separate component? -->
       <v-row class="mt-4">
         <v-col
           v-if="!showBuildingExpenseCreateForm"
