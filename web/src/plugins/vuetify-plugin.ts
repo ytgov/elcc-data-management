@@ -71,7 +71,7 @@ export default createVuetify({
       rounded: "md",
     },
     VCard: {
-      elevation: 3,
+      elevation: 0,
       VCardActions: {
         VBtn: {
           variant: "elevated",
