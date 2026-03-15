@@ -3,7 +3,7 @@
     :headers="headers"
     :items="buildingExpenses"
     :loading="isLoading || isSaving"
-    :editable-columns="['estimatedCost', 'actualCost', 'notes']"
+    :editable-columns="editableColumns"
     height="630"
     fixed-footer
     disable-sort
@@ -23,6 +23,13 @@
 
     <template #item.totalCost="{ item }">
       {{ formatMoney(item.totalCost) }}
+    </template>
+
+    <template #item.subsidyRate.edit="{ item }">
+      <v-text-field
+        v-model="item.subsidyRate"
+        hide-details
+      />
     </template>
 
     <template #item.estimatedCost.edit="{ item }">
@@ -78,6 +85,7 @@ import useBuildingExpenses, {
   type BuildingExpenseWhereOptions,
   type BuildingExpenseQueryOptions,
 } from "@/use/use-building-expenses"
+import useCurrentUser from "@/use/use-current-user"
 import useSnack from "@/use/use-snack"
 
 import EditDataTableVirtual from "@/components/common/EditDataTableVirtual.vue"
@@ -131,6 +139,17 @@ const headers = [
   },
 ]
 
+const { isSystemAdmin } = useCurrentUser()
+const editableColumns = computed(() => {
+  const columns = ["estimatedCost", "actualCost", "notes"]
+
+  if (isSystemAdmin.value) {
+    columns.unshift("subsidyRate")
+  }
+
+  return columns
+})
+
 const totalEstimatedCost = computed(() => {
   return sumByDecimal(buildingExpenses.value, "estimatedCost").toFixed(4)
 })
@@ -163,6 +182,7 @@ async function saveBuildingExpenseIfDirty(buildingExpense: BuildingExpense) {
   isSaving.value = true
   try {
     const buildingExpenseAttributes = pick(buildingExpense, [
+      "subsidyRate",
       "estimatedCost",
       "actualCost",
       "notes",

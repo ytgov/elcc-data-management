@@ -28,12 +28,18 @@ export class BuildingExpensePolicy extends PolicyFactory(BuildingExpense) {
   }
 
   permittedAttributes(): Path[] {
-    return [
+    const permittedAttributes: Path[] = [
       "estimatedCost",
       "actualCost",
       "totalCost",
       "notes",
     ]
+
+    if (this.user.isSystemAdmin) {
+      permittedAttributes.push("subsidyRate")
+    }
+
+    return permittedAttributes
   }
 
   permittedAttributesForCreate(): Path[] {
