@@ -8,11 +8,16 @@ import {
   type CreationAttributes,
   type FindOptions,
   type ModelStatic,
+  type ScopeOptions,
   type UpdateOptions,
+  type WhereOptions,
 } from "@sequelize/core"
+import { type AllowReadonlyArray, type Nullish } from "@sequelize/utils"
 
 import db from "@/db/db-client"
 import searchFieldsByTermsFactory from "@/utils/search-fields-by-terms-factory"
+
+export type BaseModelStatic<M extends BaseModel> = typeof BaseModel & ModelStatic<M>
 
 // See /home/marlen/code/icefoganalytics/elcc-data-management/api/node_modules/sequelize/types/model.d.ts -> Model
 export abstract class BaseModel<
@@ -24,6 +29,13 @@ export abstract class BaseModel<
   static addSearchScope<M extends BaseModel>(this: ModelStatic<M>, fields: AttributeNames<M>[]) {
     const searchScopeFunction = searchFieldsByTermsFactory<M>(fields)
     this.addScope("search", searchScopeFunction)
+  }
+
+  public static withScope<M extends BaseModel>(
+    this: ModelStatic<M>,
+    scopes?: AllowReadonlyArray<string | ScopeOptions> | WhereOptions<Attributes<M>> | Nullish
+  ): BaseModelStatic<M> {
+    return super.withScope(scopes) as BaseModelStatic<M>
   }
 
   // See api/node_modules/@sequelize/core/lib/model.d.ts -> findAll
