@@ -91,7 +91,7 @@ const buildingExpenseCategoryAttributes = ref<BuildingExpenseCategoryCreationAtt
   fundingRegionId: undefined,
   categoryName: "",
   subsidyRate: "",
-  applyToCurrentAndFutureCentreFundingPeriods: true,
+  applyToCurrentAndFutureCentreFundingPeriods: false,
 })
 
 const headerActionsFormCard = ref<InstanceType<typeof HeaderActionsFormCard> | null>(null)
