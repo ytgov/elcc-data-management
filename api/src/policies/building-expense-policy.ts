@@ -10,9 +10,7 @@ export class BuildingExpensePolicy extends PolicyFactory(BuildingExpense) {
   }
 
   create(): boolean {
-    if (this.user.isSystemAdmin) return true
-
-    return false
+    return true
   }
 
   update(): boolean {
@@ -38,12 +36,7 @@ export class BuildingExpensePolicy extends PolicyFactory(BuildingExpense) {
   }
 
   permittedAttributesForCreate(): Path[] {
-    return [
-      "centreId",
-      "fiscalPeriodId",
-      "categoryId",
-      ...this.permittedAttributes(),
-    ]
+    return ["centreId", "fiscalPeriodId", "categoryId", ...this.permittedAttributes()]
   }
 
   static policyScope(_user: User): FindOptions<Attributes<BuildingExpense>> {

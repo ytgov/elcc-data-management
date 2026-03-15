@@ -1,7 +1,14 @@
 import { type CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
 
-import { BuildingExpense, BuildingExpenseCategory, Centre, FundingRegion, User } from "@/models"
+import {
+  BuildingExpense,
+  BuildingExpenseCategory,
+  Centre,
+  FiscalPeriod,
+  FundingRegion,
+  User,
+} from "@/models"
 import BaseService from "@/services/base-service"
 
 export type BuildingExpenseCreationAttributes = Partial<CreationAttributes<BuildingExpense>>
@@ -25,12 +32,22 @@ export class CreateService extends BaseService {
       ...optionalAttributes
     } = this.attributes
 
-    if (isNil(centreId)) {
-      throw new Error("Centre ID is required")
-    }
-
     if (isNil(fiscalPeriodId)) {
       throw new Error("Fiscal period ID is required")
+    }
+
+    // TODO: make this timezone aware.
+    // Probably will need to: a) add timezone to Center and b) use that timezone to compare dates
+    const fiscalPeriod = await FiscalPeriod.findByPk(fiscalPeriodId, {
+      attributes: ["dateEnd"],
+      rejectOnEmpty: true,
+    })
+    if (fiscalPeriod.dateEnd < new Date()) {
+      throw new Error("Cannot create building expense for a past fiscal period")
+    }
+
+    if (isNil(centreId)) {
+      throw new Error("Centre ID is required")
     }
 
     if (isNil(categoryId)) {
