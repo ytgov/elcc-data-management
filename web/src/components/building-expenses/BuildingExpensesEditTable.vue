@@ -202,6 +202,8 @@ async function saveBuildingExpenseIfDirty(buildingExpense: BuildingExpense) {
 
     snack.success("Building expense saved!")
   } catch (error) {
+    await refresh()
+
     console.error(`Failed to save building expense: ${error}`, { error })
     snack.error(`Failed to save building expense: ${error}`)
   } finally {
