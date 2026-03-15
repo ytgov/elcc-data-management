@@ -36,15 +36,7 @@ export class CreateService extends BaseService {
       throw new Error("Fiscal period ID is required")
     }
 
-    // TODO: make this timezone aware.
-    // Probably will need to: a) add timezone to Center and b) use that timezone to compare dates
-    const fiscalPeriod = await FiscalPeriod.findByPk(fiscalPeriodId, {
-      attributes: ["dateEnd"],
-      rejectOnEmpty: true,
-    })
-    if (fiscalPeriod.dateEnd < new Date()) {
-      throw new Error("Cannot create building expense for a past fiscal period")
-    }
+    await this.assertCurrentOrFutureFiscalPeriod(fiscalPeriodId)
 
     if (isNil(centreId)) {
       throw new Error("Centre ID is required")
@@ -84,6 +76,23 @@ export class CreateService extends BaseService {
     })
 
     return buildingExpense
+  }
+
+  /**
+   * TODO: make this timezone aware.
+   * Probably will need to:
+   * a) add timezone to Center
+   * b) use that timezone to compare dates
+   */
+  private async assertCurrentOrFutureFiscalPeriod(fiscalPeriodId: number): Promise<void> {
+    const fiscalPeriod = await FiscalPeriod.findByPk(fiscalPeriodId, {
+      attributes: ["dateEnd"],
+      rejectOnEmpty: true,
+    })
+
+    if (fiscalPeriod.dateEnd < new Date()) {
+      throw new Error("Cannot create building expense for a past fiscal period")
+    }
   }
 
   private async determineFundingRegion(categoryId: number): Promise<string> {
