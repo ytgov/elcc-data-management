@@ -40,7 +40,11 @@ Test initialization goes like this:
    })
    ```
 5. In isolated model or scope tests, avoid redundant `where` clauses that only restate the records created in the test. Only include extra filters when that filter is part of the behavior under test.
-6. I'm using a plugin that lets me switch between the test and non-test file, and creates the test file if it does not exist. It's not great, but it mostly works. See https://marketplace.visualstudio.com/items?itemName=klondikemarlen.create-test-file
+6. Prefer one `expect(...)` per test. If you need to verify multiple outcomes, split them into separate tests with narrow assertions.
+7. Prefer concrete record assertions over count-only assertions. When asserting persisted results, prefer `findAll()` on the full table and compare the returned records directly. Do not add restrictive `where` clauses or `order` clauses unless that filter or ordering is part of the behavior under test.
+8. Use full, descriptive variable names in tests. Avoid abbreviations like `persistedCategory` when `persistedBuildingExpenseCategory` is clearer.
+9. Order test imports by conceptual distance: third-party libraries first, then local project imports such as models, then factories, and finally the file under test.
+10. I'm using a plugin that lets me switch between the test and non-test file, and creates the test file if it does not exist. It's not great, but it mostly works. See https://marketplace.visualstudio.com/items?itemName=klondikemarlen.create-test-file
 
    It requires this config (in your workspace or `.vscode/settings.json`).
 
