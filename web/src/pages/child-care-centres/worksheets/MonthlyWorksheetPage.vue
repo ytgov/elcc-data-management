@@ -57,7 +57,10 @@
 
       <!-- TODO: only show this feature when month is not in the past? -->
       <!-- TODO: maybe move this to a separate component? -->
-      <v-row class="mt-4">
+      <v-row
+        v-if="isCurrentOrFutureFiscalPeriod"
+        class="mt-4"
+      >
         <v-col
           v-if="!showBuildingExpenseCreateForm"
           cols="12"
