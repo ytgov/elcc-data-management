@@ -53,7 +53,7 @@ describe("api/src/services/centres/funding-periods/building-expenses/bulk-create
           expect.objectContaining({
             centreId: centre.id,
             fiscalPeriodId: fiscalPeriod1.id,
-            buildingExpenseCategoryId: buildingExpenseCategory1.id,
+            categoryId: buildingExpenseCategory1.id,
             fundingRegionSnapshot: "Test Region",
             subsidyRate: "0.25",
             buildingUsagePercent: "80",
@@ -64,7 +64,7 @@ describe("api/src/services/centres/funding-periods/building-expenses/bulk-create
           expect.objectContaining({
             centreId: centre.id,
             fiscalPeriodId: fiscalPeriod1.id,
-            buildingExpenseCategoryId: buildingExpenseCategory2.id,
+            categoryId: buildingExpenseCategory2.id,
             fundingRegionSnapshot: "Test Region",
             subsidyRate: "0.5",
             buildingUsagePercent: "80",
@@ -75,7 +75,7 @@ describe("api/src/services/centres/funding-periods/building-expenses/bulk-create
           expect.objectContaining({
             centreId: centre.id,
             fiscalPeriodId: fiscalPeriod2.id,
-            buildingExpenseCategoryId: buildingExpenseCategory1.id,
+            categoryId: buildingExpenseCategory1.id,
             fundingRegionSnapshot: "Test Region",
             subsidyRate: "0.25",
             buildingUsagePercent: "80",
@@ -86,7 +86,7 @@ describe("api/src/services/centres/funding-periods/building-expenses/bulk-create
           expect.objectContaining({
             centreId: centre.id,
             fiscalPeriodId: fiscalPeriod2.id,
-            buildingExpenseCategoryId: buildingExpenseCategory2.id,
+            categoryId: buildingExpenseCategory2.id,
             fundingRegionSnapshot: "Test Region",
             subsidyRate: "0.5",
             buildingUsagePercent: "80",

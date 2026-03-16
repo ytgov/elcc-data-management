@@ -34,6 +34,17 @@
       </v-col>
     </v-row>
 
+    <v-row>
+      <v-col cols="12">
+        <v-checkbox
+          v-model="buildingExpenseCategoryAttributes.applyToCurrentAndFutureCentreFundingPeriods"
+          color="primary"
+          hide-details
+          label="Apply to all current and future centre funding periods"
+        />
+      </v-col>
+    </v-row>
+
     <template #actions>
       <v-btn
         :loading="isLoading"
@@ -66,7 +77,7 @@ import { isNil } from "lodash"
 import { required } from "@/utils/validators"
 
 import buildingExpenseCategoriesApi, {
-  type BuildingExpenseCategory,
+  type BuildingExpenseCategoryCreationAttributes,
 } from "@/api/building-expense-categories-api"
 import useBreadcrumbs from "@/use/use-breadcrumbs"
 import useSnack from "@/use/use-snack"
@@ -76,10 +87,11 @@ import BuildingExpenseCategoryCategoryNameUniqueTextField from "@/components/bui
 import FundingRegionAutocomplete from "@/components/funding-regions/FundingRegionAutocomplete.vue"
 import HeaderActionsFormCard from "@/components/common/HeaderActionsFormCard.vue"
 
-const buildingExpenseCategoryAttributes = ref<Partial<BuildingExpenseCategory>>({
+const buildingExpenseCategoryAttributes = ref<BuildingExpenseCategoryCreationAttributes>({
   fundingRegionId: undefined,
   categoryName: "",
   subsidyRate: "",
+  applyToCurrentAndFutureCentreFundingPeriods: false,
 })
 
 const headerActionsFormCard = ref<InstanceType<typeof HeaderActionsFormCard> | null>(null)

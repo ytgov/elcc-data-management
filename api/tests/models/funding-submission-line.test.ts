@@ -183,6 +183,28 @@ describe("api/src/models/funding-submission-line.ts", () => {
             }),
           ])
         })
+
+        test("when matching funding submission line is soft deleted, excludes it from the scope", async () => {
+          // Arrange
+          const fundingPeriod = await fundingPeriodFactory.create({
+            fiscalYear: "2023-2024",
+          })
+          const softDeletedFundingSubmissionLine = await fundingSubmissionLineFactory.create({
+            fiscalYear: "2023/24",
+            sectionName: "Child Care Spaces",
+            lineName: "Infant Spaces",
+            monthlyAmount: "100.0000",
+          })
+          await softDeletedFundingSubmissionLine.destroy()
+
+          // Act
+          const fundingSubmissionLines = await FundingSubmissionLine.withScope({
+            method: ["byFundingPeriod", fundingPeriod.id],
+          }).findAll()
+
+          // Assert
+          expect(fundingSubmissionLines).toEqual([])
+        })
       })
     })
   })

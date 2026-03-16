@@ -2,14 +2,14 @@
   <EditDataTableVirtual
     :headers="headers"
     :items="buildingExpenses"
-    :loading="isLoading || isSaving"
-    :editable-columns="['estimatedCost', 'actualCost', 'notes']"
+    :loading="isLoading || isSaving || !isNil(isDeletingBuildingExpenseId)"
+    :editable-columns="editableColumns"
     height="630"
     fixed-footer
     disable-sort
     @update:cell="saveBuildingExpenseIfDirty"
   >
-    <template #item.buildingExpenseCategoryId="{ item }">
+    <template #item.categoryId="{ item }">
       <BuildingExpenseCategoryAttributesChip :building-expense-category="item.category" />
     </template>
 
@@ -23,6 +23,13 @@
 
     <template #item.totalCost="{ item }">
       {{ formatMoney(item.totalCost) }}
+    </template>
+
+    <template #item.subsidyRate.edit="{ item }">
+      <v-text-field
+        v-model="item.subsidyRate"
+        hide-details
+      />
     </template>
 
     <template #item.estimatedCost.edit="{ item }">
@@ -47,6 +54,22 @@
       />
     </template>
 
+    <template
+      v-if="!hideActionsColumn"
+      #item.actions="{ item }"
+    >
+      <v-btn
+        v-if="item.policy.destroy"
+        color="error"
+        variant="outlined"
+        size="small"
+        :loading="isDeletingBuildingExpenseId === item.id"
+        @click.stop="deleteBuildingExpense(item)"
+      >
+        Delete
+      </v-btn>
+    </template>
+
     <template #tfoot>
       <tfoot>
         <tr class="bg-grey-lighten-3 font-weight-medium">
@@ -56,6 +79,7 @@
           <td>{{ formatMoney(totalActualCost) }}</td>
           <td>{{ formatMoney(totalCost) }}</td>
           <td></td>
+          <td v-if="!hideActionsColumn"></td>
         </tr>
       </tfoot>
     </template>
@@ -67,8 +91,10 @@ import { computed, ref } from "vue"
 import { isNil, keyBy, pick } from "lodash"
 
 import { formatMoney } from "@/utils/formatters"
+import blockedToTrueConfirm from "@/utils/blocked-to-true-confirm"
 import sumByDecimal from "@/utils/sum-by-decimal"
 
+import { MAX_PER_PAGE } from "@/api/base-api"
 import buildingExpensesApi, {
   BuildingExpenseAsIndex,
   type BuildingExpense,
@@ -78,6 +104,7 @@ import useBuildingExpenses, {
   type BuildingExpenseWhereOptions,
   type BuildingExpenseQueryOptions,
 } from "@/use/use-building-expenses"
+import useCurrentUser from "@/use/use-current-user"
 import useSnack from "@/use/use-snack"
 
 import EditDataTableVirtual from "@/components/common/EditDataTableVirtual.vue"
@@ -87,10 +114,12 @@ const props = withDefaults(
   defineProps<{
     where?: BuildingExpenseWhereOptions
     filters?: BuildingExpenseFiltersOptions
+    hideActionsColumn?: boolean
   }>(),
   {
     where: () => ({}),
     filters: () => ({}),
+    hideActionsColumn: false,
   }
 )
 
@@ -98,38 +127,67 @@ const buildingExpensesQuery = computed<BuildingExpenseQueryOptions>(() => {
   return {
     where: props.where,
     filters: props.filters,
+    perPage: MAX_PER_PAGE,
   }
 })
 
-const { buildingExpenses, isLoading } = useBuildingExpenses(buildingExpensesQuery)
+const { buildingExpenses, isLoading, refresh } = useBuildingExpenses(buildingExpensesQuery)
 
-const headers = [
-  {
-    title: "Category",
-    key: "buildingExpenseCategoryId",
-  },
-  {
-    title: "Subsidy Rate / $",
-    key: "subsidyRate",
-  },
-  {
-    title: "Estimated Cost",
-    key: "estimatedCost",
-  },
-  {
-    title: "Actual Cost",
-    key: "actualCost",
-  },
-  {
-    title: "Total Cost",
-    key: "totalCost",
-  },
-  {
-    title: "Notes",
-    key: "notes",
-    width: "16rem",
-  },
-]
+const headers = computed(() => {
+  const baseHeaders = [
+    {
+      title: "Category",
+      key: "categoryId",
+    },
+    {
+      title: "Subsidy Rate / $",
+      key: "subsidyRate",
+    },
+    {
+      title: "Estimated Cost",
+      key: "estimatedCost",
+    },
+    {
+      title: "Actual Cost",
+      key: "actualCost",
+    },
+    {
+      title: "Total Cost",
+      key: "totalCost",
+    },
+    {
+      title: "Notes",
+      key: "notes",
+      width: "16rem",
+      sortable: false,
+    },
+  ]
+
+  if (props.hideActionsColumn) {
+    return baseHeaders
+  }
+
+  return [
+    ...baseHeaders,
+    {
+      title: "Actions",
+      key: "actions",
+      sortable: false,
+      align: "center" as const,
+    },
+  ]
+})
+
+const { isSystemAdmin } = useCurrentUser()
+const editableColumns = computed(() => {
+  const columns = ["estimatedCost", "actualCost", "notes"]
+
+  if (isSystemAdmin.value) {
+    columns.unshift("subsidyRate")
+  }
+
+  return columns
+})
 
 const totalEstimatedCost = computed(() => {
   return sumByDecimal(buildingExpenses.value, "estimatedCost").toFixed(4)
@@ -153,7 +211,6 @@ const buildingExpenseIdToIndex = computed<Record<number, number>>(() =>
 )
 
 const isSaving = ref(false)
-
 const snack = useSnack()
 
 async function saveBuildingExpenseIfDirty(buildingExpense: BuildingExpense) {
@@ -163,6 +220,7 @@ async function saveBuildingExpenseIfDirty(buildingExpense: BuildingExpense) {
   isSaving.value = true
   try {
     const buildingExpenseAttributes = pick(buildingExpense, [
+      "subsidyRate",
       "estimatedCost",
       "actualCost",
       "notes",
@@ -182,10 +240,34 @@ async function saveBuildingExpenseIfDirty(buildingExpense: BuildingExpense) {
 
     snack.success("Building expense saved!")
   } catch (error) {
+    await refresh()
+
     console.error(`Failed to save building expense: ${error}`, { error })
     snack.error(`Failed to save building expense: ${error}`)
   } finally {
     isSaving.value = false
   }
 }
+
+const isDeletingBuildingExpenseId = ref<number | null>(null)
+
+async function deleteBuildingExpense(buildingExpense: BuildingExpense) {
+  if (!blockedToTrueConfirm("Are you sure you want to remove this building expense?")) return
+
+  isDeletingBuildingExpenseId.value = buildingExpense.id
+  try {
+    await buildingExpensesApi.delete(buildingExpense.id)
+    await refresh()
+    snack.success("Building expense deleted!")
+  } catch (error) {
+    console.error(`Failed to delete building expense: ${error}`, { error })
+    snack.error(`Failed to delete building expense: ${error}`)
+  } finally {
+    isDeletingBuildingExpenseId.value = null
+  }
+}
+
+defineExpose({
+  refresh,
+})
 </script>

@@ -1,12 +1,15 @@
 import { type CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
 
-import { BuildingExpenseCategory, User } from "@/models"
+import db, { BuildingExpenseCategory, User } from "@/models"
 import BaseService from "@/services/base-service"
+import { BuildingExpenses } from "@/services/building-expense-categories"
 
 export type BuildingExpenseCategoryCreationAttributes = Partial<
   CreationAttributes<BuildingExpenseCategory>
->
+> & {
+  applyToCurrentAndFutureCentreFundingPeriods?: boolean
+}
 
 export class CreateService extends BaseService {
   constructor(
@@ -17,7 +20,13 @@ export class CreateService extends BaseService {
   }
 
   async perform(): Promise<BuildingExpenseCategory> {
-    const { fundingRegionId, categoryName, subsidyRate, ...optionalAttributes } = this.attributes
+    const {
+      fundingRegionId,
+      categoryName,
+      subsidyRate,
+      applyToCurrentAndFutureCentreFundingPeriods,
+      ...optionalAttributes
+    } = this.attributes
 
     if (isNil(fundingRegionId)) {
       throw new Error("Funding region ID is required")
@@ -31,14 +40,20 @@ export class CreateService extends BaseService {
       throw new Error("Subsidy rate is required")
     }
 
-    const buildingExpenseCategory = await BuildingExpenseCategory.create({
-      ...optionalAttributes,
-      fundingRegionId,
-      categoryName,
-      subsidyRate,
-    })
+    return db.transaction(async () => {
+      const buildingExpenseCategory = await BuildingExpenseCategory.create({
+        ...optionalAttributes,
+        fundingRegionId,
+        categoryName,
+        subsidyRate,
+      })
 
-    return buildingExpenseCategory
+      if (applyToCurrentAndFutureCentreFundingPeriods) {
+        await BuildingExpenses.BulkEnsureForwardService.perform(buildingExpenseCategory)
+      }
+
+      return buildingExpenseCategory
+    })
   }
 }
 

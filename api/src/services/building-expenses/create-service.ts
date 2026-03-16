@@ -1,15 +1,25 @@
 import { type CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
 
-import { BuildingExpense, BuildingExpenseCategory, Centre, FundingRegion, User } from "@/models"
+import db, {
+  BuildingExpense,
+  BuildingExpenseCategory,
+  Centre,
+  FiscalPeriod,
+  FundingRegion,
+  User,
+} from "@/models"
 import BaseService from "@/services/base-service"
+import { FiscalPeriods } from "@/services/building-expenses"
 
-export type BuildingExpenseCreationAttributes = Partial<CreationAttributes<BuildingExpense>>
+export type BuildingExpenseCreationAttributes = Partial<CreationAttributes<BuildingExpense>> & {
+  applyToCurrentAndFutureFiscalPeriods?: boolean
+}
 
 export class CreateService extends BaseService {
   constructor(
     private attributes: BuildingExpenseCreationAttributes,
-    private _currentUser: User
+    private currentUser: User
   ) {
     super()
   }
@@ -18,22 +28,23 @@ export class CreateService extends BaseService {
     const {
       centreId,
       fiscalPeriodId,
-      buildingExpenseCategoryId,
+      categoryId,
       estimatedCost,
       actualCost,
       totalCost,
+      applyToCurrentAndFutureFiscalPeriods,
       ...optionalAttributes
     } = this.attributes
-
-    if (isNil(centreId)) {
-      throw new Error("Centre ID is required")
-    }
 
     if (isNil(fiscalPeriodId)) {
       throw new Error("Fiscal period ID is required")
     }
 
-    if (isNil(buildingExpenseCategoryId)) {
+    if (isNil(centreId)) {
+      throw new Error("Centre ID is required")
+    }
+
+    if (isNil(categoryId)) {
       throw new Error("Building expense category ID is required")
     }
 
@@ -49,34 +60,54 @@ export class CreateService extends BaseService {
       throw new Error("Total cost is required")
     }
 
-    const fundingRegionSnapshot = await this.determineFundingRegion(buildingExpenseCategoryId)
+    const fundingRegionSnapshot = await this.determineFundingRegion(categoryId)
     const buildingUsagePercent = await this.determineBuildingUsagePercent(centreId)
-    const subsidyRate = await this.determineSubsidyRate(buildingExpenseCategoryId)
+    const subsidyRate = await this.determineSubsidyRate(categoryId)
 
-    const buildingExpense = await BuildingExpense.create({
-      ...optionalAttributes,
-      centreId,
-      fiscalPeriodId,
-      buildingExpenseCategoryId,
-      fundingRegionSnapshot,
-      subsidyRate,
-      buildingUsagePercent,
-      estimatedCost,
-      actualCost,
-      totalCost,
+    return db.transaction(async () => {
+      const buildingExpense = await BuildingExpense.create({
+        ...optionalAttributes,
+        centreId,
+        fiscalPeriodId,
+        categoryId,
+        fundingRegionSnapshot,
+        subsidyRate,
+        buildingUsagePercent,
+        estimatedCost,
+        actualCost,
+        totalCost,
+      })
+
+      if (applyToCurrentAndFutureFiscalPeriods) {
+        // TODO: should I just preload this in the controller?
+        const fiscalPeriod = await this.loadFiscalPeriod(fiscalPeriodId)
+        if (isNil(fiscalPeriod)) {
+          throw new Error("Fiscal period not found")
+        }
+
+        await FiscalPeriods.BulkEnsureForwardService.perform(
+          fiscalPeriod,
+          buildingExpense,
+          this.currentUser
+        )
+      }
+
+      return buildingExpense
     })
-
-    return buildingExpense
   }
 
-  private async determineFundingRegion(buildingExpenseCategoryId: number): Promise<string> {
+  private async loadFiscalPeriod(fiscalPeriodId: number): Promise<FiscalPeriod | null> {
+    return FiscalPeriod.findByPk(fiscalPeriodId)
+  }
+
+  private async determineFundingRegion(categoryId: number): Promise<string> {
     const fundingRegion = await FundingRegion.findOne({
       attributes: ["region"],
       include: [
         {
           association: "buildingExpenseCategories",
           where: {
-            id: buildingExpenseCategoryId,
+            id: categoryId,
           },
         },
       ],
@@ -96,8 +127,8 @@ export class CreateService extends BaseService {
     return buildingUsagePercent
   }
 
-  private async determineSubsidyRate(buildingExpenseCategoryId: number): Promise<string> {
-    const category = await BuildingExpenseCategory.findByPk(buildingExpenseCategoryId, {
+  private async determineSubsidyRate(categoryId: number): Promise<string> {
+    const category = await BuildingExpenseCategory.findByPk(categoryId, {
       attributes: ["subsidyRate"],
       rejectOnEmpty: true,
     })

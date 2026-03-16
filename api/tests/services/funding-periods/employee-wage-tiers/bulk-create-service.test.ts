@@ -208,6 +208,66 @@ describe("api/src/services/funding-periods/employee-wage-tiers/bulk-create-servi
         ])
       })
 
+      test("when newest employee wage tiers are soft deleted, ignores them and copies from newest active fiscal period", async () => {
+        // Arrange
+        const olderFundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2023-2024",
+          createdAt: new Date("2024-01-01"),
+        })
+        const olderFiscalPeriod = await fiscalPeriodFactory.create({
+          fundingPeriodId: olderFundingPeriod.id,
+          fiscalYear: "2023-24",
+          dateStart: new Date("2023-04-01"),
+          dateEnd: new Date("2023-04-30"),
+        })
+        await employeeWageTierFactory.create({
+          fiscalPeriodId: olderFiscalPeriod.id,
+          tierLevel: 1,
+          tierLabel: "Level 1",
+          wageRatePerHour: "5.00",
+        })
+
+        const newerFundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2024-2025",
+          createdAt: new Date("2024-02-01"),
+        })
+        const newerFiscalPeriod = await fiscalPeriodFactory.create({
+          fundingPeriodId: newerFundingPeriod.id,
+          fiscalYear: "2024-25",
+          dateStart: new Date("2024-05-01"),
+          dateEnd: new Date("2024-05-31"),
+        })
+        const softDeletedEmployeeWageTier = await employeeWageTierFactory.create({
+          fiscalPeriodId: newerFiscalPeriod.id,
+          tierLevel: 1,
+          tierLabel: "Level 1",
+          wageRatePerHour: "99.99",
+        })
+        await softDeletedEmployeeWageTier.destroy()
+
+        const targetFundingPeriod = await fundingPeriodFactory.create({
+          fiscalYear: "2025-2026",
+        })
+        const targetFiscalPeriod = await fiscalPeriodFactory.create({
+          fundingPeriodId: targetFundingPeriod.id,
+          fiscalYear: "2025-26",
+          dateStart: new Date("2025-04-01"),
+        })
+
+        // Act
+        const employeeWageTiers = await BulkCreateService.perform(targetFundingPeriod)
+
+        // Assert
+        expect(employeeWageTiers).toEqual([
+          expect.objectContaining({
+            fiscalPeriodId: targetFiscalPeriod.id,
+            tierLevel: 1,
+            tierLabel: "Level 1",
+            wageRatePerHour: "5",
+          }),
+        ])
+      })
+
       test("when fiscal periods are missing for target funding period, errors informatively", async () => {
         // Arrange
         const fundingPeriod = await fundingPeriodFactory.create({

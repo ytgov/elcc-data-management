@@ -89,7 +89,7 @@ export class BuildingExpenseCategory extends BaseModel<
   declare fundingRegion?: NonAttribute<FundingRegion>
 
   @HasMany(() => BuildingExpense, {
-    foreignKey: "buildingExpenseCategoryId",
+    foreignKey: "categoryId",
     inverse: {
       as: "category",
     },
@@ -108,6 +108,29 @@ export class BuildingExpenseCategory extends BaseModel<
         },
       }
     })
+
+    this.addScope(
+      "excludingUsedByCentreFiscalPeriod",
+      ({ centreId, fiscalPeriodId }: { centreId: number; fiscalPeriodId: number }) => {
+        return {
+          where: {
+            [Op.and]: sql`
+              NOT EXISTS (
+                SELECT
+                  1
+                FROM
+                  building_expenses
+                WHERE
+                  building_expenses.category_id = ${sql.attribute("id")}
+                  AND building_expenses.deleted_at IS NULL
+                  AND building_expenses.centre_id = ${centreId}
+                  AND building_expenses.fiscal_period_id = ${fiscalPeriodId}
+              )
+            `,
+          },
+        }
+      }
+    )
   }
 }
 

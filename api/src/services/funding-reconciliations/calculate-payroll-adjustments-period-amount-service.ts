@@ -41,6 +41,7 @@ export class CalculatePayrollAdjustmentsPeriodAmountService extends BaseService 
         WHERE
           centre_id = :centreId
           AND fiscal_period_id = :fiscalPeriodId
+          AND deleted_at IS NULL
       `,
       {
         type: QueryTypes.SELECT,
@@ -75,9 +76,11 @@ export class CalculatePayrollAdjustmentsPeriodAmountService extends BaseService 
         FROM
           wage_enhancements
           INNER JOIN employee_wage_tiers ON wage_enhancements.employee_wage_tier_id = employee_wage_tiers.id
+          AND employee_wage_tiers.deleted_at IS NULL
         WHERE
           wage_enhancements.centre_id = :centreId
           AND employee_wage_tiers.fiscal_period_id = :fiscalPeriodId
+          AND wage_enhancements.deleted_at IS NULL
       `,
       {
         type: QueryTypes.SELECT,

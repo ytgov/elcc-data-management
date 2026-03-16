@@ -99,6 +99,8 @@ export class FundingSubmissionLine extends BaseModel<
           FROM
             funding_submission_lines
           WHERE
+            funding_submission_lines.deleted_at IS NULL
+            AND
             EXISTS (
               SELECT
                 1
@@ -106,6 +108,7 @@ export class FundingSubmissionLine extends BaseModel<
                 funding_periods
               WHERE
                 funding_periods.id = ${fundingPeriodId}
+                AND funding_periods.deleted_at IS NULL
                 AND funding_submission_lines.fiscal_year = REPLACE(
                   funding_periods.fiscal_year,
                   '-' + RIGHT(funding_periods.fiscal_year, 4),

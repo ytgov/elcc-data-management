@@ -38,7 +38,7 @@ export const buildingExpenseFactory = Factory.define<BuildingExpense>(
     const category =
       associations.category ??
       buildingExpenseCategoryFactory.build({
-        id: params.buildingExpenseCategoryId,
+        id: params.categoryId,
       })
 
     const fundingRegionSnapshot =
@@ -53,7 +53,7 @@ export const buildingExpenseFactory = Factory.define<BuildingExpense>(
     const buildingExpense = BuildingExpense.build({
       centreId: centre.id,
       fiscalPeriodId: fiscalPeriod.id,
-      buildingExpenseCategoryId: category.id,
+      categoryId: category.id,
       fundingRegionSnapshot,
       subsidyRate,
       buildingUsagePercent,

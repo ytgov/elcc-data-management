@@ -20,6 +20,15 @@ The current naming conventions for pages is pretty random, but over time it will
 4. It should be easy to find a component given the vue-router route name.
 5. It should be easy to find the page component for a given URL.
 
+## Route Naming
+
+Use `{domain}/{resource}/{PageName}` route names so the route name mirrors the file path under `pages/`.
+
+Examples:
+
+- `administration/submission-lines/SubmissionLineNewPage`
+- `administration/funding-periods/FundingPeriodEditPage`
+
 ## Directory Structure
 
 For example
