@@ -54,7 +54,10 @@
       />
     </template>
 
-    <template #item.actions="{ item }">
+    <template
+      v-if="!hideActionsColumn"
+      #item.actions="{ item }"
+    >
       <v-btn
         v-if="item.policy.destroy"
         color="error"
@@ -76,7 +79,7 @@
           <td>{{ formatMoney(totalActualCost) }}</td>
           <td>{{ formatMoney(totalCost) }}</td>
           <td></td>
-          <td></td>
+          <td v-if="!hideActionsColumn"></td>
         </tr>
       </tfoot>
     </template>
@@ -111,10 +114,12 @@ const props = withDefaults(
   defineProps<{
     where?: BuildingExpenseWhereOptions
     filters?: BuildingExpenseFiltersOptions
+    hideActionsColumn?: boolean
   }>(),
   {
     where: () => ({}),
     filters: () => ({}),
+    hideActionsColumn: false,
   }
 )
 
@@ -128,39 +133,50 @@ const buildingExpensesQuery = computed<BuildingExpenseQueryOptions>(() => {
 
 const { buildingExpenses, isLoading, refresh } = useBuildingExpenses(buildingExpensesQuery)
 
-const headers = [
-  {
-    title: "Category",
-    key: "categoryId",
-  },
-  {
-    title: "Subsidy Rate / $",
-    key: "subsidyRate",
-  },
-  {
-    title: "Estimated Cost",
-    key: "estimatedCost",
-  },
-  {
-    title: "Actual Cost",
-    key: "actualCost",
-  },
-  {
-    title: "Total Cost",
-    key: "totalCost",
-  },
-  {
-    title: "Notes",
-    key: "notes",
-    width: "16rem",
-  },
-  {
-    title: "Actions",
-    key: "actions",
-    sortable: false,
-    align: "center" as const,
-  },
-]
+const headers = computed(() => {
+  const baseHeaders = [
+    {
+      title: "Category",
+      key: "categoryId",
+    },
+    {
+      title: "Subsidy Rate / $",
+      key: "subsidyRate",
+    },
+    {
+      title: "Estimated Cost",
+      key: "estimatedCost",
+    },
+    {
+      title: "Actual Cost",
+      key: "actualCost",
+    },
+    {
+      title: "Total Cost",
+      key: "totalCost",
+    },
+    {
+      title: "Notes",
+      key: "notes",
+      width: "16rem",
+      sortable: false,
+    },
+  ]
+
+  if (props.hideActionsColumn) {
+    return baseHeaders
+  }
+
+  return [
+    ...baseHeaders,
+    {
+      title: "Actions",
+      key: "actions",
+      sortable: false,
+      align: "center" as const,
+    },
+  ]
+})
 
 const { isSystemAdmin } = useCurrentUser()
 const editableColumns = computed(() => {
