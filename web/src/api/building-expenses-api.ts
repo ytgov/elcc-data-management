@@ -28,6 +28,7 @@ export type BuildingExpenseAsShow = BuildingExpense
 
 export type BuildingExpenseAsIndex = BuildingExpense & {
   category: BuildingExpenseCategoryAsReference
+  policy: BuildingExpensePolicy
 }
 
 export type BuildingExpenseWhereOptions = WhereOptions<

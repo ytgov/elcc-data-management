@@ -1,6 +1,8 @@
 import { isUndefined, pick } from "lodash"
 
-import { BuildingExpense } from "@/models"
+import { type PolicyAsReference } from "@/policies/base-policy"
+import { BuildingExpense, type User } from "@/models"
+import { BuildingExpensePolicy } from "@/policies"
 import BaseSerializer from "@/serializers/base-serializer"
 import { BuildingExpenseCategories } from "@/serializers"
 
@@ -21,9 +23,17 @@ export type BuildingExpenseAsIndex = Pick<
   | "updatedAt"
 > & {
   category: BuildingExpenseCategories.AsReference
+  policy: PolicyAsReference
 }
 
 export class IndexSerializer extends BaseSerializer<BuildingExpense> {
+  constructor(
+    protected record: BuildingExpense,
+    protected currentUser: User
+  ) {
+    super(record)
+  }
+
   perform(): BuildingExpenseAsIndex {
     const { category } = this.record
     if (isUndefined(category)) {
@@ -31,6 +41,7 @@ export class IndexSerializer extends BaseSerializer<BuildingExpense> {
     }
 
     const categorySerialized = BuildingExpenseCategories.ReferenceSerializer.perform(category)
+    const serializedPolicy = this.serializePolicy(this.record, this.currentUser)
 
     return {
       ...pick(this.record, [
@@ -49,7 +60,12 @@ export class IndexSerializer extends BaseSerializer<BuildingExpense> {
         "updatedAt",
       ]),
       category: categorySerialized,
+      policy: serializedPolicy,
     }
+  }
+
+  private serializePolicy(record: BuildingExpense, currentUser: User): PolicyAsReference {
+    return new BuildingExpensePolicy(currentUser, record).toJSON()
   }
 }
 

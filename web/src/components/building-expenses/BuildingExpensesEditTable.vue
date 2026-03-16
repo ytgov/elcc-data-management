@@ -56,6 +56,7 @@
 
     <template #item.actions="{ item }">
       <v-btn
+        v-if="item.policy.destroy"
         color="error"
         variant="outlined"
         size="small"
