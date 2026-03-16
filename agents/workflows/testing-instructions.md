@@ -21,6 +21,7 @@ This workflow guides you through creating comprehensive, accurate testing instru
 - **Use exact formatting**: Follow the established bold formatting and sequential numbering patterns
 - **Cover all scenarios**: Include happy paths, edge cases, error conditions, and cleanup flows
 - **Be specific**: Include exact navigation paths, field labels, and expected outcomes
+- **Feed PR workflow output back:** Use this workflow to produce or refresh the `# Testing Instructions` section that `pull-request-management.md` adds to a PR body.
 - **Complete workflow sequence:** This is step 4 of 4 in the complete PR creation process. Always use after jira-issue-management, code-review, and pull-request-management workflows to provide comprehensive test coverage for the created PR.
 
 ---

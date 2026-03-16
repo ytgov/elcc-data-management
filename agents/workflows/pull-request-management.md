@@ -13,7 +13,7 @@ auto_execution_mode: 1
 - Clear title following naming conventions
 - Context explaining WHY the change is needed
 - Implementation summarizing WHAT was changed (purpose, not files)
-- Testing instructions that verify correctness
+- A generated `# Testing Instructions` section
 
 **Decision Rules:**
 - **Title format:** Use `Issue-<number>: Description` for GitHub issues, `TICKET-ID: Description` for Jira tickets, `Fix: Description` for bug fixes, or `Action Verb + Noun` for features. Always use AP style title case.
@@ -21,7 +21,8 @@ auto_execution_mode: 1
 - **Implementation section:** Focus on purpose and intent, not specific files. A reviewer can see file changes in the diff - the Implementation section explains the reasoning behind those changes.
 - **Screenshots:** Check the diff for `web/src/components/` or `web/src/pages/` changes. If present, write "TODO" and let user add screenshots. Only write "N/A - backend changes only" if there are truly no frontend changes.
 - **Draft mode:** Always create PRs as drafts first
-- **QA Testing:** Write testing instructions for someone with zero project knowledge, focusing on user interactions rather than technical implementation. Follow the `testing-instructions` workflow for comprehensive guidance on creating detailed, accurate testing instructions with exact UI element names and proper test case structure.
+- **Testing instructions are delegated:** Do not author detailed QA steps in this workflow. Generate or refresh the entire `# Testing Instructions` section via `testing-instructions.md`.
+- **PR edits still need QA workflow:** When updating an existing PR body, if the change touches the `# Testing Instructions` section or could invalidate it, rerun the `testing-instructions` workflow before patching the PR.
 - **Complete workflow sequence:** This is step 3 of 4 in the complete PR creation process. Always use after jira-issue-management and code-review workflows, then follow with testing-instructions workflow for comprehensive test coverage.
 
 This workflow covers the process of creating and editing well-structured pull requests that follow the established patterns in the ELCC project.
@@ -56,10 +57,7 @@ TODO - check diff for web/src/components/ or web/src/pages/ changes
 
 # Testing Instructions
 
-1. Run the test suite via `dev test`.
-2. Boot the app via `dev up`.
-3. Log in to the app at http://localhost:8080.
-4. <specific step>
+Generated via `testing-instructions.md`
 EOF
 )"
 ```
@@ -127,10 +125,7 @@ Relates to:
 
 # Testing Instructions
 
-1. Run the test suite via `dev test`.
-2. Boot the app via `dev up`.
-3. Log in to the app at http://localhost:8080.
-4. <Specific testing step>
+<Paste the output from `testing-instructions.md`>
 ```
 
 **PR Template Usage:**
@@ -142,7 +137,7 @@ The GitHub PR template provides the basic structure. Fill in each section follow
 - **Context:** Explain the problem, user reports, or motivation for the change
 - **Implementation:** List all changes made in numbered format
 - **Screenshots:** Check diff for frontend changes; write "TODO" and let user add screenshots if UI changed, "N/A" only if no frontend files changed
-- **Testing Instructions:** Always start with the standard 3 steps, then add specific steps
+- **Testing Instructions:** Delegate the entire section to `testing-instructions.md` and paste that workflow's output
 
 ### 4. Section Guidelines
 
@@ -221,40 +216,12 @@ git diff main...HEAD --name-only | grep -E "^web/src/(components|pages)/"
 
 #### Testing Instructions Section
 
-**Always start with these three steps:**
-```markdown
-1. Run the test suite via `dev test`.
-2. Boot the app via `dev up`.
-3. Log in to the app at http://localhost:8080.
-```
+Describe how a reviewer can verify the change with the least ambiguity possible.
 
-**Then add specific steps:**
-- Use **bold** for UI elements: **Create Entry**, **Save**
-- Use arrows for navigation: **Knowledge Base** → **Create New**
-- Include verification: "Verify that..." or "Check that..."
-- Number steps sequentially
-
-**QA Testing Principles:**
-
-Write testing instructions as if a real person is sitting at the app doing QA. Reference actual UI labels, button text, menu items, and page headings — not code identifiers or route names. The tester should never have to look at code to follow the instructions.
-
-- **Use actual UI labels**: Reference the exact text the tester will see — button labels, menu items, page titles, field labels. Read the Vue templates to get these right.
-- **Describe real actions**: "Click the **Add User** button", not "trigger the create user flow"
-- **Sequential steps**: Clear, numbered steps with specific verification points
-- **Complete workflows**: Test creation, editing, saving, and navigation
-- **Browser behavior**: Include back button, refresh, and direct URL testing
-- **Verify with visible outcomes**: "Verify a success message appears", "Verify the new entry appears in the table", not "verify the record was created"
-
-**Example:**
-```markdown
-4. Navigate to a child care centre worksheet for a current fiscal period.
-5. Click a month tab (e.g., **April**) to open the **Monthly Worksheet** page.
-6. In the **Building Expenses** section, click **Add Building Expense**.
-7. Select a category from the **Category** autocomplete.
-8. Fill in the **Estimated Cost** and **Actual Cost** fields.
-9. Click **Create**.
-10. Verify the success message: "Building expense created successfully".
-```
+- Include the relevant automated checks
+- List the main manual verification steps in the order a reviewer should perform them
+- Call out any setup, seed data, or permissions needed to exercise the change
+- Focus on the changed behavior, not generic project smoke tests
 
 ### 5. Create the PR
 
@@ -475,6 +442,8 @@ TODO
 ---
 
 ## Related Workflows
+
+- [`./testing-instructions.md`](./testing-instructions.md) - Generate the `# Testing Instructions` section with verified UI labels and QA scenarios
 
 - [`./jira-issue-management.md`](./jira-issue-management.md) - Creating well-structured Jira issues
 - [`./testing-instructions.md`](./testing-instructions.md) - Generate comprehensive testing instructions
