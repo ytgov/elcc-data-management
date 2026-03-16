@@ -20,6 +20,7 @@ Useful local documentation:
 - [web/src/components/README.md](./web/src/components/README.md)
 - [web/src/pages/README.md](./web/src/pages/README.md)
 - [web/src/use/README.md](./web/src/use/README.md)
+- [agents/workflows/README.md](./agents/workflows/README.md)
 
 ## Development Approach
 
