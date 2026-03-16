@@ -48,6 +48,17 @@
       </v-col>
     </v-row>
 
+    <v-row>
+      <v-col cols="12">
+        <v-checkbox
+          v-model="buildingExpenseAttributes.applyToCurrentAndFutureFiscalPeriods"
+          color="primary"
+          hide-details
+          label="Apply to current and future fiscal periods for this centre"
+        />
+      </v-col>
+    </v-row>
+
     <template #actions>
       <v-btn
         color="primary"
@@ -72,7 +83,9 @@ import { computed, ref, useTemplateRef } from "vue"
 
 import { greaterThanOrEqualTo, required } from "@/utils/validators"
 
-import buildingExpensesApi, { type BuildingExpense } from "@/api/building-expenses-api"
+import buildingExpensesApi, {
+  type BuildingExpenseCreationAttributes,
+} from "@/api/building-expenses-api"
 
 import useCentre from "@/use/use-centre"
 import useSnack from "@/use/use-snack"
@@ -91,7 +104,7 @@ const emit = defineEmits<{
   cancel: [void]
 }>()
 
-const buildingExpenseAttributes = ref<Partial<BuildingExpense>>({
+const buildingExpenseAttributes = ref<BuildingExpenseCreationAttributes>({
   centreId: props.centreId,
   fiscalPeriodId: props.fiscalPeriodId,
   categoryId: undefined,
@@ -99,6 +112,7 @@ const buildingExpenseAttributes = ref<Partial<BuildingExpense>>({
   actualCost: "0",
   totalCost: "0",
   notes: null,
+  applyToCurrentAndFutureFiscalPeriods: false,
 })
 
 const centreId = computed(() => props.centreId)

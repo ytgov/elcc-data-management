@@ -36,7 +36,14 @@ export class BuildingExpensePolicy extends PolicyFactory(BuildingExpense) {
   }
 
   permittedAttributesForCreate(): Path[] {
-    return ["centreId", "fiscalPeriodId", "categoryId", ...this.permittedAttributes()]
+    return [
+      "centreId",
+      "fiscalPeriodId",
+      "categoryId",
+      ...this.permittedAttributes(),
+      // option flags
+      "applyToCurrentAndFutureFiscalPeriods",
+    ]
   }
 
   static policyScope(_user: User): FindOptions<Attributes<BuildingExpense>> {

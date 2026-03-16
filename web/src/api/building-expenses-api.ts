@@ -22,6 +22,10 @@ export type BuildingExpense = {
   updatedAt: string
 }
 
+export type BuildingExpenseCreationAttributes = Partial<BuildingExpense> & {
+  applyToCurrentAndFutureFiscalPeriods?: boolean
+}
+
 export type BuildingExpensePolicy = Policy
 
 export type BuildingExpenseAsShow = BuildingExpense
@@ -58,7 +62,7 @@ export const buildingExpensesApi = {
     const { data } = await http.get(`/api/building-expenses/${buildingExpenseId}`)
     return data
   },
-  async create(attributes: Partial<BuildingExpense>): Promise<{
+  async create(attributes: BuildingExpenseCreationAttributes): Promise<{
     buildingExpense: BuildingExpenseAsShow
     policy: BuildingExpensePolicy
   }> {

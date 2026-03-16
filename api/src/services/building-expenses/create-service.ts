@@ -1,7 +1,7 @@
 import { type CreationAttributes } from "@sequelize/core"
 import { isNil } from "lodash"
 
-import {
+import db, {
   BuildingExpense,
   BuildingExpenseCategory,
   Centre,
@@ -10,13 +10,16 @@ import {
   User,
 } from "@/models"
 import BaseService from "@/services/base-service"
+import { FiscalPeriods } from "@/services/building-expenses"
 
-export type BuildingExpenseCreationAttributes = Partial<CreationAttributes<BuildingExpense>>
+export type BuildingExpenseCreationAttributes = Partial<CreationAttributes<BuildingExpense>> & {
+  applyToCurrentAndFutureFiscalPeriods?: boolean
+}
 
 export class CreateService extends BaseService {
   constructor(
     private attributes: BuildingExpenseCreationAttributes,
-    private _currentUser: User
+    private currentUser: User
   ) {
     super()
   }
@@ -29,6 +32,7 @@ export class CreateService extends BaseService {
       estimatedCost,
       actualCost,
       totalCost,
+      applyToCurrentAndFutureFiscalPeriods,
       ...optionalAttributes
     } = this.attributes
 
@@ -36,7 +40,13 @@ export class CreateService extends BaseService {
       throw new Error("Fiscal period ID is required")
     }
 
-    await this.assertCurrentOrFutureFiscalPeriod(fiscalPeriodId)
+    // TODO: should I just preload this in the controller?
+    const fiscalPeriod = await this.loadFiscalPeriod(fiscalPeriodId)
+    if (isNil(fiscalPeriod)) {
+      throw new Error("Fiscal period not found")
+    }
+
+    await this.assertCurrentOrFutureFiscalPeriod(fiscalPeriod)
 
     if (isNil(centreId)) {
       throw new Error("Centre ID is required")
@@ -62,20 +72,34 @@ export class CreateService extends BaseService {
     const buildingUsagePercent = await this.determineBuildingUsagePercent(centreId)
     const subsidyRate = await this.determineSubsidyRate(categoryId)
 
-    const buildingExpense = await BuildingExpense.create({
-      ...optionalAttributes,
-      centreId,
-      fiscalPeriodId,
-      categoryId,
-      fundingRegionSnapshot,
-      subsidyRate,
-      buildingUsagePercent,
-      estimatedCost,
-      actualCost,
-      totalCost,
-    })
+    return db.transaction(async () => {
+      const buildingExpense = await BuildingExpense.create({
+        ...optionalAttributes,
+        centreId,
+        fiscalPeriodId,
+        categoryId,
+        fundingRegionSnapshot,
+        subsidyRate,
+        buildingUsagePercent,
+        estimatedCost,
+        actualCost,
+        totalCost,
+      })
 
-    return buildingExpense
+      if (applyToCurrentAndFutureFiscalPeriods) {
+        await FiscalPeriods.BulkEnsureForwardService.perform(
+          fiscalPeriod,
+          buildingExpense,
+          this.currentUser
+        )
+      }
+
+      return buildingExpense
+    })
+  }
+
+  private async loadFiscalPeriod(fiscalPeriodId: number): Promise<FiscalPeriod | null> {
+    return FiscalPeriod.findByPk(fiscalPeriodId)
   }
 
   /**
@@ -84,12 +108,7 @@ export class CreateService extends BaseService {
    * a) add timezone to Center
    * b) use that timezone to compare dates
    */
-  private async assertCurrentOrFutureFiscalPeriod(fiscalPeriodId: number): Promise<void> {
-    const fiscalPeriod = await FiscalPeriod.findByPk(fiscalPeriodId, {
-      attributes: ["dateEnd"],
-      rejectOnEmpty: true,
-    })
-
+  private async assertCurrentOrFutureFiscalPeriod(fiscalPeriod: FiscalPeriod): Promise<void> {
     if (fiscalPeriod.dateEnd < new Date()) {
       throw new Error("Cannot create building expense for a past fiscal period")
     }
