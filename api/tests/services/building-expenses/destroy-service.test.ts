@@ -38,29 +38,6 @@ describe("api/src/services/building-expenses/destroy-service.ts", () => {
         const reloadedBuildingExpense = await BuildingExpense.findByPk(buildingExpense.id)
         expect(reloadedBuildingExpense).toBeNull()
       })
-
-      test("when building expense is in a past fiscal period, errors informatively", async () => {
-        // Arrange
-        const fiscalPeriodStart = DateTime.fromISO("2020-04-01T00:00:00Z")
-        const currentUser = await userFactory.create()
-        const fundingPeriod = await fundingPeriodFactory.create({
-          fiscalYear: "2020-2021",
-        })
-        const fiscalPeriod = await fiscalPeriodFactory.create({
-          fundingPeriodId: fundingPeriod.id,
-          fiscalYear: "2020-21",
-          dateStart: fiscalPeriodStart.toJSDate(),
-          dateEnd: fiscalPeriodStart.endOf("month").set({ millisecond: 0 }).toJSDate(),
-        })
-        const buildingExpense = await buildingExpenseFactory.create({
-          fiscalPeriodId: fiscalPeriod.id,
-        })
-
-        // Act
-        await expect(DestroyService.perform(buildingExpense, currentUser)).rejects.toThrow(
-          "Cannot delete building expense for a past fiscal period"
-        )
-      })
     })
   })
 })

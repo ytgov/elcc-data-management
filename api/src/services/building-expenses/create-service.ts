@@ -40,14 +40,6 @@ export class CreateService extends BaseService {
       throw new Error("Fiscal period ID is required")
     }
 
-    // TODO: should I just preload this in the controller?
-    const fiscalPeriod = await this.loadFiscalPeriod(fiscalPeriodId)
-    if (isNil(fiscalPeriod)) {
-      throw new Error("Fiscal period not found")
-    }
-
-    await this.assertCurrentOrFutureFiscalPeriod(fiscalPeriod)
-
     if (isNil(centreId)) {
       throw new Error("Centre ID is required")
     }
@@ -87,6 +79,12 @@ export class CreateService extends BaseService {
       })
 
       if (applyToCurrentAndFutureFiscalPeriods) {
+        // TODO: should I just preload this in the controller?
+        const fiscalPeriod = await this.loadFiscalPeriod(fiscalPeriodId)
+        if (isNil(fiscalPeriod)) {
+          throw new Error("Fiscal period not found")
+        }
+
         await FiscalPeriods.BulkEnsureForwardService.perform(
           fiscalPeriod,
           buildingExpense,
@@ -100,18 +98,6 @@ export class CreateService extends BaseService {
 
   private async loadFiscalPeriod(fiscalPeriodId: number): Promise<FiscalPeriod | null> {
     return FiscalPeriod.findByPk(fiscalPeriodId)
-  }
-
-  /**
-   * TODO: make this timezone aware.
-   * Probably will need to:
-   * a) add timezone to Center
-   * b) use that timezone to compare dates
-   */
-  private async assertCurrentOrFutureFiscalPeriod(fiscalPeriod: FiscalPeriod): Promise<void> {
-    if (fiscalPeriod.dateEnd < new Date()) {
-      throw new Error("Cannot create building expense for a past fiscal period")
-    }
   }
 
   private async determineFundingRegion(categoryId: number): Promise<string> {

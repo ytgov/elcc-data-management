@@ -175,51 +175,6 @@ describe("api/src/services/building-expenses/create-service.ts", () => {
           }),
         ])
       })
-
-      test("when fiscal period is in the past, errors informatively", async () => {
-        // Arrange
-        const fundingPeriodStart = DateTime.fromISO("2020-04-01T00:00:00Z")
-        const fundingPeriodEnd = fundingPeriodStart.plus({ years: 1 }).minus({ second: 1 })
-        const fiscalPeriodEnd = fundingPeriodStart.endOf("month").set({ millisecond: 0 })
-        const currentUser = await userFactory.create()
-        const fundingRegion = await fundingRegionFactory.create({
-          region: "Past Region",
-        })
-        const centre = await centreFactory.create({
-          fundingRegionId: fundingRegion.id,
-          buildingUsagePercent: "80",
-        })
-        const category = await buildingExpenseCategoryFactory.create({
-          fundingRegionId: fundingRegion.id,
-          subsidyRate: "0.5000",
-        })
-        const fundingPeriod = await fundingPeriodFactory.create({
-          fiscalYear: "2020-2021",
-          fromDate: fundingPeriodStart.toJSDate(),
-          toDate: fundingPeriodEnd.toJSDate(),
-        })
-        const pastFiscalPeriod = await fiscalPeriodFactory.create({
-          fundingPeriodId: fundingPeriod.id,
-          fiscalYear: "2020-21",
-          dateStart: fundingPeriodStart.toJSDate(),
-          dateEnd: fiscalPeriodEnd.toJSDate(),
-        })
-
-        // Act
-        await expect(
-          CreateService.perform(
-            {
-              centreId: centre.id,
-              fiscalPeriodId: pastFiscalPeriod.id,
-              categoryId: category.id,
-              estimatedCost: "120.0000",
-              actualCost: "100.0000",
-              totalCost: "0",
-            },
-            currentUser
-          )
-        ).rejects.toThrow("Cannot create building expense for a past fiscal period")
-      })
     })
   })
 })
