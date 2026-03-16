@@ -10,9 +10,7 @@ export class BuildingExpensePolicy extends PolicyFactory(BuildingExpense) {
   }
 
   create(): boolean {
-    if (this.user.isSystemAdmin) return true
-
-    return false
+    return true
   }
 
   update(): boolean {
@@ -28,20 +26,23 @@ export class BuildingExpensePolicy extends PolicyFactory(BuildingExpense) {
   }
 
   permittedAttributes(): Path[] {
-    return [
-      "estimatedCost",
-      "actualCost",
-      "totalCost",
-      "notes",
-    ]
+    const permittedAttributes: Path[] = ["estimatedCost", "actualCost", "totalCost", "notes"]
+
+    if (this.user.isSystemAdmin) {
+      permittedAttributes.push("subsidyRate")
+    }
+
+    return permittedAttributes
   }
 
   permittedAttributesForCreate(): Path[] {
     return [
       "centreId",
       "fiscalPeriodId",
-      "buildingExpenseCategoryId",
+      "categoryId",
       ...this.permittedAttributes(),
+      // option flags
+      "applyToCurrentAndFutureFiscalPeriods",
     ]
   }
 

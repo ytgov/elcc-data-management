@@ -9,7 +9,7 @@ import { type BuildingExpenseCategoryAsReference } from "@/api/building-expense-
 
 export type BuildingExpense = {
   id: number
-  buildingExpenseCategoryId: number
+  categoryId: number
   centreId: number
   fiscalPeriodId: number
   subsidyRate: string
@@ -22,17 +22,22 @@ export type BuildingExpense = {
   updatedAt: string
 }
 
+export type BuildingExpenseCreationAttributes = Partial<BuildingExpense> & {
+  applyToCurrentAndFutureFiscalPeriods?: boolean
+}
+
 export type BuildingExpensePolicy = Policy
 
 export type BuildingExpenseAsShow = BuildingExpense
 
 export type BuildingExpenseAsIndex = BuildingExpense & {
   category: BuildingExpenseCategoryAsReference
+  policy: BuildingExpensePolicy
 }
 
 export type BuildingExpenseWhereOptions = WhereOptions<
   BuildingExpense,
-  "id" | "centreId" | "fiscalPeriodId" | "buildingExpenseCategoryId"
+  "id" | "centreId" | "fiscalPeriodId" | "categoryId"
 >
 
 export type BuildingExpenseFiltersOptions = FiltersOptions
@@ -57,7 +62,7 @@ export const buildingExpensesApi = {
     const { data } = await http.get(`/api/building-expenses/${buildingExpenseId}`)
     return data
   },
-  async create(attributes: Partial<BuildingExpense>): Promise<{
+  async create(attributes: BuildingExpenseCreationAttributes): Promise<{
     buildingExpense: BuildingExpenseAsShow
     policy: BuildingExpensePolicy
   }> {

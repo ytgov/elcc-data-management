@@ -202,22 +202,22 @@ describe("api/src/services/centres/create-service.ts", () => {
         expect(buildingExpenses).toEqual([
           expect.objectContaining({
             centreId: centre.id,
-            buildingExpenseCategoryId: buildingExpenseCategory1.id,
+            categoryId: buildingExpenseCategory1.id,
             fiscalPeriodId: fiscalPeriod1.id,
           }),
           expect.objectContaining({
             centreId: centre.id,
-            buildingExpenseCategoryId: buildingExpenseCategory2.id,
+            categoryId: buildingExpenseCategory2.id,
             fiscalPeriodId: fiscalPeriod1.id,
           }),
           expect.objectContaining({
             centreId: centre.id,
-            buildingExpenseCategoryId: buildingExpenseCategory1.id,
+            categoryId: buildingExpenseCategory1.id,
             fiscalPeriodId: fiscalPeriod2.id,
           }),
           expect.objectContaining({
             centreId: centre.id,
-            buildingExpenseCategoryId: buildingExpenseCategory2.id,
+            categoryId: buildingExpenseCategory2.id,
             fiscalPeriodId: fiscalPeriod2.id,
           }),
         ])

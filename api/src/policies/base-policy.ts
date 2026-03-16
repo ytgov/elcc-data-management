@@ -4,6 +4,7 @@ import { User } from "@/models"
 import { Path, deepPick } from "@/utils/deep-pick"
 
 export type Actions = "show" | "create" | "update" | "destroy"
+export type PolicyAsReference = Record<Actions, boolean>
 export const NO_RECORDS_SCOPE = Object.freeze({ where: literal("1 = 0") })
 export const ALL_RECORDS_SCOPE = Object.freeze({})
 
@@ -79,7 +80,7 @@ export class BasePolicy<M extends Model> {
    *
    * @returns a JSON representation of the policy
    */
-  toJSON(): Record<Actions, boolean> {
+  toJSON(): PolicyAsReference {
     return {
       show: this.show(),
       create: this.create(),

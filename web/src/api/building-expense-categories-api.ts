@@ -26,6 +26,10 @@ export type BuildingExpenseCategoryAsIndex = BuildingExpenseCategory & {
 
 export type BuildingExpenseCategoryAsReference = BuildingExpenseCategory
 
+export type BuildingExpenseCategoryCreationAttributes = Partial<BuildingExpenseCategory> & {
+  applyToCurrentAndFutureCentreFundingPeriods?: boolean
+}
+
 export type BuildingExpenseCategoryWhereOptions = WhereOptions<
   BuildingExpenseCategory,
   "id" | "fundingRegionId" | "categoryName"
@@ -34,6 +38,10 @@ export type BuildingExpenseCategoryWhereOptions = WhereOptions<
 export type BuildingExpenseCategoryFiltersOptions = FiltersOptions<{
   search: string
   excludingIds: number[]
+  excludingUsedByCentreFiscalPeriod: {
+    centreId: number
+    fiscalPeriodId: number
+  }
 }>
 
 export type BuildingExpenseCategoryQueryOptions = QueryOptions<
@@ -58,7 +66,7 @@ export const buildingExpenseCategoriesApi = {
     const { data } = await http.get(`/api/building-expense-categories/${buildingExpenseCategoryId}`)
     return data
   },
-  async create(attributes: Partial<BuildingExpenseCategory>): Promise<{
+  async create(attributes: BuildingExpenseCategoryCreationAttributes): Promise<{
     buildingExpenseCategory: BuildingExpenseCategoryAsShow
     policy: BuildingExpenseCategoryPolicy
   }> {
