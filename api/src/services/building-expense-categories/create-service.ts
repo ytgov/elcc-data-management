@@ -24,7 +24,7 @@ export class CreateService extends BaseService {
       fundingRegionId,
       categoryName,
       subsidyRate,
-      applyToCurrentAndFutureCentreFundingPeriods = true,
+      applyToCurrentAndFutureCentreFundingPeriods,
       ...optionalAttributes
     } = this.attributes
 
