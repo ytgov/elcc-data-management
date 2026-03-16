@@ -34,8 +34,9 @@ export class BuildingExpenseCategoryPolicy extends PolicyFactory(BuildingExpense
   permittedAttributesForCreate(): Path[] {
     return [
       "fundingRegionId",
-      "applyToCurrentAndFutureCentreFundingPeriods",
       ...this.permittedAttributes(),
+      // option flags
+      "applyToCurrentAndFutureCentreFundingPeriods",
     ]
   }
 
