@@ -7,6 +7,7 @@ Use this directory for reusable UI building blocks. Keep feature-specific detail
 - Prefer dedicated pages over dialogs for complex workflows.
 - Parent components should discover records. Child components should edit or display a specific record.
 - When lookups are complex, the parent absorbs that complexity and passes stable identifiers or already-resolved state to the child.
+- When action visibility depends on page context, compute that state in the parent page and pass a simple boolean prop down to the child component.
 - Handle loading, empty, error, and success states explicitly.
 
 ## Naming and Location
@@ -31,3 +32,8 @@ components/{model-plural}/{ModelSingularOrPlural}[Modifier]{VuetifyComponent}.vu
 - Name functions for the action performed, not the DOM event.
 - Prefer `startEditingRow`, `saveAndExitEditMode`, and `handleKeyboardNavigation` over `onClick`, `onBlur`, or `onKeyDown`.
 - Call action functions directly from the template when the event wrapper adds no value.
+
+## Tables
+
+- When hiding an optional actions column, remove it from the `headers` list instead of rendering an empty column and then hiding the button inside the cell template.
+- Keep row-level action gating separate from page-level action-column gating. For example, the page may hide the entire actions column while a row still checks `item.policy.destroy`.

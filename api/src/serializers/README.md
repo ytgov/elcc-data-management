@@ -19,3 +19,4 @@ Serializers control API response shape. Use them to decide what leaves the serve
 - Name output types to match the response shape, such as `UserAsIndex` and `UserAsShow`
 - Validate association assumptions before serializing nested data
 - Keep serializers declarative and focused on transformation, not authorization or persistence
+- When index rows need policy data, serialize it as `PolicyAsReference` using a small `serializePolicy(record, currentUser)` helper that returns `new SomePolicy(currentUser, record).toJSON()`.
