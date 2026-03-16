@@ -52,13 +52,10 @@
       <BuildingExpensesEditTable
         ref="buildingExpensesEditTable"
         :where="buildingExpenseWhere"
-        :hide-actions-column="!isCurrentOrFutureFiscalPeriod"
       />
 
-      <!-- TODO: only show this feature when month is not in the past? -->
       <!-- TODO: maybe move this to a separate component? -->
       <v-row
-        v-if="isCurrentOrFutureFiscalPeriod"
         class="mt-4"
       >
         <v-col
@@ -146,12 +143,6 @@ const fiscalPeriodsQuery = computed(() => {
 const { fiscalPeriods } = useFiscalPeriods(fiscalPeriodsQuery)
 const fiscalPeriod = computed(() => fiscalPeriods.value[0])
 const fiscalPeriodId = computed(() => fiscalPeriod.value?.id)
-
-const isCurrentOrFutureFiscalPeriod = computed(() => {
-  if (isNil(fiscalPeriod.value)) return false
-
-  return new Date(fiscalPeriod.value.dateEnd) >= new Date()
-})
 
 const buildingExpenseWhere = computed(() => ({
   centreId: props.centreId,
